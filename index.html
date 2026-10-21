@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>경로 기반 타워 디펜스</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div id="container">
+    <div id="lobby-screen" style="text-align: center; padding: 50px;">
+      <h1>🏰 Tower Defense : Card Collection</h1>
+      <p>보유 골드: <span id="lobby-gold">0</span> G</p>
+
+      <div style="margin: 20px;">
+        <button onclick="startGame()" style="font-weight: bold; background: #2563eb; color: white; padding: 8px 16px;">⚔️ 게임 시작</button>
+        <button onclick="toggleShop()">🏪 상점 (뽑기)</button>
+        <button onclick="openTalentModal()" style="background: #f8fafc; border-color: #6366f1; color: #4338ca; font-weight: bold;">🔬 연구소 (특성)</button>
+      </div>
+
+      <!-- 스테이지 선택기 (Phase D) -->
+      <div class="stage-selector">
+        <button class="btn-stage-select active" data-stage-id="1" onclick="selectStage(1)">Stage 1 (평원)</button>
+        <button class="btn-stage-select" data-stage-id="2" onclick="selectStage(2)">Stage 2 (혹한)</button>
+        <button class="btn-stage-select" data-stage-id="3" onclick="selectStage(3)">Stage 3 (화산)</button>
+      </div>
+      <div id="stage-desc-text" style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Stage 1: 평원의 미로 (기본 난이도)</div>
+
+      <!-- 간단한 상점 UI -->
+      <div id="shop-ui"
+        style="display: none; border: 1px solid #ccc; padding: 20px; background: #fff; max-width: 400px; margin: 0 auto;">
+        <h3>운명의 카드 뽑기</h3>
+        <p>1회 소환: 100 G</p>
+        <button onclick="drawGacha()">🔮 소환하기</button>
+        <div id="gacha-result" style="margin-top: 10px; font-weight: bold; color: blue;"></div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <h3>📦 인벤토리</h3>
+        <div id="inventory-list" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <!-- JS로 로드 -->
+        </div>
+
+        <!-- 카드 상세 정보 패널 -->
+        <div id="card-info-panel"
+          style="margin-top: 20px; border: 2px solid #666; padding: 10px; background: #f9f9f9; display: none; max-width: 400px; margin-left: auto; margin-right: auto;">
+          <h3 id="info-name">타워 이름</h3>
+          <p id="info-desc" style="color: #666; font-size: 14px;">설명</p>
+          <div style="display: flex; justify-content: space-around; margin-top: 10px;">
+            <div>⚔️ 공격력: <span id="info-damage">0</span></div>
+            <div>🏹 사거리: <span id="info-range">0</span></div>
+            <div>⚡ 공속: <span id="info-speed">5.0</span>/s</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="game-screen" style="display: none;">
+      <div id="game-container">
+        <div id="game-board"></div>
+
+        <div id="info-panel">
+          <h2>🎮 Game Info</h2>
+          <p>🌟 라운드: <span id="round">1</span></p>
+          <p>❤️ HP: <span id="hp">10</span></p>
+          <p>💰 Gold: <span id="gold">10</span></p>
+          <p>👾 Monster: <span id="monster-count">0 / 0</span></p>
+          <button onclick="startRound()" style="width: 100%; font-weight: bold; background: #e8f5e9; border: 1px solid #4caf50; padding: 8px;">▶ 라운드 시작</button>
+
+          <div class="speed-control-group">
+            <button id="btn-pause" class="speed-btn" onclick="togglePause()">⏸️ 일시정지</button>
+            <button id="btn-speed-1" class="speed-btn active" onclick="setGameSpeed(1)">1x</button>
+            <button id="btn-speed-2" class="speed-btn" onclick="setGameSpeed(2)">2x</button>
+          </div>
+
+          <h3>🛠 타워</h3>
+          <div id="tower-controls">
+            <!-- JS로 동적 생성됨 -->
+          </div>
+          <div style="margin-top: 10px;">
+            <button id="btn-unlock" style="width: 100%;">🔓 타일 해제 (1G)</button>
+          </div>
+
+          <!-- 타워 상세 관리 패널 (Phase B: 타깃팅 및 판매) -->
+          <div id="tower-detail-panel">
+            <h4 id="detail-tower-name">타워 이름</h4>
+            <div id="detail-tower-stats" class="detail-stats">스탯 정보</div>
+            <div class="targeting-label">🎯 타깃팅 우선순위:</div>
+            <div class="targeting-buttons">
+              <button class="btn-target" data-target-mode="first" onclick="setSelectedTowerTargeting('first')">선두</button>
+              <button class="btn-target" data-target-mode="strongest" onclick="setSelectedTowerTargeting('strongest')">체력 높음</button>
+              <button class="btn-target" data-target-mode="weakest" onclick="setSelectedTowerTargeting('weakest')">체력 낮음</button>
+              <button class="btn-target" data-target-mode="boss" onclick="setSelectedTowerTargeting('boss')">보스</button>
+            </div>
+            <button id="btn-sell-tower" class="btn-sell" onclick="sellSelectedTower()">💰 타워 판매</button>
+          </div>
+        </div>
+        <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
+          v0.18.0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 가챠 3D 카드 플립 연출 모달 (Phase C) -->
+  <div id="gacha-modal-overlay">
+    <div class="gacha-modal-content">
+      <div class="card-flip-container" onclick="flipGachaCard()">
+        <div id="gacha-card-inner" class="card-flip-inner">
+          <!-- 카드 뒷면 -->
+          <div class="card-face card-front-face">
+            <div class="card-back-pattern">🔮</div>
+            <div style="font-weight: bold; font-size: 16px;">TOWER CARD</div>
+            <div style="font-size: 11px; opacity: 0.8; margin-top: 5px;">클릭하여 카드 공개</div>
+          </div>
+          <!-- 카드 앞면 (결과) -->
+          <div id="gacha-card-back" class="card-face card-back-face">
+            <span id="gacha-card-badge" class="gacha-card-badge card">완제품 카드</span>
+            <div id="gacha-card-emblem" class="gacha-card-emblem">🏹</div>
+            <div id="gacha-card-title" class="gacha-card-title">원거리 타워</div>
+            <div id="gacha-card-desc" class="gacha-card-desc">사거리가 긴 기본 원거리 유닛</div>
+            <div id="gacha-card-detail" style="margin-top: 10px; font-weight: bold; font-size: 13px; color: #d97706;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="gacha-modal-actions">
+        <button class="btn-gacha-action btn-gacha-retry" onclick="retryGacha()">🔮 한 번 더 소환 (100G)</button>
+        <button class="btn-gacha-action btn-gacha-close" onclick="closeGachaModal()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 연구소 모달 (Phase D) -->
+  <div id="talent-modal-overlay">
+    <div class="talent-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0; font-size: 18px;">🔬 영구 특성 연구소</h3>
+        <span style="font-weight: bold; color: #f59e0b;">보유: <span id="talent-gold-display">0</span> G</span>
+      </div>
+      <div id="talent-list">
+        <!-- JS로 렌더링 -->
+      </div>
+      <button style="width: 100%; margin-top: 15px; padding: 10px; font-weight: bold; background: #334155; color: white; border: none; border-radius: 6px;" onclick="closeTalentModal()">닫기</button>
+    </div>
+  </div>
+
+  <!-- QA Panel HTML -->
+  <div id="qa-panel" style="display:none;">
+    <h3>QA/Debug Controls (Ctrl+J to Toggle)</h3>
+    <div class="qa-item">
+      <label>Gold: <input type="number" id="qa-gold" oninput="qaSetGold()"></label>
+    </div>
+    <div class="qa-item">
+      <label>Round: <input type="number" id="qa-round" oninput="qaSetRound()"></label>
+    </div>
+    <div class="qa-item">
+      <button onclick="qaResetGame()">Reset Game (Current Round)</button>
+      <button onclick="if(confirm('정말 모든 데이터를 삭제하고 초기화하시겠습니까?')) hardResetGame()"
+        style="color:red; margin-left:10px;">⚠️ Hard Reset (Save Data)</button>
+    </div>
+    <div class="qa-item" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 5px;">
+      <div>
+        <button onclick="qaGrantAllCheat()" style="background:#2e7d32; color:white; width:100%; margin-bottom:5px;">🎁 모든 카드 즉시 해금 & +1000G 지급</button>
+      </div>
+      <strong>Card Reset (QA)</strong>
+      <div id="qa-card-list">
+        <!-- JS로 버튼 생성 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 상수 및 데이터/저장소 모듈 -->
+  <script src="js/constants.js"></script>
+  <script src="js/user_data.js"></script>
+  <script src="js/state.js"></script>
+
+  <!-- 2. 인게임 시스템 모듈 -->
+  <script src="js/board.js"></script>
+  <script src="js/tower.js"></script>
+  <script src="js/enemy.js"></script>
+  <script src="js/ui.js"></script>
+
+  <!-- 3. 메타 / 로비 / 가챠 모듈 -->
+  <script src="js/lobby.js"></script>
+  <script src="js/gacha.js"></script>
+
+  <!-- 4. QA / 디버그 도구 모듈 -->
+  <script src="js/qa.js"></script>
+
+  <!-- 5. 게임 초기화 진입점 -->
+  <script src="js/main.js"></script>
+</body>
+
+</html>

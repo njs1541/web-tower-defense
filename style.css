@@ -1,0 +1,667 @@
+﻿body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f0f2f5;
+}
+
+#container {
+  width: 100%;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+#game-container {
+  display: flex;
+  padding: 20px;
+  gap: 20px;
+}
+
+#game-board {
+  display: grid;
+  grid-template-columns: repeat(20, 30px);
+  grid-template-rows: repeat(20, 30px);
+  gap: 1px;
+  position: relative;
+  background-color: #94a3b8;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  box-sizing: border-box;
+  transition: background 0.15s ease, transform 0.1s ease;
+  position: relative;
+}
+
+/* 타일셋 개선 (Phase C) */
+.path {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+  border-color: #94a3b8;
+}
+
+.buildable {
+  background: radial-gradient(circle, #dcfce7 20%, #bbf7d0 100%);
+  border-color: #86efac;
+}
+
+.cell.range-preview {
+  background: rgba(14, 165, 233, 0.4) !important;
+  box-shadow: inset 0 0 0 2px #0284c7;
+}
+
+.cell.range-active {
+  background: rgba(249, 115, 22, 0.4) !important;
+  box-shadow: inset 0 0 0 2px #ea580c;
+}
+
+.cell.selected-tower {
+  outline: 3px solid #ef4444;
+  z-index: 3;
+}
+
+/* 타워 엠블럼 및 시각화 (Phase C) */
+.cell.ranged {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+}
+.cell.ranged::after {
+  content: "🏹";
+  font-size: 15px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cell.melee {
+  background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+}
+.cell.melee::after {
+  content: "⚔️";
+  font-size: 15px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cell.ice {
+  background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%);
+}
+.cell.ice::after {
+  content: "❄️";
+  font-size: 15px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cell.bomb {
+  background: linear-gradient(135deg, #c084fc 0%, #7e22ce 100%);
+}
+.cell.bomb::after {
+  content: "💣";
+  font-size: 15px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.enemy {
+  background-color: red;
+}
+
+#info-panel {
+  background: #ffffff;
+  padding: 15px;
+  width: 230px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+
+button {
+  margin: 4px 0;
+  padding: 6px 12px;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  background-color: #f8fafc;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+
+button:hover {
+  background-color: #e2e8f0;
+}
+
+button.selected {
+  background-color: #fef08a;
+  border: 2px solid #ef4444;
+  font-weight: bold;
+}
+
+/* 배속 및 일시정지 컨트롤 */
+.speed-control-group {
+  display: flex;
+  gap: 5px;
+  margin: 10px 0;
+}
+
+.speed-btn {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 12px;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.speed-btn.active {
+  background-color: #2563eb;
+  color: #fff;
+  border-color: #1d4ed8;
+  font-weight: bold;
+}
+
+/* 타워 상세 패널 */
+#tower-detail-panel {
+  margin-top: 15px;
+  padding: 10px;
+  background: #fffbeb;
+  border: 1.5px solid #f59e0b;
+  border-radius: 6px;
+  display: none;
+}
+
+#tower-detail-panel h4 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  color: #b45309;
+}
+
+.detail-stats {
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.targeting-label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.targeting-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.btn-target {
+  padding: 4px 2px;
+  font-size: 11px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.btn-target.active {
+  background: #f59e0b;
+  color: white;
+  font-weight: bold;
+  border-color: #d97706;
+}
+
+.btn-sell {
+  width: 100%;
+  margin-top: 4px;
+  background: #fee2e2;
+  border: 1px solid #f87171;
+  color: #b91c1c;
+  font-weight: bold;
+  padding: 6px;
+  border-radius: 4px;
+}
+
+.btn-sell:hover {
+  background: #fecaca;
+}
+
+/* 투사체 */
+.projectile {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10;
+  transition: transform 0.2s linear;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+/* 피격 효과 */
+.hit-effect {
+  filter: brightness(2.2) sepia(1) hue-rotate(-50deg) saturate(6);
+  transition: filter 0.08s;
+}
+
+/* 플로팅 데미지 텍스트 (Phase C: Juice Effect) */
+.floating-damage {
+  position: absolute;
+  font-weight: 900;
+  font-size: 14px;
+  color: #ffeb3b;
+  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 0 6px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  z-index: 20;
+  animation: floatDamageAnim 0.55s ease-out forwards;
+}
+
+@keyframes floatDamageAnim {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  40% { transform: translateY(-12px) scale(1.3); }
+  100% { opacity: 0; transform: translateY(-24px) scale(0.9); }
+}
+
+/* 폭탄 타워 광역 폭발 이펙트 */
+.splash-effect {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 80, 0, 0.9) 0%, rgba(224, 64, 251, 0.5) 55%, transparent 75%);
+  pointer-events: none;
+  z-index: 12;
+  transform: translate(-50%, -50%) scale(0.2);
+  animation: splashAnim 0.35s ease-out forwards;
+}
+
+@keyframes splashAnim {
+  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.9; }
+  100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
+}
+
+/* 몬스터 컨테이너 래퍼 (체력바 + 바디) */
+.monster-wrapper {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.4s linear, top 0.4s linear;
+}
+
+/* 몬스터 체력바 */
+.monster-hp-bar {
+  width: 22px;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.65);
+  border-radius: 2px;
+  margin-bottom: 2px;
+  overflow: hidden;
+}
+
+.monster-hp-fill {
+  width: 100%;
+  height: 100%;
+  background-color: #10b981;
+  transition: width 0.1s linear, background-color 0.2s ease;
+}
+
+.monster-hp-fill.danger {
+  background-color: #ef4444;
+}
+
+/* 몬스터 바디 */
+.monster-body {
+  width: 20px;
+  height: 20px;
+  background-color: #ef4444;
+  border-radius: 50%;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+  transition: filter 0.2s ease;
+}
+
+/* 얼음 타워 피격 시 슬로우 시각 효과 */
+.monster-body.slowed {
+  filter: drop-shadow(0 0 6px #06b6d4) hue-rotate(170deg) brightness(1.2) !important;
+}
+
+.monster-body.fast {
+  background-color: #eab308;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.monster-body.tank {
+  background-color: #3b82f6;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+}
+
+.monster-body.boss {
+  background-color: #a855f7;
+  width: 26px;
+  height: 26px;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  border-radius: 0;
+}
+
+/* ========================================================
+   가챠 연출 모달 3D 플립 (Phase C)
+   ======================================================== */
+#gacha-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.gacha-modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  perspective: 1200px;
+}
+
+.card-flip-container {
+  width: 220px;
+  height: 310px;
+  cursor: pointer;
+  perspective: 1200px;
+  margin-bottom: 20px;
+}
+
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+}
+
+.card-flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 14px;
+  backface-visibility: hidden;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 카드 뒷면 (소환 전) */
+.card-front-face {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+  border: 4px solid #f59e0b;
+  color: #fbbf24;
+}
+
+.card-back-pattern {
+  font-size: 50px;
+  margin-bottom: 15px;
+  animation: pulseGlow 1.5s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  100% { transform: scale(1.08); opacity: 1; }
+}
+
+/* 카드 앞면 (소환 결과) */
+.card-back-face {
+  background: #ffffff;
+  border: 4px solid #cbd5e1;
+  transform: rotateY(180deg);
+  padding: 15px;
+}
+
+.card-back-face.legendary {
+  border-color: #f59e0b;
+  box-shadow: 0 0 35px rgba(245, 158, 11, 0.6);
+  background: linear-gradient(180deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.card-back-face.fragment {
+  border-color: #06b6d4;
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.4);
+}
+
+.gacha-card-emblem {
+  font-size: 60px;
+  margin: 10px 0;
+}
+
+.gacha-card-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.gacha-card-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.gacha-card-badge.card {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.gacha-card-badge.frag {
+  background: #cffafe;
+  color: #0e7490;
+}
+
+.gacha-card-desc {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.gacha-modal-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-gacha-action {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s ease;
+}
+
+.btn-gacha-action:active {
+  transform: scale(0.96);
+}
+
+.btn-gacha-retry {
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-gacha-close {
+  background: #475569;
+  color: white;
+}
+
+/* QA 패널 CSS */
+#qa-panel {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #333;
+  border-top: 3px solid #f44336;
+  border-radius: 10px 10px 0 0;
+  z-index: 1000;
+  color: white;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+.qa-item {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+#qa-panel label {
+  font-weight: bold;
+}
+
+#qa-panel input {
+  padding: 5px;
+  background: #222;
+  color: #fff;
+  border: 1px solid #666;
+  width: 80px;
+  margin-left: 5px;
+}
+
+#qa-panel button {
+  padding: 8px 15px;
+  cursor: pointer;
+  background: #555;
+  color: white;
+  border: 1px solid #777;
+  border-radius: 4px;
+}
+
+#qa-panel button:hover {
+  background: #777;
+}
+
+/* ========================================================
+   연구소 모달 및 스테이지 선택기 (Phase D)
+   ======================================================== */
+#talent-modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+.talent-modal-box {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 440px;
+  max-width: 90%;
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.talent-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background: #f8fafc;
+}
+
+.btn-talent-upgrade {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-talent-upgrade:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.btn-talent-upgrade.max {
+  background: #10b981;
+}
+
+/* 스테이지 선택기 스타일 */
+.stage-selector {
+  margin: 15px 0;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-stage-select {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: bold;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-stage-select.active {
+  background: #1e293b;
+  color: #ffffff;
+  border-color: #0f172a;
+}

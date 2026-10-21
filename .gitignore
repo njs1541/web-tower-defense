@@ -1,0 +1,15 @@
+# 운영체제 및 시스템 파일
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# 에디터 및 IDE 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 임시 파일
+*.tmp
+*.bak
