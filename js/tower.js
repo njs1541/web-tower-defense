@@ -7,17 +7,25 @@ function resetSelection() {
     updateButtonVisuals();
 }
 
-function selectUnlockMode() {
-    console.log("Input: Unlock Mode Clicked");
-    if (interactionMode === 'unlock') {
+/**
+ * 기반 건설 모드 선택 (구 타일 해제)
+ */
+function selectBaseBuildMode() {
+    console.log("Input: Base Build Mode Clicked");
+    if (interactionMode === 'base' || interactionMode === 'unlock') {
         resetSelection();
         return;
     }
     clearActiveRange();
     hideTowerDetailPanel();
-    interactionMode = 'unlock';
+    interactionMode = 'base';
     selectedTower = null;
     updateButtonVisuals();
+}
+
+// 하위 호환성 유지
+function selectUnlockMode() {
+    selectBaseBuildMode();
 }
 
 function selectTower(towerId) {
@@ -67,38 +75,69 @@ function handleCellClick(x, y) {
     clearActiveRange();
     hideTowerDetailPanel();
 
-    // 2. 타일 해제 모드
-    if (interactionMode === 'unlock') {
-        if (cell.buildable || cell.path) {
+    // 2. 기반 건설 모드 (기반은 벽 역할을 하며, 환불 불가)
+    if (interactionMode === 'base' || interactionMode === 'unlock') {
+        if (cell.isStart || cell.isGoal) {
+            alert("입구 및 출구에는 기반을 건설할 수 없습니다.");
             return;
         }
 
-        if (gold >= unlockTileCost) {
+        if (typeof isSafetyZone === 'function' && isSafetyZone(x, y)) {
+            alert("시작 지점 및 골인 지점 인근(보호구역)에는 기반을 건설할 수 없습니다.");
+            return;
+        }
+
+        if (cell.buildable) {
+            // 기반은 환불 불가
+            alert("이미 기반이 건설된 타일입니다. (기반은 환불이 불가능합니다.)");
+            return;
+        }
+
+        // 2-1. 봉쇄 방지 검사 (A* 길찾기로 몬스터의 출구 경로가 막히는지 확인)
+        if (typeof canBuildBaseAt === 'function' && !canBuildBaseAt(x, y)) {
+            alert("⚠️ 몬스터의 이동 경로를 완전히 차단할 수 없습니다! (통로를 남겨주세요)");
+            return;
+        }
+
+        const cost = (typeof getBaseBuildCost === 'function') ? getBaseBuildCost() : 1;
+        if (gold >= cost) {
             cell.buildable = true;
-            gold -= unlockTileCost;
-            render(); // 즉시 갱신
+            gold -= cost;
+            builtBaseCount = (builtBaseCount || 0) + 1;
+
+            // 전역 몬스터 최단 경로 즉시 재계산
+            if (typeof recalculateGlobalPath === 'function') {
+                recalculateGlobalPath();
+            }
+
+            render();
+            updateButtonVisuals();
+            console.log(`기반 건설 완료: (${x}, ${y}), 비용: ${cost}G, 총 기반 수: ${builtBaseCount}`);
         } else {
-            alert("골드가 부족합니다!");
+            alert(`골드가 부족합니다! (필요 골드: ${cost}G)`);
         }
         return;
     }
 
     // 3. 타워 건설 모드
     if (interactionMode === 'build') {
-        if (cell.buildable) {
-            if (!selectedTower) return;
-            const towerInfo = TOWER_DATA[selectedTower];
-            if (!towerInfo) return;
+        if (!cell.buildable) {
+            alert("타워는 '기반'이 건설된 영역 위에만 설치할 수 있습니다!");
+            return;
+        }
 
-            if (gold >= towerInfo.cost) {
-                cell.tower = selectedTower;
-                cell.targeting = 'first'; // 기본 타깃팅: 선두
-                gold -= towerInfo.cost;
-                clearRangePreview();
-                render(); // 즉시 갱신
-            } else {
-                alert("골드가 부족합니다!");
-            }
+        if (!selectedTower) return;
+        const towerInfo = TOWER_DATA[selectedTower];
+        if (!towerInfo) return;
+
+        if (gold >= towerInfo.cost) {
+            cell.tower = selectedTower;
+            cell.targeting = 'first'; // 기본 타깃팅: 선두
+            gold -= towerInfo.cost;
+            clearRangePreview();
+            render(); // 즉시 갱신
+        } else {
+            alert("골드가 부족합니다!");
         }
     }
 }
@@ -112,27 +151,22 @@ function selectTargetEnemy(cell, inRangeEnemies) {
     const mode = cell.targeting || 'first';
 
     if (mode === 'strongest') {
-        // 체력이 가장 높은 적 (동률 시 선두)
         return inRangeEnemies.slice().sort((a, b) => b.hp - a.hp || b.pathIndex - a.pathIndex)[0];
     } else if (mode === 'weakest') {
-        // 체력이 가장 낮은 적 (동률 시 선두)
         return inRangeEnemies.slice().sort((a, b) => a.hp - b.hp || b.pathIndex - a.pathIndex)[0];
     } else if (mode === 'boss') {
-        // 보스 우선 필터
-        const bosses = inRangeEnemies.filter(e => e.type === 'boss');
+        const bosses = inRangeEnemies.filter(e => e.isBoss || e.type.startsWith('boss'));
         if (bosses.length > 0) {
             return bosses.sort((a, b) => b.pathIndex - a.pathIndex)[0];
         }
-        // 보스 없으면 선두
         return inRangeEnemies.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
     } else {
-        // 기본값: 선두(First) - 경로 인덱스가 가장 큰 적
         return inRangeEnemies.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
     }
 }
 
 /**
- * 타워들의 적 공격 루프 (Phase B 특수 타워 로직 포함)
+ * 타워들의 적 공격 루프 (공중 유닛 요격 필터 및 신규 타워 확장 지원)
  */
 function attackFromTowers() {
     for (const cell of board) {
@@ -143,10 +177,17 @@ function attackFromTowers() {
 
         const range = towerStats.range;
         const damage = towerStats.damage;
+        const targetType = towerStats.targetType || "all";
 
-        // 사거리 내 살아있는 적 수집
+        // 사거리 내 살아있는 적 수집 (타입 필터링 적용)
         const inRangeEnemies = enemies.filter(e => {
             if (!e.alive) return false;
+
+            // 지상 전용 타워(근거리, 폭탄 등)는 비행 유닛 타격 불가
+            if (targetType === "ground_only" && e.moveType === "flying") {
+                return false;
+            }
+
             return Math.abs(e.x - cell.x) <= range && Math.abs(e.y - cell.y) <= range;
         });
 
@@ -179,9 +220,8 @@ function attackFromTowers() {
             else if (cell.tower === 'bomb') {
                 createSplashEffect(targetEnemy.x, targetEnemy.y);
 
-                // 착탄 지점 기준 3x3 범위 내 모든 적에게 피해
                 const victims = enemies.filter(e => {
-                    return e.alive && Math.abs(e.x - targetEnemy.x) <= 1 && Math.abs(e.y - targetEnemy.y) <= 1;
+                    return e.alive && Math.abs(e.x - targetEnemy.x) <= 1 && Math.abs(e.y - targetEnemy.y) <= 1 && e.moveType !== 'flying';
                 });
 
                 for (const victim of victims) {
@@ -189,10 +229,21 @@ function attackFromTowers() {
                     onEnemyHit(victim, damage, "#ff9100");
                 }
             }
-            // 3. 일반 타워 (Ranged / Melee)
+            // 3. 전격 타워 (Shock): 연쇄 번개 피해
+            else if (cell.tower === 'shock') {
+                targetEnemy.hp -= damage;
+                onEnemyHit(targetEnemy, damage, "#f59e0b");
+
+                const chainTargets = enemies.filter(e => e.alive && e !== targetEnemy && Math.abs(e.x - targetEnemy.x) <= 2 && Math.abs(e.y - targetEnemy.y) <= 2).slice(0, 2);
+                for (const chain of chainTargets) {
+                    chain.hp -= damage * 0.7;
+                    onEnemyHit(chain, damage * 0.7, "#fbbf24");
+                }
+            }
+            // 4. 일반/저격 타워 (Ranged / Melee / Sniper)
             else {
                 targetEnemy.hp -= damage;
-                onEnemyHit(targetEnemy, damage, "#ffeb3b");
+                onEnemyHit(targetEnemy, damage, towerStats.color || "#ffeb3b");
             }
         }, hitDelay);
     }
@@ -321,6 +372,7 @@ function createProjectile(startElem, targetElem, color) {
 
 /**
  * 선택된 타워 판매 (Sell)
+ * (규칙: 타워 비용의 60% 환불, 기반 건설 영역은 환불 불가하고 유지됨)
  */
 function sellSelectedTower() {
     if (!selectedBoardTower || !selectedBoardTower.tower) return;
@@ -329,18 +381,19 @@ function sellSelectedTower() {
     const towerInfo = TOWER_DATA[cell.tower];
     if (!towerInfo) return;
 
-    // 건설 비용의 70% 환급 (올림 처리)
-    const refund = Math.floor(towerInfo.cost * 0.7);
+    const refundRate = (typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6;
+    const refund = Math.floor(towerInfo.cost * refundRate);
 
     gold += refund;
     cell.tower = null;
     cell.targeting = null;
+    // cell.buildable 은 true 유지! (기반은 환불 불가)
 
     clearActiveRange();
     hideTowerDetailPanel();
     render();
 
-    console.log(`타워 판매 완료: ${towerInfo.name} (+${refund}G)`);
+    console.log(`타워 판매 완료: ${towerInfo.name} (+${refund}G, 60% 환급). 기반 영역은 유지됩니다.`);
 }
 
 /**
@@ -375,13 +428,15 @@ function showTowerDetailPanel(cell, stats) {
         let specialDesc = "";
         if (cell.tower === 'ice') specialDesc = "<br>❄️ 효과: 50% 슬로우";
         if (cell.tower === 'bomb') specialDesc = "<br>💣 효과: 3x3 범위 폭발";
+        if (cell.tower === 'shock') specialDesc = "<br>⚡ 효과: 3기 연쇄 번개";
 
         statsEl.innerHTML = `⚔️ 공격력: ${dmgText} | 🏹 사거리: ${stats.range}${specialDesc}`;
     }
 
-    const refund = Math.floor(stats.cost * 0.7);
+    const refundRate = (typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6;
+    const refund = Math.floor(stats.cost * refundRate);
     if (sellBtn) {
-        sellBtn.innerText = `💰 타워 판매 (+${refund}G)`;
+        sellBtn.innerText = `💰 타워 판매 (+${refund}G, 60%)`;
     }
 
     updateTargetingButtonsUI(cell.targeting || 'first');

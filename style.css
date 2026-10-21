@@ -1,4 +1,4 @@
-﻿body {
+body {
   margin: 0;
   font-family: Arial, sans-serif;
   background-color: #f0f2f5;
@@ -40,23 +40,59 @@
   position: relative;
 }
 
-/* 타일셋 개선 (Phase C) */
+/* 타일셋 개선 (Phase C / v0.21.0 Mazing) */
 .path {
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-  border-color: #94a3b8;
+  background: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.8);
+}
+.path::after {
+  content: "•";
+  font-size: 16px;
+  color: #94a3b8;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
+/* 기반 건설 영역 (단단한 석재 벽돌 & 타워 건설 터) */
 .buildable {
-  background: radial-gradient(circle, #dcfce7 20%, #bbf7d0 100%);
-  border-color: #86efac;
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
+  border-color: #334155 !important;
+  box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.3), 1px 1px 3px rgba(0, 0, 0, 0.3) !important;
 }
 
-.cell.range-preview {
-  background: rgba(14, 165, 233, 0.4) !important;
-  box-shadow: inset 0 0 0 2px #0284c7;
+/* 시작점 및 골인점 타일 */
+.start-tile {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border-color: #047857 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  animation: pulseStart 2s infinite ease-in-out;
 }
 
-.cell.range-active {
+.goal-tile {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+  border-color: #991b1b !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  animation: pulseGoal 2s infinite ease-in-out;
+}
+
+@keyframes pulseStart {
+  0%, 100% { box-shadow: inset 0 0 6px #6ee7b7; }
+  50% { box-shadow: inset 0 0 12px #34d399; }
+}
+
+@keyframes pulseGoal {
+  0%, 100% { box-shadow: inset 0 0 6px #fca5a5; }
+  50% { box-shadow: inset 0 0 12px #f87171; }
+}
   background: rgba(249, 115, 22, 0.4) !important;
   box-shadow: inset 0 0 0 2px #ea580c;
 }
@@ -334,14 +370,18 @@ button.selected {
   background-color: #ef4444;
 }
 
-/* 몬스터 바디 */
+/* 몬스터 바디 (v0.21.0 이모지 및 다형성 렌더링) */
 .monster-body {
-  width: 20px;
-  height: 20px;
-  background-color: #ef4444;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
   border-radius: 50%;
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
-  transition: filter 0.2s ease;
+  transition: filter 0.2s ease, transform 0.2s ease;
+  user-select: none;
 }
 
 /* 얼음 타워 피격 시 슬로우 시각 효과 */
@@ -349,26 +389,87 @@ button.selected {
   filter: drop-shadow(0 0 6px #06b6d4) hue-rotate(170deg) brightness(1.2) !important;
 }
 
+.monster-body.normal {
+  background-color: #10b981;
+}
+
 .monster-body.fast {
-  background-color: #eab308;
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  border-radius: 0;
-  box-shadow: none;
+  background-color: #06b6d4;
+  font-size: 12px;
 }
 
 .monster-body.tank {
-  background-color: #3b82f6;
-  width: 22px;
-  height: 22px;
-  border-radius: 3px;
+  background-color: #64748b;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
 }
 
-.monster-body.boss {
-  background-color: #a855f7;
-  width: 26px;
-  height: 26px;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  border-radius: 0;
+/* 크롤러: 기반 파쇄자 */
+.monster-body.crawler {
+  background-color: #ea580c;
+  animation: crawlerCrawl 0.5s infinite alternate ease-in-out;
+}
+
+@keyframes crawlerCrawl {
+  from { transform: scale(0.95); }
+  to { transform: scale(1.05); }
+}
+
+/* 크롤러가 기반을 철거할 때의 진동 채널링 효과 */
+.monster-wrapper.demolishing .monster-body.crawler {
+  animation: crawlerDemolish 0.15s infinite linear !important;
+  box-shadow: 0 0 8px #ef4444 !important;
+}
+
+@keyframes crawlerDemolish {
+  0% { transform: translate(-2px, 1px) rotate(-5deg); }
+  50% { transform: translate(2px, -1px) rotate(5deg); }
+  100% { transform: translate(-1px, -2px) rotate(0deg); }
+}
+
+/* 비행형 유닛 */
+.monster-body.flying {
+  background-color: #8b5cf6;
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4);
+  animation: flyingFloat 1.2s infinite ease-in-out;
+}
+
+@keyframes flyingFloat {
+  0%, 100% { transform: translateY(-3px); }
+  50% { transform: translateY(1px); }
+}
+
+/* 보스 3종 */
+.monster-body.boss_ground {
+  width: 28px;
+  height: 28px;
+  font-size: 17px;
+  background-color: #b91c1c;
+  box-shadow: 0 0 10px rgba(185, 28, 28, 0.8);
+}
+
+.monster-body.boss_flying {
+  width: 28px;
+  height: 28px;
+  font-size: 17px;
+  background-color: #dc2626;
+  box-shadow: 0 10px 16px rgba(220, 38, 38, 0.6);
+  animation: flyingFloat 1s infinite ease-in-out;
+}
+
+.monster-body.boss_leaping {
+  width: 28px;
+  height: 28px;
+  font-size: 17px;
+  background-color: #4c1d95;
+  box-shadow: 0 0 10px rgba(76, 29, 149, 0.8);
+}
+
+/* 도약 보스의 점프 애니메이션 */
+.monster-wrapper.leap-jump {
+  transform: translateY(-16px) scale(1.2);
+  transition: transform 0.15s ease-out;
 }
 
 /* ========================================================
@@ -664,4 +765,307 @@ button.selected {
   background: #1e293b;
   color: #ffffff;
   border-color: #0f172a;
+}
+
+/* ==========================================================
+   오프닝 타이틀 화면 (OP Screen) 스타일 (v0.19.0)
+   ========================================================== */
+#op-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 999;
+  background: #090d16 url('assets/op_title_bg.jpg') center center / cover no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#op-screen.op-fade-out {
+  opacity: 0;
+  transform: scale(1.05);
+  pointer-events: none;
+}
+
+.op-overlay {
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(15, 23, 42, 0.45) 0%, rgba(10, 15, 30, 0.85) 85%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  text-align: center;
+  position: relative;
+}
+
+.op-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  background: rgba(30, 58, 138, 0.55);
+  border: 1px solid rgba(96, 165, 250, 0.6);
+  border-radius: 9999px;
+  color: #93c5fd;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+.op-title {
+  margin: 0;
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: #ffffff;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(56, 189, 248, 0.5);
+  background: linear-gradient(135deg, #ffffff 20%, #7dd3fc 60%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: float-title 3.5s ease-in-out infinite alternate;
+}
+
+.op-subtitle {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #fbbf24;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(251, 191, 36, 0.4);
+}
+
+.op-desc {
+  margin-top: 16px;
+  font-size: 15px;
+  color: #e2e8f0;
+  opacity: 0.9;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  max-width: 500px;
+}
+
+.op-start-prompt {
+  margin-top: 60px;
+  padding: 16px 36px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 2px solid rgba(56, 189, 248, 0.7);
+  border-radius: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 25px rgba(56, 189, 248, 0.4);
+  animation: op-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#op-screen:hover .op-start-prompt {
+  border-color: #38bdf8;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 35px rgba(56, 189, 248, 0.7);
+  transform: scale(1.04);
+}
+
+.op-start-icon {
+  font-size: 26px;
+  animation: op-bob 1.5s ease-in-out infinite alternate;
+}
+
+.op-start-text {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.op-start-sub {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #7dd3fc;
+  opacity: 0.85;
+}
+
+.op-footer-version {
+  position: absolute;
+  bottom: 20px;
+  right: 25px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1px;
+}
+
+@keyframes op-pulse {
+  0%, 100% {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(56, 189, 248, 0.3);
+    border-color: rgba(56, 189, 248, 0.5);
+  }
+  50% {
+    box-shadow: 0 8px 35px rgba(0, 0, 0, 0.5), 0 0 30px rgba(56, 189, 248, 0.6);
+    border-color: rgba(56, 189, 248, 0.9);
+  }
+}
+
+@keyframes float-title {
+  0% {
+    transform: translateY(0px);
+  }
+  100% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes op-bob {
+  0% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(3px);
+  }
+}
+
+/* ==========================================================
+   로비 UI 카드 박스 & 타워 조각 타일 버튼 스타일 (v0.20.0)
+   ========================================================== */
+.lobby-card-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  text-align: center;
+}
+
+.fragment-grid {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.shard-tile-btn {
+  width: 125px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 8px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  user-select: none;
+}
+
+.shard-tile-btn:hover {
+  transform: translateY(-4px);
+  border-color: #6366f1;
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.18);
+}
+
+.shard-tile-btn.ready-to-act {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.shard-tile-btn.ready-to-act:hover {
+  border-color: #2563eb;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+}
+
+.shard-img-wrap {
+  width: 68px;
+  height: 68px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  background: #0f172a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.shard-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.shard-tile-btn:hover .shard-img {
+  transform: scale(1.08);
+}
+
+.shard-tile-name {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.shard-tile-count {
+  margin-top: 3px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.shard-tile-count.low {
+  color: #64748b;
+}
+
+.shard-tile-action {
+  width: 100%;
+  padding: 5px 0;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  box-sizing: border-box;
+  transition: background 0.15s ease;
+}
+
+.shard-tile-action.can-craft {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.shard-tile-action.can-craft:hover {
+  background: #1d4ed8;
+}
+
+.shard-tile-action.can-upgrade {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.shard-tile-action.can-upgrade:hover {
+  background: #059669;
+}
+
+.shard-tile-action.need-more {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border: 1px solid #e2e8f0;
+}
+
+.shard-tile-action.max-lv {
+  background: #475569;
+  color: #ffffff;
 }

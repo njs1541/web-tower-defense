@@ -60,80 +60,99 @@ function updateLobbyUI() {
         invList.appendChild(card);
     });
 
-    // 3. 조각 현황 및 타워 제작/강화 섹션
-    const fragmentKeys = Object.keys(USER_DATA.fragments);
-    if (fragmentKeys.length > 0) {
-        const fragTitle = document.createElement("div");
-        fragTitle.style.width = "100%";
-        fragTitle.innerHTML = "<hr><strong>타워 강화 (조각 사용)</strong>";
-        invList.appendChild(fragTitle);
+    // 3. 타워 조각 보관함 및 타일 버튼 렌더링 (v0.20.0)
+    const fragList = document.getElementById("fragment-list");
+    if (fragList && typeof USER_DATA !== 'undefined' && typeof TOWER_DATA !== 'undefined') {
+        fragList.innerHTML = "";
 
-        fragmentKeys.forEach(id => {
-            const currentFrag = USER_DATA.fragments[id];
-            if (currentFrag <= 0) return;
-            if (!TOWER_DATA[id]) return;
+        // 모든 타워 목록을 순회하여 조각 타일 버튼 생성
+        const allTowerIds = Object.keys(TOWER_DATA);
 
-            const isOwned = USER_DATA.inventory.includes(id);
-            const lv = USER_DATA.levels ? USER_DATA.levels[id] : 1;
+        allTowerIds.forEach(id => {
+            const currentFrag = (USER_DATA.fragments && USER_DATA.fragments[id]) || 0;
+            const isOwned = USER_DATA.inventory && USER_DATA.inventory.includes(id);
+            const lv = (USER_DATA.levels && USER_DATA.levels[id]) || 1;
+            const imgPath = (typeof SHARD_IMAGES !== 'undefined' && SHARD_IMAGES[id]) ? SHARD_IMAGES[id] : "assets/shard_ranged.jpg";
+            const shardName = (typeof SHARD_NAMES !== 'undefined' && SHARD_NAMES[id]) ? SHARD_NAMES[id] : `${TOWER_DATA[id].name} 조각`;
 
-            let btnText = "";
-            let btnAction = null;
+            let actionText = "";
+            let actionClass = "";
             let reqCost = 0;
-            let isDisabled = false;
+            let canAct = false;
+            let clickHandler = null;
 
             if (!isOwned) {
                 reqCost = 30; // 미보유 카드 정가 제작: 30개
-                btnText = `제작 (비용:${reqCost})`;
-                btnAction = () => {
-                    if (craftCard(id)) {
-                        alert("제작 성공! 인벤토리를 확인하세요.");
-                        updateLobbyUI();
-                    }
-                };
-            } else {
-                reqCost = lv * 10;
-                const isMax = lv >= 5;
-                if (isMax) {
-                    btnText = "MAX";
-                    isDisabled = true;
-                } else {
-                    btnText = `강화 (Lv.${lv}→${lv + 1}, 비용:${reqCost})`;
-                    btnAction = () => {
-                        const success = upgradeTower(id);
-                        if (success) {
-                            alert("강화 성공!");
-                            updateLobbyUI();
+                if (currentFrag >= reqCost) {
+                    actionText = `제작 가능 (30)`;
+                    actionClass = "can-craft";
+                    canAct = true;
+                    clickHandler = () => {
+                        if (confirm(`'${TOWER_DATA[id].name}'을(를) 조각 30개로 제작하시겠습니까?`)) {
+                            if (craftCard(id)) {
+                                alert("🎉 제작 성공! 이제 인벤토리에서 출전 덱에 편성할 수 있습니다.");
+                                updateLobbyUI();
+                            }
                         }
                     };
+                } else {
+                    actionText = `제작 (${currentFrag}/${reqCost})`;
+                    actionClass = "need-more";
+                    clickHandler = () => {
+                        alert(`조각이 부족합니다.\n제작에 필요한 조각: ${reqCost}개 (현재: ${currentFrag}개)`);
+                    };
+                }
+            } else {
+                const isMax = lv >= 5;
+                if (isMax) {
+                    actionText = `MAX (최대 Lv.5)`;
+                    actionClass = "max-lv";
+                    clickHandler = () => {
+                        alert(`'${TOWER_DATA[id].name}'은(는) 이미 최고 레벨(Lv.5)입니다!`);
+                    };
+                } else {
+                    reqCost = lv * 10;
+                    if (currentFrag >= reqCost) {
+                        actionText = `Lv.${lv + 1} 강화 (${reqCost})`;
+                        actionClass = "can-upgrade";
+                        canAct = true;
+                        clickHandler = () => {
+                            if (confirm(`조각 ${reqCost}개를 소모하여 '${TOWER_DATA[id].name}'을(를) Lv.${lv + 1}로 강화하시겠습니까?`)) {
+                                if (upgradeTower(id)) {
+                                    alert("⚡ 강화 성공! 공격력과 성능이 증가했습니다.");
+                                    updateLobbyUI();
+                                }
+                            }
+                        };
+                    } else {
+                        actionText = `강화 (${currentFrag}/${reqCost})`;
+                        actionClass = "need-more";
+                        clickHandler = () => {
+                            alert(`조각이 부족합니다.\nLv.${lv + 1} 강화에 필요한 조각: ${reqCost}개 (현재: ${currentFrag}개)`);
+                        };
+                    }
                 }
             }
 
-            if (currentFrag < reqCost && !isDisabled) {
-                isDisabled = true;
+            // 타일 버튼 엘리먼트 생성
+            const tileBtn = document.createElement("div");
+            tileBtn.className = `shard-tile-btn ${canAct ? 'ready-to-act' : ''}`;
+            tileBtn.title = isOwned ? `${TOWER_DATA[id].name} (현재 Lv.${lv})` : `${TOWER_DATA[id].name} [미보유]`;
+
+            tileBtn.innerHTML = `
+                <div class="shard-img-wrap">
+                    <img src="${imgPath}" alt="${shardName}" class="shard-img" onerror="this.src='assets/op_title_bg.jpg'">
+                </div>
+                <div class="shard-tile-name">${shardName}</div>
+                <div class="shard-tile-count ${currentFrag === 0 ? 'low' : ''}">💎 ${currentFrag}개</div>
+                <div class="shard-tile-action ${actionClass}">${actionText}</div>
+            `;
+
+            if (clickHandler) {
+                tileBtn.onclick = clickHandler;
             }
 
-            const row = document.createElement("div");
-            row.style.width = "100%";
-            row.style.marginBottom = "5px";
-            row.style.display = "flex";
-            row.style.justifyContent = "space-between";
-            row.style.alignItems = "center";
-            row.style.borderBottom = "1px dashed #eee";
-            row.style.paddingBottom = "5px";
-
-            const info = document.createElement("span");
-            info.innerHTML = `${TOWER_DATA[id].name} (보유: ${currentFrag}개) ${!isOwned ? "<span style='color:red; font-size:10px;'>[미보유]</span>" : ""}`;
-
-            const btn = document.createElement("button");
-            btn.innerText = btnText;
-            btn.disabled = isDisabled;
-            if (!isDisabled && btnAction) {
-                btn.onclick = btnAction;
-            }
-
-            row.appendChild(info);
-            row.appendChild(btn);
-            invList.appendChild(row);
+            fragList.appendChild(tileBtn);
         });
     }
 }

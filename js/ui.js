@@ -15,9 +15,32 @@ function render() {
         const isRangeActive = dom.classList.contains("range-active");
 
         dom.className = "cell";
-        if (cell.path) dom.classList.add("path");
-        if (cell.buildable) dom.classList.add("buildable");
-        if (cell.tower) dom.classList.add(cell.tower);
+        dom.innerText = ""; // 내부 텍스트 초기화
+
+        // 시작점 및 골인점 마킹
+        if (cell.isStart) {
+            dom.classList.add("start-tile");
+            dom.innerText = "🚩";
+        } else if (cell.isGoal) {
+            dom.classList.add("goal-tile");
+            dom.innerText = "🏰";
+        }
+
+        // 경로 및 기반 상태
+        if (cell.path && !cell.buildable && !cell.isStart && !cell.isGoal) {
+            dom.classList.add("path");
+        }
+        if (cell.buildable) {
+            dom.classList.add("buildable");
+        }
+
+        // 타워 설치 상태
+        if (cell.tower) {
+            dom.classList.add(cell.tower);
+            const emblem = (typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[cell.tower]) ? TOWER_EMBLEMS[cell.tower] : "🏰";
+            dom.innerText = emblem;
+        }
+
         if (selectedBoardTower && selectedBoardTower.x === cell.x && selectedBoardTower.y === cell.y) {
             dom.classList.add("selected-tower");
         }
@@ -74,10 +97,14 @@ document.addEventListener("keydown", (e) => {
 });
 
 function updateButtonVisuals() {
-    // 타일 해제 버튼 시각화
+    // 기반 건설 버튼 시각화 및 실시간 비용 표기
     const btnUnlock = document.getElementById("btn-unlock");
     if (btnUnlock) {
-        if (interactionMode === 'unlock') {
+        const cost = (typeof getBaseBuildCost === 'function') ? getBaseBuildCost() : 1;
+        btnUnlock.innerText = `🏗️ 기반 건설 (${cost}G)`;
+        btnUnlock.title = `기반(벽)을 건설합니다. 5개 건설할 때마다 비용이 1G 증가하며 환불할 수 없습니다. (현재 건설된 기반: ${builtBaseCount || 0}개)`;
+
+        if (interactionMode === 'base' || interactionMode === 'unlock') {
             btnUnlock.classList.add("selected");
         } else {
             btnUnlock.classList.remove("selected");
@@ -91,7 +118,6 @@ function updateButtonVisuals() {
     const buttons = Array.from(container.getElementsByTagName("button"));
     buttons.forEach(btn => {
         const tId = btn.dataset.towerId;
-        // dataset의 towerId와 현재 선택된 towerId가 일치하는지 확인
         if (interactionMode === 'build' && tId && tId === selectedTower) {
             btn.classList.add("selected");
         } else {

@@ -9,14 +9,39 @@
 
 <body>
   <div id="container">
-    <div id="lobby-screen" style="text-align: center; padding: 50px;">
-      <h1>🏰 Tower Defense : Card Collection</h1>
-      <p>보유 골드: <span id="lobby-gold">0</span> G</p>
+    <!-- 오프닝 타이틀 화면 (OP Screen) -->
+    <div id="op-screen" onclick="enterGameFromOp()">
+      <div class="op-overlay">
+        <div class="op-badge">FANTASY TOWER DEFENSE</div>
+        <h1 class="op-title">🏰 TOWER DEFENSE</h1>
+        <div class="op-subtitle">CARD COLLECTION & META TACTICS</div>
+        <p class="op-desc">크리스탈 왕국을 위협하는 몬스터 군단에 맞서 승리하세요!</p>
+        
+        <div class="op-start-prompt">
+          <div class="op-start-icon">⚔️</div>
+          <div class="op-start-text">화면을 클릭하여 시작하세요</div>
+          <div class="op-start-sub">CLICK ANYWHERE TO START</div>
+        </div>
 
-      <div style="margin: 20px;">
-        <button onclick="startGame()" style="font-weight: bold; background: #2563eb; color: white; padding: 8px 16px;">⚔️ 게임 시작</button>
-        <button onclick="toggleShop()">🏪 상점 (뽑기)</button>
-        <button onclick="openTalentModal()" style="background: #f8fafc; border-color: #6366f1; color: #4338ca; font-weight: bold;">🔬 연구소 (특성)</button>
+        <div class="op-footer-version">v0.21.0</div>
+      </div>
+    </div>
+
+    <!-- 메인 로비 화면 -->
+    <div id="lobby-screen" style="text-align: center; padding: 40px 20px; display: none; max-width: 800px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <button onclick="returnToOpScreen()" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">◀ 타이틀 화면</button>
+        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.21.0</span>
+      </div>
+      <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card Collection</h1>
+      <div style="display: inline-block; background: #fef3c7; border: 1px solid #fde047; padding: 6px 16px; border-radius: 20px; font-weight: bold; color: #b45309; margin-bottom: 20px;">
+        💰 보유 골드: <span id="lobby-gold" style="font-size: 18px;">0</span> G
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <button onclick="startGame()" style="font-weight: bold; background: #2563eb; color: white; padding: 10px 22px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.3);">⚔️ 게임 시작</button>
+        <button onclick="toggleShop()" style="margin-left: 8px; font-weight: bold; background: #ffffff; color: #334155; padding: 10px 18px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; cursor: pointer;">🏪 상점 (뽑기)</button>
+        <button onclick="openTalentModal()" style="margin-left: 8px; background: #f8fafc; border: 1.5px solid #6366f1; color: #4338ca; font-weight: bold; padding: 10px 18px; border-radius: 8px; font-size: 14px; cursor: pointer;">🔬 연구소 (특성)</button>
       </div>
 
       <!-- 스테이지 선택기 (Phase D) -->
@@ -29,29 +54,45 @@
 
       <!-- 간단한 상점 UI -->
       <div id="shop-ui"
-        style="display: none; border: 1px solid #ccc; padding: 20px; background: #fff; max-width: 400px; margin: 0 auto;">
-        <h3>운명의 카드 뽑기</h3>
-        <p>1회 소환: 100 G</p>
-        <button onclick="drawGacha()">🔮 소환하기</button>
+        style="display: none; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; background: #fff; max-width: 420px; margin: 0 auto 20px auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
+        <h3 style="margin-top: 0;">운명의 카드 뽑기</h3>
+        <p style="color: #64748b; font-size: 14px;">1회 소환: 100 G</p>
+        <button onclick="drawGacha()" style="background: #8b5cf6; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer;">🔮 소환하기</button>
         <div id="gacha-result" style="margin-top: 10px; font-weight: bold; color: blue;"></div>
       </div>
 
-      <div style="margin-top: 30px;">
-        <h3>📦 인벤토리</h3>
-        <div id="inventory-list" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+      <!-- 보유 타워 및 인벤토리 섹션 -->
+      <div class="lobby-card-box">
+        <h3 style="margin-top: 0; font-size: 17px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>📦</span> 보유 타워 & 덱 편성
+        </h3>
+        <div id="inventory-list" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
           <!-- JS로 로드 -->
         </div>
 
         <!-- 카드 상세 정보 패널 -->
         <div id="card-info-panel"
-          style="margin-top: 20px; border: 2px solid #666; padding: 10px; background: #f9f9f9; display: none; max-width: 400px; margin-left: auto; margin-right: auto;">
-          <h3 id="info-name">타워 이름</h3>
-          <p id="info-desc" style="color: #666; font-size: 14px;">설명</p>
-          <div style="display: flex; justify-content: space-around; margin-top: 10px;">
+          style="margin-top: 20px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; background: #f8fafc; display: none; max-width: 400px; margin-left: auto; margin-right: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+          <h3 id="info-name" style="margin-top: 0;">타워 이름</h3>
+          <p id="info-desc" style="color: #64748b; font-size: 13px;">설명</p>
+          <div style="display: flex; justify-content: space-around; margin-top: 10px; font-size: 13px; font-weight: bold;">
             <div>⚔️ 공격력: <span id="info-damage">0</span></div>
             <div>🏹 사거리: <span id="info-range">0</span></div>
             <div>⚡ 공속: <span id="info-speed">5.0</span>/s</div>
           </div>
+        </div>
+      </div>
+
+      <!-- 타워 조각 보관함 및 강화 타일 섹션 (v0.20.0) -->
+      <div class="lobby-card-box" style="margin-top: 25px;">
+        <h3 style="margin-top: 0; font-size: 17px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>🔮</span> 타워 조각 보관함
+        </h3>
+        <p style="font-size: 12px; color: #64748b; margin-top: 4px; margin-bottom: 16px;">
+          조각을 모아 타일 버튼을 클릭하면 새로운 타워를 제작(30개)하거나 기존 타워를 강화할 수 있습니다.
+        </p>
+        <div id="fragment-list" class="fragment-grid">
+          <!-- JS로 타일 버튼 생성 -->
         </div>
       </div>
     </div>
@@ -79,7 +120,7 @@
             <!-- JS로 동적 생성됨 -->
           </div>
           <div style="margin-top: 10px;">
-            <button id="btn-unlock" style="width: 100%;">🔓 타일 해제 (1G)</button>
+            <button id="btn-unlock" style="width: 100%;">🏗️ 기반 건설 (1G)</button>
           </div>
 
           <!-- 타워 상세 관리 패널 (Phase B: 타깃팅 및 판매) -->
@@ -97,7 +138,7 @@
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.18.0</div>
+          v0.21.0</div>
       </div>
     </div>
   </div>
