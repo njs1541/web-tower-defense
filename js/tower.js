@@ -171,6 +171,8 @@ function selectTargetEnemy(cell, inRangeEnemies) {
  * 타워들의 적 공격 루프 (공중 유닛 요격 필터 및 신규 타워 확장 지원)
  */
 function attackFromTowers() {
+    const passives = typeof getActiveRunePassives === 'function' ? getActiveRunePassives() : {};
+
     for (const cell of board) {
         if (!cell.tower) continue;
 
@@ -178,7 +180,6 @@ function attackFromTowers() {
         if (!towerStats) continue;
 
         const range = towerStats.range;
-        const damage = towerStats.damage;
         const targetType = towerStats.targetType || "all";
 
         // 사거리 내 살아있는 적 수집 (타입 필터링 적용)
@@ -199,11 +200,20 @@ function attackFromTowers() {
         const targetEnemy = selectTargetEnemy(cell, inRangeEnemies);
         if (!targetEnemy) continue;
 
+        // 데미지 계산: 관통 보너스 및 치명타 판정 (v0.24.0)
+        let baseDmg = towerStats.damage * (1 + (passives.bonusDamageRatio || 0));
+        let isCrit = false;
+        if (passives.critChance > 0 && Math.random() < passives.critChance) {
+            isCrit = true;
+            baseDmg *= (passives.critMultiplier || 2.0);
+        }
+        const finalDamage = Math.max(1, Math.round(baseDmg * 10) / 10);
+
         // 투사체 발사
         const startDom = getDomCell(cell.x, cell.y);
         const targetDom = targetEnemy.element;
         if (startDom && targetDom) {
-            createProjectile(startDom, targetDom, towerStats.color);
+            createProjectile(startDom, targetDom, isCrit ? "#ef4444" : towerStats.color);
         }
 
         // 배속에 맞춘 투사체 도달 딜레이
@@ -214,9 +224,9 @@ function attackFromTowers() {
 
             // 1. 얼음 타워 (Ice): 슬로우 효과 부여
             if (cell.tower === 'ice') {
-                targetEnemy.hp -= damage;
+                targetEnemy.hp -= finalDamage;
                 applySlowEffect(targetEnemy, towerStats.slowTicks || 10);
-                onEnemyHit(targetEnemy, damage, "#00e5ff");
+                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#00e5ff", isCrit);
             }
             // 2. 폭탄 타워 (Bomb): 착탄 지점 3x3 광역 스플래시 데미지
             else if (cell.tower === 'bomb') {
@@ -227,37 +237,81 @@ function attackFromTowers() {
                 });
 
                 for (const victim of victims) {
-                    victim.hp -= damage;
-                    onEnemyHit(victim, damage, "#ff9100");
+                    victim.hp -= finalDamage;
+                    onEnemyHit(victim, finalDamage, isCrit ? "#ef4444" : "#ff9100", isCrit);
                 }
             }
             // 3. 전격 타워 (Shock): 연쇄 번개 피해
             else if (cell.tower === 'shock') {
-                targetEnemy.hp -= damage;
-                onEnemyHit(targetEnemy, damage, "#f59e0b");
+                targetEnemy.hp -= finalDamage;
+                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#f59e0b", isCrit);
 
                 const chainTargets = enemies.filter(e => e.alive && e !== targetEnemy && Math.abs(e.x - targetEnemy.x) <= 2 && Math.abs(e.y - targetEnemy.y) <= 2).slice(0, 2);
                 for (const chain of chainTargets) {
-                    chain.hp -= damage * 0.7;
-                    onEnemyHit(chain, damage * 0.7, "#fbbf24");
+                    chain.hp -= finalDamage * 0.7;
+                    onEnemyHit(chain, finalDamage * 0.7, "#fbbf24");
                 }
             }
             // 4. 일반/저격 타워 (Ranged / Melee / Sniper)
             else {
-                targetEnemy.hp -= damage;
-                onEnemyHit(targetEnemy, damage, towerStats.color || "#ffeb3b");
+                targetEnemy.hp -= finalDamage;
+                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : (towerStats.color || "#ffeb3b"), isCrit);
+            }
+
+            // [속성 룬 패시브 추가 발동]
+            if (targetEnemy.alive) {
+                // A. 작열의 룬 (화상 도트 부여)
+                if (passives.burn) {
+                    targetEnemy.burnTicks = passives.burnDuration || 3;
+                    targetEnemy.burnDmg = Math.max(1, Math.round(finalDamage * (passives.burnRatio || 0.25)));
+                }
+
+                // B. 연쇄 전격 룬 발동
+                if (passives.chainChance > 0 && Math.random() < passives.chainChance) {
+                    triggerRuneChainLightning(targetEnemy, finalDamage * (passives.chainRatio || 0.6), passives.chainCount || 2);
+                }
+
+                // C. 시공 붕괴 룬 발동
+                if (passives.voidCollapseChance > 0 && Math.random() < passives.voidCollapseChance) {
+                    triggerRuneVoidCollapse(targetEnemy, passives.voidCollapseDamage || 35);
+                }
             }
         }, hitDelay);
     }
 }
 
 /**
+ * 룬 속성 효과: 인접 적 연쇄 전격 발동
+ */
+function triggerRuneChainLightning(sourceEnemy, chainDmg, maxChains = 2) {
+    const chainTargets = enemies.filter(e => e.alive && e !== sourceEnemy && Math.abs(e.x - sourceEnemy.x) <= 2 && Math.abs(e.y - sourceEnemy.y) <= 2).slice(0, maxChains);
+    for (const chain of chainTargets) {
+        chain.hp -= chainDmg;
+        onEnemyHit(chain, chainDmg, "#38bdf8");
+    }
+}
+
+/**
+ * 룬 속성 효과: 시공 붕괴 광역 왜곡 폭발
+ */
+function triggerRuneVoidCollapse(sourceEnemy, collapseDmg = 35) {
+    createSplashEffect(sourceEnemy.x, sourceEnemy.y);
+    showFloatingDamage(sourceEnemy.x, sourceEnemy.y, "🌌 시공 붕괴!", "#a855f7");
+
+    const victims = enemies.filter(e => e.alive && Math.abs(e.x - sourceEnemy.x) <= 1 && Math.abs(e.y - sourceEnemy.y) <= 1);
+    for (const victim of victims) {
+        victim.hp -= collapseDmg;
+        onEnemyHit(victim, collapseDmg, "#c084fc");
+    }
+}
+
+/**
  * 단일 적 피격 후 체력바 갱신, 플로팅 텍스트 팝업 및 사망 처리
  */
-function onEnemyHit(enemy, damage, color = "#ffeb3b") {
+function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false) {
     // 플로팅 데미지 텍스트 생성
-    if (typeof damage === 'number') {
-        showFloatingDamage(enemy.x, enemy.y, damage, color);
+    if (typeof damage === 'number' || typeof damage === 'string') {
+        showFloatingDamage(enemy.x, enemy.y, damage, color, isCrit);
     }
 
     if (typeof updateEnemyHpBar === "function") {
@@ -296,21 +350,42 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b") {
             }
         }
 
+        // 4. 황금 약탈 패시브 룬 발동 (v0.24.0 New)
+        const passives = typeof getActiveRunePassives === 'function' ? getActiveRunePassives() : {};
+        if (passives.plunderChance > 0 && Math.random() < passives.plunderChance) {
+            const loot = passives.plunderGold || 2;
+            gold += loot;
+            showFloatingDamage(enemy.x, enemy.y, `🪙 +${loot} TP 약탈!`, "#f59e0b");
+        }
+
         if (typeof render === "function") render();
     }
 }
 
 /**
- * 피격 시 플로팅 데미지 텍스트 팝업 (Phase C: Juice Effect)
+ * 피격 시 플로팅 데미지 텍스트 팝업 (Phase C: Juice Effect & v0.24.0)
  */
-function showFloatingDamage(gridX, gridY, damage, color = "#ffeb3b") {
+function showFloatingDamage(gridX, gridY, damage, color = "#ffeb3b", isCrit = false) {
     const boardDom = document.getElementById("game-board");
     if (!boardDom) return;
 
     const el = document.createElement("div");
     el.className = "floating-damage";
-    el.innerText = `-${Math.round(damage * 10) / 10}`;
+    
+    if (typeof damage === 'number') {
+        const val = Math.round(damage * 10) / 10;
+        el.innerText = isCrit ? `💥 CRIT! -${val}` : `-${val}`;
+    } else {
+        el.innerText = damage;
+    }
+    
     el.style.color = color;
+    if (isCrit) {
+        el.style.fontSize = "14px";
+        el.style.fontWeight = "900";
+        el.style.textShadow = "0 0 8px rgba(239, 68, 68, 0.8)";
+        el.style.zIndex = "100";
+    }
 
     // 약간의 랜덤 오프셋
     const randomOffsetX = Math.floor(Math.random() * 12) - 6;
@@ -321,7 +396,7 @@ function showFloatingDamage(gridX, gridY, damage, color = "#ffeb3b") {
 
     setTimeout(() => {
         el.remove();
-    }, 550);
+    }, 600);
 }
 
 /**
@@ -697,6 +772,29 @@ function castSpellRune(spellItem) {
             }
         }
         showFloatingDamage(10, 10, "🌀 시공의 왜곡: 전원 강제 송환!", "#a855f7");
+    } else if (runeId === 'rune_spell_frenzy') {
+        // 5. 성스러운 축복 (UR): 6초간 아군 타워 공격속도 폭주 & 연속 사격
+        showFloatingDamage(10, 10, "✨ 성스러운 축복: 전 타워 폭주 사격!", "#eab308");
+        attackFromTowers();
+        const frenzyInterval = setInterval(() => {
+            if (typeof gameRunning !== 'undefined' && gameRunning && !isPaused) {
+                attackFromTowers();
+            }
+        }, 600);
+        setTimeout(() => {
+            clearInterval(frenzyInterval);
+        }, (rInfo.durationSec || 6) * 1000);
+    } else if (runeId === 'rune_spell_armageddon') {
+        // 6. 아마겟돈 (U): 전 필드 거대 메테오 낙하 60 파멸 피해
+        let meteorHits = 0;
+        for (const enemy of enemies) {
+            if (enemy.alive) {
+                enemy.hp -= (rInfo.damage || 60);
+                onEnemyHit(enemy, rInfo.damage || 60, "#ef4444", true);
+                meteorHits++;
+            }
+        }
+        showFloatingDamage(10, 10, `☄️ 아마겟돈 파멸 폭격! (${meteorHits}기 강타)`, "#dc2626");
     }
 
     render();

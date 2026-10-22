@@ -248,6 +248,17 @@ function gameLoopTick() {
             }
         }
 
+        // 1-2. 화상(Burn) 도트 피해 틱 차감 및 데미지 적용 (v0.24.0 New)
+        if (enemy.burnTicks && enemy.burnTicks > 0) {
+            enemy.burnTicks--;
+            const bDmg = enemy.burnDmg || 1;
+            enemy.hp -= bDmg;
+            if (typeof onEnemyHit === 'function') {
+                onEnemyHit(enemy, bDmg, "#ff4500");
+            }
+            if (!enemy.alive) continue;
+        }
+
         enemy.currentTick++;
         if (enemy.currentTick < enemy.speedTick) {
             continue;

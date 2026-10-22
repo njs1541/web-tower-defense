@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.23.1";
+const GAME_VERSION = "v0.24.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -353,6 +353,37 @@ const CHARACTER_DATA = {
             melee: 1
         },
         desc: "폭발이야말로 예술이라 믿는 천재 연금술사. 폭탄 타워의 파괴력을 극한(3단계)까지 개방합니다."
+    },
+    char_seraphina: {
+        id: "char_seraphina",
+        name: "세라피나",
+        title: "성스러운 대사제",
+        grade: "UR",
+        avatar: "✨",
+        maxSockets: 5,
+        baseSockets: 3,
+        levelCaps: {
+            ranged: 3,
+            sniper: 3
+        },
+        desc: "신성한 빛으로 전장을 축복하는 고위 대사제. 원거리 및 저격 타워의 강화 한도를 3단계 해금합니다."
+    },
+    char_lumina: {
+        id: "char_lumina",
+        name: "루미나",
+        title: "성간의 지배자",
+        grade: "U",
+        avatar: "🌌",
+        maxSockets: 6,
+        baseSockets: 4,
+        levelCaps: {
+            melee: 2,
+            ranged: 2,
+            ice: 2,
+            bomb: 2,
+            sniper: 2
+        },
+        desc: "별의 기운을 다스리는 최고위 유니크 지휘관. 모든 타워의 강화 한도를 2단계씩 전방위로 확장합니다."
     }
 };
 
@@ -370,7 +401,9 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "C",
         icon: "🔥",
-        desc: "타워 공격 시 3초간 매초 공격력의 20% 화염 도트 피해를 부여합니다."
+        burnDurationSec: 3,
+        burnRatio: 0.25,
+        desc: "타워 공격 시 3초간 매초 공격력의 25% 화염 도트 피해를 부여합니다."
     },
     rune_critical: {
         id: "rune_critical",
@@ -379,9 +412,9 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "UC",
         icon: "⚡",
-        critChance: 0.2,
+        critChance: 0.25,
         critMultiplier: 2.0,
-        desc: "20% 확률로 200%의 치명타 치명 피해를 입힙니다."
+        desc: "25% 확률로 200%의 치명타 폭발 피해를 입힙니다."
     },
     rune_pierce: {
         id: "rune_pierce",
@@ -391,7 +424,8 @@ const RUNE_DATA = {
         grade: "R",
         icon: "🎯",
         pierceCount: 1,
-        desc: "원거리 투사체가 직선상의 적 1기를 추가 관통합니다."
+        bonusDamageRatio: 0.15,
+        desc: "투사체 공격력 +15% 및 관통 충격파를 발산합니다."
     },
     rune_chain_lightning: {
         id: "rune_chain_lightning",
@@ -400,8 +434,33 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "SR",
         icon: "🌩️",
+        chainChance: 0.35,
         chainCount: 2,
-        desc: "적 타격 시 25% 확률로 인접한 2기의 적에게 연쇄 전격을 일으킵니다."
+        chainRatio: 0.6,
+        desc: "적 타격 시 35% 확률로 인접한 2기의 적에게 60% 위력의 연쇄 전격을 일으킵니다."
+    },
+    rune_plunder: {
+        id: "rune_plunder",
+        name: "황금 약탈의 룬",
+        type: "stat",
+        usageType: "passive",
+        grade: "UR",
+        icon: "💰",
+        plunderChance: 0.4,
+        plunderGold: 2,
+        desc: "타워가 적 처치 시 40% 확률로 추가 +2 TP를 전리품으로 강탈합니다."
+    },
+    rune_void_collapse: {
+        id: "rune_void_collapse",
+        name: "시공 붕괴의 룬",
+        type: "stat",
+        usageType: "passive",
+        grade: "U",
+        icon: "🌌",
+        collapseChance: 0.2,
+        collapseRadius: 60,
+        collapseDamage: 35,
+        desc: "공격 시 20% 확률로 시공간을 왜곡시켜 반경 내 모든 적에게 35의 붕괴 폭발 피해를 가합니다."
     },
 
     // [스펠 액티브 룬]
@@ -439,8 +498,8 @@ const RUNE_DATA = {
         icon: "⚡",
         mpCost: 40,
         cooldownSec: 25,
-        damage: 15,
-        desc: "마나 40 소모: 지정된 필드 구역에 벼락을 내리쳐 15의 마법 피해를 입힙니다."
+        damage: 18,
+        desc: "마나 40 소모: 지정된 필드 구역에 벼락을 내리쳐 18의 마법 피해를 입힙니다."
     },
     rune_spell_teleport: {
         id: "rune_spell_teleport",
@@ -451,33 +510,63 @@ const RUNE_DATA = {
         icon: "🌀",
         mpCost: 75,
         desc: "마나 75 소모 [전투당 1회 궁극기]: 현재 필드의 모든 몬스터를 스폰 입구로 강제 송환합니다."
+    },
+    rune_spell_frenzy: {
+        id: "rune_spell_frenzy",
+        name: "성스러운 축복",
+        type: "spell",
+        usageType: "multi",
+        grade: "UR",
+        icon: "✨",
+        mpCost: 50,
+        cooldownSec: 30,
+        durationSec: 6,
+        desc: "마나 50 소모: 6초 동안 전장의 모든 아군 타워 공격 속도가 100%(2배) 폭주합니다."
+    },
+    rune_spell_armageddon: {
+        id: "rune_spell_armageddon",
+        name: "아마겟돈",
+        type: "spell",
+        usageType: "single", // 판당 1회 궁극기
+        grade: "U",
+        icon: "☄️",
+        mpCost: 90,
+        damage: 60,
+        desc: "마나 90 소모 [전투당 1회 궁극기]: 하늘에서 거대한 메테오를 낙하시켜 전장의 모든 적에게 60의 파멸 피해를 입힙니다."
     }
 };
 
 /**
- * 지휘관 및 룬 가챠(소환) 설정 (v0.23.0)
+ * 지휘관 및 룬 가챠(소환) 설정 (v0.24.0)
  */
 const COMMANDER_GACHA_CONFIG = {
     costPP: 1, // 1회 소환 시 1 PP 소모
     rates: [
-        { grade: "C", charId: "char_liana", weight: 45 },
-        { grade: "UC", charId: "char_elena", weight: 35 },
-        { grade: "R", charId: "char_freya", weight: 15 },
-        { grade: "SR", charId: "char_scarlet", weight: 5 }
+        { grade: "C", charId: "char_liana", weight: 40 },
+        { grade: "UC", charId: "char_elena", weight: 30 },
+        { grade: "R", charId: "char_freya", weight: 18 },
+        { grade: "SR", charId: "char_scarlet", weight: 8 },
+        { grade: "UR", charId: "char_seraphina", weight: 3 },
+        { grade: "U", charId: "char_lumina", weight: 1 }
     ]
 };
 
 const RUNE_GACHA_CONFIG = {
     costRP: 5, // 1회 소환 시 5 RP 소모
     rates: [
-        { runeId: "rune_flame", weight: 25 },
-        { runeId: "rune_spell_gold", weight: 25 },
-        { runeId: "rune_critical", weight: 20 },
-        { runeId: "rune_spell_gust", weight: 15 },
-        { runeId: "rune_pierce", weight: 8 },
-        { runeId: "rune_spell_thunder", weight: 4 },
-        { runeId: "rune_chain_lightning", weight: 2 },
-        { runeId: "rune_spell_teleport", weight: 1 }
+        { runeId: "rune_flame", weight: 22 },
+        { runeId: "rune_spell_gold", weight: 22 },
+        { runeId: "rune_critical", weight: 18 },
+        { runeId: "rune_spell_gust", weight: 14 },
+        { runeId: "rune_pierce", weight: 10 },
+        { runeId: "rune_spell_thunder", weight: 6 },
+        { runeId: "rune_chain_lightning", weight: 4 },
+        { runeId: "rune_spell_teleport", weight: 2 },
+        { runeId: "rune_plunder", weight: 1 },
+        { runeId: "rune_spell_frenzy", weight: 0.6 },
+        { runeId: "rune_void_collapse", weight: 0.3 },
+        { runeId: "rune_spell_armageddon", weight: 0.1 }
     ]
 };
+
 

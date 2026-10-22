@@ -51,7 +51,7 @@ function qaGrantAllCheat() {
     }
 
     saveData();
-    alert("모든 카드, 캐릭터 4종, 룬 8종 및 1000 TP, 10 PP, 50 RP가 지급되었습니다!");
+    alert("모든 타워 카드, 지휘관 6종(C~U), 룬 12종 및 1000 TP, 10 PP, 50 RP가 지급되었습니다!");
     location.reload();
 }
 

@@ -457,4 +457,77 @@ function getEquippedSpellRunes() {
     return list;
 }
 
+/**
+ * 현재 출전 덱에 편성된 지휘관들이 장착 중인 속성(패시브) 룬 효과 집계 (v0.24.0 New)
+ * @returns {Object} 패시브 효과 집계 객체
+ */
+function getActiveRunePassives() {
+    const passives = {
+        burn: false,          // 화염 도트 여부
+        burnDuration: 3,
+        burnRatio: 0,
+        critChance: 0,        // 치명타 확률
+        critMultiplier: 2.0,
+        chainChance: 0,       // 연쇄 번개 확률
+        chainCount: 0,
+        chainRatio: 0.6,
+        pierceCount: 0,       // 관통 횟수
+        bonusDamageRatio: 0,  // 추가 데미지 비율
+        plunderChance: 0,     // 황금 약탈 확률
+        plunderGold: 0,       // 약탈 골드(TP)
+        voidCollapseChance: 0,// 시공 붕괴 확률
+        voidCollapseDamage: 0,// 시공 붕괴 피해
+        voidCollapseRadius: 60
+    };
+
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return passives;
+
+    for (const charId of USER_DATA.characterDeck) {
+        const char = USER_DATA.characters && USER_DATA.characters[charId];
+        if (!char || !char.equippedRunes) continue;
+
+        char.equippedRunes.forEach(runeId => {
+            if (!runeId) return;
+            const runeInfo = RUNE_DATA[runeId];
+            if (!runeInfo || runeInfo.type !== 'stat') return;
+
+            // 1. 작열
+            if (runeId === 'rune_flame') {
+                passives.burn = true;
+                passives.burnRatio = Math.max(passives.burnRatio, runeInfo.burnRatio || 0.25);
+                passives.burnDuration = Math.max(passives.burnDuration, runeInfo.burnDurationSec || 3);
+            }
+            // 2. 예리함 (치명타)
+            else if (runeId === 'rune_critical') {
+                passives.critChance = Math.min(0.75, passives.critChance + (runeInfo.critChance || 0.25));
+                passives.critMultiplier = Math.max(passives.critMultiplier, runeInfo.critMultiplier || 2.0);
+            }
+            // 3. 관통
+            else if (runeId === 'rune_pierce') {
+                passives.pierceCount += (runeInfo.pierceCount || 1);
+                passives.bonusDamageRatio += (runeInfo.bonusDamageRatio || 0.15);
+            }
+            // 4. 연쇄 전격
+            else if (runeId === 'rune_chain_lightning') {
+                passives.chainChance = Math.min(0.8, passives.chainChance + (runeInfo.chainChance || 0.35));
+                passives.chainCount = Math.max(passives.chainCount, runeInfo.chainCount || 2);
+                passives.chainRatio = Math.max(passives.chainRatio, runeInfo.chainRatio || 0.6);
+            }
+            // 5. 황금 약탈
+            else if (runeId === 'rune_plunder') {
+                passives.plunderChance = Math.min(0.8, passives.plunderChance + (runeInfo.plunderChance || 0.4));
+                passives.plunderGold = Math.max(passives.plunderGold, runeInfo.plunderGold || 2);
+            }
+            // 6. 시공 붕괴
+            else if (runeId === 'rune_void_collapse') {
+                passives.voidCollapseChance = Math.min(0.6, passives.voidCollapseChance + (runeInfo.collapseChance || 0.2));
+                passives.voidCollapseDamage = Math.max(passives.voidCollapseDamage, runeInfo.collapseDamage || 35);
+                passives.voidCollapseRadius = Math.max(passives.voidCollapseRadius, runeInfo.collapseRadius || 60);
+            }
+        });
+    }
+
+    return passives;
+}
+
 

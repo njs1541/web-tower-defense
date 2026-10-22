@@ -71,6 +71,25 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - **전투 UX**: 몬스터 머리 위 체력바, 사거리 프리뷰, 배속(1x/2x) 및 스페이스바 일시정지.
 
 ## 🐛 수정된 버그 및 업데이트 (Fixed Bugs & Updates)
+- **v0.24.0 (Rune Passive Combat Integration & UR/U Supreme Grade Expansion Phase 3)**:
+    - **속성 패시브 룬 인게임 실시간 전투 연동 (`js/user_data.js`, `js/tower.js`, `js/enemy.js`)**:
+        - 덱에 편성된 지휘관들이 장착한 모든 속성 룬 패시브를 집계하는 `getActiveRunePassives()` 구현.
+        - `rune_critical` (예리함): 25% 확률로 200% 치명타 폭발 피해 및 `💥 CRIT! -{dmg}` 대형 플로팅 데미지 팝업 연동.
+        - `rune_flame` (작열): 타격 시 몬스터에게 3초간 화염(Burn) 도트 디버프 부여 -> `enemy.js` 이동 루프에서 매 틱 화염 피해 및 텍스트 팝업.
+        - `rune_chain_lightning` (연쇄 전격): 적 타격 시 35% 확률로 주변 2기의 적에게 연쇄 번개 전이 데미지.
+        - `rune_pierce` (관통): 투사체 공격력 +15% 증폭.
+        - `rune_void_collapse` (시공 붕괴): 20% 확률로 반경 내 35의 공간 왜곡 폭발 피해.
+        - `rune_plunder` (황금 약탈): 적 처치 시 40% 확률로 추가 +2 TP(골드) 강탈.
+    - **UR(울트라 레어) & U(유니크) 지휘관 및 룬 풀 대확장 (`js/constants.js`)**:
+        - 신규 지휘관 2종 추가 (총 6명 라인업 완비):
+            - 세라피나 (UR, 성스러운 대사제, 원거리/스나이퍼 한도 +3, 기본 소켓 3칸)
+            - 루미나 (U, 성간의 지배자, 전 타워 한도 +2 전방위 확장, 기본 소켓 4칸)
+        - 신규 룬 4종 추가 (총 12종 라인업 완비):
+            - `rune_plunder` (UR 속성 패시브: 황금 약탈)
+            - `rune_spell_frenzy` (UR 액티브 스펠: 성스러운 축복 - 6초간 전 타워 폭주 사격)
+            - `rune_void_collapse` (U 속성 패시브: 시공 붕괴)
+            - `rune_spell_armageddon` (U 궁극기 스펠: 아마겟돈 - 전 필드 60 파멸 메테오 낙하)
+        - 3대 소환 확률표(`COMMANDER_GACHA_CONFIG`, `RUNE_GACHA_CONFIG`) 업데이트 및 QA 콘솔 치트 갱신.
 - **v0.23.1 (Lobby Tab Navigation & Commander Grid Alignment Fix)**:
     - **로비 서브 탭 네비게이션 도입 (`index.html`, `js/lobby.js`, `style.css`)**:
         - 지휘관 & 소켓 룬, 출전 타워 덱, 타워 조각 보관함이 세로로 길게 나열되어 스크롤이 과도해지던 문제를 3개 서브 탭 버튼(`👑 지휘관 & 룬 소켓`, `📦 출전 타워 덱`, `🔮 타워 조각 보관함`)으로 분리.
