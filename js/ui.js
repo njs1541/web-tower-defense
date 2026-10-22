@@ -142,12 +142,17 @@ function updateTowerButtons() {
 
     container.innerHTML = ""; // 버튼 초기화
 
-    // 출전 덱(Deck) 기반 버튼 생성 (Phase D)
-    const activeDeck = (typeof USER_DATA !== 'undefined' && USER_DATA.deck && USER_DATA.deck.length > 0)
-        ? USER_DATA.deck
-        : ((typeof USER_DATA !== 'undefined' && USER_DATA.inventory) ? USER_DATA.inventory : []);
+    // 출전 지휘관 카드들에 등록/관장된 타워 목록(라이선스) 조회 (v0.25.1 New)
+    const authorizedTowers = (typeof getAuthorizedTowerTypes === 'function') 
+        ? getAuthorizedTowerTypes() 
+        : ['ranged'];
 
-    activeDeck.forEach(towerId => {
+    if (authorizedTowers.length === 0) {
+        container.innerHTML = `<div style="font-size: 11px; color: #ef4444; padding: 6px; text-align: center; border: 1px dashed #fca5a5; border-radius: 6px;">출전한 지휘관이 관장하는 타워가 없습니다.<br>(지휘관 덱을 편성해주세요)</div>`;
+        return;
+    }
+
+    authorizedTowers.forEach(towerId => {
         const stats = TOWER_DATA[towerId];
         if (!stats) return;
 

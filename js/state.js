@@ -36,4 +36,9 @@ let deckTowerCaps = {    // 출전 캐릭터들로부터 계산된 타워별 최
     bomb: 0
 };
 
+// v0.25.0 지휘관 스타팅 무료 보급 인벤토리
+let commanderSupplies = {}; // { melee: 2, ranged: 1, base: 2, ... }
+let selectedSupplyType = null; // 무료 보급으로 설치 중인 타워/기반 키
+
+
 

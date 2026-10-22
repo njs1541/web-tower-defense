@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.24.0";
+const GAME_VERSION = "v0.26.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -307,11 +307,13 @@ const CHARACTER_DATA = {
         avatar: "🛡️",
         maxSockets: 2,
         baseSockets: 1,
-        // 인게임 타워 강화 한도 보너스
         levelCaps: {
             melee: 1
         },
-        desc: "최전선에서 아군을 보호하는 열정 넘치는 성기사. 근거리 타워의 잠재력을 1단계 끌어올립니다."
+        startingTowers: {
+            melee: 2
+        },
+        desc: "최전선에서 아군을 보호하는 열정 넘치는 성기사. 시작 시 근거리 타워 2기를 무료 보급하며 근거리 타워 한도를 +1 확장합니다."
     },
     char_elena: {
         id: "char_elena",
@@ -324,7 +326,97 @@ const CHARACTER_DATA = {
         levelCaps: {
             ranged: 2
         },
-        desc: "먼 거리의 표적도 놓치지 않는 엘프 명사수. 원거리 타워의 최대 강화를 2단계 해금합니다."
+        startingTowers: {
+            ranged: 1,
+            base: 2
+        },
+        desc: "먼 거리의 표적도 놓치지 않는 엘프 명사수. 시작 시 원거리 타워 1기와 무료 기반 2개를 보급하며 원거리 타워 한도를 +2 확장합니다."
+    },
+    // [v0.26.0 신규 타워 전담 언커먼 지휘관 라인업]
+    char_chloe: {
+        id: "char_chloe",
+        name: "클로에",
+        title: "강철의 검사",
+        grade: "UC",
+        avatar: "⚔️",
+        maxSockets: 2,
+        baseSockets: 1,
+        levelCaps: {
+            melee: 2
+        },
+        startingTowers: {
+            melee: 2,
+            base: 1
+        },
+        desc: "전열을 용맹하게 돌파하는 강철의 여기사. 시작 시 근거리 타워 2기와 무료 기반 1개를 보급하며 근거리 타워 한도를 +2 확장합니다."
+    },
+    char_charlotte: {
+        id: "char_charlotte",
+        name: "샤를로트",
+        title: "매의 눈 저격수",
+        grade: "UC",
+        avatar: "🎯",
+        maxSockets: 2,
+        baseSockets: 1,
+        levelCaps: {
+            sniper: 2
+        },
+        startingTowers: {
+            sniper: 1,
+            base: 1
+        },
+        desc: "초장거리 정밀 사격에 특화된 냉철한 스나이퍼. 시작 시 저격 타워 1기와 무료 기반 1개를 보급하며 저격 타워 한도를 +2 확장합니다."
+    },
+    char_cecilia: {
+        id: "char_cecilia",
+        name: "세실리아",
+        title: "서리의 마도사",
+        grade: "UC",
+        avatar: "❄️",
+        maxSockets: 2,
+        baseSockets: 1,
+        levelCaps: {
+            ice: 2
+        },
+        startingTowers: {
+            ice: 1,
+            base: 2
+        },
+        desc: "차가운 서리 결정으로 적의 발을 묶는 빙결 마법사. 시작 시 얼음 타워 1기와 무료 기반 2개를 보급하며 얼음 타워 한도를 +2 확장합니다."
+    },
+    char_greta: {
+        id: "char_greta",
+        name: "그레타",
+        title: "화약의 포격수",
+        grade: "UC",
+        avatar: "💣",
+        maxSockets: 2,
+        baseSockets: 1,
+        levelCaps: {
+            bomb: 2
+        },
+        startingTowers: {
+            bomb: 1,
+            base: 1
+        },
+        desc: "광역 포격으로 적군을 단숨에 초토화하는 화약 전문가. 시작 시 폭탄 타워 1기와 무료 기반 1개를 보급하며 폭탄 타워 한도를 +2 확장합니다."
+    },
+    char_ada: {
+        id: "char_ada",
+        name: "에이다",
+        title: "벽력의 정령사",
+        grade: "UC",
+        avatar: "⚡",
+        maxSockets: 2,
+        baseSockets: 1,
+        levelCaps: {
+            shock: 2
+        },
+        startingTowers: {
+            shock: 1,
+            base: 1
+        },
+        desc: "연쇄 번개로 다수의 적을 감전시키는 전격의 인도자. 시작 시 전격 타워 1기와 무료 기반 1개를 보급하며 전격 타워 한도를 +2 확장합니다."
     },
     char_freya: {
         id: "char_freya",
@@ -338,7 +430,11 @@ const CHARACTER_DATA = {
             ice: 2,
             bomb: 1
         },
-        desc: "영구 동토의 한기를 다루는 빙결 마법사. 얼음 타워를 2단계, 폭탄 타워를 1단계 강화할 수 있게 합니다."
+        startingTowers: {
+            ice: 1,
+            bomb: 1
+        },
+        desc: "영구 동토의 한기를 다루는 빙결 마법사. 시작 시 얼음 타워 1기와 폭탄 타워 1기를 무료 보급하며 얼음/폭탄 한도를 확장합니다."
     },
     char_scarlet: {
         id: "char_scarlet",
@@ -352,7 +448,10 @@ const CHARACTER_DATA = {
             bomb: 3,
             melee: 1
         },
-        desc: "폭발이야말로 예술이라 믿는 천재 연금술사. 폭탄 타워의 파괴력을 극한(3단계)까지 개방합니다."
+        startingTowers: {
+            bomb: 2
+        },
+        desc: "폭발이야말로 예술이라 믿는 천재 연금술사. 시작 시 폭탄 타워 2기를 무료 보급하며 폭탄 타워의 한도를 +3 개방합니다."
     },
     char_seraphina: {
         id: "char_seraphina",
@@ -366,7 +465,11 @@ const CHARACTER_DATA = {
             ranged: 3,
             sniper: 3
         },
-        desc: "신성한 빛으로 전장을 축복하는 고위 대사제. 원거리 및 저격 타워의 강화 한도를 3단계 해금합니다."
+        startingTowers: {
+            sniper: 1,
+            ranged: 1
+        },
+        desc: "신성한 빛으로 전장을 축복하는 고위 대사제. 시작 시 저격 타워 1기와 원거리 타워 1기를 무료 보급하며 저격/원거리 한도를 +3 개방합니다."
     },
     char_lumina: {
         id: "char_lumina",
@@ -383,7 +486,13 @@ const CHARACTER_DATA = {
             bomb: 2,
             sniper: 2
         },
-        desc: "별의 기운을 다스리는 최고위 유니크 지휘관. 모든 타워의 강화 한도를 2단계씩 전방위로 확장합니다."
+        startingTowers: {
+            melee: 1,
+            ranged: 1,
+            ice: 1,
+            bomb: 1
+        },
+        desc: "별의 기운을 다스리는 최고위 유니크 지휘관. 시작 시 4대 기본 타워를 각 1기씩 무료 보급하며 모든 타워 한도를 +2 전방위 확장합니다."
     }
 };
 
@@ -542,12 +651,17 @@ const RUNE_DATA = {
 const COMMANDER_GACHA_CONFIG = {
     costPP: 1, // 1회 소환 시 1 PP 소모
     rates: [
-        { grade: "C", charId: "char_liana", weight: 40 },
-        { grade: "UC", charId: "char_elena", weight: 30 },
-        { grade: "R", charId: "char_freya", weight: 18 },
+        { grade: "C", charId: "char_liana", weight: 35 },
+        { grade: "UC", charId: "char_elena", weight: 6 },
+        { grade: "UC", charId: "char_chloe", weight: 6 },
+        { grade: "UC", charId: "char_charlotte", weight: 6 },
+        { grade: "UC", charId: "char_cecilia", weight: 6 },
+        { grade: "UC", charId: "char_greta", weight: 6 },
+        { grade: "UC", charId: "char_ada", weight: 6 },
+        { grade: "R", charId: "char_freya", weight: 16 },
         { grade: "SR", charId: "char_scarlet", weight: 8 },
         { grade: "UR", charId: "char_seraphina", weight: 3 },
-        { grade: "U", charId: "char_lumina", weight: 1 }
+        { grade: "U", charId: "char_lumina", weight: 2 }
     ]
 };
 

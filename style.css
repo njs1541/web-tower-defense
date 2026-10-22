@@ -1314,6 +1314,94 @@ button.selected {
   box-shadow: 0 0 0 1px #2563eb, 0 4px 10px rgba(37, 99, 235, 0.15);
 }
 
+/* ============================================================
+   출전 지휘관 덱 전술 요약 카드 (v0.25.3 New)
+   ============================================================ */
+.commander-deck-summary-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%);
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: left;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.deck-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1.5px solid #dbeafe;
+  padding-bottom: 8px;
+}
+
+.deck-summary-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.deck-commanders-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.deck-commander-chip {
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  padding: 3px 8px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1d4ed8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.08);
+}
+
+.deck-tower-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.deck-tower-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 3px 0;
+  border-bottom: 1px dashed #f1f5f9;
+}
+
+.deck-tower-item:last-child {
+  border-bottom: none;
+}
+
+.deck-tower-badge {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
 .commander-card-header {
   display: flex;
   justify-content: space-between;

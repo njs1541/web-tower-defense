@@ -309,6 +309,57 @@ function calculateDeckTowerCaps() {
 }
 
 /**
+ * 현재 출전 덱에 편성된 지휘관들로부터 시작 시 무료 보급 타워/기반 총합 계산 (v0.25.0 New)
+ * @returns {Object} { melee: 2, ranged: 1, base: 2, ... }
+ */
+function calculateDeckStartingSupplies() {
+    const supplies = {};
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return supplies;
+
+    for (const charId of USER_DATA.characterDeck) {
+        const charInfo = CHARACTER_DATA[charId];
+        if (charInfo && charInfo.startingTowers) {
+            for (const [key, count] of Object.entries(charInfo.startingTowers)) {
+                supplies[key] = (supplies[key] || 0) + count;
+            }
+        }
+    }
+    return supplies;
+}
+
+/**
+ * 현재 출전한 지휘관 카드들에 등록/관장된 타워 타입 목록(라이선스) 조회 (v0.25.1 New)
+ * - 지휘관의 levelCaps 또는 startingTowers에 등록된 타워만 인게임 설치 가능
+ * @returns {Array<string>} 예: ['melee', 'ranged', 'bomb']
+ */
+function getAuthorizedTowerTypes() {
+    const authorized = new Set();
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck) || USER_DATA.characterDeck.length === 0) {
+        return ['ranged']; // 비상용 기본
+    }
+
+    for (const charId of USER_DATA.characterDeck) {
+        const charInfo = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+        if (!charInfo) continue;
+
+        // 1. levelCaps에 등록된 타워
+        if (charInfo.levelCaps) {
+            Object.keys(charInfo.levelCaps).forEach(type => authorized.add(type));
+        }
+
+        // 2. startingTowers에 등록된 타워 (base 제외)
+        if (charInfo.startingTowers) {
+            Object.keys(charInfo.startingTowers).forEach(type => {
+                if (type !== 'base') authorized.add(type);
+            });
+        }
+    }
+
+    return Array.from(authorized);
+}
+
+
+/**
  * 캐릭터 덱 장착/해제 토글 (최대 3인 덱)
  */
 function toggleCharacterDeck(charId) {

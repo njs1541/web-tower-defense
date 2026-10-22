@@ -23,7 +23,7 @@
           <div class="op-start-sub">CLICK ANYWHERE TO START</div>
         </div>
 
-        <div class="op-footer-version">v0.24.0</div>
+        <div class="op-footer-version">v0.25.2</div>
       </div>
     </div>
 
@@ -31,7 +31,7 @@
     <div id="lobby-screen" style="text-align: center; padding: 40px 20px; display: none; max-width: 800px; margin: 0 auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <button onclick="returnToOpScreen()" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">◀ 타이틀 화면</button>
-        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.24.0</span>
+        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.25.2</span>
       </div>
       <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card & Commander</h1>
       
@@ -96,10 +96,9 @@
         <div id="gacha-result" style="margin-top: 10px; font-weight: bold; color: blue;"></div>
       </div>
 
-      <!-- 로비 서브 탭 네비게이션 (v0.23.1 New) -->
+      <!-- 로비 서브 탭 네비게이션 (v0.25.2 Update) -->
       <div class="lobby-tab-container">
         <button id="tab-btn-commanders" class="lobby-tab-btn active" onclick="switchLobbyTab('commanders')">👑 지휘관 &amp; 룬 소켓</button>
-        <button id="tab-btn-towers" class="lobby-tab-btn" onclick="switchLobbyTab('towers')">📦 출전 타워 덱</button>
         <button id="tab-btn-shards" class="lobby-tab-btn" onclick="switchLobbyTab('shards')">🔮 타워 조각 보관함</button>
       </div>
 
@@ -109,35 +108,10 @@
           <span>👑</span> 미소녀 지휘관 &amp; 룬 소켓
         </h3>
         <p style="font-size: 12px; color: #64748b; margin-top: 4px; margin-bottom: 16px;">
-          지휘관 카드를 출전 덱(최대 3명)에 편성하고, 소켓에 룬을 장착하여 고유 패시브와 전술 스펠을 개방하세요.
+          지휘관 카드를 출전 덱(최대 3명)에 편성하면 지휘관이 관장하는 고유 타워가 인게임에 자동 배치되며, 소켓에 룬을 장착할 수 있습니다.
         </p>
         <div id="commander-list" class="commander-grid">
           <!-- JS로 동적 렌더링 -->
-        </div>
-      </div>
-
-      <!-- 2. 보유 타워 및 인벤토리 섹션 -->
-      <div id="tab-section-towers" class="lobby-card-box lobby-tab-content" style="display: none;">
-        <h3 style="margin-top: 0; font-size: 17px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <span>📦</span> 보유 타워 &amp; 덱 편성
-        </h3>
-        <p style="font-size: 12px; color: #64748b; margin-top: 4px; margin-bottom: 16px;">
-          원하는 타워를 활성화하여 게임 시작 시 배치할 수 있는 타워 덱을 구성하세요.
-        </p>
-        <div id="inventory-list" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-          <!-- JS로 로드 -->
-        </div>
-
-        <!-- 카드 상세 정보 패널 -->
-        <div id="card-info-panel"
-          style="margin-top: 20px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; background: #f8fafc; display: none; max-width: 400px; margin-left: auto; margin-right: auto; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-          <h3 id="info-name" style="margin-top: 0;">타워 이름</h3>
-          <p id="info-desc" style="color: #64748b; font-size: 13px;">설명</p>
-          <div style="display: flex; justify-content: space-around; margin-top: 10px; font-size: 13px; font-weight: bold;">
-            <div>⚔️ 공격력: <span id="info-damage">0</span></div>
-            <div>🏹 사거리: <span id="info-range">0</span></div>
-            <div>⚡ 공속: <span id="info-speed">5.0</span>/s</div>
-          </div>
         </div>
       </div>
 
@@ -174,6 +148,16 @@
             <button id="btn-speed-2" class="speed-btn" onclick="setGameSpeed(2)">2x</button>
           </div>
 
+          <!-- 지휘관 스타팅 무료 보급 타워 (v0.25.0 New) -->
+          <div id="starting-supplies-section" style="margin-bottom: 12px; display: none; background: #fefce8; border: 1.5px dashed #facc15; padding: 8px; border-radius: 8px;">
+            <div style="font-size: 12px; font-weight: bold; color: #a16207; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+              <span>🎁</span> <span>지휘관 스타팅 보급 (무료)</span>
+            </div>
+            <div id="starting-supplies-controls" style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <!-- JS 동적 생성 -->
+            </div>
+          </div>
+
           <!-- 인게임 액티브 스펠 룬 컨트롤 (v0.23.0 New) -->
           <h3>✨ 지휘관 스펠 (MP)</h3>
           <div id="spell-controls">
@@ -205,7 +189,7 @@
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.23.0</div>
+          v0.25.2</div>
       </div>
     </div>
   </div>

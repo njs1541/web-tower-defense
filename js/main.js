@@ -100,7 +100,14 @@ function startGame() {
         usedSpellRunes = {};
     }
 
-    // 3. 스테이지 테마 및 보드 배경 적용 (Phase D)
+    // 3. v0.25.0 지휘관 스타팅 무료 보급 타워/기반 초기화
+    if (typeof calculateDeckStartingSupplies === 'function') {
+        commanderSupplies = calculateDeckStartingSupplies();
+        selectedSupplyType = null;
+        console.log("출전 지휘관 스타팅 무료 보급 수령 완료:", commanderSupplies);
+    }
+
+    // 4. 스테이지 테마 및 보드 배경 적용 (Phase D)
     const stage = (typeof STAGE_DATA !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : { boardBg: "#94a3b8" };
     const boardEl = document.getElementById("game-board");
     if (boardEl) boardEl.style.backgroundColor = stage.boardBg;
@@ -113,6 +120,9 @@ function startGame() {
     updateTowerButtons();
     if (typeof updateButtonVisuals === 'function') {
         updateButtonVisuals();
+    }
+    if (typeof renderStartingSuppliesUI === 'function') {
+        renderStartingSuppliesUI();
     }
 }
 
