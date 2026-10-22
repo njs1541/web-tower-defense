@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.21.0";
+const GAME_VERSION = "v0.22.2";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -267,5 +267,189 @@ const TALENT_DATA = {
         desc: "모든 타워의 데미지 영구 증가 (+5% / Lv)",
         maxLevel: 5,
         baseCost: 200
+    }
+};
+
+/**
+ * 6단계 공통 카드/룬 등급 체계 (v0.22.0)
+ * C -> UC -> R -> SR -> UR -> U
+ */
+const CARD_GRADES = {
+    C: { id: "C", name: "커먼", eng: "Common", color: "#94a3b8", bg: "rgba(148, 163, 184, 0.15)", border: "#94a3b8", defaultSockets: 1 },
+    UC: { id: "UC", name: "언커먼", eng: "Uncommon", color: "#22c55e", bg: "rgba(34, 197, 94, 0.15)", border: "#22c55e", defaultSockets: 1 },
+    R: { id: "R", name: "레어", eng: "Rare", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.15)", border: "#3b82f6", defaultSockets: 2 },
+    SR: { id: "SR", name: "스페셜 레어", eng: "Special Rare", color: "#a855f7", bg: "rgba(168, 85, 247, 0.15)", border: "#a855f7", defaultSockets: 2 },
+    UR: { id: "UR", name: "울트라 레어", eng: "Ultra Rare", color: "#eab308", bg: "rgba(234, 179, 8, 0.2)", border: "#eab308", defaultSockets: 3 },
+    U: { id: "U", name: "유니크", eng: "Unique", color: "#f43f5e", bg: "rgba(244, 63, 94, 0.25)", border: "#f43f5e", defaultSockets: 4 }
+};
+
+/**
+ * 4대 독립 재화 체계 (v0.22.0)
+ */
+const CURRENCY_INFO = {
+    TP: { id: "TP", name: "타워 포인트", symbol: "🪙", desc: "타워/기반 건설 및 인게임 타워 강화에 소모" },
+    MP: { id: "MP", name: "마나 포인트", symbol: "💧", desc: "인게임 스펠 룬 액티브 발동에 소모" },
+    PP: { id: "PP", name: "프리즘 포인트", symbol: "💎", desc: "보스 격파 시 획득, 미소녀 지휘관 캐릭터 소환 전용" },
+    RP: { id: "RP", name: "룬 포인트", symbol: "🔮", desc: "웨이브/스테이지 보상, 룬 소환 전용" }
+};
+
+/**
+ * 미소녀 지휘관 캐릭터 레지스트리 (CHARACTER_DATA)
+ * - 덱 편성 시 타워별 인게임 최대 강화 한도(levelCaps)를 제공
+ * - 성급(star)에 따라 소켓 수 확장
+ */
+const CHARACTER_DATA = {
+    char_liana: {
+        id: "char_liana",
+        name: "리아나",
+        title: "견습 성기사",
+        grade: "C",
+        avatar: "🛡️",
+        maxSockets: 2,
+        baseSockets: 1,
+        // 인게임 타워 강화 한도 보너스
+        levelCaps: {
+            melee: 1
+        },
+        desc: "최전선에서 아군을 보호하는 열정 넘치는 성기사. 근거리 타워의 잠재력을 1단계 끌어올립니다."
+    },
+    char_elena: {
+        id: "char_elena",
+        name: "엘레나",
+        title: "바람의 사수",
+        grade: "UC",
+        avatar: "🏹",
+        maxSockets: 2,
+        baseSockets: 1,
+        levelCaps: {
+            ranged: 2
+        },
+        desc: "먼 거리의 표적도 놓치지 않는 엘프 명사수. 원거리 타워의 최대 강화를 2단계 해금합니다."
+    },
+    char_freya: {
+        id: "char_freya",
+        name: "프레이야",
+        title: "서리의 마녀",
+        grade: "R",
+        avatar: "❄️",
+        maxSockets: 3,
+        baseSockets: 2,
+        levelCaps: {
+            ice: 2,
+            bomb: 1
+        },
+        desc: "영구 동토의 한기를 다루는 빙결 마법사. 얼음 타워를 2단계, 폭탄 타워를 1단계 강화할 수 있게 합니다."
+    },
+    char_scarlet: {
+        id: "char_scarlet",
+        name: "스칼렛",
+        title: "비전 폭파술사",
+        grade: "SR",
+        avatar: "💣",
+        maxSockets: 4,
+        baseSockets: 2,
+        levelCaps: {
+            bomb: 3,
+            melee: 1
+        },
+        desc: "폭발이야말로 예술이라 믿는 천재 연금술사. 폭탄 타워의 파괴력을 극한(3단계)까지 개방합니다."
+    }
+};
+
+/**
+ * 룬(Rune) 레지스트리 (RUNE_DATA)
+ * type: 'stat' (속성/패시브) | 'spell' (액티브 마법)
+ * usageType: 'passive' | 'multi' (다회용 쿨타임) | 'single' (판당 1회 궁극기)
+ */
+const RUNE_DATA = {
+    // [속성 패시브 룬]
+    rune_flame: {
+        id: "rune_flame",
+        name: "작열의 룬",
+        type: "stat",
+        usageType: "passive",
+        grade: "C",
+        icon: "🔥",
+        desc: "타워 공격 시 3초간 매초 공격력의 20% 화염 도트 피해를 부여합니다."
+    },
+    rune_critical: {
+        id: "rune_critical",
+        name: "예리함의 룬",
+        type: "stat",
+        usageType: "passive",
+        grade: "UC",
+        icon: "⚡",
+        critChance: 0.2,
+        critMultiplier: 2.0,
+        desc: "20% 확률로 200%의 치명타 치명 피해를 입힙니다."
+    },
+    rune_pierce: {
+        id: "rune_pierce",
+        name: "관통의 룬",
+        type: "stat",
+        usageType: "passive",
+        grade: "R",
+        icon: "🎯",
+        pierceCount: 1,
+        desc: "원거리 투사체가 직선상의 적 1기를 추가 관통합니다."
+    },
+    rune_chain_lightning: {
+        id: "rune_chain_lightning",
+        name: "연쇄 전격 룬",
+        type: "stat",
+        usageType: "passive",
+        grade: "SR",
+        icon: "🌩️",
+        chainCount: 2,
+        desc: "적 타격 시 25% 확률로 인접한 2기의 적에게 연쇄 전격을 일으킵니다."
+    },
+
+    // [스펠 액티브 룬]
+    rune_spell_gold: {
+        id: "rune_spell_gold",
+        name: "긴급 보급",
+        type: "spell",
+        usageType: "multi",
+        grade: "C",
+        icon: "📦",
+        mpCost: 30,
+        cooldownSec: 20,
+        effectValue: 8,
+        desc: "마나 30 소모: 즉시 긴급 타워 포인트 +8 TP를 보급받습니다."
+    },
+    rune_spell_gust: {
+        id: "rune_spell_gust",
+        name: "돌풍의 결계",
+        type: "spell",
+        usageType: "multi",
+        grade: "UC",
+        icon: "🌪️",
+        mpCost: 25,
+        cooldownSec: 15,
+        durationSec: 4,
+        slowRatio: 0.4,
+        desc: "마나 25 소모: 4초 동안 전장의 모든 적 이동 속도를 40% 감속시킵니다."
+    },
+    rune_spell_thunder: {
+        id: "rune_spell_thunder",
+        name: "천벌의 낙뢰",
+        type: "spell",
+        usageType: "multi",
+        grade: "R",
+        icon: "⚡",
+        mpCost: 40,
+        cooldownSec: 25,
+        damage: 15,
+        desc: "마나 40 소모: 지정된 필드 구역에 벼락을 내리쳐 15의 마법 피해를 입힙니다."
+    },
+    rune_spell_teleport: {
+        id: "rune_spell_teleport",
+        name: "시공의 왜곡",
+        type: "spell",
+        usageType: "single", // 판당 1회 궁극기
+        grade: "SR",
+        icon: "🌀",
+        mpCost: 75,
+        desc: "마나 75 소모 [전투당 1회 궁극기]: 현재 필드의 모든 몬스터를 스폰 입구로 강제 송환합니다."
     }
 };

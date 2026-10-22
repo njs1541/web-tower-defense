@@ -52,6 +52,11 @@ function render() {
     hpDisplay.innerText = playerHP;
     goldDisplay.innerText = gold;
 
+    const mpDisplay = document.getElementById("mp-count");
+    if (mpDisplay) {
+        mpDisplay.innerText = Math.floor(mp || 0);
+    }
+
     // 몬스터 수 표시 갱신
     const aliveCount = enemies.filter(e => e.alive).length;
     monsterCountDisplay.innerText = `${aliveCount} / ${totalEnemies}`;

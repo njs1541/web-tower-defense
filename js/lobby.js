@@ -12,6 +12,16 @@ function updateLobbyUI() {
         goldDisplay.innerText = USER_DATA.gold;
     }
 
+    const ppDisplay = document.getElementById("lobby-pp");
+    if (ppDisplay && typeof USER_DATA !== 'undefined') {
+        ppDisplay.innerText = USER_DATA.pp || 0;
+    }
+
+    const rpDisplay = document.getElementById("lobby-rp");
+    if (rpDisplay && typeof USER_DATA !== 'undefined') {
+        rpDisplay.innerText = USER_DATA.rp || 0;
+    }
+
     const invList = document.getElementById("inventory-list");
     if (!invList || typeof USER_DATA === 'undefined') return;
     invList.innerHTML = "";

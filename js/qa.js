@@ -37,11 +37,45 @@ function qaResetGame() {
 // 모든 카드 해금 및 1000G 지급 치트
 function qaGrantAllCheat() {
     addUserGold(1000);
+    USER_DATA.pp = (USER_DATA.pp || 0) + 10;
+    USER_DATA.rp = (USER_DATA.rp || 0) + 50;
+
     if (typeof TOWER_DATA !== 'undefined') {
         Object.keys(TOWER_DATA).forEach(addCard);
     }
-    alert("모든 카드 및 1000G가 지급되었습니다!");
+    if (typeof CHARACTER_DATA !== 'undefined') {
+        Object.keys(CHARACTER_DATA).forEach(addCharacter);
+    }
+    if (typeof RUNE_DATA !== 'undefined') {
+        Object.keys(RUNE_DATA).forEach(addRune);
+    }
+
+    saveData();
+    alert("모든 카드, 캐릭터 4종, 룬 8종 및 1000 TP, 10 PP, 50 RP가 지급되었습니다!");
     location.reload();
+}
+
+// PP (프리즘 포인트) 지급
+function qaAddPP(amount = 5) {
+    USER_DATA.pp = (USER_DATA.pp || 0) + amount;
+    saveData();
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+    alert(`💎 프리즘 포인트 (PP) +${amount}개 지급! (현재: ${USER_DATA.pp}개)`);
+}
+
+// RP (룬 포인트) 지급
+function qaAddRP(amount = 20) {
+    USER_DATA.rp = (USER_DATA.rp || 0) + amount;
+    saveData();
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+    alert(`🔮 룬 포인트 (RP) +${amount}개 지급! (현재: ${USER_DATA.rp}개)`);
+}
+
+// 인게임 MP (마나) 100% 충전
+function qaFillMP() {
+    mp = maxMp || 100;
+    if (typeof render === 'function') render();
+    console.log("⚡ 마나(MP) 100 충전 완료");
 }
 
 // QA 패널 입력 필드 현재 값 동기화

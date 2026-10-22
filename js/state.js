@@ -26,3 +26,14 @@ let builtBaseCount = 0; // 건설된 기반(벽) 총 개수
 // 스테이지 관리 (Phase D)
 let currentStage = 1;
 
+// v0.22.0 마나 및 지휘관 덱 타워 강화 한도
+let mp = 0;              // 현재 마나 포인트 (MP)
+let maxMp = 100;         // 최대 마나 포인트
+let deckTowerCaps = {    // 출전 캐릭터들로부터 계산된 타워별 최대 인게임 강화 가능 레벨
+    ranged: 0,
+    melee: 0,
+    ice: 0,
+    bomb: 0
+};
+
+

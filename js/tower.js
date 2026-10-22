@@ -133,11 +133,13 @@ function handleCellClick(x, y) {
         if (gold >= towerInfo.cost) {
             cell.tower = selectedTower;
             cell.targeting = 'first'; // 기본 타깃팅: 선두
+            cell.inGameLevel = 0;     // 인게임 0강 기본 상태
+            cell.investedGold = towerInfo.cost; // 환불 계산용 누적 투자 비용
             gold -= towerInfo.cost;
             clearRangePreview();
             render(); // 즉시 갱신
         } else {
-            alert("골드가 부족합니다!");
+            alert("타워 포인트(TP)가 부족합니다!");
         }
     }
 }
@@ -172,7 +174,7 @@ function attackFromTowers() {
     for (const cell of board) {
         if (!cell.tower) continue;
 
-        const towerStats = getGameTowerStats(cell.tower);
+        const towerStats = getGameTowerStats(cell);
         if (!towerStats) continue;
 
         const range = towerStats.range;
@@ -272,7 +274,29 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b") {
     if (enemy.hp <= 0 && enemy.alive) {
         enemy.alive = false;
         if (enemy.element) enemy.element.remove();
+
+        // 1. 기본 TP(골드) 획득
         gold++;
+
+        // 2. 마나 포인트(MP) 회복 (+2 MP, 최대치까지)
+        mp = Math.min(maxMp || 100, (mp || 0) + 2);
+
+        // 3. 10라운드 보스 처치 시 프리즘 포인트 (PP) 1개 확정 지급! (v0.22.0)
+        if (enemy.isBoss) {
+            USER_DATA.pp = (USER_DATA.pp || 0) + 1;
+            saveData();
+            showFloatingDamage(enemy.x, enemy.y, "💎 보스 격파! PP +1 획득!", "#38bdf8");
+            console.log(`[보스 격파] 프리즘 포인트(PP) 1개 획득! (현재 보유: ${USER_DATA.pp}개)`);
+        } else {
+            // 일반 몬스터 처치 시 12% 확률로 룬 포인트(RP) 드롭
+            if (Math.random() < 0.12) {
+                USER_DATA.rp = (USER_DATA.rp || 0) + 1;
+                saveData();
+                showFloatingDamage(enemy.x, enemy.y, "🔮 RP +1!", "#c084fc");
+            }
+        }
+
+        if (typeof render === "function") render();
     }
 }
 
@@ -374,6 +398,10 @@ function createProjectile(startElem, targetElem, color) {
  * 선택된 타워 판매 (Sell)
  * (규칙: 타워 비용의 60% 환불, 기반 건설 영역은 환불 불가하고 유지됨)
  */
+/**
+ * 선택된 타워 판매 (Sell)
+ * (규칙: 타워 기본비용 + 강화 누적 비용의 60% 환불, 기반 건설 영역은 환불 불가하고 유지됨)
+ */
 function sellSelectedTower() {
     if (!selectedBoardTower || !selectedBoardTower.tower) return;
 
@@ -382,18 +410,66 @@ function sellSelectedTower() {
     if (!towerInfo) return;
 
     const refundRate = (typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6;
-    const refund = Math.floor(towerInfo.cost * refundRate);
+    const totalCost = cell.investedGold || towerInfo.cost;
+    const refund = Math.floor(totalCost * refundRate);
 
     gold += refund;
     cell.tower = null;
     cell.targeting = null;
+    cell.inGameLevel = 0;
+    cell.investedGold = 0;
     // cell.buildable 은 true 유지! (기반은 환불 불가)
 
     clearActiveRange();
     hideTowerDetailPanel();
     render();
 
-    console.log(`타워 판매 완료: ${towerInfo.name} (+${refund}G, 60% 환급). 기반 영역은 유지됩니다.`);
+    console.log(`타워 판매 완료: ${towerInfo.name} (+${refund} TP, 60% 환급). 기반 영역은 유지됩니다.`);
+}
+
+/**
+ * 인게임 타워 강화 (Upgrade) - v0.22.0
+ * 출전 캐릭터 덱의 타워별 강화 한도(deckTowerCaps) 내에서 TP를 소모하여 업그레이드
+ */
+function upgradeSelectedTower() {
+    if (!selectedBoardTower || !selectedBoardTower.tower) return;
+
+    const cell = selectedBoardTower;
+    const towerInfo = TOWER_DATA[cell.tower];
+    if (!towerInfo) return;
+
+    // 현재 출전 캐릭터 덱으로부터 타워별 최대 강화 가능 한도 계산
+    if (typeof calculateDeckTowerCaps === 'function') {
+        deckTowerCaps = calculateDeckTowerCaps();
+    }
+    const maxCap = (deckTowerCaps && deckTowerCaps[cell.tower]) || 0;
+    const currentLv = cell.inGameLevel || 0;
+
+    if (currentLv >= maxCap) {
+        alert(`⚠️ 현재 출전 지휘관 덱의 최대 강화 한도(Lv.${maxCap})에 도달했습니다!\n로비에서 더 높은 등급의 지휘관을 덱에 편성하면 한도를 높일 수 있습니다.`);
+        return;
+    }
+
+    // 강화 비용: 기본 타워 비용 * 0.8 + (다음레벨 * 2) TP
+    const upgradeCost = Math.floor(towerInfo.cost * 0.8) + (currentLv + 1) * 2;
+
+    if (gold < upgradeCost) {
+        alert(`타워 포인트(TP)가 부족합니다! (필요 TP: ${upgradeCost})`);
+        return;
+    }
+
+    gold -= upgradeCost;
+    cell.inGameLevel = currentLv + 1;
+    cell.investedGold = (cell.investedGold || towerInfo.cost) + upgradeCost;
+
+    // 축하 플로팅 텍스트
+    showFloatingDamage(cell.x, cell.y, `⬆️ Lv.${cell.inGameLevel} 강화!`, "#22c55e");
+
+    const updatedStats = getGameTowerStats(cell);
+    showTowerDetailPanel(cell, updatedStats);
+    render();
+
+    console.log(`타워 강화 완료: ${towerInfo.name} Lv.${cell.inGameLevel} (소모 TP: ${upgradeCost}, 총 투자: ${cell.investedGold})`);
 }
 
 /**
@@ -406,7 +482,7 @@ function setSelectedTowerTargeting(mode) {
 }
 
 /**
- * 타워 상세 관리 패널 표시
+ * 타워 상세 관리 패널 표시 (v0.22.0 인게임 강화 버튼 및 한도 노출)
  */
 function showTowerDetailPanel(cell, stats) {
     const panel = document.getElementById("tower-detail-panel");
@@ -417,9 +493,13 @@ function showTowerDetailPanel(cell, stats) {
     const titleEl = document.getElementById("detail-tower-name");
     const statsEl = document.getElementById("detail-tower-stats");
     const sellBtn = document.getElementById("btn-sell-tower");
+    const upgradeBtn = document.getElementById("btn-upgrade-tower");
+
+    const inGameLv = cell.inGameLevel || 0;
 
     if (titleEl) {
-        titleEl.innerText = `🏰 ${stats.name} (Lv.${stats.level || 1})`;
+        const inGameBadge = inGameLv > 0 ? ` <span style="color:#22c55e;">[+${inGameLv}강]</span>` : "";
+        titleEl.innerHTML = `🏰 ${stats.name}${inGameBadge}`;
         titleEl.style.color = stats.color;
     }
 
@@ -433,10 +513,35 @@ function showTowerDetailPanel(cell, stats) {
         statsEl.innerHTML = `⚔️ 공격력: ${dmgText} | 🏹 사거리: ${stats.range}${specialDesc}`;
     }
 
+    // 강화 버튼 처리
+    if (typeof calculateDeckTowerCaps === 'function') {
+        deckTowerCaps = calculateDeckTowerCaps();
+    }
+    const maxCap = (deckTowerCaps && deckTowerCaps[cell.tower]) || 0;
+    const upgradeCost = Math.floor(stats.cost * 0.8) + (inGameLv + 1) * 2;
+
+    if (upgradeBtn) {
+        if (maxCap === 0) {
+            upgradeBtn.disabled = true;
+            upgradeBtn.innerText = `🔒 강화 불가 (지휘관 미편성: 한도 0)`;
+            upgradeBtn.title = "로비에서 해당 타워를 지원하는 지휘관을 덱에 편성하세요.";
+        } else if (inGameLv >= maxCap) {
+            upgradeBtn.disabled = true;
+            upgradeBtn.innerText = `🔒 MAX 강화 도달 (Lv.${inGameLv} / ${maxCap})`;
+            upgradeBtn.title = "출전 지휘관의 성급을 올리거나 상위 등급 지휘관을 편성하세요.";
+        } else {
+            upgradeBtn.disabled = false;
+            upgradeBtn.innerText = `⬆️ 강화 (+${upgradeCost} TP) [Lv.${inGameLv} ➔ ${inGameLv + 1} / MAX ${maxCap}]`;
+            upgradeBtn.title = `타워 포인트를 소모하여 공격력을 25% 향상시킵니다.`;
+        }
+    }
+
+    // 판매 버튼 처리 (투자 비용 60% 환급)
     const refundRate = (typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6;
-    const refund = Math.floor(stats.cost * refundRate);
+    const totalInvested = cell.investedGold || stats.cost;
+    const refund = Math.floor(totalInvested * refundRate);
     if (sellBtn) {
-        sellBtn.innerText = `💰 타워 판매 (+${refund}G, 60%)`;
+        sellBtn.innerText = `💰 타워 판매 (+${refund} TP, 60%)`;
     }
 
     updateTargetingButtonsUI(cell.targeting || 'first');
@@ -467,9 +572,16 @@ function updateTargetingButtonsUI(currentMode) {
 }
 
 // 타워 스탯 가져오기 (전역 함수 getTowerStats 사용, 없으면 기본값)
-function getGameTowerStats(type) {
+function getGameTowerStats(cellOrType) {
+    let type = cellOrType;
+    let inGameLevel = 0;
+    if (typeof cellOrType === 'object' && cellOrType !== null) {
+        type = cellOrType.tower;
+        inGameLevel = cellOrType.inGameLevel || 0;
+    }
+
     if (typeof getTowerStats === "function") {
-        return getTowerStats(type, TOWER_DATA);
+        return getTowerStats(type, TOWER_DATA, inGameLevel);
     }
     return TOWER_DATA[type];
 }

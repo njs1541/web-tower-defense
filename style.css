@@ -2,20 +2,34 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background-color: #f0f2f5;
+  overflow-x: hidden;
 }
 
 #container {
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   justify-content: center;
   align-items: center;
   display: flex;
+  box-sizing: border-box;
+}
+
+#game-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 #game-container {
   display: flex;
-  padding: 20px;
-  gap: 20px;
+  align-items: flex-start; /* 우측 인포창이 길어져도 좌측 보드가 위/아래로 밀리거나 늘어나지 않도록 고정 */
+  justify-content: center;
+  gap: 24px;
+  margin: 0 auto;
+  width: fit-content;      /* 가로 100%를 차지하지 않고 콘텐츠 크기에 딱 맞춤 */
+  position: relative;
+  box-sizing: border-box;
 }
 
 #game-board {
@@ -27,7 +41,54 @@ body {
   background-color: #94a3b8;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;          /* 보드 크기 절대 축소/왜곡 방지 */
+  width: 620px;
+  height: 620px;           /* 보드 높이 620px 정확히 고정 (회색 배경 아래로 늘어남 방지) */
+}
+
+/* 우측 정보 및 조작 패널 (독립된 화이트 카드 박스) */
+#info-panel {
+  width: 260px;
+  max-height: 620px;       /* 게임 보드 높이(620px)와 동일하게 일치 */
+  overflow-y: auto;        /* 강화창 및 버튼이 늘어나도 인포 패널 내부에서 부드럽게 스크롤 */
+  overflow-x: hidden;
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+#info-panel::-webkit-scrollbar {
+  width: 5px;
+}
+#info-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+#info-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#info-panel h2 {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+  color: #0f172a;
+}
+
+#info-panel p {
+  margin: 4px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+#info-panel h3 {
+  margin: 12px 0 6px 0;
+  font-size: 15px;
+  color: #1e293b;
 }
 
 .cell {
@@ -1068,4 +1129,115 @@ button.selected {
 .shard-tile-action.max-lv {
   background: #475569;
   color: #ffffff;
+}
+
+/* 타워 상세 패널 & 인게임 강화 (v0.22.0) */
+#tower-detail-panel {
+  display: none;
+  margin-top: 15px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+#detail-tower-name {
+  margin: 0 0 6px 0;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.detail-stats {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  background: #ffffff;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.targeting-label {
+  font-size: 11px;
+  font-weight: bold;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.targeting-buttons {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.btn-target {
+  flex: 1;
+  padding: 4px 0;
+  font-size: 11px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #475569;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.btn-target:hover {
+  background: #f1f5f9;
+}
+
+.btn-target.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.btn-upgrade {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-upgrade:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(16, 185, 129, 0.35);
+}
+
+.btn-upgrade:disabled {
+  background: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-sell {
+  width: 100%;
+  margin-top: 6px;
+  padding: 7px 10px;
+  background: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-sell:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
 }

@@ -75,7 +75,12 @@ function returnToOpScreen() {
 
 function startGame() {
     document.getElementById("lobby-screen").style.display = "none";
-    document.getElementById("game-screen").style.display = "block";
+    const gameScreen = document.getElementById("game-screen");
+    if (gameScreen) {
+        gameScreen.style.display = "flex";
+        gameScreen.style.justifyContent = "center";
+        gameScreen.style.alignItems = "center";
+    }
 
     // 1. 연구소 특성 보너스 적용 (Phase D)
     const bonusHp = ((USER_DATA.talents && USER_DATA.talents.maxHp) || 0) * 2;
@@ -84,7 +89,15 @@ function startGame() {
     gold = 10 + bonusGold;
     builtBaseCount = 0;
 
-    // 2. 스테이지 테마 및 보드 배경 적용 (Phase D)
+    // 2. v0.22.0 지휘관 덱 타워 한도 및 MP 초기화
+    if (typeof calculateDeckTowerCaps === 'function') {
+        deckTowerCaps = calculateDeckTowerCaps();
+        console.log("출전 지휘관 덱 타워 강화 한도 적용 완료:", deckTowerCaps);
+    }
+    mp = 0;
+    maxMp = 100;
+
+    // 3. 스테이지 테마 및 보드 배경 적용 (Phase D)
     const stage = (typeof STAGE_DATA !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : { boardBg: "#94a3b8" };
     const boardEl = document.getElementById("game-board");
     if (boardEl) boardEl.style.backgroundColor = stage.boardBg;

@@ -23,7 +23,7 @@
           <div class="op-start-sub">CLICK ANYWHERE TO START</div>
         </div>
 
-        <div class="op-footer-version">v0.21.0</div>
+        <div class="op-footer-version">v0.22.2</div>
       </div>
     </div>
 
@@ -31,11 +31,21 @@
     <div id="lobby-screen" style="text-align: center; padding: 40px 20px; display: none; max-width: 800px; margin: 0 auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <button onclick="returnToOpScreen()" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">◀ 타이틀 화면</button>
-        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.21.0</span>
+        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.22.2</span>
       </div>
-      <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card Collection</h1>
-      <div style="display: inline-block; background: #fef3c7; border: 1px solid #fde047; padding: 6px 16px; border-radius: 20px; font-weight: bold; color: #b45309; margin-bottom: 20px;">
-        💰 보유 골드: <span id="lobby-gold" style="font-size: 18px;">0</span> G
+      <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card & Commander</h1>
+      
+      <!-- v0.22.0 4대 재화 바 -->
+      <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+        <div style="background: #fef3c7; border: 1px solid #fde047; padding: 6px 14px; border-radius: 20px; font-weight: bold; color: #b45309; font-size: 13px;">
+          🪙 TP(골드): <span id="lobby-gold" style="font-size: 15px;">0</span>
+        </div>
+        <div style="background: #e0f2fe; border: 1px solid #7dd3fc; padding: 6px 14px; border-radius: 20px; font-weight: bold; color: #0369a1; font-size: 13px;">
+          💎 PP (지휘관 소환): <span id="lobby-pp" style="font-size: 15px;">0</span>개
+        </div>
+        <div style="background: #f3e8ff; border: 1px solid #d8b4fe; padding: 6px 14px; border-radius: 20px; font-weight: bold; color: #7e22ce; font-size: 13px;">
+          🔮 RP (룬 소환): <span id="lobby-rp" style="font-size: 15px;">0</span>개
+        </div>
       </div>
 
       <div style="margin-bottom: 25px;">
@@ -105,7 +115,8 @@
           <h2>🎮 Game Info</h2>
           <p>🌟 라운드: <span id="round">1</span></p>
           <p>❤️ HP: <span id="hp">10</span></p>
-          <p>💰 Gold: <span id="gold">10</span></p>
+          <p>🪙 TP (타워포인트): <span id="gold">10</span></p>
+          <p>💧 MP (마나): <span id="mp-count">0</span> / 100</p>
           <p>👾 Monster: <span id="monster-count">0 / 0</span></p>
           <button onclick="startRound()" style="width: 100%; font-weight: bold; background: #e8f5e9; border: 1px solid #4caf50; padding: 8px;">▶ 라운드 시작</button>
 
@@ -120,10 +131,10 @@
             <!-- JS로 동적 생성됨 -->
           </div>
           <div style="margin-top: 10px;">
-            <button id="btn-unlock" style="width: 100%;">🏗️ 기반 건설 (1G)</button>
+            <button id="btn-unlock" style="width: 100%;">🏗️ 기반 건설 (1 TP)</button>
           </div>
 
-          <!-- 타워 상세 관리 패널 (Phase B: 타깃팅 및 판매) -->
+          <!-- 타워 상세 관리 패널 (Phase B: 타깃팅, v0.22.0 인게임 강화 및 판매) -->
           <div id="tower-detail-panel">
             <h4 id="detail-tower-name">타워 이름</h4>
             <div id="detail-tower-stats" class="detail-stats">스탯 정보</div>
@@ -134,11 +145,13 @@
               <button class="btn-target" data-target-mode="weakest" onclick="setSelectedTowerTargeting('weakest')">체력 낮음</button>
               <button class="btn-target" data-target-mode="boss" onclick="setSelectedTowerTargeting('boss')">보스</button>
             </div>
+            
+            <button id="btn-upgrade-tower" class="btn-upgrade" onclick="upgradeSelectedTower()" style="width: 100%; margin-top: 8px; padding: 7px; background: #22c55e; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s;">⬆️ 타워 강화</button>
             <button id="btn-sell-tower" class="btn-sell" onclick="sellSelectedTower()">💰 타워 판매</button>
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.21.0</div>
+          v0.22.2</div>
       </div>
     </div>
   </div>
@@ -201,7 +214,12 @@
     </div>
     <div class="qa-item" style="margin-top: 10px; border-top: 1px dashed #ccc; padding-top: 5px;">
       <div>
-        <button onclick="qaGrantAllCheat()" style="background:#2e7d32; color:white; width:100%; margin-bottom:5px;">🎁 모든 카드 즉시 해금 & +1000G 지급</button>
+        <button onclick="qaGrantAllCheat()" style="background:#2e7d32; color:white; width:100%; margin-bottom:5px;">🎁 모든 카드/지휘관/룬 해금 & 재화 지급</button>
+      </div>
+      <div style="display: flex; gap: 4px; margin-bottom: 8px;">
+        <button onclick="qaAddPP(5)" style="background:#0284c7; color:white; flex:1; font-size:11px;">💎 PP +5</button>
+        <button onclick="qaAddRP(20)" style="background:#7c3aed; color:white; flex:1; font-size:11px;">🔮 RP +20</button>
+        <button onclick="qaFillMP()" style="background:#059669; color:white; flex:1; font-size:11px;">💧 MP 100%</button>
       </div>
       <strong>Card Reset (QA)</strong>
       <div id="qa-card-list">

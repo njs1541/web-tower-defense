@@ -1,5 +1,7 @@
 const USER_DATA = {
     gold: 0,
+    pp: 2,         // 프리즘 포인트 (미소녀 지휘관 캐릭터 소환용, 기본 2개)
+    rp: 10,        // 룬 포인트 (룬 소환용, 기본 10개)
     inventory: [], // 보유한 타워 ID 목록 (예: ['ranged', 'melee'])
     deck: [],      // 출전 덱 (최대 4장) (Phase D)
     fragments: {}, // { 'ranged': 5, 'melee': 2 }
@@ -8,7 +10,11 @@ const USER_DATA = {
         startGold: 0,
         maxHp: 0,
         towerPower: 0
-    }
+    },
+    // 미소녀 지휘관 캐릭터 시스템 (v0.22.0)
+    characters: {},
+    characterDeck: [], // 출전 캐릭터 덱 (최대 3명)
+    runes: []          // 보유 룬 ID 목록
 };
 
 const STORAGE_KEY = "tower_defense_save_v1";
@@ -31,7 +37,24 @@ function loadData() {
                     ? USER_DATA.inventory.slice(0, 4) 
                     : ['ranged', 'melee'];
             }
-            console.log("저장된 데이터 로드 완료:", USER_DATA);
+
+            // v0.22.0 캐릭터 & 룬 & 재화 호환성 마이그레이션
+            if (USER_DATA.pp === undefined) USER_DATA.pp = 2;
+            if (USER_DATA.rp === undefined) USER_DATA.rp = 10;
+            if (!USER_DATA.characters || Object.keys(USER_DATA.characters).length === 0) {
+                USER_DATA.characters = {
+                    char_liana: { id: "char_liana", star: 1, sockets: 1, equippedRunes: ["rune_flame"] },
+                    char_elena: { id: "char_elena", star: 1, sockets: 1, equippedRunes: ["rune_spell_gold"] }
+                };
+            }
+            if (!USER_DATA.characterDeck || USER_DATA.characterDeck.length === 0) {
+                USER_DATA.characterDeck = ["char_liana", "char_elena"];
+            }
+            if (!USER_DATA.runes || USER_DATA.runes.length === 0) {
+                USER_DATA.runes = ["rune_flame", "rune_spell_gold"];
+            }
+
+            console.log("저장된 데이터 로드 완료 (v0.22.0 호환):", USER_DATA);
         } catch (e) {
             console.error("데이터 로드 실패, 초기화합니다.", e);
             initDefaultData();
@@ -45,11 +68,22 @@ function loadData() {
 // 초기 데이터 설정
 function initDefaultData() {
     USER_DATA.gold = 0;
+    USER_DATA.pp = 2;  // 기본 2회 소환 분량
+    USER_DATA.rp = 10; // 기본 10회 소환 분량
     USER_DATA.inventory = ['ranged', 'melee']; // 기본 타워 지급
     USER_DATA.deck = ['ranged', 'melee'];      // 기본 출전 덱
     USER_DATA.fragments = {};
     USER_DATA.levels = { 'ranged': 1, 'melee': 1 };
     USER_DATA.talents = { startGold: 0, maxHp: 0, towerPower: 0 };
+
+    // 기본 캐릭터 및 룬 세팅
+    USER_DATA.characters = {
+        char_liana: { id: "char_liana", star: 1, sockets: 1, equippedRunes: ["rune_flame"] },
+        char_elena: { id: "char_elena", star: 1, sockets: 1, equippedRunes: ["rune_spell_gold"] }
+    };
+    USER_DATA.characterDeck = ["char_liana", "char_elena"];
+    USER_DATA.runes = ["rune_flame", "rune_spell_gold"];
+
     saveData();
 }
 
@@ -174,14 +208,17 @@ function upgradeTower(towerId) {
     return true;
 }
 
-// 타워 스탯 계산 (기본 스탯 + 레벨 보정 + 연구소 특성 보정)
-function getTowerStats(towerId, towerDataOrigin) {
+// 타워 스탯 계산 (기본 스탯 + 메타 레벨 + 인게임 강화 레벨 + 연구소 특성 보정)
+function getTowerStats(towerId, towerDataOrigin, inGameLevel = 0) {
     const base = towerDataOrigin[towerId];
     if (!base) return null;
 
     const lv = USER_DATA.levels[towerId] || 1;
-    // 레벨당 데미지 10% 증가
-    const multiplier = 1 + (lv - 1) * 0.1;
+    // 메타 레벨당 데미지 10% 증가
+    const metaMultiplier = 1 + (lv - 1) * 0.1;
+
+    // v0.22.0 인게임 타워 강화: 레벨당 데미지 25% 추가 증가
+    const inGameMultiplier = 1 + (inGameLevel * 0.25);
 
     // 연구소 특성: 타워 파워 (+5% per Lv) (Phase D)
     const talentPowerLv = (USER_DATA.talents && USER_DATA.talents.towerPower) || 0;
@@ -189,10 +226,12 @@ function getTowerStats(towerId, towerDataOrigin) {
 
     return {
         ...base,
-        damage: base.damage * multiplier * talentMultiplier,
-        level: lv
+        damage: base.damage * metaMultiplier * inGameMultiplier * talentMultiplier,
+        level: lv,
+        inGameLevel: inGameLevel
     };
 }
+
 
 /**
  * 카드를 초기화(제거)합니다.
@@ -249,3 +288,100 @@ function hardResetGame() {
     console.log("게임 세이브 데이터가 완전히 삭제되었습니다.");
     location.reload();
 }
+
+/**
+ * 현재 출전 덱에 편성된 캐릭터들로부터 타워별 최대 강화 한도(Level Cap) 총합 계산 (v0.22.0)
+ * @returns {Object} { ranged: 2, melee: 1, ice: 0, bomb: 0 }
+ */
+function calculateDeckTowerCaps() {
+    const caps = { ranged: 0, melee: 0, ice: 0, bomb: 0 };
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return caps;
+
+    for (const charId of USER_DATA.characterDeck) {
+        const charInfo = CHARACTER_DATA[charId];
+        if (charInfo && charInfo.levelCaps) {
+            for (const [towerType, capBonus] of Object.entries(charInfo.levelCaps)) {
+                caps[towerType] = (caps[towerType] || 0) + capBonus;
+            }
+        }
+    }
+    return caps;
+}
+
+/**
+ * 캐릭터 덱 장착/해제 토글 (최대 3인 덱)
+ */
+function toggleCharacterDeck(charId) {
+    if (!USER_DATA.characterDeck) USER_DATA.characterDeck = [];
+    const idx = USER_DATA.characterDeck.indexOf(charId);
+
+    if (idx !== -1) {
+        // 이미 덱에 있으면 해제 (최소 1명 유지 권장)
+        if (USER_DATA.characterDeck.length <= 1) {
+            alert("최소 1명의 지휘관은 덱에 출전해야 합니다.");
+            return false;
+        }
+        USER_DATA.characterDeck.splice(idx, 1);
+        saveData();
+        return true;
+    } else {
+        // 덱에 없으면 추가 (최대 3명)
+        if (USER_DATA.characterDeck.length >= 3) {
+            alert("출전 덱에는 최대 3명의 지휘관까지만 편성할 수 있습니다.");
+            return false;
+        }
+        USER_DATA.characterDeck.push(charId);
+        saveData();
+        return true;
+    }
+}
+
+/**
+ * 신규 캐릭터 획득
+ */
+function addCharacter(charId) {
+    if (!CHARACTER_DATA[charId]) return false;
+    if (!USER_DATA.characters) USER_DATA.characters = {};
+
+    if (!USER_DATA.characters[charId]) {
+        const charBase = CHARACTER_DATA[charId];
+        USER_DATA.characters[charId] = {
+            id: charId,
+            star: 1,
+            sockets: charBase.baseSockets || 1,
+            equippedRunes: []
+        };
+        // 덱에 빈자리가 있다면 자동 편성
+        if (USER_DATA.characterDeck && USER_DATA.characterDeck.length < 3) {
+            USER_DATA.characterDeck.push(charId);
+        }
+        saveData();
+        return true;
+    }
+    return false;
+}
+
+/**
+ * 신규 룬 획득
+ */
+function addRune(runeId) {
+    if (!RUNE_DATA[runeId]) return false;
+    if (!USER_DATA.runes) USER_DATA.runes = [];
+    USER_DATA.runes.push(runeId);
+    saveData();
+    return true;
+}
+
+/**
+ * 캐릭터 소켓에 룬 장착
+ */
+function equipRuneToCharacter(charId, socketIndex, runeId) {
+    const char = USER_DATA.characters[charId];
+    if (!char) return false;
+    if (!char.equippedRunes) char.equippedRunes = [];
+
+    char.equippedRunes[socketIndex] = runeId;
+    saveData();
+    return true;
+}
+
