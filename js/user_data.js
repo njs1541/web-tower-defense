@@ -339,15 +339,21 @@ function toggleCharacterDeck(charId) {
 /**
  * 신규 캐릭터 획득
  */
-function addCharacter(charId) {
-    if (!CHARACTER_DATA[charId]) return false;
+/**
+ * 신규 캐릭터 획득 또는 중복 획득 시 성급 승급 & 소켓 추가 해금 (v0.23.0)
+ */
+function addCharacterOrDuplicate(charId) {
+    if (!CHARACTER_DATA[charId]) return null;
     if (!USER_DATA.characters) USER_DATA.characters = {};
 
+    const charBase = CHARACTER_DATA[charId];
+
+    // 1. 신규 획득
     if (!USER_DATA.characters[charId]) {
-        const charBase = CHARACTER_DATA[charId];
         USER_DATA.characters[charId] = {
             id: charId,
             star: 1,
+            starExp: 0,
             sockets: charBase.baseSockets || 1,
             equippedRunes: []
         };
@@ -356,9 +362,32 @@ function addCharacter(charId) {
             USER_DATA.characterDeck.push(charId);
         }
         saveData();
-        return true;
+        return { isNew: true, star: 1, sockets: charBase.baseSockets || 1 };
     }
-    return false;
+
+    // 2. 중복 획득 -> 성급 강화 경험치 누적
+    const char = USER_DATA.characters[charId];
+    char.starExp = (char.starExp || 0) + 1;
+    const reqExp = char.star || 1; // 1성->2성: 1개, 2성->3성: 2개
+    let upgraded = false;
+
+    if (char.starExp >= reqExp && char.star < 5) {
+        char.starExp -= reqExp;
+        char.star += 1;
+        upgraded = true;
+        // 최대 소켓 수 한도 내에서 소켓 추가 해금!
+        if (char.sockets < (charBase.maxSockets || 3)) {
+            char.sockets += 1;
+        }
+    }
+
+    saveData();
+    return { isNew: false, upgraded: upgraded, star: char.star, sockets: char.sockets, exp: char.starExp, reqExp: char.star };
+}
+
+// 하위 호환
+function addCharacter(charId) {
+    return addCharacterOrDuplicate(charId);
 }
 
 /**
@@ -380,8 +409,52 @@ function equipRuneToCharacter(charId, socketIndex, runeId) {
     if (!char) return false;
     if (!char.equippedRunes) char.equippedRunes = [];
 
+    // 유효한 소켓 인덱스인지 확인
+    if (socketIndex >= char.sockets) return false;
+
     char.equippedRunes[socketIndex] = runeId;
     saveData();
     return true;
 }
+
+/**
+ * 캐릭터 소켓에서 룬 장착 해제
+ */
+function unequipRuneFromCharacter(charId, socketIndex) {
+    const char = USER_DATA.characters[charId];
+    if (!char || !char.equippedRunes) return false;
+
+    char.equippedRunes[socketIndex] = null;
+    saveData();
+    return true;
+}
+
+/**
+ * 현재 출전 덱에 편성된 지휘관들이 장착 중인 액티브 스펠 룬 목록 조회 (인게임 스펠 UI용)
+ * @returns {Array} [{ charId, socketIndex, runeId, runeInfo }]
+ */
+function getEquippedSpellRunes() {
+    const list = [];
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return list;
+
+    for (const charId of USER_DATA.characterDeck) {
+        const char = USER_DATA.characters && USER_DATA.characters[charId];
+        if (!char || !char.equippedRunes) continue;
+
+        char.equippedRunes.forEach((runeId, idx) => {
+            if (!runeId) return;
+            const runeInfo = RUNE_DATA[runeId];
+            if (runeInfo && runeInfo.type === 'spell') {
+                list.push({
+                    charId: charId,
+                    socketIndex: idx,
+                    runeId: runeId,
+                    runeInfo: runeInfo
+                });
+            }
+        });
+    }
+    return list;
+}
+
 

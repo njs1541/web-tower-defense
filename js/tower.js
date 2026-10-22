@@ -585,3 +585,121 @@ function getGameTowerStats(cellOrType) {
     }
     return TOWER_DATA[type];
 }
+
+/**
+ * -------------------------------------------------------------
+ * 인게임 액티브 스펠 룬 발동 시스템 (v0.23.0 New)
+ * -------------------------------------------------------------
+ */
+
+let usedSpellRunes = {}; // 1회용 궁극기 사용 여부 기록
+
+/**
+ * 인게임 액티브 스펠 UI 갱신
+ */
+function renderInGameSpells() {
+    const container = document.getElementById("spell-controls");
+    if (!container) return;
+
+    if (typeof getEquippedSpellRunes !== 'function') return;
+    const spells = getEquippedSpellRunes();
+
+    if (spells.length === 0) {
+        container.innerHTML = `<div style="font-size: 11px; color: #94a3b8; padding: 4px 0;">출전 지휘관에 장착된 스펠이 없습니다.</div>`;
+        return;
+    }
+
+    container.innerHTML = "";
+
+    spells.forEach(item => {
+        const rInfo = item.runeInfo;
+        const btn = document.createElement("button");
+        btn.className = "btn-spell-action";
+
+        const isUsedSingle = (rInfo.usageType === 'single') && usedSpellRunes[item.runeId];
+        const notEnoughMp = (mp || 0) < rInfo.mpCost;
+        const isDisabled = isUsedSingle || notEnoughMp;
+
+        let statusText = `💧 ${rInfo.mpCost} MP`;
+        if (isUsedSingle) statusText = "🔒 사용 완료";
+
+        btn.disabled = isDisabled;
+        btn.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span>${rInfo.icon || '🔮'} <strong>${rInfo.name}</strong></span>
+                <span style="font-size: 10px; color:${isDisabled ? '#94a3b8' : '#38bdf8'}; font-weight:bold;">${statusText}</span>
+            </div>
+            <div style="font-size: 10px; opacity: 0.8; margin-top: 2px;">${rInfo.desc}</div>
+        `;
+
+        btn.onclick = () => castSpellRune(item);
+        container.appendChild(btn);
+    });
+}
+
+/**
+ * 스펠 룬 발동 실행
+ */
+function castSpellRune(spellItem) {
+    const rInfo = spellItem.runeInfo;
+    const runeId = spellItem.runeId;
+
+    if ((mp || 0) < rInfo.mpCost) {
+        alert("마나(MP)가 부족합니다!");
+        return;
+    }
+
+    if (rInfo.usageType === 'single' && usedSpellRunes[runeId]) {
+        alert("이 궁극기 스펠은 전투당 1회만 사용할 수 있습니다!");
+        return;
+    }
+
+    // 마나 차감
+    mp -= rInfo.mpCost;
+
+    if (rInfo.usageType === 'single') {
+        usedSpellRunes[runeId] = true;
+    }
+
+    // 스펠 고유 효과 실행
+    if (runeId === 'rune_spell_gold') {
+        // 1. 긴급 보급: +8 TP
+        gold += (rInfo.effectValue || 8);
+        showFloatingDamage(10, 10, `+${rInfo.effectValue || 8} TP 보급!`, "#eab308");
+    } else if (runeId === 'rune_spell_gust') {
+        // 2. 돌풍의 결계: 모든 살아있는 적 4초간 40% 감속
+        for (const enemy of enemies) {
+            if (enemy.alive && typeof applySlowEffect === 'function') {
+                applySlowEffect(enemy, 20); // 4초 상당
+            }
+        }
+        showFloatingDamage(10, 10, "🌪️ 돌풍의 결계 발동!", "#06b6d4");
+    } else if (runeId === 'rune_spell_thunder') {
+        // 3. 천벌의 낙뢰: 전장의 모든 적에게 15 피해
+        let hitCount = 0;
+        for (const enemy of enemies) {
+            if (enemy.alive) {
+                enemy.hp -= (rInfo.damage || 15);
+                onEnemyHit(enemy, rInfo.damage || 15, "#eab308");
+                hitCount++;
+            }
+        }
+        showFloatingDamage(10, 10, `⚡ 천벌의 낙뢰 (${hitCount}기 타격)!`, "#f59e0b");
+    } else if (runeId === 'rune_spell_teleport') {
+        // 4. 시공의 왜곡 (궁극기): 모든 적을 스폰 입구로 강제 송환
+        for (const enemy of enemies) {
+            if (enemy.alive) {
+                enemy.x = startPos.x;
+                enemy.y = startPos.y;
+                if (typeof updateEnemyPosition === 'function') {
+                    updateEnemyPosition(enemy);
+                }
+            }
+        }
+        showFloatingDamage(10, 10, "🌀 시공의 왜곡: 전원 강제 송환!", "#a855f7");
+    }
+
+    render();
+    renderInGameSpells();
+}
+

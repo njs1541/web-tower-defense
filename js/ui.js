@@ -60,6 +60,11 @@ function render() {
     // 몬스터 수 표시 갱신
     const aliveCount = enemies.filter(e => e.alive).length;
     monsterCountDisplay.innerText = `${aliveCount} / ${totalEnemies}`;
+
+    // 인게임 스펠 버튼 상태 갱신
+    if (typeof renderInGameSpells === 'function') {
+        renderInGameSpells();
+    }
 }
 
 /**

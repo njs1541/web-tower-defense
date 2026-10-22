@@ -96,6 +96,9 @@ function startGame() {
     }
     mp = 0;
     maxMp = 100;
+    if (typeof usedSpellRunes !== 'undefined') {
+        usedSpellRunes = {};
+    }
 
     // 3. 스테이지 테마 및 보드 배경 적용 (Phase D)
     const stage = (typeof STAGE_DATA !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : { boardBg: "#94a3b8" };

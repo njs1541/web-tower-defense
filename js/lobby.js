@@ -22,6 +22,9 @@ function updateLobbyUI() {
         rpDisplay.innerText = USER_DATA.rp || 0;
     }
 
+    // 미소녀 지휘관 & 소켓 룬 섹션 렌더링 (v0.23.0)
+    renderCommanderSection();
+
     const invList = document.getElementById("inventory-list");
     if (!invList || typeof USER_DATA === 'undefined') return;
     invList.innerHTML = "";
@@ -313,3 +316,251 @@ function buyTalent(key) {
         updateLobbyUI();
     }
 }
+
+/**
+ * -------------------------------------------------------------
+ * 미소녀 지휘관 & 소켓 룬 시스템 UI (v0.23.0 New)
+ * -------------------------------------------------------------
+ */
+
+let selectingRuneFor = { charId: null, socketIndex: 0 };
+
+/**
+ * 지휘관 카드 및 룬 소켓 목록 렌더링
+ */
+function renderCommanderSection() {
+    const container = document.getElementById("commander-list");
+    if (!container || typeof USER_DATA === 'undefined' || typeof CHARACTER_DATA === 'undefined') return;
+
+    container.innerHTML = "";
+
+    // 보유한 지휘관 목록
+    const ownedChars = USER_DATA.characters || {};
+    const ownedIds = Object.keys(ownedChars);
+
+    if (ownedIds.length === 0) {
+        container.innerHTML = `<div style="color: #64748b; font-size: 13px; padding: 20px;">보유한 지휘관이 없습니다. 상점에서 프리즘 포인트(PP)로 지휘관을 소환해 보세요!</div>`;
+        return;
+    }
+
+    // 출전 덱 헤더 요약
+    const deckIds = USER_DATA.characterDeck || [];
+    const deckHeader = document.createElement("div");
+    deckHeader.style.width = "100%";
+    deckHeader.style.marginBottom = "10px";
+    deckHeader.style.fontSize = "13px";
+    deckHeader.style.color = "#334155";
+    deckHeader.innerHTML = `👑 <strong>출전 지휘관 덱 (${deckIds.length}/3)</strong> - 편성된 지휘관들의 타워 강화 라이선스가 인게임에 합산 적용됩니다.`;
+    container.appendChild(deckHeader);
+
+    // 각 지휘관 카드 렌더링
+    ownedIds.forEach(charId => {
+        const charData = ownedChars[charId];
+        const baseInfo = CHARACTER_DATA[charId];
+        if (!baseInfo) return;
+
+        const isInDeck = deckIds.includes(charId);
+        const gradeInfo = CARD_GRADES[baseInfo.grade] || { name: baseInfo.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.1)" };
+
+        const card = document.createElement("div");
+        card.className = `commander-card ${isInDeck ? 'in-deck' : ''}`;
+
+        // 타워 한도 보너스 텍스트 생성
+        let capsText = [];
+        if (baseInfo.levelCaps) {
+            for (const [tType, cap] of Object.entries(baseInfo.levelCaps)) {
+                const tName = TOWER_DATA[tType] ? TOWER_DATA[tType].name.replace(" 타워", "") : tType;
+                capsText.push(`+${cap}강`);
+            }
+        }
+        const capsSummary = capsText.join(", ");
+
+        // 소켓 목록 생성
+        const socketsCount = charData.sockets || baseInfo.baseSockets || 1;
+        let socketsHtml = "";
+        for (let i = 0; i < socketsCount; i++) {
+            const equippedRuneId = (charData.equippedRunes && charData.equippedRunes[i]) || null;
+            if (equippedRuneId && RUNE_DATA[equippedRuneId]) {
+                const rInfo = RUNE_DATA[equippedRuneId];
+                const rGrade = CARD_GRADES[rInfo.grade] || { color: "#3b82f6" };
+                socketsHtml += `
+                    <div class="commander-socket filled" onclick="openRuneEquipModal('${charId}', ${i})" title="${rInfo.name} (${rInfo.desc})">
+                        <span style="font-size: 14px;">${rInfo.icon || '🔮'}</span>
+                        <span style="font-size: 11px; font-weight: bold; color: ${rGrade.color}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75px;">${rInfo.name}</span>
+                        <button class="btn-socket-remove" onclick="event.stopPropagation(); unequipRuneAction('${charId}', ${i});" title="룬 장착 해제">×</button>
+                    </div>
+                `;
+            } else {
+                socketsHtml += `
+                    <div class="commander-socket empty" onclick="openRuneEquipModal('${charId}', ${i})" title="클릭하여 룬 장착">
+                        <span>➕</span>
+                        <span style="font-size: 10px; color: #94a3b8;">빈 소켓</span>
+                    </div>
+                `;
+            }
+        }
+
+        // 별(성급) 표시
+        const starCount = charData.star || 1;
+        let starsHtml = "★".repeat(starCount) + "☆".repeat(Math.max(0, 5 - starCount));
+
+        card.innerHTML = `
+            <div class="commander-card-header">
+                <span class="commander-grade-badge" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border:1px solid ${gradeInfo.border};">${gradeInfo.name} (${baseInfo.grade})</span>
+                <span class="commander-stars" style="color: #f59e0b; font-size: 12px; letter-spacing: 1px;">${starsHtml}</span>
+            </div>
+            
+            <div class="commander-avatar-box">
+                <div class="commander-avatar">${baseInfo.avatar || '👑'}</div>
+                <div class="commander-name-box">
+                    <div class="commander-name">${baseInfo.name}</div>
+                    <div class="commander-title">${baseInfo.title}</div>
+                </div>
+            </div>
+
+            <div class="commander-cap-info">
+                🛡️ 타워 강화 라이선스: <strong>${capsSummary}</strong>
+            </div>
+
+            <div class="commander-sockets-container">
+                <div style="font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 4px;">🔮 장착 룬 소켓 (${socketsCount}칸)</div>
+                <div class="commander-sockets-list">${socketsHtml}</div>
+            </div>
+
+            <div class="commander-actions">
+                <button class="btn-deck-toggle ${isInDeck ? 'in-deck' : ''}" onclick="toggleCharacterDeckAction('${charId}')">
+                    ${isInDeck ? '⚔️ 출전 중 (해제)' : '⚔️ 출전 덱에 편성'}
+                </button>
+            </div>
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+/**
+ * 지휘관 덱 편성/해제 핸들러
+ */
+function toggleCharacterDeckAction(charId) {
+    if (typeof toggleCharacterDeck === 'function') {
+        toggleCharacterDeck(charId);
+        updateLobbyUI();
+    }
+}
+
+/**
+ * 룬 장착 해제 핸들러
+ */
+function unequipRuneAction(charId, socketIndex) {
+    if (typeof unequipRuneFromCharacter === 'function') {
+        unequipRuneFromCharacter(charId, socketIndex);
+        updateLobbyUI();
+    }
+}
+
+/**
+ * 룬 장착 선택 모달 열기
+ */
+function openRuneEquipModal(charId, socketIndex) {
+    selectingRuneFor = { charId: charId, socketIndex: socketIndex };
+    const modal = document.getElementById("rune-equip-modal");
+    if (!modal) return;
+
+    const list = document.getElementById("rune-modal-list");
+    if (list) {
+        list.innerHTML = "";
+        const runes = USER_DATA.runes || [];
+
+        if (runes.length === 0) {
+            list.innerHTML = `<div style="text-align: center; color: #64748b; padding: 20px; font-size: 13px;">보유한 룬이 없습니다.<br>상점에서 룬 포인트(RP)로 신비한 룬을 소환해보세요!</div>`;
+        } else {
+            runes.forEach((runeId, rIndex) => {
+                const runeInfo = RUNE_DATA[runeId];
+                if (!runeInfo) return;
+
+                const gradeInfo = CARD_GRADES[runeInfo.grade] || { name: runeInfo.grade, color: "#3b82f6" };
+                const isSpell = runeInfo.type === 'spell';
+
+                const item = document.createElement("div");
+                item.className = "rune-modal-item";
+                item.innerHTML = `
+                    <div style="font-size: 24px; margin-right: 10px;">${runeInfo.icon || '🔮'}</div>
+                    <div style="flex: 1;">
+                        <div style="font-weight: bold; font-size: 13px; color: #0f172a;">
+                            ${runeInfo.name} 
+                            <span style="font-size: 10px; color:${gradeInfo.color}; font-weight:bold;">[${gradeInfo.name}]</span>
+                            <span style="font-size: 10px; color:${isSpell ? '#2563eb' : '#ea580c'};">(${isSpell ? '액티브 스펠' : '속성 패시브'})</span>
+                        </div>
+                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${runeInfo.desc}</div>
+                    </div>
+                    <button class="btn-select-rune" onclick="selectRuneForSocket('${runeId}')">장착</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+    }
+
+    modal.style.display = "flex";
+}
+
+/**
+ * 룬 장착 모달 닫기
+ */
+function closeRuneEquipModal() {
+    const modal = document.getElementById("rune-equip-modal");
+    if (modal) modal.style.display = "none";
+}
+
+/**
+ * 모달에서 특정 룬을 선택하여 소켓에 장착
+ */
+function selectRuneForSocket(runeId) {
+    if (!selectingRuneFor.charId) return;
+
+    if (typeof equipRuneToCharacter === 'function') {
+        equipRuneToCharacter(selectingRuneFor.charId, selectingRuneFor.socketIndex, runeId);
+        closeRuneEquipModal();
+        updateLobbyUI();
+    }
+}
+
+/**
+ * 로비 서브 탭 전환 (v0.23.1 New)
+ * @param {'commanders' | 'towers' | 'shards'} tabName
+ */
+let currentLobbyTab = 'commanders';
+
+function switchLobbyTab(tabName) {
+    currentLobbyTab = tabName;
+
+    // 1. 모든 탭 버튼 비활성화 및 선택 버튼 활성화
+    const tabButtons = {
+        'commanders': document.getElementById('tab-btn-commanders'),
+        'towers': document.getElementById('tab-btn-towers'),
+        'shards': document.getElementById('tab-btn-shards')
+    };
+
+    Object.keys(tabButtons).forEach(key => {
+        if (tabButtons[key]) {
+            if (key === tabName) {
+                tabButtons[key].classList.add('active');
+            } else {
+                tabButtons[key].classList.remove('active');
+            }
+        }
+    });
+
+    // 2. 모든 탭 섹션 숨김 및 선택 섹션 노출
+    const tabSections = {
+        'commanders': document.getElementById('tab-section-commanders'),
+        'towers': document.getElementById('tab-section-towers'),
+        'shards': document.getElementById('tab-section-shards')
+    };
+
+    Object.keys(tabSections).forEach(key => {
+        if (tabSections[key]) {
+            tabSections[key].style.display = (key === tabName) ? 'block' : 'none';
+        }
+    });
+}
+

@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.22.2";
+const GAME_VERSION = "v0.23.1";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -453,3 +453,31 @@ const RUNE_DATA = {
         desc: "마나 75 소모 [전투당 1회 궁극기]: 현재 필드의 모든 몬스터를 스폰 입구로 강제 송환합니다."
     }
 };
+
+/**
+ * 지휘관 및 룬 가챠(소환) 설정 (v0.23.0)
+ */
+const COMMANDER_GACHA_CONFIG = {
+    costPP: 1, // 1회 소환 시 1 PP 소모
+    rates: [
+        { grade: "C", charId: "char_liana", weight: 45 },
+        { grade: "UC", charId: "char_elena", weight: 35 },
+        { grade: "R", charId: "char_freya", weight: 15 },
+        { grade: "SR", charId: "char_scarlet", weight: 5 }
+    ]
+};
+
+const RUNE_GACHA_CONFIG = {
+    costRP: 5, // 1회 소환 시 5 RP 소모
+    rates: [
+        { runeId: "rune_flame", weight: 25 },
+        { runeId: "rune_spell_gold", weight: 25 },
+        { runeId: "rune_critical", weight: 20 },
+        { runeId: "rune_spell_gust", weight: 15 },
+        { runeId: "rune_pierce", weight: 8 },
+        { runeId: "rune_spell_thunder", weight: 4 },
+        { runeId: "rune_chain_lightning", weight: 2 },
+        { runeId: "rune_spell_teleport", weight: 1 }
+    ]
+};
+

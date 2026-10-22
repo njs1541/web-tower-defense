@@ -23,7 +23,7 @@
           <div class="op-start-sub">CLICK ANYWHERE TO START</div>
         </div>
 
-        <div class="op-footer-version">v0.22.2</div>
+        <div class="op-footer-version">v0.23.1</div>
       </div>
     </div>
 
@@ -31,7 +31,7 @@
     <div id="lobby-screen" style="text-align: center; padding: 40px 20px; display: none; max-width: 800px; margin: 0 auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <button onclick="returnToOpScreen()" style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">◀ 타이틀 화면</button>
-        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.22.2</span>
+        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.23.1</span>
       </div>
       <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card & Commander</h1>
       
@@ -62,20 +62,68 @@
       </div>
       <div id="stage-desc-text" style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Stage 1: 평원의 미로 (기본 난이도)</div>
 
-      <!-- 간단한 상점 UI -->
+      <!-- 상점 UI (3대 소환 시스템: 지휘관 1PP, 룬 5RP, 타워 100TP) -->
       <div id="shop-ui"
-        style="display: none; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; background: #fff; max-width: 420px; margin: 0 auto 20px auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);">
-        <h3 style="margin-top: 0;">운명의 카드 뽑기</h3>
-        <p style="color: #64748b; font-size: 14px;">1회 소환: 100 G</p>
-        <button onclick="drawGacha()" style="background: #8b5cf6; color: white; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer;">🔮 소환하기</button>
+        style="display: none; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 20px; background: #ffffff; max-width: 600px; margin: 0 auto 25px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.06);">
+        <h3 style="margin-top: 0; color: #0f172a; font-size: 18px;">🏪 차원 소환 제단</h3>
+        <p style="color: #64748b; font-size: 13px; margin-top: -6px; margin-bottom: 16px;">보유한 재화로 미소녀 지휘관과 강력한 룬을 소환하여 전력을 강화하세요.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+          <!-- 1. 지휘관 소환 -->
+          <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 26px;">👑</div>
+            <div style="font-weight: bold; font-size: 14px; color: #0369a1; margin-top: 4px;">지휘관 소환</div>
+            <div style="font-size: 11px; color: #64748b; margin: 4px 0 10px 0;">미소녀 지휘관 & 소켓</div>
+            <button onclick="drawCommanderGacha()" style="width: 100%; background: #0284c7; color: white; border: none; padding: 7px 0; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(2,132,199,0.3);">💎 1 PP 소환</button>
+          </div>
+
+          <!-- 2. 룬 소환 -->
+          <div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border: 1.5px solid #d8b4fe; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 26px;">🔮</div>
+            <div style="font-weight: bold; font-size: 14px; color: #7e22ce; margin-top: 4px;">신비한 룬 소환</div>
+            <div style="font-size: 11px; color: #64748b; margin: 4px 0 10px 0;">속성 패시브 / 액티브 스펠</div>
+            <button onclick="drawRuneGacha()" style="width: 100%; background: #9333ea; color: white; border: none; padding: 7px 0; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(147,51,234,0.3);">🔮 5 RP 소환</button>
+          </div>
+
+          <!-- 3. 타워 카드 소환 -->
+          <div style="background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; text-align: center;">
+            <div style="font-size: 26px;">📦</div>
+            <div style="font-weight: bold; font-size: 14px; color: #a16207; margin-top: 4px;">타워 & 조각</div>
+            <div style="font-size: 11px; color: #64748b; margin: 4px 0 10px 0;">완제품 카드 & 조각</div>
+            <button onclick="drawGacha()" style="width: 100%; background: #d97706; color: white; border: none; padding: 7px 0; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(217,119,6,0.3);">🪙 100 TP 소환</button>
+          </div>
+        </div>
         <div id="gacha-result" style="margin-top: 10px; font-weight: bold; color: blue;"></div>
       </div>
 
-      <!-- 보유 타워 및 인벤토리 섹션 -->
-      <div class="lobby-card-box">
+      <!-- 로비 서브 탭 네비게이션 (v0.23.1 New) -->
+      <div class="lobby-tab-container">
+        <button id="tab-btn-commanders" class="lobby-tab-btn active" onclick="switchLobbyTab('commanders')">👑 지휘관 &amp; 룬 소켓</button>
+        <button id="tab-btn-towers" class="lobby-tab-btn" onclick="switchLobbyTab('towers')">📦 출전 타워 덱</button>
+        <button id="tab-btn-shards" class="lobby-tab-btn" onclick="switchLobbyTab('shards')">🔮 타워 조각 보관함</button>
+      </div>
+
+      <!-- 1. 미소녀 지휘관 & 소켓 룬 편성 섹션 (v0.23.0 New) -->
+      <div id="tab-section-commanders" class="lobby-card-box lobby-tab-content">
         <h3 style="margin-top: 0; font-size: 17px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <span>📦</span> 보유 타워 & 덱 편성
+          <span>👑</span> 미소녀 지휘관 &amp; 룬 소켓
         </h3>
+        <p style="font-size: 12px; color: #64748b; margin-top: 4px; margin-bottom: 16px;">
+          지휘관 카드를 출전 덱(최대 3명)에 편성하고, 소켓에 룬을 장착하여 고유 패시브와 전술 스펠을 개방하세요.
+        </p>
+        <div id="commander-list" class="commander-grid">
+          <!-- JS로 동적 렌더링 -->
+        </div>
+      </div>
+
+      <!-- 2. 보유 타워 및 인벤토리 섹션 -->
+      <div id="tab-section-towers" class="lobby-card-box lobby-tab-content" style="display: none;">
+        <h3 style="margin-top: 0; font-size: 17px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>📦</span> 보유 타워 &amp; 덱 편성
+        </h3>
+        <p style="font-size: 12px; color: #64748b; margin-top: 4px; margin-bottom: 16px;">
+          원하는 타워를 활성화하여 게임 시작 시 배치할 수 있는 타워 덱을 구성하세요.
+        </p>
         <div id="inventory-list" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
           <!-- JS로 로드 -->
         </div>
@@ -93,8 +141,8 @@
         </div>
       </div>
 
-      <!-- 타워 조각 보관함 및 강화 타일 섹션 (v0.20.0) -->
-      <div class="lobby-card-box" style="margin-top: 25px;">
+      <!-- 3. 타워 조각 보관함 및 강화 타일 섹션 (v0.20.0) -->
+      <div id="tab-section-shards" class="lobby-card-box lobby-tab-content" style="display: none;">
         <h3 style="margin-top: 0; font-size: 17px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 6px;">
           <span>🔮</span> 타워 조각 보관함
         </h3>
@@ -126,6 +174,12 @@
             <button id="btn-speed-2" class="speed-btn" onclick="setGameSpeed(2)">2x</button>
           </div>
 
+          <!-- 인게임 액티브 스펠 룬 컨트롤 (v0.23.0 New) -->
+          <h3>✨ 지휘관 스펠 (MP)</h3>
+          <div id="spell-controls">
+            <!-- JS로 동적 생성됨 -->
+          </div>
+
           <h3>🛠 타워</h3>
           <div id="tower-controls">
             <!-- JS로 동적 생성됨 -->
@@ -146,12 +200,12 @@
               <button class="btn-target" data-target-mode="boss" onclick="setSelectedTowerTargeting('boss')">보스</button>
             </div>
             
-            <button id="btn-upgrade-tower" class="btn-upgrade" onclick="upgradeSelectedTower()" style="width: 100%; margin-top: 8px; padding: 7px; background: #22c55e; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s;">⬆️ 타워 강화</button>
+            <button id="btn-upgrade-tower" class="btn-upgrade" onclick="upgradeSelectedTower()">⬆️ 타워 강화</button>
             <button id="btn-sell-tower" class="btn-sell" onclick="sellSelectedTower()">💰 타워 판매</button>
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.22.2</div>
+          v0.23.0</div>
       </div>
     </div>
   </div>
@@ -195,6 +249,21 @@
         <!-- JS로 렌더링 -->
       </div>
       <button style="width: 100%; margin-top: 15px; padding: 10px; font-weight: bold; background: #334155; color: white; border: none; border-radius: 6px;" onclick="closeTalentModal()">닫기</button>
+    </div>
+  </div>
+
+  <!-- 룬 장착 선택 모달 (v0.23.0 New) -->
+  <div id="rune-equip-modal" style="display: none;" class="modal-overlay">
+    <div class="rune-modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+        <h3 style="margin: 0; font-size: 17px; color: #0f172a;">🔮 지휘관 소켓 룬 장착</h3>
+        <button onclick="closeRuneEquipModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #64748b;">×</button>
+      </div>
+      <p style="font-size: 12px; color: #64748b; margin-top: 0; margin-bottom: 15px;">장착할 룬을 선택하세요. 스펠 룬은 인게임에서 마나(MP)로 발동하며, 속성 룬은 상시 패시브를 부여합니다.</p>
+      <div id="rune-modal-list" class="rune-modal-list">
+        <!-- JS로 동적 생성 -->
+      </div>
+      <button style="width: 100%; margin-top: 15px; padding: 9px; font-weight: bold; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer;" onclick="closeRuneEquipModal()">닫기</button>
     </div>
   </div>
 

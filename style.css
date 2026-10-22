@@ -1241,3 +1241,312 @@ button.selected {
   background: #fef2f2;
   border-color: #ef4444;
 }
+
+/* ============================================================
+   로비 탭(Tab) 네비게이션 & 지휘관 시스템 스타일 (v0.23.1 New)
+   ============================================================ */
+
+.lobby-tab-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.lobby-tab-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1.5px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lobby-tab-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.lobby-tab-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.commander-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2열 균등 배치로 4명이 2x2 완벽 대칭 */
+  gap: 14px;
+  justify-content: center;
+}
+
+@media (max-width: 640px) {
+  .commander-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.commander-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  text-align: left;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.commander-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.commander-card.in-deck {
+  border-color: #2563eb;
+  background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%);
+  box-shadow: 0 0 0 1px #2563eb, 0 4px 10px rgba(37, 99, 235, 0.15);
+}
+
+.commander-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.commander-grade-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+
+.commander-avatar-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.commander-avatar {
+  font-size: 26px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.commander-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #0f172a;
+}
+
+.commander-title {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.commander-cap-info {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.commander-sockets-container {
+  margin-bottom: 8px;
+  flex: 1;
+}
+
+.commander-sockets-list {
+  display: flex;
+  flex-direction: row; /* 가로형 슬롯 */
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.commander-socket {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.commander-socket.empty {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+.commander-socket.empty:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.commander-socket.filled {
+  background: #ffffff;
+  border: 1px solid #94a3b8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.commander-socket.filled:hover {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+}
+
+.btn-socket-remove {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0 4px;
+}
+
+.btn-socket-remove:hover {
+  color: #ef4444;
+}
+
+.btn-deck-toggle {
+  width: 100%;
+  padding: 6px 0;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  transition: all 0.15s ease;
+}
+
+.btn-deck-toggle:hover {
+  background: #f8fafc;
+}
+
+.btn-deck-toggle.in-deck {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.btn-deck-toggle.in-deck:hover {
+  background: #1d4ed8;
+}
+
+/* 룬 장착 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.rune-modal-box {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  width: 90%;
+  max-width: 440px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+.rune-modal-list {
+  overflow-y: auto;
+  max-height: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 4px;
+}
+
+.rune-modal-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.rune-modal-item:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.btn-select-rune {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-select-rune:hover {
+  background: #1d4ed8;
+}
+
+/* 인게임 스펠 버튼 스타일 (v0.23.0) */
+.btn-spell-action {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 7px 10px;
+  background: #ffffff;
+  border: 1.5px solid #38bdf8;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  color: #0f172a;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(56, 189, 248, 0.15);
+}
+
+.btn-spell-action:hover:not(:disabled) {
+  background: #f0f9ff;
+  border-color: #0284c7;
+  transform: translateY(-1px);
+}
+
+.btn-spell-action:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+}
