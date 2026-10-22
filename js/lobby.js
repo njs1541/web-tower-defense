@@ -317,7 +317,7 @@ function renderCommanderSection() {
             </div>
             
             <div class="commander-avatar-box">
-                <div class="commander-avatar ${baseInfo.image ? 'has-image' : ''}">
+                <div class="commander-avatar ${baseInfo.image ? 'has-image' : ''}" onclick="viewCommanderIllustration('${charId}')" title="🔍 클릭하여 일러스트 크게 보기">
                     ${baseInfo.image ? `<img src="${baseInfo.image}" alt="${baseInfo.name}" class="commander-thumb-img" onerror="this.parentElement.innerHTML='${baseInfo.avatar || '👑'}'">` : (baseInfo.avatar || '👑')}
                 </div>
                 <div class="commander-name-box">
@@ -438,6 +438,50 @@ function selectRuneForSocket(runeId) {
  */
 function switchLobbyTab(tabName) {
     // 단일 지휘관 센터 체계로 통합 완료
+}
+
+/**
+ * 지휘관 일러스트 확대 뷰어 모달 열기 (v0.27.1 New)
+ */
+function viewCommanderIllustration(charId) {
+    const modal = document.getElementById("illustration-viewer-modal");
+    if (!modal) return;
+
+    const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+    if (!charBase) return;
+
+    const imgEl = document.getElementById("viewer-img");
+    const gradeBadge = document.getElementById("viewer-grade-badge");
+    const nameEl = document.getElementById("viewer-name");
+    const titleEl = document.getElementById("viewer-title");
+
+    if (imgEl) {
+        imgEl.src = charBase.image || "";
+        imgEl.alt = charBase.name;
+    }
+
+    if (gradeBadge) {
+        const gradeInfo = (typeof CARD_GRADES !== 'undefined' && CARD_GRADES[charBase.grade]) 
+            ? CARD_GRADES[charBase.grade] 
+            : { name: charBase.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.2)" };
+        gradeBadge.textContent = `${gradeInfo.name} (${charBase.grade})`;
+        gradeBadge.style.background = gradeInfo.bg;
+        gradeBadge.style.color = gradeInfo.color;
+        gradeBadge.style.borderColor = gradeInfo.border || gradeInfo.color;
+    }
+
+    if (nameEl) nameEl.textContent = charBase.name;
+    if (titleEl) titleEl.textContent = charBase.title;
+
+    modal.style.display = "flex";
+}
+
+/**
+ * 지휘관 일러스트 확대 뷰어 모달 닫기 (v0.27.1 New)
+ */
+function closeIllustrationViewer() {
+    const modal = document.getElementById("illustration-viewer-modal");
+    if (modal) modal.style.display = "none";
 }
 
 

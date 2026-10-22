@@ -71,6 +71,21 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - **전투 UX**: 몬스터 머리 위 체력바, 사거리 프리뷰, 배속(1x/2x) 및 스페이스바 일시정지.
 
 ## 🐛 수정된 버그 및 업데이트 (Fixed Bugs & Updates)
+- **v0.27.1 (First-Time Gacha Presentation & Modal Illustration Viewer)**:
+    - **가챠 연출 차별화 (최초 획득 vs 중복 획득 분기 연출) (`index.html`, `js/gacha.js`, `style.css`)**:
+        - **최초(신규) 지휘관 획득 시**:
+            - 화면 전체 다크 딤드 오버레이(`new-char-modal-overlay`, `backdrop-filter: blur(10px)`) 발동.
+            - 캐릭터의 전체 고화질 일러스트(`new-char-img`) 및 상세 정보 박스(칭호, 이름, 설명, 인가 타워 한도, 무료 보급, 기본 소켓 개방 정보) 출력.
+            - 일러스트 왼쪽 상단 위에 **왼쪽 아래에서 오른쪽 위로 향하는 대각선(`/` 방향, `-18deg`)**의 강렬한 **`NEW!` 마크**(`new-char-diagonal-badge`) 출력.
+            - `NEW!` 마크에 살짝 작아졌다 커졌다 하는 펄스 스케일 애니메이션(`@keyframes newMarkPulse`) 무한 반복 적용.
+        - **중복 지휘관 획득 시**:
+            - 기존의 가벼운 3D 카드 뒤집기(플립) 연출(`openGachaModal`)을 유지하여 중복 소환 시의 피로도를 방지하고 성급 강화 진행도를 명확히 전달.
+    - **편성 화면 지휘관 일러스트 확대 뷰어 시스템 (`index.html`, `js/lobby.js`, `style.css`)**:
+        - 로비 지휘관 편성 화면에서 캐릭터 카드의 아바타 썸네일(`.commander-avatar`)을 클릭하면 고화질 전체 일러스트를 큰 화면으로 감상할 수 있는 모달 뷰어(`illustration-viewer-modal`) 구현.
+        - 뷰어 내에서 등급 배지, 지휘관 명칭 및 칭호 함께 표기, 우상단 닫기(×) 버튼 및 배경 클릭 닫기 지원.
+        - **요약 카드 칩 예외 처리**: 출전 지휘관 덱 요약 카드의 미니 칩(`.deck-commander-chip`, `.deck-chip-thumb`)에서는 일러스트 확대 뷰어가 열리지 않도록 `pointer-events: none` 처리 및 클릭 이벤트 완전 배제.
+    - **버전 일괄 동기화 (v0.27.1)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md`, `기획문서.md` 완벽 동기화.
 - **v0.27.0 (Commander Illustration System & Tiered Anime Visual Design)**:
     - **11인 전 지휘관 고화질 일러스트 에셋 생성 및 전면 연동 (`assets/char_*.jpg`, `constants.js`)**:
         - 모바일 미소녀 가챠 게임의 등급별 시각적 디자인 계층화 규칙을 완벽하게 적용한 전용 아니메 일러스트 11종 생성 및 프로젝트 배치:

@@ -83,7 +83,13 @@ function drawCommanderGacha() {
     }
 
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
-    openGachaModal(gachaResultData);
+
+    // v0.27.1: 최초 획득(신규)은 전체 일러스트 풀스크린 딤드 연출, 중복 뽑기 시에만 3D 카드 뒤집기 연출
+    if (result.isNew) {
+        openNewCommanderModal(charId, result);
+    } else {
+        openGachaModal(gachaResultData);
+    }
 }
 
 /**
@@ -224,3 +230,81 @@ function retryGacha() {
         }
     }, 150);
 }
+
+/**
+ * 신규 지휘관 최초 획득 풀스크린 딤드 모달 오픈 (v0.27.1 New)
+ */
+function openNewCommanderModal(charId, result) {
+    const modal = document.getElementById("new-commander-modal");
+    if (!modal) return;
+
+    const charBase = CHARACTER_DATA[charId];
+    if (!charBase) return;
+
+    const gradeInfo = CARD_GRADES[charBase.grade] || { name: charBase.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.2)", border: "#3b82f6" };
+
+    const imgEl = document.getElementById("new-char-img");
+    const gradeEl = document.getElementById("new-char-grade-badge");
+    const titleEl = document.getElementById("new-char-title");
+    const nameEl = document.getElementById("new-char-name");
+    const descEl = document.getElementById("new-char-desc");
+    const licenseEl = document.getElementById("new-char-license");
+
+    if (imgEl) {
+        imgEl.src = charBase.image || "";
+        imgEl.alt = charBase.name;
+    }
+
+    if (gradeEl) {
+        gradeEl.textContent = `${gradeInfo.name} (${charBase.grade})`;
+        gradeEl.style.background = gradeInfo.bg;
+        gradeEl.style.color = gradeInfo.color;
+        gradeEl.style.borderColor = gradeInfo.border || gradeInfo.color;
+    }
+
+    if (titleEl) titleEl.textContent = charBase.title || "지휘관";
+    if (nameEl) nameEl.textContent = charBase.name;
+    if (descEl) descEl.textContent = charBase.desc || "새로운 지휘관이 영지에 합류했습니다!";
+
+    // 인가 타워 및 보급 정보 요약
+    if (licenseEl) {
+        const caps = [];
+        if (charBase.towerCaps) {
+            for (const [tType, capVal] of Object.entries(charBase.towerCaps)) {
+                const tName = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[tType]) ? TOWER_DATA[tType].name.replace(" 타워", "") : tType;
+                caps.push(`${tName} Lv.${capVal}`);
+            }
+        }
+        const capsText = caps.length > 0 ? caps.join(", ") : "기본 타워";
+
+        const supplies = [];
+        if (charBase.initialSupplies) {
+            for (const [sKey, sCount] of Object.entries(charBase.initialSupplies)) {
+                if (sCount > 0) {
+                    const sName = (sKey === 'base') ? '기반' : ((typeof TOWER_DATA !== 'undefined' && TOWER_DATA[sKey]) ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey);
+                    supplies.push(`${sName} ${sCount}${sKey === 'base' ? '개' : '기'}`);
+                }
+            }
+        }
+        const suppliesText = supplies.length > 0 ? supplies.join(", ") : "없음";
+
+        licenseEl.innerHTML = `
+            <div>🏗️ <strong>인가 타워 한도</strong>: ${capsText}</div>
+            <div style="margin-top: 4px;">🎁 <strong>시작 무료 보급</strong>: ${suppliesText}</div>
+            <div style="margin-top: 4px; color: #a5b4fc;">🔮 <strong>기본 룬 소켓</strong>: ${result.sockets || 1}칸 개방</div>
+        `;
+    }
+
+    modal.style.display = "flex";
+}
+
+/**
+ * 신규 지휘관 최초 획득 모달 닫기
+ */
+function closeNewCommanderModal() {
+    const modal = document.getElementById("new-commander-modal");
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
+

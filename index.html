@@ -189,8 +189,46 @@
         </div>
       </div>
       <div class="gacha-modal-actions">
-        <button class="btn-gacha-action btn-gacha-retry" onclick="retryGacha()">🔮 한 번 더 소환 (100G)</button>
+        <button class="btn-gacha-action btn-gacha-retry" onclick="retryGacha()">🔮 한 번 더 소환</button>
         <button class="btn-gacha-action btn-gacha-close" onclick="closeGachaModal()">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 신규 지휘관 최초 획득 풀스크린 딤드 연출 모달 (v0.27.1 New) -->
+  <div id="new-commander-modal" style="display: none;" class="new-char-modal-overlay" onclick="closeNewCommanderModal()">
+    <div class="new-char-container" onclick="event.stopPropagation()">
+      <div class="new-char-illust-box">
+        <!-- 왼쪽 상단 대각선 펄스 NEW! 마크 -->
+        <div class="new-char-diagonal-badge">NEW!</div>
+        <!-- 등급 뱃지 -->
+        <div id="new-char-grade-badge" class="new-char-grade-badge">UR</div>
+        <!-- 전체 일러스트 이미지 -->
+        <img id="new-char-img" src="" alt="New Character" class="new-char-img">
+      </div>
+      <div class="new-char-info-box">
+        <div id="new-char-title" class="new-char-title">칭호</div>
+        <div id="new-char-name" class="new-char-name">캐릭터 이름</div>
+        <div id="new-char-desc" class="new-char-desc">캐릭터 설명</div>
+        <div id="new-char-license" class="new-char-license">타워 라이선스 정보</div>
+        <div class="new-char-actions">
+          <button class="btn-new-char-confirm" onclick="closeNewCommanderModal()">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 지휘관 일러스트 확대 뷰어 모달 (v0.27.1 New) -->
+  <div id="illustration-viewer-modal" style="display: none;" class="viewer-modal-overlay" onclick="closeIllustrationViewer()">
+    <div class="viewer-modal-box" onclick="event.stopPropagation()">
+      <button class="viewer-close-btn" onclick="closeIllustrationViewer()">×</button>
+      <div class="viewer-img-wrap">
+        <img id="viewer-img" src="" alt="Commander Illustration" class="viewer-full-img">
+      </div>
+      <div class="viewer-info-bar">
+        <span id="viewer-grade-badge" class="viewer-grade-badge">UR</span>
+        <span id="viewer-name" class="viewer-name">지휘관 이름</span>
+        <span id="viewer-title" class="viewer-title">칭호</span>
       </div>
     </div>
   </div>
