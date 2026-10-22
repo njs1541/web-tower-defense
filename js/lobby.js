@@ -24,168 +24,9 @@ function updateLobbyUI() {
 
     // 1. 미소녀 지휘관 & 소켓 룬 섹션 렌더링 (v0.23.0)
     renderCommanderSection();
-
-    // 2. 타워 조각 보관함 렌더링 (v0.20.0)
-    renderFragmentList();
 }
 
-/**
- * 타워 조각 보관함 및 타일 버튼 렌더링 (v0.20.0)
- */
-function renderFragmentList() {
-    const fragList = document.getElementById("fragment-list");
-    if (!fragList || typeof USER_DATA === 'undefined' || typeof TOWER_DATA === 'undefined') return;
-    fragList.innerHTML = "";
 
-    // 모든 타워 목록을 순회하여 조각 타일 버튼 생성
-    const allTowerIds = Object.keys(TOWER_DATA);
-
-    allTowerIds.forEach(id => {
-        const currentFrag = (USER_DATA.fragments && USER_DATA.fragments[id]) || 0;
-        const isOwned = USER_DATA.inventory && USER_DATA.inventory.includes(id);
-        const lv = (USER_DATA.levels && USER_DATA.levels[id]) || 1;
-        const imgPath = (typeof SHARD_IMAGES !== 'undefined' && SHARD_IMAGES[id]) ? SHARD_IMAGES[id] : "assets/shard_ranged.jpg";
-        const shardName = (typeof SHARD_NAMES !== 'undefined' && SHARD_NAMES[id]) ? SHARD_NAMES[id] : `${TOWER_DATA[id].name} 조각`;
-
-        let actionText = "";
-        let actionClass = "";
-        let reqCost = 0;
-        let canAct = false;
-        let clickHandler = null;
-
-        if (!isOwned) {
-            reqCost = 30; // 미보유 카드 정가 제작: 30개
-            if (currentFrag >= reqCost) {
-                actionText = `제작 가능 (30)`;
-                actionClass = "can-craft";
-                canAct = true;
-                clickHandler = () => {
-                    if (confirm(`'${TOWER_DATA[id].name}'을(를) 조각 30개로 제작하시겠습니까?`)) {
-                        if (craftCard(id)) {
-                            alert("🎉 제작 성공! 이제 해당 타워를 관장하는 지휘관을 통해 사용할 수 있습니다.");
-                            updateLobbyUI();
-                        }
-                    }
-                };
-            } else {
-                actionText = `제작 (${currentFrag}/${reqCost})`;
-                actionClass = "need-more";
-                clickHandler = () => {
-                    alert(`조각이 부족합니다.\n제작에 필요한 조각: ${reqCost}개 (현재: ${currentFrag}개)`);
-                };
-            }
-        } else {
-            const isMax = lv >= 5;
-            if (isMax) {
-                actionText = `MAX (최대 Lv.5)`;
-                actionClass = "max-lv";
-                clickHandler = () => {
-                    alert(`'${TOWER_DATA[id].name}'은(는) 이미 최고 레벨(Lv.5)입니다!`);
-                };
-            } else {
-                reqCost = lv * 10;
-                if (currentFrag >= reqCost) {
-                    actionText = `Lv.${lv + 1} 강화 (${reqCost})`;
-                    actionClass = "can-upgrade";
-                    canAct = true;
-                    clickHandler = () => {
-                        if (confirm(`조각 ${reqCost}개를 소모하여 '${TOWER_DATA[id].name}'을(를) Lv.${lv + 1}로 강화하시겠습니까?`)) {
-                            if (upgradeTower(id)) {
-                                alert("⚡ 강화 성공! 공격력과 성능이 증가했습니다.");
-                                updateLobbyUI();
-                            }
-                        }
-                    };
-                } else {
-                    actionText = `강화 (${currentFrag}/${reqCost})`;
-                    actionClass = "need-more";
-                    clickHandler = () => {
-                        alert(`조각이 부족합니다.\nLv.${lv + 1} 강화에 필요한 조각: ${reqCost}개 (현재: ${currentFrag}개)`);
-                    };
-                }
-            }
-        }
-
-        // 타일 버튼 엘리먼트 생성
-        const tileBtn = document.createElement("div");
-        tileBtn.className = `shard-tile-btn ${canAct ? 'ready-to-act' : ''}`;
-        tileBtn.title = isOwned ? `${TOWER_DATA[id].name} (현재 Lv.${lv})` : `${TOWER_DATA[id].name} [미보유]`;
-
-        tileBtn.innerHTML = `
-            <div class="shard-img-wrap">
-                <img src="${imgPath}" alt="${shardName}" class="shard-img" onerror="this.src='assets/op_title_bg.jpg'">
-            </div>
-            <div class="shard-tile-name">${shardName}</div>
-            <div class="shard-tile-count ${currentFrag === 0 ? 'low' : ''}">💎 ${currentFrag}개</div>
-            <div class="shard-tile-action ${actionClass}">${actionText}</div>
-        `;
-
-        if (clickHandler) {
-            tileBtn.onclick = clickHandler;
-        }
-
-        fragList.appendChild(tileBtn);
-    });
-}
-
-/**
- * 타워 상세 정보 표시 및 출전 덱 토글
- */
-function showCardDetails(towerId) {
-    const stats = getTowerStats(towerId, TOWER_DATA);
-    if (!stats) return;
-
-    const panel = document.getElementById("card-info-panel");
-    const nameEl = document.getElementById("info-name");
-    const descEl = document.getElementById("info-desc");
-    const dmgEl = document.getElementById("info-damage");
-    const rngEl = document.getElementById("info-range");
-    const spdEl = document.getElementById("info-speed");
-
-    if (!panel) return;
-
-    panel.style.display = "block";
-    const emblem = (typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[towerId]) ? TOWER_EMBLEMS[towerId] : "🏰";
-    nameEl.innerText = `${emblem} ${stats.name} (Lv.${stats.level})`;
-    nameEl.style.color = stats.color;
-    descEl.innerText = stats.desc;
-
-    dmgEl.innerText = Math.round(stats.damage * 10) / 10;
-    rngEl.innerText = stats.range;
-    spdEl.innerText = "5.0";
-
-    // 출전 덱 토글 버튼
-    let deckActionBtn = document.getElementById("btn-card-deck-toggle");
-    if (!deckActionBtn) {
-        deckActionBtn = document.createElement("button");
-        deckActionBtn.id = "btn-card-deck-toggle";
-        deckActionBtn.style.width = "100%";
-        deckActionBtn.style.marginTop = "10px";
-        deckActionBtn.style.padding = "7px";
-        deckActionBtn.style.fontWeight = "bold";
-        panel.appendChild(deckActionBtn);
-    }
-
-    const isInDeck = USER_DATA.deck && USER_DATA.deck.includes(towerId);
-    if (isInDeck) {
-        deckActionBtn.innerText = "❌ 출전 덱에서 해제";
-        deckActionBtn.style.background = "#fee2e2";
-        deckActionBtn.style.borderColor = "#f87171";
-        deckActionBtn.style.color = "#b91c1c";
-    } else {
-        deckActionBtn.innerText = "⚔️ 출전 덱에 장착";
-        deckActionBtn.style.background = "#dbeafe";
-        deckActionBtn.style.borderColor = "#60a5fa";
-        deckActionBtn.style.color = "#1d4ed8";
-    }
-
-    deckActionBtn.onclick = () => {
-        if (toggleDeckCard(towerId)) {
-            updateLobbyUI();
-            showCardDetails(towerId);
-        }
-    };
-}
 
 /**
  * 스테이지 선택
@@ -323,7 +164,8 @@ function renderCommanderSection() {
         deckIds.forEach(id => {
             const char = CHARACTER_DATA[id];
             if (char) {
-                commanderChipsHtml += `<span class="deck-commander-chip">${char.avatar || '👑'} ${char.name}</span>`;
+                const thumb = char.image ? `<img src="${char.image}" class="deck-chip-thumb" alt="${char.name}">` : (char.avatar || '👑');
+                commanderChipsHtml += `<span class="deck-commander-chip">${thumb} ${char.name}</span>`;
             }
         });
     } else {
@@ -413,7 +255,7 @@ function renderCommanderSection() {
         const gradeInfo = CARD_GRADES[baseInfo.grade] || { name: baseInfo.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.1)" };
 
         const card = document.createElement("div");
-        card.className = `commander-card ${isInDeck ? 'in-deck' : ''}`;
+        card.className = `commander-card grade-${baseInfo.grade.toLowerCase()} ${isInDeck ? 'in-deck' : ''}`;
 
         // 타워 한도 보너스 및 시작 보급 텍스트 생성
         let capsText = [];
@@ -475,7 +317,9 @@ function renderCommanderSection() {
             </div>
             
             <div class="commander-avatar-box">
-                <div class="commander-avatar">${baseInfo.avatar || '👑'}</div>
+                <div class="commander-avatar ${baseInfo.image ? 'has-image' : ''}">
+                    ${baseInfo.image ? `<img src="${baseInfo.image}" alt="${baseInfo.name}" class="commander-thumb-img" onerror="this.parentElement.innerHTML='${baseInfo.avatar || '👑'}'">` : (baseInfo.avatar || '👑')}
+                </div>
                 <div class="commander-name-box">
                     <div class="commander-name">${baseInfo.name}</div>
                     <div class="commander-title">${baseInfo.title}</div>
@@ -590,40 +434,10 @@ function selectRuneForSocket(runeId) {
 }
 
 /**
- * 로비 서브 탭 전환 (v0.25.2 Update - 2대 탭 체계)
- * @param {'commanders' | 'shards'} tabName
+ * 로비 서브 탭 전환 (단일 지휘관 센터 체계로 통합되어 레거시 호환성 유지)
  */
-let currentLobbyTab = 'commanders';
-
 function switchLobbyTab(tabName) {
-    currentLobbyTab = tabName;
-
-    // 1. 모든 탭 버튼 비활성화 및 선택 버튼 활성화
-    const tabButtons = {
-        'commanders': document.getElementById('tab-btn-commanders'),
-        'shards': document.getElementById('tab-btn-shards')
-    };
-
-    Object.keys(tabButtons).forEach(key => {
-        if (tabButtons[key]) {
-            if (key === tabName) {
-                tabButtons[key].classList.add('active');
-            } else {
-                tabButtons[key].classList.remove('active');
-            }
-        }
-    });
-
-    // 2. 모든 탭 섹션 숨김 및 선택 섹션 노출
-    const tabSections = {
-        'commanders': document.getElementById('tab-section-commanders'),
-        'shards': document.getElementById('tab-section-shards')
-    };
-
-    Object.keys(tabSections).forEach(key => {
-        if (tabSections[key]) {
-            tabSections[key].style.display = (key === tabName) ? 'block' : 'none';
-        }
-    });
+    // 단일 지휘관 센터 체계로 통합 완료
 }
+
 

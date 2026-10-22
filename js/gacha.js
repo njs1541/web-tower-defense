@@ -1,9 +1,9 @@
 /**
  * 상점 및 가챠 소환 전담 모듈 (js/gacha.js)
- * v0.23.0: 1) 미소녀 지휘관 소환(1 PP), 2) 신비한 룬 소환(5 RP), 3) 타워&조각 소환(100 TP)
+ * v0.26.1: 1) 미소녀 지휘관 소환(1 PP), 2) 신비한 룬 소환(5 RP) 2대 소환 제단
  */
 
-let lastGachaType = 'tower'; // 'tower', 'commander', 'rune'
+let lastGachaType = 'commander'; // 'commander', 'rune'
 
 /**
  * 상점 UI 열기/닫기 토글
@@ -14,72 +14,7 @@ function toggleShop() {
     shop.style.display = (shop.style.display === "none" || shop.style.display === "") ? "block" : "none";
 }
 
-/**
- * 1. 기존 타워 & 조각 소환 (100 TP/골드 소모)
- */
-function drawGacha() {
-    lastGachaType = 'tower';
-    const cost = 100;
-    if (USER_DATA.gold < cost) {
-        alert("타워 포인트(골드)가 부족합니다! (필요: 100)");
-        return;
-    }
 
-    USER_DATA.gold -= cost;
-    saveData();
-    if (typeof updateLobbyUI === 'function') updateLobbyUI();
-
-    const towerKeys = Object.keys(TOWER_DATA);
-    const randomKey = towerKeys[Math.floor(Math.random() * towerKeys.length)];
-    const towerInfo = TOWER_DATA[randomKey];
-
-    const isCard = Math.random() < 0.2;
-    let gachaResultData = {};
-
-    if (isCard) {
-        const isNew = addCard(randomKey);
-        if (isNew) {
-            gachaResultData = {
-                type: 'new_card',
-                badgeText: "🎉 NEW 완제품 카드!",
-                badgeType: "card",
-                isLegendary: true,
-                emblem: (typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[randomKey]) ? TOWER_EMBLEMS[randomKey] : "🏹",
-                title: towerInfo.name,
-                desc: towerInfo.desc,
-                detail: "신규 카드를 획득하여 덱에 추가되었습니다!"
-            };
-        } else {
-            addFragment(randomKey, 10);
-            gachaResultData = {
-                type: 'duplicate',
-                badgeText: "🔁 중복 변환 (조각 +10)",
-                badgeType: "frag",
-                isLegendary: false,
-                emblem: (typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[randomKey]) ? TOWER_EMBLEMS[randomKey] : "💎",
-                title: `${towerInfo.name} 조각`,
-                desc: towerInfo.desc,
-                detail: "이미 보유한 카드이므로 조각 10개로 변환되었습니다."
-            };
-        }
-    } else {
-        const amount = Math.floor(Math.random() * 4) + 2; // 2~5개
-        addFragment(randomKey, amount);
-        gachaResultData = {
-            type: 'fragment',
-            badgeText: `💎 조각 획득 (+${amount})`,
-            badgeType: "frag",
-            isLegendary: false,
-            emblem: "💎",
-            title: `${towerInfo.name} 조각`,
-            desc: towerInfo.desc,
-            detail: `조각을 모으면 타워를 제작하거나 강화할 수 있습니다.`
-        };
-    }
-
-    if (typeof updateLobbyUI === 'function') updateLobbyUI();
-    openGachaModal(gachaResultData);
-}
 
 /**
  * 2. 미소녀 지휘관 소환 (1 PP 소모) - v0.23.0 New
@@ -123,6 +58,7 @@ function drawCommanderGacha() {
             badgeText: `👑 [${gradeInfo.name}] 신규 지휘관 획득!`,
             badgeType: "card",
             isLegendary: charBase.grade === 'SR' || charBase.grade === 'UR' || charBase.grade === 'U' || charBase.grade === 'R',
+            image: charBase.image,
             emblem: charBase.avatar || "👑",
             title: `${charBase.name} (${charBase.title})`,
             desc: charBase.desc,
@@ -138,6 +74,7 @@ function drawCommanderGacha() {
             badgeText: `🔁 지휘관 성급 강화 (+1)`,
             badgeType: "frag",
             isLegendary: result.upgraded,
+            image: charBase.image,
             emblem: charBase.avatar || "👑",
             title: `${charBase.name} ★${result.star}`,
             desc: charBase.desc,
@@ -227,7 +164,13 @@ function openGachaModal(data) {
         badge.innerText = data.badgeText;
         badge.className = `gacha-card-badge ${data.badgeType}`;
     }
-    if (emblem) emblem.innerText = data.emblem || "🔮";
+    if (emblem) {
+        if (data.image) {
+            emblem.innerHTML = `<img src="${data.image}" style="width: 76px; height: 76px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.8);">`;
+        } else {
+            emblem.innerText = data.emblem || "🔮";
+        }
+    }
     if (title) title.innerText = data.title;
     if (desc) desc.innerText = data.desc;
     if (detail) detail.innerText = data.detail;
@@ -274,12 +217,10 @@ function closeGachaModal() {
 function retryGacha() {
     closeGachaModal();
     setTimeout(() => {
-        if (lastGachaType === 'commander') {
-            drawCommanderGacha();
-        } else if (lastGachaType === 'rune') {
+        if (lastGachaType === 'rune') {
             drawRuneGacha();
         } else {
-            drawGacha();
+            drawCommanderGacha();
         }
     }, 150);
 }

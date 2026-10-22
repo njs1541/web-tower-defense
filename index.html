@@ -62,69 +62,42 @@
       </div>
       <div id="stage-desc-text" style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Stage 1: 평원의 미로 (기본 난이도)</div>
 
-      <!-- 상점 UI (3대 소환 시스템: 지휘관 1PP, 룬 5RP, 타워 100TP) -->
+      <!-- 상점 UI (2대 소환 시스템: 지휘관 1PP, 룬 5RP) -->
       <div id="shop-ui"
-        style="display: none; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 20px; background: #ffffff; max-width: 600px; margin: 0 auto 25px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.06);">
+        style="display: none; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 20px; background: #ffffff; max-width: 540px; margin: 0 auto 25px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.06);">
         <h3 style="margin-top: 0; color: #0f172a; font-size: 18px;">🏪 차원 소환 제단</h3>
         <p style="color: #64748b; font-size: 13px; margin-top: -6px; margin-bottom: 16px;">보유한 재화로 미소녀 지휘관과 강력한 룬을 소환하여 전력을 강화하세요.</p>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
           <!-- 1. 지휘관 소환 -->
-          <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 12px; text-align: center;">
-            <div style="font-size: 26px;">👑</div>
-            <div style="font-weight: bold; font-size: 14px; color: #0369a1; margin-top: 4px;">지휘관 소환</div>
-            <div style="font-size: 11px; color: #64748b; margin: 4px 0 10px 0;">미소녀 지휘관 & 소켓</div>
-            <button onclick="drawCommanderGacha()" style="width: 100%; background: #0284c7; color: white; border: none; padding: 7px 0; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(2,132,199,0.3);">💎 1 PP 소환</button>
+          <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1.5px solid #7dd3fc; border-radius: 10px; padding: 14px 12px; text-align: center;">
+            <div style="font-size: 28px;">👑</div>
+            <div style="font-weight: bold; font-size: 15px; color: #0369a1; margin-top: 4px;">지휘관 소환</div>
+            <div style="font-size: 11px; color: #64748b; margin: 4px 0 12px 0;">미소녀 지휘관 &amp; 소켓</div>
+            <button onclick="drawCommanderGacha()" style="width: 100%; background: #0284c7; color: white; border: none; padding: 8px 0; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(2,132,199,0.3);">💎 1 PP 소환</button>
           </div>
 
           <!-- 2. 룬 소환 -->
-          <div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border: 1.5px solid #d8b4fe; border-radius: 10px; padding: 12px; text-align: center;">
-            <div style="font-size: 26px;">🔮</div>
-            <div style="font-weight: bold; font-size: 14px; color: #7e22ce; margin-top: 4px;">신비한 룬 소환</div>
-            <div style="font-size: 11px; color: #64748b; margin: 4px 0 10px 0;">속성 패시브 / 액티브 스펠</div>
-            <button onclick="drawRuneGacha()" style="width: 100%; background: #9333ea; color: white; border: none; padding: 7px 0; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(147,51,234,0.3);">🔮 5 RP 소환</button>
-          </div>
-
-          <!-- 3. 타워 카드 소환 -->
-          <div style="background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border: 1.5px solid #fde047; border-radius: 10px; padding: 12px; text-align: center;">
-            <div style="font-size: 26px;">📦</div>
-            <div style="font-weight: bold; font-size: 14px; color: #a16207; margin-top: 4px;">타워 & 조각</div>
-            <div style="font-size: 11px; color: #64748b; margin: 4px 0 10px 0;">완제품 카드 & 조각</div>
-            <button onclick="drawGacha()" style="width: 100%; background: #d97706; color: white; border: none; padding: 7px 0; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(217,119,6,0.3);">🪙 100 TP 소환</button>
+          <div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border: 1.5px solid #d8b4fe; border-radius: 10px; padding: 14px 12px; text-align: center;">
+            <div style="font-size: 28px;">🔮</div>
+            <div style="font-weight: bold; font-size: 15px; color: #7e22ce; margin-top: 4px;">신비한 룬 소환</div>
+            <div style="font-size: 11px; color: #64748b; margin: 4px 0 12px 0;">속성 패시브 / 액티브 스펠</div>
+            <button onclick="drawRuneGacha()" style="width: 100%; background: #9333ea; color: white; border: none; padding: 8px 0; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(147,51,234,0.3);">🔮 5 RP 소환</button>
           </div>
         </div>
         <div id="gacha-result" style="margin-top: 10px; font-weight: bold; color: blue;"></div>
       </div>
 
-      <!-- 로비 서브 탭 네비게이션 (v0.25.2 Update) -->
-      <div class="lobby-tab-container">
-        <button id="tab-btn-commanders" class="lobby-tab-btn active" onclick="switchLobbyTab('commanders')">👑 지휘관 &amp; 룬 소켓</button>
-        <button id="tab-btn-shards" class="lobby-tab-btn" onclick="switchLobbyTab('shards')">🔮 타워 조각 보관함</button>
-      </div>
-
-      <!-- 1. 미소녀 지휘관 & 소켓 룬 편성 섹션 (v0.23.0 New) -->
-      <div id="tab-section-commanders" class="lobby-card-box lobby-tab-content">
+      <!-- 미소녀 지휘관 & 소켓 룬 편성 센터 (단일 메인 섹션) -->
+      <div id="tab-section-commanders" class="lobby-card-box">
         <h3 style="margin-top: 0; font-size: 17px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <span>👑</span> 미소녀 지휘관 &amp; 룬 소켓
+          <span>👑</span> 미소녀 지휘관 &amp; 룬 소켓 편성
         </h3>
         <p style="font-size: 12px; color: #64748b; margin-top: 4px; margin-bottom: 16px;">
           지휘관 카드를 출전 덱(최대 3명)에 편성하면 지휘관이 관장하는 고유 타워가 인게임에 자동 배치되며, 소켓에 룬을 장착할 수 있습니다.
         </p>
         <div id="commander-list" class="commander-grid">
           <!-- JS로 동적 렌더링 -->
-        </div>
-      </div>
-
-      <!-- 3. 타워 조각 보관함 및 강화 타일 섹션 (v0.20.0) -->
-      <div id="tab-section-shards" class="lobby-card-box lobby-tab-content" style="display: none;">
-        <h3 style="margin-top: 0; font-size: 17px; color: #1e293b; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <span>🔮</span> 타워 조각 보관함
-        </h3>
-        <p style="font-size: 12px; color: #64748b; margin-top: 4px; margin-bottom: 16px;">
-          조각을 모아 타일 버튼을 클릭하면 새로운 타워를 제작(30개)하거나 기존 타워를 강화할 수 있습니다.
-        </p>
-        <div id="fragment-list" class="fragment-grid">
-          <!-- JS로 타일 버튼 생성 -->
         </div>
       </div>
     </div>

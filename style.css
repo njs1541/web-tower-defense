@@ -1007,129 +1007,7 @@ button.selected {
   text-align: center;
 }
 
-.fragment-grid {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
 
-.shard-tile-btn {
-  width: 125px;
-  background: #ffffff;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 12px;
-  padding: 12px 8px 10px 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  user-select: none;
-}
-
-.shard-tile-btn:hover {
-  transform: translateY(-4px);
-  border-color: #6366f1;
-  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.18);
-}
-
-.shard-tile-btn.ready-to-act {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
-
-.shard-tile-btn.ready-to-act:hover {
-  border-color: #2563eb;
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
-}
-
-.shard-img-wrap {
-  width: 68px;
-  height: 68px;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
-  background: #0f172a;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.shard-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.shard-tile-btn:hover .shard-img {
-  transform: scale(1.08);
-}
-
-.shard-tile-name {
-  margin-top: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #1e293b;
-  line-height: 1.2;
-}
-
-.shard-tile-count {
-  margin-top: 3px;
-  margin-bottom: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #6366f1;
-}
-
-.shard-tile-count.low {
-  color: #64748b;
-}
-
-.shard-tile-action {
-  width: 100%;
-  padding: 5px 0;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-align: center;
-  box-sizing: border-box;
-  transition: background 0.15s ease;
-}
-
-.shard-tile-action.can-craft {
-  background: #2563eb;
-  color: #ffffff;
-}
-
-.shard-tile-action.can-craft:hover {
-  background: #1d4ed8;
-}
-
-.shard-tile-action.can-upgrade {
-  background: #10b981;
-  color: #ffffff;
-}
-
-.shard-tile-action.can-upgrade:hover {
-  background: #059669;
-}
-
-.shard-tile-action.need-more {
-  background: #f1f5f9;
-  color: #94a3b8;
-  border: 1px solid #e2e8f0;
-}
-
-.shard-tile-action.max-lv {
-  background: #475569;
-  color: #ffffff;
-}
 
 /* 타워 상세 패널 & 인게임 강화 (v0.22.0) */
 #tower-detail-panel {
@@ -1246,36 +1124,7 @@ button.selected {
    로비 탭(Tab) 네비게이션 & 지휘관 시스템 스타일 (v0.23.1 New)
    ============================================================ */
 
-.lobby-tab-container {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 22px;
-}
 
-.lobby-tab-btn {
-  padding: 9px 18px;
-  border-radius: 8px;
-  border: 1.5px solid #cbd5e1;
-  background: #ffffff;
-  color: #475569;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.lobby-tab-btn:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-}
-
-.lobby-tab-btn.active {
-  background: #2563eb;
-  color: #ffffff;
-  border-color: #2563eb;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
-}
 
 .commander-grid {
   display: grid;
@@ -1419,21 +1268,82 @@ button.selected {
 .commander-avatar-box {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 8px;
 }
 
 .commander-avatar {
   font-size: 26px;
-  width: 42px;
-  height: 42px;
+  width: 54px;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
+  background: #0f172a;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
   flex-shrink: 0;
+  overflow: hidden;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.commander-avatar.has-image {
+  border: none;
+  background: transparent;
+}
+
+.commander-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.commander-card:hover .commander-thumb-img {
+  transform: scale(1.08);
+}
+
+.deck-chip-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+}
+
+/* 등급별 카드 비주얼 및 홀로그램 광원 효과 */
+.commander-card.grade-c {
+  border-color: #cbd5e1;
+}
+
+.commander-card.grade-uc {
+  border-color: #34d399;
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
+}
+
+.commander-card.grade-r {
+  border-color: #60a5fa;
+  background: linear-gradient(180deg, #ffffff 0%, #eff6ff 100%);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
+}
+
+.commander-card.grade-sr {
+  border-color: #f87171;
+  background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15);
+}
+
+.commander-card.grade-ur {
+  border: 2px solid #fbbf24;
+  background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+}
+
+.commander-card.grade-u {
+  border: 2px solid #a855f7;
+  background: linear-gradient(145deg, #ffffff 0%, #faf5ff 100%);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.3);
 }
 
 .commander-name {

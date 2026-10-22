@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.26.0";
+const GAME_VERSION = "v0.27.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -21,22 +21,6 @@ const TOWER_EMBLEMS = {
     sniper: "🎯",
     power: "💥",
     shock: "⚡"
-};
-
-// 타워별 조각 이미지 에셋
-const SHARD_IMAGES = {
-    ranged: "assets/shard_ranged.jpg",
-    melee: "assets/shard_melee.jpg",
-    ice: "assets/shard_ice.jpg",
-    bomb: "assets/shard_bomb.jpg"
-};
-
-// 타워별 조각 명칭
-const SHARD_NAMES = {
-    ranged: "원거리 조각",
-    melee: "근거리 조각",
-    ice: "얼음 조각",
-    bomb: "폭탄 조각"
 };
 
 // 몬스터 체력 및 난이도 밸런스 설정
@@ -305,6 +289,7 @@ const CHARACTER_DATA = {
         title: "견습 성기사",
         grade: "C",
         avatar: "🛡️",
+        image: "assets/char_liana.jpg",
         maxSockets: 2,
         baseSockets: 1,
         levelCaps: {
@@ -321,6 +306,7 @@ const CHARACTER_DATA = {
         title: "바람의 사수",
         grade: "UC",
         avatar: "🏹",
+        image: "assets/char_elena.jpg",
         maxSockets: 2,
         baseSockets: 1,
         levelCaps: {
@@ -339,6 +325,7 @@ const CHARACTER_DATA = {
         title: "강철의 검사",
         grade: "UC",
         avatar: "⚔️",
+        image: "assets/char_chloe.jpg",
         maxSockets: 2,
         baseSockets: 1,
         levelCaps: {
@@ -356,6 +343,7 @@ const CHARACTER_DATA = {
         title: "매의 눈 저격수",
         grade: "UC",
         avatar: "🎯",
+        image: "assets/char_charlotte.jpg",
         maxSockets: 2,
         baseSockets: 1,
         levelCaps: {
@@ -373,6 +361,7 @@ const CHARACTER_DATA = {
         title: "서리의 마도사",
         grade: "UC",
         avatar: "❄️",
+        image: "assets/char_cecilia.jpg",
         maxSockets: 2,
         baseSockets: 1,
         levelCaps: {
@@ -390,6 +379,7 @@ const CHARACTER_DATA = {
         title: "화약의 포격수",
         grade: "UC",
         avatar: "💣",
+        image: "assets/char_greta.jpg",
         maxSockets: 2,
         baseSockets: 1,
         levelCaps: {
@@ -407,6 +397,7 @@ const CHARACTER_DATA = {
         title: "벽력의 정령사",
         grade: "UC",
         avatar: "⚡",
+        image: "assets/char_ada.jpg",
         maxSockets: 2,
         baseSockets: 1,
         levelCaps: {
@@ -424,6 +415,7 @@ const CHARACTER_DATA = {
         title: "서리의 마녀",
         grade: "R",
         avatar: "❄️",
+        image: "assets/char_freya.jpg",
         maxSockets: 3,
         baseSockets: 2,
         levelCaps: {
@@ -442,6 +434,7 @@ const CHARACTER_DATA = {
         title: "비전 폭파술사",
         grade: "SR",
         avatar: "💣",
+        image: "assets/char_scarlet.jpg",
         maxSockets: 4,
         baseSockets: 2,
         levelCaps: {
@@ -459,6 +452,7 @@ const CHARACTER_DATA = {
         title: "성스러운 대사제",
         grade: "UR",
         avatar: "✨",
+        image: "assets/char_seraphina.jpg",
         maxSockets: 5,
         baseSockets: 3,
         levelCaps: {
@@ -477,6 +471,7 @@ const CHARACTER_DATA = {
         title: "성간의 지배자",
         grade: "U",
         avatar: "🌌",
+        image: "assets/char_lumina.jpg",
         maxSockets: 6,
         baseSockets: 4,
         levelCaps: {
