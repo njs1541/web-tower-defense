@@ -1209,16 +1209,174 @@ button.selected {
 
 .commander-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  /* 2열 균등 배치로 4명이 2x2 완벽 대칭 */
+  grid-template-columns: repeat(3, 1fr);
+  /* 3열 균등 배치로 지휘관 카드를 3개씩 나열 */
   gap: 14px;
   justify-content: center;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 900px) {
+  .commander-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
   .commander-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ============================================================
+   출전 편성된 캐릭터 3개 전용 슬롯 영역 (v0.35.0 New)
+   ============================================================ */
+.deck-deployed-section {
+  margin-top: 18px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.deck-deployed-section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.deck-deployed-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .deck-deployed-slots-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.deck-empty-slot {
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.deck-empty-slot:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.deck-empty-slot.is-leader-slot {
+  background: #fffdf5;
+  border-color: #fde047;
+  color: #b45309;
+}
+
+.deck-empty-slot-icon {
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+
+/* ============================================================
+   지휘관 도감 정렬 & 필터 툴바 (v0.35.0 New)
+   ============================================================ */
+.commander-roster-section {
+  text-align: left;
+  margin-top: 24px;
+}
+
+.commander-roster-header {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.commander-sort-toolbar {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sort-toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sort-toolbar-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #64748b;
+  min-width: 65px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sort-btn-group,
+.filter-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.btn-sort-chip,
+.btn-filter-chip {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 9px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.2;
+}
+
+.btn-sort-chip:hover,
+.btn-filter-chip:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.btn-sort-chip.active,
+.btn-filter-chip.active {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.3);
 }
 
 .commander-card {
@@ -1245,8 +1403,18 @@ button.selected {
   box-shadow: 0 0 0 1px #2563eb, 0 4px 10px rgba(37, 99, 235, 0.15);
 }
 
+.commander-card.is-deployed-slot {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.commander-card.is-leader-card {
+  border: 2px solid #f59e0b !important;
+  background: linear-gradient(145deg, #fffdf5 0%, #fffbeb 100%);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25);
+}
+
 /* ============================================================
-   출전 지휘관 덱 전술 요약 카드 (v0.25.3 New)
+   출전 지휘관 덱 전술 요약 카드 (v0.25.3 / v0.35.0 New: 3열 전폭 차지)
    ============================================================ */
 .commander-deck-summary-card {
   background: linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%);
@@ -1259,6 +1427,8 @@ button.selected {
   flex-direction: column;
   justify-content: flex-start;
   gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .deck-summary-header {

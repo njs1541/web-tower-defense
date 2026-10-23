@@ -127,8 +127,207 @@ function buyTalent(key) {
 
 let selectingRuneFor = { charId: null, socketIndex: 0 };
 
+// [v0.35.0 New] 로비 지휘관 도감 정렬 및 필터 상태 관리
+let currentCommanderSort = 'grade_desc'; // 'grade_desc', 'grade_asc', 'star_desc', 'element', 'role', 'name'
+let currentCommanderFilter = 'all';      // 'all', 'holy', 'fire', 'frost', 'shock', 'void', 'guardian', 'ranger', 'mage', 'tactician'
+
 /**
- * 지휘관 카드 및 룬 소켓 목록 렌더링
+ * 정렬 기준 변경 핸들러
+ */
+function setCommanderSort(sortKey) {
+    currentCommanderSort = sortKey;
+    renderCommanderSection();
+}
+
+/**
+ * 속성 필터 변경 핸들러
+ */
+function setCommanderFilter(filterKey) {
+    currentCommanderFilter = filterKey;
+    renderCommanderSection();
+}
+
+/**
+ * 등급 가중치 헬퍼
+ */
+function getCharGradeWeight(grade) {
+    const weights = { 'U': 6, 'UR': 5, 'SR': 4, 'R': 3, 'UC': 2, 'C': 1 };
+    return weights[grade] || 1;
+}
+
+/**
+ * 원소 순서 가중치 헬퍼
+ */
+function getCharElementWeight(elem) {
+    const order = { 'holy': 1, 'fire': 2, 'frost': 3, 'shock': 4, 'void': 5 };
+    return order[elem] || 99;
+}
+
+/**
+ * 역할군 순서 가중치 헬퍼
+ */
+function getCharRoleWeight(role) {
+    const order = { 'guardian': 1, 'ranger': 2, 'mage': 3, 'tactician': 4 };
+    return order[role] || 99;
+}
+
+/**
+ * 단일 지휘관 카드 HTML 엘리먼트 생성 헬퍼
+ */
+function createSingleCommanderCard(charId, isDeployedSlot = false, slotIndex = 0) {
+    const ownedChars = USER_DATA.characters || {};
+    const charData = ownedChars[charId] || { star: 1, sockets: 1, equippedRunes: [] };
+    const baseInfo = CHARACTER_DATA[charId];
+    if (!baseInfo) return document.createElement('div');
+
+    const deckIds = USER_DATA.characterDeck || [];
+    const isInDeck = deckIds.includes(charId);
+    const isLeader = isInDeck && deckIds[0] === charId;
+    const gradeInfo = CARD_GRADES[baseInfo.grade] || { name: baseInfo.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.1)", border: "#3b82f6" };
+
+    const card = document.createElement("div");
+    card.className = `commander-card grade-${baseInfo.grade.toLowerCase()} ${isInDeck ? 'in-deck' : ''} ${isLeader ? 'is-leader-card' : ''} ${isDeployedSlot ? 'is-deployed-slot' : ''}`;
+
+    // 타워 한도 보너스 텍스트 생성
+    let capsText = [];
+    if (baseInfo.levelCaps) {
+        for (const [tType, cap] of Object.entries(baseInfo.levelCaps)) {
+            const tName = TOWER_DATA[tType] ? TOWER_DATA[tType].name.replace(" 타워", "") : tType;
+            capsText.push(`${tName} +${cap}강`);
+        }
+    }
+    const capsSummary = capsText.length > 0 ? capsText.join(", ") : "기본";
+
+    // 시작 타워/기반 무료 보급 요약
+    const suppliesText = [];
+    if (baseInfo.startingTowers) {
+        for (const [sKey, sCount] of Object.entries(baseInfo.startingTowers)) {
+            if (sKey === 'base') {
+                suppliesText.push(`기반 ${sCount}개`);
+            } else {
+                const sName = TOWER_DATA[sKey] ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey;
+                suppliesText.push(`${sName} ${sCount}기`);
+            }
+        }
+    }
+    const suppliesSummary = suppliesText.length > 0 ? suppliesText.join(", ") : "없음";
+
+    // 소켓 목록 생성
+    const socketsCount = charData.sockets || baseInfo.baseSockets || 1;
+    let socketsHtml = "";
+    for (let i = 0; i < socketsCount; i++) {
+        const equippedRuneId = (charData.equippedRunes && charData.equippedRunes[i]) || null;
+        if (equippedRuneId && RUNE_DATA[equippedRuneId]) {
+            const rInfo = RUNE_DATA[equippedRuneId];
+            const rGrade = CARD_GRADES[rInfo.grade] || { color: "#3b82f6" };
+            socketsHtml += `
+                <div class="commander-socket filled" onclick="openRuneEquipModal('${charId}', ${i})" title="${rInfo.name} (${rInfo.desc})">
+                    <span style="font-size: 14px;">${rInfo.icon || '🔮'}</span>
+                    <span style="font-size: 11px; font-weight: bold; color: ${rGrade.color}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75px;">${rInfo.name}</span>
+                    <button class="btn-socket-remove" onclick="event.stopPropagation(); unequipRuneAction('${charId}', ${i});" title="룬 장착 해제">×</button>
+                </div>
+            `;
+        } else {
+            socketsHtml += `
+                <div class="commander-socket empty" onclick="openRuneEquipModal('${charId}', ${i})" title="클릭하여 룬 장착">
+                    <span>➕</span>
+                    <span style="font-size: 10px; color: #94a3b8;">빈 소켓</span>
+                </div>
+            `;
+        }
+    }
+
+    // 별(성급) 표시
+    const starCount = charData.star || 1;
+    let starsHtml = "★".repeat(starCount) + "☆".repeat(Math.max(0, 5 - starCount));
+
+    // 원소 & 역할군 태그 마크업
+    let tagsHtml = "";
+    if (typeof SYNERGY_DATA !== 'undefined') {
+        const elemInfo = baseInfo.element ? SYNERGY_DATA.elements[baseInfo.element] : null;
+        const roleInfo = baseInfo.role ? SYNERGY_DATA.roles[baseInfo.role] : null;
+        if (elemInfo) {
+            tagsHtml += `<span class="commander-tag-badge" style="background:${elemInfo.bg}; color:${elemInfo.color}; border:1px solid ${elemInfo.border};">${elemInfo.symbol}${elemInfo.name}</span>`;
+        }
+        if (roleInfo) {
+            tagsHtml += `<span class="commander-tag-badge" style="background:${roleInfo.bg}; color:${roleInfo.color}; border:1px solid ${roleInfo.border};">${roleInfo.symbol}${roleInfo.name}</span>`;
+        }
+    }
+
+    // 대장/슬롯 뱃지 및 액션 버튼
+    let slotBadgeHtml = "";
+    let actionButtonsHtml = "";
+
+    if (isDeployedSlot) {
+        if (slotIndex === 0) {
+            slotBadgeHtml = `<span class="commander-leader-crown-badge">👑 1번 대장</span>`;
+            actionButtonsHtml = `
+                <button class="btn-deck-toggle in-deck" onclick="toggleCharacterDeckAction('${charId}')" style="width:100%;">
+                    ⚔️ 출전 해제
+                </button>
+            `;
+        } else {
+            slotBadgeHtml = `<span style="font-size:11px; font-weight:800; color:#2563eb; background:#dbeafe; padding:2px 7px; border-radius:10px;">⚔️ ${slotIndex + 1}번 슬롯</span>`;
+            actionButtonsHtml = `
+                <div style="display:flex; gap:6px; width:100%;">
+                    <button class="btn-set-leader" onclick="setLeaderAction('${charId}')" style="flex:1;">👑 대장 임명</button>
+                    <button class="btn-deck-toggle in-deck" onclick="toggleCharacterDeckAction('${charId}')" style="flex:1;">⚔️ 해제</button>
+                </div>
+            `;
+        }
+    } else {
+        // 하단 도감 카드
+        const leaderBadgeHtml = isLeader ? `<span class="commander-leader-crown-badge">👑 대장</span>` : '';
+        slotBadgeHtml = leaderBadgeHtml;
+        actionButtonsHtml = `
+            <button class="btn-deck-toggle ${isInDeck ? 'in-deck' : ''}" onclick="toggleCharacterDeckAction('${charId}')" style="width:100%;">
+                ${isInDeck ? '⚔️ 출전 중 (클릭 시 해제)' : '⚔️ 출전 덱에 편성'}
+            </button>
+        `;
+    }
+
+    card.innerHTML = `
+        <div class="commander-card-header">
+            <div style="display:flex; align-items:center; gap:6px;">
+                <span class="commander-grade-badge" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border:1px solid ${gradeInfo.border};">${gradeInfo.name} (${baseInfo.grade})</span>
+                ${slotBadgeHtml}
+            </div>
+            <span class="commander-stars" style="color: #f59e0b; font-size: 12px; letter-spacing: 1px;">${starsHtml}</span>
+        </div>
+        
+        <div class="commander-avatar-box">
+            <div class="commander-avatar ${baseInfo.image ? 'has-image' : ''}" onclick="viewCommanderIllustration('${charId}')" title="🔍 클릭하여 일러스트 크게 보기">
+                ${baseInfo.image ? `<img src="${baseInfo.image}" alt="${baseInfo.name}" class="commander-thumb-img" onerror="this.parentElement.innerHTML='${baseInfo.avatar || '👑'}'">` : (baseInfo.avatar || '👑')}
+            </div>
+            <div class="commander-name-box">
+                <div class="commander-name">${baseInfo.name}</div>
+                <div class="commander-title">${baseInfo.title}</div>
+                <div class="commander-tags-row">
+                    ${tagsHtml}
+                </div>
+            </div>
+        </div>
+
+        <div class="commander-cap-info">
+            <div>🛡️ 타워 강화 한도: <strong>${capsSummary}</strong></div>
+            <div style="margin-top: 3px; color: #b45309;">🎁 시작 무료 보급: <strong>${suppliesSummary}</strong></div>
+        </div>
+
+        <div class="commander-sockets-container">
+            <div style="font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 4px;">🔮 장착 룬 소켓 (${socketsCount}칸)</div>
+            <div class="commander-sockets-list">${socketsHtml}</div>
+        </div>
+
+        <div class="commander-actions">
+            ${actionButtonsHtml}
+        </div>
+    `;
+
+    return card;
+}
+
+/**
+ * 지휘관 카드 및 룬 소켓 목록 렌더링 (v0.35.0 대개편)
  */
 function renderCommanderSection() {
     const container = document.getElementById("commander-list");
@@ -146,13 +345,12 @@ function renderCommanderSection() {
     }
 
     // -------------------------------------------------------------
-    // [v0.25.3] 출전 지휘관 덱 전술 요약 카드 (건설 가능 타워 & 최대 레벨 리스트 노출)
+    // [v0.35.0] 1. 상단: 출전 지휘관 덱 전술 요약 카드 (3열 전폭 차지)
     // -------------------------------------------------------------
     const deckIds = USER_DATA.characterDeck || [];
     const deckCaps = (typeof calculateDeckTowerCaps === 'function') ? calculateDeckTowerCaps() : {};
     const deckSupplies = (typeof calculateDeckStartingSupplies === 'function') ? calculateDeckStartingSupplies() : {};
     
-    // 현재 출전 지휘관들로부터 인가된 타워 목록 수집
     let authorizedTowers = [];
     if (deckIds.length > 0 && typeof getAuthorizedTowerTypes === 'function') {
         authorizedTowers = getAuthorizedTowerTypes();
@@ -161,23 +359,7 @@ function renderCommanderSection() {
     const summaryCard = document.createElement("div");
     summaryCard.className = "commander-deck-summary-card";
 
-    // 1. 편성된 지휘관 칩들
-    let commanderChipsHtml = "";
-    if (deckIds.length > 0) {
-        deckIds.forEach((id, idx) => {
-            const char = CHARACTER_DATA[id];
-            if (char) {
-                const isLeader = (idx === 0);
-                const thumb = char.image ? `<img src="${char.image}" class="deck-chip-thumb" alt="${char.name}">` : (char.avatar || '👑');
-                const leaderTag = isLeader ? `<span class="deck-chip-leader-tag">👑대장</span>` : '';
-                commanderChipsHtml += `<span class="deck-commander-chip ${isLeader ? 'is-leader' : ''}">${thumb} ${leaderTag}${char.name}</span>`;
-            }
-        });
-    } else {
-        commanderChipsHtml = `<span style="font-size: 11px; color: #94a3b8;">출전 중인 지휘관 없음</span>`;
-    }
-
-    // 2. 건설 가능 타워 목록 및 최대 강화 한도 배지
+    // A. 건설 가능 타워 목록 및 최대 강화 한도 배지
     let towerListHtml = "";
     if (authorizedTowers.length > 0) {
         towerListHtml = `<div class="deck-tower-list">`;
@@ -199,14 +381,13 @@ function renderCommanderSection() {
         towerListHtml += `</div>`;
     } else {
         towerListHtml = `
-            <div style="background: #fff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; font-size: 12px; color: #64748b;">
-                ⚠️ 출전 지휘관이 없습니다.<br>
-                지휘관 카드의 <strong>[출전 덱에 편성]</strong>을 눌러 타워를 개방하세요!
+            <div style="background: #fff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; font-size: 11.5px; color: #64748b;">
+                ⚠️ 출전 지휘관이 없습니다. 아래 슬롯에 지휘관을 편성하여 타워를 개방하세요!
             </div>
         `;
     }
 
-    // 3. 시작 무료 보급 요약
+    // B. 시작 무료 보급 요약
     const suppliesText = [];
     for (const [sKey, sCount] of Object.entries(deckSupplies)) {
         if (sCount > 0) {
@@ -220,7 +401,7 @@ function renderCommanderSection() {
     }
     const suppliesSummary = suppliesText.length > 0 ? suppliesText.join(", ") : "없음";
 
-    // 4. 대장 오버클럭 보너스 배너
+    // C. 대장 오버클럭 보너스 배너
     const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
     const leaderBannerHtml = (leaderInfo && leaderInfo.bonusDesc) ? `
         <div class="deck-leader-bonus-box">
@@ -229,7 +410,7 @@ function renderCommanderSection() {
         </div>
     ` : '';
 
-    // 5. 활성 듀얼 시너지 배너 (v0.34.0 New)
+    // D. 활성 듀얼 시너지 배너
     const synergyData = (typeof calculateDeckSynergies === 'function') ? calculateDeckSynergies() : { activeSynergies: [] };
     let synergyChipsHtml = "";
     if (synergyData.activeSynergies && synergyData.activeSynergies.length > 0) {
@@ -242,12 +423,12 @@ function renderCommanderSection() {
             `;
         });
     } else {
-        synergyChipsHtml = `<span style="font-size: 11px; color: #94a3b8;">활성화된 시너지 없음 (동일 원소 2인 이상 또는 동일 역할군 2인 이상 편성 시 발동)</span>`;
+        synergyChipsHtml = `<span style="font-size: 11px; color: #94a3b8;">활성화된 시너지 없음 (동일 속성/역할군 2인 이상 편성 시 발동)</span>`;
     }
 
     const synergyBannerHtml = `
         <div class="deck-synergies-container">
-            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; display: flex; justify-content: space-between;">
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; display: flex; justify-content: space-between; align-items: center;">
                 <span>✨ 활성 시너지 콤보 (${synergyData.activeSynergies ? synergyData.activeSynergies.length : 0})</span>
                 <span style="font-size: 10px; color: #8b5cf6;">속성/역할군 2세트 이상</span>
             </div>
@@ -260,17 +441,11 @@ function renderCommanderSection() {
     summaryCard.innerHTML = `
         <div class="deck-summary-header">
             <div class="deck-summary-title">
-                <span>👑</span> 출전 지휘관 덱 (${deckIds.length}/3)
+                <span>👑</span> 출전 지휘관 덱 전술 요약 (${deckIds.length}/3)
             </div>
             <span style="font-size: 11px; font-weight: 700; color: #2563eb; background: #dbeafe; padding: 2px 8px; border-radius: 10px;">
-                1번 슬롯 = 대장
+                1번 슬롯 = 👑 대장(총사령관)
             </span>
-        </div>
-        <div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px;">편성된 지휘관 (첫 번째가 대장)</div>
-            <div class="deck-commanders-chips">
-                ${commanderChipsHtml}
-            </div>
         </div>
         ${leaderBannerHtml}
         ${synergyBannerHtml}
@@ -289,131 +464,146 @@ function renderCommanderSection() {
 
     container.appendChild(summaryCard);
 
-    // 각 지휘관 카드 렌더링
-    ownedIds.forEach(charId => {
-        const charData = ownedChars[charId];
-        const baseInfo = CHARACTER_DATA[charId];
-        if (!baseInfo) return;
+    // -------------------------------------------------------------
+    // [v0.35.0 New] 2. 출전 편성된 캐릭터 3개 전용 슬롯 영역 (가로 3열)
+    // -------------------------------------------------------------
+    const deployedSection = document.createElement("div");
+    deployedSection.className = "deck-deployed-section";
+    deployedSection.innerHTML = `
+        <div class="deck-deployed-section-title">
+            <span>⚔️ 출전 편성 지휘관 (최대 3명)</span>
+            <span style="font-size:11.5px; font-weight:700; color:#3b82f6;">1번 슬롯 = 👑 총사령관(대장)</span>
+        </div>
+    `;
 
-        const isInDeck = deckIds.includes(charId);
-        const isLeader = isInDeck && deckIds[0] === charId;
-        const gradeInfo = CARD_GRADES[baseInfo.grade] || { name: baseInfo.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.1)" };
+    const deployedSlotsGrid = document.createElement("div");
+    deployedSlotsGrid.className = "deck-deployed-slots-grid";
 
-        const card = document.createElement("div");
-        card.className = `commander-card grade-${baseInfo.grade.toLowerCase()} ${isInDeck ? 'in-deck' : ''} ${isLeader ? 'is-leader-card' : ''}`;
-
-        // 타워 한도 보너스 및 시작 보급 텍스트 생성
-        let capsText = [];
-        if (baseInfo.levelCaps) {
-            for (const [tType, cap] of Object.entries(baseInfo.levelCaps)) {
-                const tName = TOWER_DATA[tType] ? TOWER_DATA[tType].name.replace(" 타워", "") : tType;
-                capsText.push(`${tName} +${cap}강`);
-            }
-        }
-        const capsSummary = capsText.join(", ");
-
-        // 시작 타워/기반 무료 보급 요약 (v0.25.0 New)
-        const suppliesText = [];
-        if (baseInfo.startingTowers) {
-            for (const [sKey, sCount] of Object.entries(baseInfo.startingTowers)) {
-                if (sKey === 'base') {
-                    suppliesText.push(`기반 ${sCount}개`);
-                } else {
-                    const sName = TOWER_DATA[sKey] ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey;
-                    suppliesText.push(`${sName} ${sCount}기`);
-                }
-            }
-        }
-        const suppliesSummary = suppliesText.length > 0 ? suppliesText.join(", ") : "없음";
-
-        // 소켓 목록 생성
-        const socketsCount = charData.sockets || baseInfo.baseSockets || 1;
-        let socketsHtml = "";
-        for (let i = 0; i < socketsCount; i++) {
-            const equippedRuneId = (charData.equippedRunes && charData.equippedRunes[i]) || null;
-            if (equippedRuneId && RUNE_DATA[equippedRuneId]) {
-                const rInfo = RUNE_DATA[equippedRuneId];
-                const rGrade = CARD_GRADES[rInfo.grade] || { color: "#3b82f6" };
-                socketsHtml += `
-                    <div class="commander-socket filled" onclick="openRuneEquipModal('${charId}', ${i})" title="${rInfo.name} (${rInfo.desc})">
-                        <span style="font-size: 14px;">${rInfo.icon || '🔮'}</span>
-                        <span style="font-size: 11px; font-weight: bold; color: ${rGrade.color}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75px;">${rInfo.name}</span>
-                        <button class="btn-socket-remove" onclick="event.stopPropagation(); unequipRuneAction('${charId}', ${i});" title="룬 장착 해제">×</button>
-                    </div>
-                `;
-            } else {
-                socketsHtml += `
-                    <div class="commander-socket empty" onclick="openRuneEquipModal('${charId}', ${i})" title="클릭하여 룬 장착">
-                        <span>➕</span>
-                        <span style="font-size: 10px; color: #94a3b8;">빈 소켓</span>
-                    </div>
-                `;
-            }
-        }
-
-        // 별(성급) 표시
-        const starCount = charData.star || 1;
-        let starsHtml = "★".repeat(starCount) + "☆".repeat(Math.max(0, 5 - starCount));
-
-        // 대장 뱃지 마크업
-        const leaderBadgeHtml = isLeader ? `<span class="commander-leader-crown-badge">👑 대장(총사령관)</span>` : '';
-        const setLeaderBtnHtml = (isInDeck && !isLeader) ? `<button class="btn-set-leader" onclick="setLeaderAction('${charId}')">👑 대장으로 임명</button>` : '';
-
-        // 원소 & 역할군 태그 마크업 (v0.34.0 New)
-        let tagsHtml = "";
-        if (typeof SYNERGY_DATA !== 'undefined') {
-            const elemInfo = baseInfo.element ? SYNERGY_DATA.elements[baseInfo.element] : null;
-            const roleInfo = baseInfo.role ? SYNERGY_DATA.roles[baseInfo.role] : null;
-            if (elemInfo) {
-                tagsHtml += `<span class="commander-tag-badge" style="background:${elemInfo.bg}; color:${elemInfo.color}; border:1px solid ${elemInfo.border};">${elemInfo.symbol}${elemInfo.name}</span>`;
-            }
-            if (roleInfo) {
-                tagsHtml += `<span class="commander-tag-badge" style="background:${roleInfo.bg}; color:${roleInfo.color}; border:1px solid ${roleInfo.border};">${roleInfo.symbol}${roleInfo.name}</span>`;
-            }
-        }
-
-        card.innerHTML = `
-            <div class="commander-card-header">
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <span class="commander-grade-badge" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border:1px solid ${gradeInfo.border};">${gradeInfo.name} (${baseInfo.grade})</span>
-                    ${leaderBadgeHtml}
+    for (let slotIdx = 0; slotIdx < 3; slotIdx++) {
+        const charId = deckIds[slotIdx];
+        if (charId && ownedChars[charId]) {
+            const deployedCard = createSingleCommanderCard(charId, true, slotIdx);
+            deployedSlotsGrid.appendChild(deployedCard);
+        } else {
+            // 빈 슬롯 카드
+            const isLeaderSlot = (slotIdx === 0);
+            const emptySlotEl = document.createElement("div");
+            emptySlotEl.className = `deck-empty-slot ${isLeaderSlot ? 'is-leader-slot' : ''}`;
+            emptySlotEl.innerHTML = `
+                <div class="deck-empty-slot-icon">${isLeaderSlot ? '👑' : '⚔️'}</div>
+                <div style="font-size:14px; font-weight:800; color:${isLeaderSlot ? '#b45309' : '#475569'};">
+                    ${slotIdx + 1}번 ${isLeaderSlot ? '대장(총사령관) ' : ''}슬롯
                 </div>
-                <span class="commander-stars" style="color: #f59e0b; font-size: 12px; letter-spacing: 1px;">${starsHtml}</span>
-            </div>
-            
-            <div class="commander-avatar-box">
-                <div class="commander-avatar ${baseInfo.image ? 'has-image' : ''}" onclick="viewCommanderIllustration('${charId}')" title="🔍 클릭하여 일러스트 크게 보기">
-                    ${baseInfo.image ? `<img src="${baseInfo.image}" alt="${baseInfo.name}" class="commander-thumb-img" onerror="this.parentElement.innerHTML='${baseInfo.avatar || '👑'}'">` : (baseInfo.avatar || '👑')}
+                <div style="font-size:11.5px; opacity:0.8;">비어있음</div>
+                <div style="font-size:11px; color:#64748b; margin-top:8px;">
+                    하단 도감에서 <strong>[출전 덱에 편성]</strong>을 눌러 배치하세요
                 </div>
-                <div class="commander-name-box">
-                    <div class="commander-name">${baseInfo.name}</div>
-                    <div class="commander-title">${baseInfo.title}</div>
-                    <div class="commander-tags-row" style="display:flex; gap:4px; margin-top:4px;">
-                        ${tagsHtml}
-                    </div>
+            `;
+            deployedSlotsGrid.appendChild(emptySlotEl);
+        }
+    }
+    deployedSection.appendChild(deployedSlotsGrid);
+    container.appendChild(deployedSection);
+
+    // -------------------------------------------------------------
+    // [v0.35.0 New] 3. 지휘관 도감 정렬 & 필터 툴바
+    // -------------------------------------------------------------
+    const rosterSection = document.createElement("div");
+    rosterSection.className = "commander-roster-section";
+
+    // 출전 덱에 편성되지 않은 지휘관들 대상
+    const nonDeckIds = ownedIds.filter(id => !deckIds.includes(id));
+
+    rosterSection.innerHTML = `
+        <div class="commander-roster-header">
+            <span>📚 보유 지휘관 도감 (미편성: ${nonDeckIds.length}명 / 총 ${ownedIds.length}명)</span>
+            <span style="font-size:11.5px; color:#64748b;">클릭하여 카드를 출전 덱에 편성하세요</span>
+        </div>
+        <div class="commander-sort-toolbar">
+            <div class="sort-toolbar-row">
+                <span class="sort-toolbar-label">📊 정렬 기준:</span>
+                <div class="sort-btn-group">
+                    <button class="btn-sort-chip ${currentCommanderSort === 'grade_desc' ? 'active' : ''}" onclick="setCommanderSort('grade_desc')">⭐ 등급 높은순</button>
+                    <button class="btn-sort-chip ${currentCommanderSort === 'grade_asc' ? 'active' : ''}" onclick="setCommanderSort('grade_asc')">⭐ 등급 낮은순</button>
+                    <button class="btn-sort-chip ${currentCommanderSort === 'star_desc' ? 'active' : ''}" onclick="setCommanderSort('star_desc')">★ 성급 높은순</button>
+                    <button class="btn-sort-chip ${currentCommanderSort === 'element' ? 'active' : ''}" onclick="setCommanderSort('element')">🔥 원소순</button>
+                    <button class="btn-sort-chip ${currentCommanderSort === 'role' ? 'active' : ''}" onclick="setCommanderSort('role')">🛡️ 역할군순</button>
+                    <button class="btn-sort-chip ${currentCommanderSort === 'name' ? 'active' : ''}" onclick="setCommanderSort('name')">🔤 이름순</button>
                 </div>
             </div>
-
-            <div class="commander-cap-info">
-                <div>🛡️ 타워 강화 한도: <strong>${capsSummary}</strong></div>
-                <div style="margin-top: 3px; color: #b45309;">🎁 시작 무료 보급: <strong>${suppliesSummary}</strong></div>
+            <div class="sort-toolbar-row">
+                <span class="sort-toolbar-label">🔍 속성 필터:</span>
+                <div class="filter-btn-group">
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'all' ? 'active' : ''}" onclick="setCommanderFilter('all')">전체</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'holy' ? 'active' : ''}" onclick="setCommanderFilter('holy')">✨ 신성</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'fire' ? 'active' : ''}" onclick="setCommanderFilter('fire')">🔥 화염</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'frost' ? 'active' : ''}" onclick="setCommanderFilter('frost')">❄️ 빙결</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'shock' ? 'active' : ''}" onclick="setCommanderFilter('shock')">⚡ 전격</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'void' ? 'active' : ''}" onclick="setCommanderFilter('void')">🌌 공허</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'guardian' ? 'active' : ''}" onclick="setCommanderFilter('guardian')">🛡️ 수호자</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'ranger' ? 'active' : ''}" onclick="setCommanderFilter('ranger')">🏹 사수</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'mage' ? 'active' : ''}" onclick="setCommanderFilter('mage')">🔮 마법사</button>
+                    <button class="btn-filter-chip ${currentCommanderFilter === 'tactician' ? 'active' : ''}" onclick="setCommanderFilter('tactician')">⚙️ 전술가</button>
+                </div>
             </div>
+        </div>
+    `;
 
-            <div class="commander-sockets-container">
-                <div style="font-size: 11px; font-weight: bold; color: #64748b; margin-bottom: 4px;">🔮 장착 룬 소켓 (${socketsCount}칸)</div>
-                <div class="commander-sockets-list">${socketsHtml}</div>
-            </div>
+    // -------------------------------------------------------------
+    // [v0.35.0 New] 4. 하단 나머지 카드 그리드 (3열)
+    // -------------------------------------------------------------
+    const gridEl = document.createElement("div");
+    gridEl.className = "commander-grid";
 
-            <div class="commander-actions">
-                ${setLeaderBtnHtml}
-                <button class="btn-deck-toggle ${isInDeck ? 'in-deck' : ''}" onclick="toggleCharacterDeckAction('${charId}')">
-                    ${isInDeck ? '⚔️ 출전 중 (해제)' : '⚔️ 출전 덱에 편성'}
-                </button>
-            </div>
-        `;
+    let targetIds = nonDeckIds.slice();
 
-        container.appendChild(card);
+    // 속성 필터링
+    if (currentCommanderFilter !== 'all') {
+        targetIds = targetIds.filter(id => {
+            const b = CHARACTER_DATA[id];
+            if (!b) return false;
+            return b.element === currentCommanderFilter || b.role === currentCommanderFilter;
+        });
+    }
+
+    // 정렬 적용
+    targetIds.sort((aId, bId) => {
+        const aBase = CHARACTER_DATA[aId];
+        const bBase = CHARACTER_DATA[bId];
+        const aData = ownedChars[aId] || { star: 1 };
+        const bData = ownedChars[bId] || { star: 1 };
+
+        if (!aBase || !bBase) return 0;
+
+        switch (currentCommanderSort) {
+            case 'grade_desc':
+                return getCharGradeWeight(bBase.grade) - getCharGradeWeight(aBase.grade);
+            case 'grade_asc':
+                return getCharGradeWeight(aBase.grade) - getCharGradeWeight(bBase.grade);
+            case 'star_desc':
+                return (bData.star || 1) - (aData.star || 1);
+            case 'element':
+                return getCharElementWeight(aBase.element) - getCharElementWeight(bBase.element);
+            case 'role':
+                return getCharRoleWeight(aBase.role) - getCharRoleWeight(bBase.role);
+            case 'name':
+                return aBase.name.localeCompare(bBase.name, 'ko');
+            default:
+                return 0;
+        }
     });
+
+    if (targetIds.length === 0) {
+        gridEl.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 30px; font-size: 13px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px;">해당 조건에 일치하는 미편성 지휘관이 없습니다.</div>`;
+    } else {
+        targetIds.forEach(id => {
+            const cardEl = createSingleCommanderCard(id, false);
+            gridEl.appendChild(cardEl);
+        });
+    }
+
+    rosterSection.appendChild(gridEl);
+    container.appendChild(rosterSection);
 }
 
 /**

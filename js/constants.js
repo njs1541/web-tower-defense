@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.34.0";
+const GAME_VERSION = "v0.35.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -771,6 +771,247 @@ const CHARACTER_DATA = {
         ],
         skillQuote: "성좌의 궤도를 열어라! 심우주의 절대 심판, 코스믹 노바!",
         desc: "별의 기운을 다스리는 최고위 유니크 지휘관. 시작 시 4대 기본 타워를 각 1기씩 무료 보급하며 모든 타워 한도를 +2 전방위 확장합니다."
+    },
+    // [v0.35.0 대규모 확장 신규 지휘관 9인 라인업]
+    char_mia: {
+        id: "char_mia",
+        name: "미아",
+        title: "숲의 견습사수",
+        grade: "C",
+        element: "frost",
+        role: "ranger",
+        avatar: "🏹",
+        image: "assets/char_mia.jpg",
+        maxSockets: 2,
+        baseSockets: 1,
+        levelCaps: {
+            ranged: 1
+        },
+        startingTowers: {
+            ranged: 1,
+            base: 1
+        },
+        quotes: [
+            "숲의 요정님, 빗맞히지 않도록 힘을 주세요!",
+            "견습이지만 활시위를 당길 때는 누구보다 진지해요!",
+            "지휘관님 곁에서 훌륭한 사수로 성장하고 싶어요!"
+        ],
+        skillQuote: "바람을 타고 날아가는 화살! 서리 바람 사격!",
+        desc: "엘프 숲의 순수하고 호기심 많은 견습 궁수. 시작 시 원거리 타워 1기와 무료 기반 1개를 보급하며 원거리 타워 한도를 +1 확장합니다."
+    },
+    char_hana: {
+        id: "char_hana",
+        name: "하나",
+        title: "초보 연금술사",
+        grade: "C",
+        element: "fire",
+        role: "tactician",
+        avatar: "💣",
+        image: "assets/char_hana.jpg",
+        maxSockets: 2,
+        baseSockets: 1,
+        levelCaps: {
+            bomb: 1
+        },
+        startingTowers: {
+            base: 3
+        },
+        quotes: [
+            "이 가루랑 저 약초를 배합하면... 꺄악, 또 폭발이야?!",
+            "실패는 성공의 어머니랬어요! 이번엔 진짜 안전해요, 지휘관님!",
+            "방벽 쌓는 일이라면 제게 맡겨주세요! 기반을 튼튼하게 다질게요!"
+        ],
+        skillQuote: "비전 가루 투척 완료! 반짝이는 불꽃 팡팡!",
+        desc: "실수투성이지만 당차고 밝은 견습 연금술사. 시작 시 무료 기반 3개를 보급하며 폭탄 타워 한도를 +1 확장합니다."
+    },
+    char_valeria: {
+        id: "char_valeria",
+        name: "발레리아",
+        title: "뇌명의 여기사",
+        grade: "R",
+        element: "shock",
+        role: "guardian",
+        avatar: "⚡",
+        image: "assets/char_valeria.jpg",
+        maxSockets: 3,
+        baseSockets: 2,
+        levelCaps: {
+            shock: 2,
+            melee: 1
+        },
+        startingTowers: {
+            shock: 1,
+            melee: 1
+        },
+        quotes: [
+            "내 칼끝에 서린 벼락이 전선의 길을 열 것이다.",
+            "수호의 맹세를 저버릴 바엔 칼을 부러뜨리겠다. 지휘관, 명령을 내려라.",
+            "번개처럼 파고들어 전열을 사수한다. 물러설 생각은 마라!"
+        ],
+        skillQuote: "뇌명의 권능이여 검날에 깃들어라! 썬더 슬래시!",
+        desc: "번개의 칼날을 휘두르며 최전선을 사수하는 용맹한 여기사. 시작 시 전격 타워 1기와 근거리 타워 1기를 무료 보급하며 전격/근거리 한도를 확장합니다."
+    },
+    char_sylvia: {
+        id: "char_sylvia",
+        name: "실비아",
+        title: "천상의 명사수",
+        grade: "R",
+        element: "holy",
+        role: "ranger",
+        avatar: "✨",
+        image: "assets/char_sylvia.jpg",
+        maxSockets: 3,
+        baseSockets: 2,
+        levelCaps: {
+            sniper: 2,
+            ranged: 1
+        },
+        startingTowers: {
+            sniper: 1,
+            base: 1
+        },
+        quotes: [
+            "빛의 날개를 펴고, 하늘에서 정의의 심판을 내리겠습니다.",
+            "어둠 속에 숨어도 제 순백의 조준경을 벗어날 수는 없어요.",
+            "지휘관님의 명령이라면 저 하늘 끝까지 화살을 쏘아 올리겠어요."
+        ],
+        skillQuote: "빛의 날개여 흩날려라! 천상의 심판 화살!",
+        desc: "하얀 날개로 하늘을 날며 악을 저격하는 천상의 궁수. 시작 시 저격 타워 1기와 무료 기반 1개를 보급하며 저격/원거리 한도를 확장합니다."
+    },
+    char_camilla: {
+        id: "char_camilla",
+        name: "카밀라",
+        title: "강철 참모관",
+        grade: "R",
+        element: "fire",
+        role: "tactician",
+        avatar: "⚙️",
+        image: "assets/char_camilla.jpg",
+        maxSockets: 3,
+        baseSockets: 2,
+        levelCaps: {
+            bomb: 2,
+            melee: 1
+        },
+        startingTowers: {
+            bomb: 1,
+            base: 2
+        },
+        quotes: [
+            "전선 배치는 완벽합니다. 포격 개시를 승인해주십시오, 사령관님.",
+            "승리는 운이 아니라 정밀한 탄도 계산과 진지 구축의 결과입니다.",
+            "적의 진군 속도와 미로 경로 분석 완료. 오차는 0%입니다."
+        ],
+        skillQuote: "전 포대 동시 조준! 십자 화망 일제 포격!",
+        desc: "화력 집중과 미로 요새 구축의 천재 군사 참모. 시작 시 폭탄 타워 1기와 무료 기반 2개를 보급하며 폭탄/근거리 한도를 확장합니다."
+    },
+    char_aurelia: {
+        id: "char_aurelia",
+        name: "아우렐리아",
+        title: "태양의 성기사장",
+        grade: "SR",
+        element: "holy",
+        role: "guardian",
+        avatar: "🛡️",
+        image: "assets/char_aurelia.jpg",
+        maxSockets: 4,
+        baseSockets: 2,
+        levelCaps: {
+            melee: 3,
+            sniper: 1
+        },
+        startingTowers: {
+            melee: 2,
+            base: 2
+        },
+        quotes: [
+            "태양의 가호가 우리 전군에 함께한다! 기사단이여, 물러서지 마라!",
+            "나의 태양 방패가 굳건히 버티는 한, 그 어떤 어둠도 마을을 침범할 수 없다.",
+            "지휘관, 그대의 정의로운 깃발 아래 영광의 승리를 바치겠노라."
+        ],
+        skillQuote: "눈부신 태양의 성벽이여! 절대 불멸의 이지스!",
+        desc: "황금빛 태양 방패로 전군을 수호하는 최고위 성기사단장. 시작 시 근거리 타워 2기와 무료 기반 2개를 보급하며 근거리 타워 한도를 +3 개방합니다."
+    },
+    char_selena: {
+        id: "char_selena",
+        name: "셀레나",
+        title: "빙하의 저격공주",
+        grade: "SR",
+        element: "frost",
+        role: "ranger",
+        avatar: "❄️",
+        image: "assets/char_selena.jpg",
+        maxSockets: 4,
+        baseSockets: 2,
+        levelCaps: {
+            sniper: 3,
+            ice: 1
+        },
+        startingTowers: {
+            sniper: 1,
+            ice: 1
+        },
+        quotes: [
+            "숨소리조차 차갑게 얼어붙는 곳... 거기가 바로 제 사정거리예요.",
+            "얼어붙은 탄환은 표적의 심장까지 단숨에 동결시키지요.",
+            "후후, 지휘관님의 냉철한 판단, 아주 마음에 쏙 드는군요."
+        ],
+        skillQuote: "영하 200도의 침묵이여... 표적 완전 동결 저격!",
+        desc: "얼음 수정 저격총으로 적을 순식간에 동결시키는 왕국의 저격 공주. 시작 시 저격 타워 1기와 얼음 타워 1기를 무료 보급하며 저격 타워 한도를 +3 개방합니다."
+    },
+    char_eleanor: {
+        id: "char_eleanor",
+        name: "엘레노어",
+        title: "폭풍의 대마도사",
+        grade: "SR",
+        element: "shock",
+        role: "mage",
+        avatar: "⚡",
+        image: "assets/char_eleanor.jpg",
+        maxSockets: 4,
+        baseSockets: 2,
+        levelCaps: {
+            shock: 3,
+            ice: 1
+        },
+        startingTowers: {
+            shock: 2
+        },
+        quotes: [
+            "대기의 전도율이 임계점을 넘었습니다. 하늘의 분노를 보여드리죠.",
+            "번개는 단순한 전류가 아닙니다. 만물을 정화하는 우주의 율법이지요.",
+            "지휘관님, 귀를 막으세요. 곧 천지를 뒤흔드는 뇌우가 쏟아집니다!"
+        ],
+        skillQuote: "뇌운의 소용돌이여 폭발하라! 템페스트 아포칼립스!",
+        desc: "전장을 거대한 전자기장 폭풍으로 뒤덮는 번개의 대마도사. 시작 시 전격 타워 2기를 무료 보급하며 전격 타워 한도를 +3 개방합니다."
+    },
+    char_veronica: {
+        id: "char_veronica",
+        name: "베로니카",
+        title: "홍련의 총사령관",
+        grade: "UR",
+        element: "fire",
+        role: "tactician",
+        avatar: "👑",
+        image: "assets/char_veronica.jpg",
+        maxSockets: 5,
+        baseSockets: 3,
+        levelCaps: {
+            bomb: 3,
+            shock: 2
+        },
+        startingTowers: {
+            bomb: 1,
+            shock: 1,
+            base: 2
+        },
+        quotes: [
+            "전 함포 일제 사격 준비! 내 바다에 침범한 녀석들을 잿더미로 만들어라!",
+            "승리의 불꽃은 언제나 가장 뜨겁게 타오르는 법이다. 지휘관, 나를 따르라!",
+            "내 함대의 포문을 본 자 중에 살아남은 적은 없다. 승리는 이미 우리의 것이다!"
+        ],
+        skillQuote: "홍련의 기함이여, 주포 최대 출력 전탄 발사! 인페르노 밤바드!",
+        desc: "불꽃의 함대를 이끄는 카리스마 넘치는 홍련의 제독. 시작 시 폭탄 타워 1기, 전격 타워 1기, 무료 기반 2개를 보급하며 폭탄/전격 한도를 대폭 개방합니다."
     }
 };
 
@@ -943,17 +1184,32 @@ const COMMANDER_GACHA_CONFIG = {
     multiCostPP: 10, // 10회 소환 시 10 PP 소모
     multiCount: 11,  // 10회 소환 시 보너스로 총 11장 지급
     rates: [
-        { grade: "C", charId: "char_liana", weight: 35 },
-        { grade: "UC", charId: "char_elena", weight: 6 },
-        { grade: "UC", charId: "char_chloe", weight: 6 },
-        { grade: "UC", charId: "char_charlotte", weight: 6 },
-        { grade: "UC", charId: "char_cecilia", weight: 6 },
-        { grade: "UC", charId: "char_greta", weight: 6 },
-        { grade: "UC", charId: "char_ada", weight: 6 },
-        { grade: "R", charId: "char_freya", weight: 16 },
-        { grade: "SR", charId: "char_scarlet", weight: 8 },
-        { grade: "UR", charId: "char_seraphina", weight: 3 },
-        { grade: "U", charId: "char_lumina", weight: 2 }
+        // C 등급 (총 36%)
+        { grade: "C", charId: "char_liana", weight: 12 },
+        { grade: "C", charId: "char_mia", weight: 12 },
+        { grade: "C", charId: "char_hana", weight: 12 },
+        // UC 등급 (총 30%)
+        { grade: "UC", charId: "char_elena", weight: 5 },
+        { grade: "UC", charId: "char_chloe", weight: 5 },
+        { grade: "UC", charId: "char_charlotte", weight: 5 },
+        { grade: "UC", charId: "char_cecilia", weight: 5 },
+        { grade: "UC", charId: "char_greta", weight: 5 },
+        { grade: "UC", charId: "char_ada", weight: 5 },
+        // R 등급 (총 18%)
+        { grade: "R", charId: "char_freya", weight: 4.5 },
+        { grade: "R", charId: "char_valeria", weight: 4.5 },
+        { grade: "R", charId: "char_sylvia", weight: 4.5 },
+        { grade: "R", charId: "char_camilla", weight: 4.5 },
+        // SR 등급 (총 10%)
+        { grade: "SR", charId: "char_scarlet", weight: 2.5 },
+        { grade: "SR", charId: "char_aurelia", weight: 2.5 },
+        { grade: "SR", charId: "char_selena", weight: 2.5 },
+        { grade: "SR", charId: "char_eleanor", weight: 2.5 },
+        // UR 등급 (총 4%)
+        { grade: "UR", charId: "char_seraphina", weight: 2.0 },
+        { grade: "UR", charId: "char_veronica", weight: 2.0 },
+        // U 등급 (총 2%)
+        { grade: "U", charId: "char_lumina", weight: 2.0 }
     ]
 };
 
