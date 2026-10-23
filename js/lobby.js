@@ -22,7 +22,10 @@ function updateLobbyUI() {
         rpDisplay.innerText = USER_DATA.rp || 0;
     }
 
-    // 1. 미소녀 지휘관 & 소켓 룬 섹션 렌더링 (v0.23.0)
+    // 1. 대표 지휘관(보좌관) 쇼케이스 및 대사 렌더링 (v0.28.0)
+    renderAdjutantSection();
+
+    // 2. 미소녀 지휘관 & 소켓 룬 섹션 렌더링 (v0.23.0)
     renderCommanderSection();
 }
 
@@ -483,5 +486,108 @@ function closeIllustrationViewer() {
     const modal = document.getElementById("illustration-viewer-modal");
     if (modal) modal.style.display = "none";
 }
+
+/**
+ * -------------------------------------------------------------
+ * 로비 대표 지휘관(전속 보좌관) 쇼케이스 및 터치 인터랙션 (v0.28.0 New)
+ * -------------------------------------------------------------
+ */
+
+let currentAdjutantCharId = null;
+
+/**
+ * 로비 대표 지휘관 배너 렌더링
+ */
+function renderAdjutantSection() {
+    const banner = document.getElementById("lobby-adjutant-banner");
+    if (!banner || typeof USER_DATA === 'undefined' || typeof CHARACTER_DATA === 'undefined') return;
+
+    const ownedChars = USER_DATA.characters || {};
+    const deckIds = USER_DATA.characterDeck || [];
+
+    // 출전 덱의 1번 지휘관을 우선 보좌관으로 지정, 없으면 보유 지휘관 중 첫 번째
+    let adjutantId = null;
+    if (deckIds.length > 0 && ownedChars[deckIds[0]]) {
+        adjutantId = deckIds[0];
+    } else {
+        const ownedList = Object.keys(ownedChars);
+        if (ownedList.length > 0) adjutantId = ownedList[0];
+    }
+
+    if (!adjutantId || !CHARACTER_DATA[adjutantId]) {
+        banner.style.display = "none";
+        return;
+    }
+
+    currentAdjutantCharId = adjutantId;
+    const charBase = CHARACTER_DATA[adjutantId];
+    const charData = ownedChars[adjutantId] || { star: 1 };
+    const gradeInfo = CARD_GRADES[charBase.grade] || { name: charBase.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.2)" };
+
+    const starCount = charData.star || 1;
+    const starsHtml = "★".repeat(starCount);
+
+    // 기본 대사: 캐릭터의 첫 번째 대사
+    const defaultQuote = (charBase.quotes && charBase.quotes.length > 0) 
+        ? charBase.quotes[0] 
+        : (charBase.desc || "오늘도 영지의 평화를 지켜내겠습니다, 지휘관님!");
+
+    banner.style.display = "flex";
+    banner.innerHTML = `
+        <div class="adjutant-portrait-box" id="adjutant-portrait" onclick="interactWithAdjutant('${adjutantId}')" ondblclick="viewCommanderIllustration('${adjutantId}')" title="클릭하여 대화하기 / 더블클릭하여 일러스트 확대">
+            <img src="${charBase.image || ''}" alt="${charBase.name}" class="adjutant-portrait-img">
+            <span class="adjutant-grade-badge" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border-color:${gradeInfo.border || gradeInfo.color};">
+                ${gradeInfo.name}
+            </span>
+            <span class="adjutant-tap-hint">터치 💬</span>
+        </div>
+        <div class="adjutant-info-box">
+            <div class="adjutant-header-row">
+                <span class="adjutant-role-tag">👑 전속 보좌관</span>
+                <span class="adjutant-stars">${starsHtml}</span>
+            </div>
+            <h3 class="adjutant-name">
+                ${charBase.name}
+                <span class="adjutant-title">${charBase.title}</span>
+            </h3>
+            <div id="adjutant-speech-bubble" class="adjutant-speech-bubble" onclick="interactWithAdjutant('${adjutantId}')">
+                "${defaultQuote}"
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * 대표 지휘관 터치 인터랙션 (랜덤 대사 출력 및 바운스 모션)
+ */
+function interactWithAdjutant(charId) {
+    const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+    if (!charBase) return;
+
+    // 1. 일러스트 박스 바운스 애니메이션
+    const portrait = document.getElementById("adjutant-portrait");
+    if (portrait) {
+        portrait.classList.remove("adjutant-tap-bounce");
+        // reflow 트리거
+        void portrait.offsetWidth;
+        portrait.classList.add("adjutant-tap-bounce");
+    }
+
+    // 2. 랜덤 대사 선정 및 말풍선 갱신
+    const quotes = charBase.quotes || [charBase.desc || "지휘관님, 언제든 명령을 내려주세요!"];
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+    const bubble = document.getElementById("adjutant-speech-bubble");
+    if (bubble) {
+        bubble.style.opacity = "0";
+        bubble.style.transform = "translateY(4px)";
+        setTimeout(() => {
+            bubble.innerHTML = `"${randomQuote}"`;
+            bubble.style.opacity = "1";
+            bubble.style.transform = "translateY(0)";
+        }, 120);
+    }
+}
+
 
 

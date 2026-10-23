@@ -84,12 +84,14 @@ function drawCommanderGacha() {
 
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
 
-    // v0.27.1: 최초 획득(신규)은 전체 일러스트 풀스크린 딤드 연출, 중복 뽑기 시에만 3D 카드 뒤집기 연출
-    if (result.isNew) {
-        openNewCommanderModal(charId, result);
-    } else {
-        openGachaModal(gachaResultData);
-    }
+    // v0.28.0: 도파민 소환 시퀀스 (등급별 오라 마법진 회전 후 모달 분기)
+    playSummonSequence(charBase.grade, result.isNew, () => {
+        if (result.isNew) {
+            openNewCommanderModal(charId, result);
+        } else {
+            openGachaModal(gachaResultData);
+        }
+    });
 }
 
 /**
@@ -131,7 +133,7 @@ function drawRuneGacha() {
         type: 'rune',
         badgeText: `🔮 [${gradeInfo.name}] ${isSpell ? '액티브 스펠 룬' : '속성 패시브 룬'}`,
         badgeType: isSpell ? "card" : "frag",
-        isLegendary: runeInfo.grade === 'SR' || runeInfo.grade === 'UR' || runeInfo.grade === 'R',
+        isLegendary: runeInfo.grade === 'SR' || runeInfo.grade === 'UR' || runeInfo.grade === 'U' || runeInfo.grade === 'R',
         emblem: runeInfo.icon || "🔮",
         title: runeInfo.name,
         desc: runeInfo.desc,
@@ -139,7 +141,11 @@ function drawRuneGacha() {
     };
 
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
-    openGachaModal(gachaResultData);
+
+    // v0.28.0: 도파민 소환 시퀀스 적용
+    playSummonSequence(runeInfo.grade, false, () => {
+        openGachaModal(gachaResultData);
+    });
 }
 
 /**
@@ -232,7 +238,73 @@ function retryGacha() {
 }
 
 /**
- * 신규 지휘관 최초 획득 풀스크린 딤드 모달 오픈 (v0.27.1 New)
+ * 차원 소환 시퀀스 오버레이 연출 (v0.28.0 New - 도파민 연출)
+ * 등급에 따라 마법진의 회전 속도, 발광 색상, 스크린 쉐이크 차별화
+ */
+function playSummonSequence(grade, isNew, callback) {
+    const seqOverlay = document.getElementById("gacha-summon-sequence");
+    const circle = document.getElementById("summon-magic-circle");
+    const hintEl = document.getElementById("summon-gate-grade-hint");
+
+    if (!seqOverlay || !circle) {
+        if (callback) callback();
+        return;
+    }
+
+    // 등급별 스타일 및 텍스트 힌트 매핑
+    circle.className = "summon-magic-circle";
+    seqOverlay.classList.remove("screen-shake");
+
+    let auraClass = "aura-normal";
+    let hintText = "미지의 푸른 파동이 전장에 공명합니다...";
+
+    if (grade === 'R') {
+        auraClass = "aura-rare";
+        hintText = "신비로운 보랏빛 마법진이 활성화됩니다...!";
+    } else if (grade === 'SR') {
+        auraClass = "aura-epic";
+        hintText = "찬란한 황금빛 마력이 뿜어져 나옵니다!!";
+    } else if (grade === 'UR' || grade === 'U') {
+        auraClass = "aura-legendary";
+        hintText = "경이로운 무지갯빛 천상의 기운이 소용돌이칩니다!!!";
+        seqOverlay.classList.add("screen-shake");
+    }
+
+    circle.classList.add(auraClass);
+    if (hintEl) hintEl.textContent = hintText;
+
+    seqOverlay.style.display = "flex";
+
+    // 1.25초 후 소환 시퀀스 페이드아웃 및 결과창 호출
+    setTimeout(() => {
+        seqOverlay.style.display = "none";
+        seqOverlay.classList.remove("screen-shake");
+        if (callback) callback();
+    }, 1250);
+}
+
+/**
+ * 텍스트 타이핑 애니메이션 헬퍼
+ */
+let typingTimer = null;
+function playTypewriterEffect(el, text, speed = 35) {
+    if (!el) return;
+    if (typingTimer) clearInterval(typingTimer);
+    el.textContent = "";
+    let i = 0;
+    typingTimer = setInterval(() => {
+        if (i < text.length) {
+            el.textContent += text.charAt(i);
+            i++;
+        } else {
+            clearInterval(typingTimer);
+            typingTimer = null;
+        }
+    }, speed);
+}
+
+/**
+ * 신규 지휘관 최초 획득 풀스크린 딤드 모달 오픈 (v0.27.1 / v0.28.0 타이핑 대사 확장)
  */
 function openNewCommanderModal(charId, result) {
     const modal = document.getElementById("new-commander-modal");
@@ -249,6 +321,7 @@ function openNewCommanderModal(charId, result) {
     const nameEl = document.getElementById("new-char-name");
     const descEl = document.getElementById("new-char-desc");
     const licenseEl = document.getElementById("new-char-license");
+    const speechEl = document.getElementById("new-char-speech-text");
 
     if (imgEl) {
         imgEl.src = charBase.image || "";
@@ -265,6 +338,12 @@ function openNewCommanderModal(charId, result) {
     if (titleEl) titleEl.textContent = charBase.title || "지휘관";
     if (nameEl) nameEl.textContent = charBase.name;
     if (descEl) descEl.textContent = charBase.desc || "새로운 지휘관이 영지에 합류했습니다!";
+
+    // 지휘관 시그니처 대사 타이핑 출력 (v0.28.0 New)
+    const quote = (charBase.quotes && charBase.quotes.length > 0) ? charBase.quotes[0] : (charBase.desc || "지휘관님, 합류를 명 받았습니다!");
+    if (speechEl) {
+        playTypewriterEffect(speechEl, `"${quote}"`, 30);
+    }
 
     // 인가 타워 및 보급 정보 요약
     if (licenseEl) {
@@ -306,5 +385,10 @@ function closeNewCommanderModal() {
     if (modal) {
         modal.style.display = "none";
     }
+    if (typingTimer) {
+        clearInterval(typingTimer);
+        typingTimer = null;
+    }
 }
+
 

@@ -658,6 +658,17 @@ function showTowerDetailPanel(cell, stats) {
         titleEl.style.color = stats.color;
     }
 
+    const shardEl = document.getElementById("detail-tower-shard");
+    if (shardEl) {
+        if (stats.shardImage) {
+            shardEl.src = stats.shardImage;
+            shardEl.style.display = "block";
+            shardEl.title = `${stats.name} 속성 크리스탈`;
+        } else {
+            shardEl.style.display = "none";
+        }
+    }
+
     if (statsEl) {
         const dmgText = Math.round(stats.damage * 10) / 10;
         let specialDesc = "";
@@ -794,6 +805,51 @@ function renderInGameSpells() {
 }
 
 /**
+ * 인게임 지휘관 스펠 발동 '대각선 컷인' 연출 (v0.28.0 New)
+ */
+let cutinTimer = null;
+function triggerSpellCutin(charId, runeInfo) {
+    const overlay = document.getElementById("spell-cutin-overlay");
+    const charImg = document.getElementById("cutin-char-img");
+    const nameEl = document.getElementById("cutin-commander-name");
+    const skillEl = document.getElementById("cutin-skill-name");
+    const quoteEl = document.getElementById("cutin-skill-quote");
+    const stripe = document.getElementById("spell-cutin-stripe");
+
+    if (!overlay || !stripe) return;
+
+    // 지휘관 정보 찾기 (지정 지휘관 -> 출전 덱 1번 지휘관 fallback)
+    let commanderId = charId;
+    if (!commanderId || (typeof CHARACTER_DATA !== 'undefined' && !CHARACTER_DATA[commanderId])) {
+        if (typeof USER_DATA !== 'undefined' && USER_DATA.characterDeck && USER_DATA.characterDeck.length > 0) {
+            commanderId = USER_DATA.characterDeck[0];
+        }
+    }
+
+    const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[commanderId] : null;
+    const charName = charBase ? charBase.name : "미소녀 지휘관";
+    const charImage = (charBase && charBase.image) ? charBase.image : "assets/char_liana.jpg";
+    const skillQuote = (charBase && charBase.skillQuote) ? charBase.skillQuote : `"${runeInfo.name} 발동!"`;
+
+    if (charImg) charImg.src = charImage;
+    if (nameEl) nameEl.textContent = `👑 [${(charBase && charBase.title) || '지휘관'}] ${charName}`;
+    if (skillEl) skillEl.textContent = `${runeInfo.icon || '✨'} ${runeInfo.name}`;
+    if (quoteEl) quoteEl.textContent = `"${skillQuote}"`;
+
+    // 애니메이션 리셋 및 발동
+    overlay.style.display = "flex";
+    stripe.style.animation = "none";
+    void stripe.offsetWidth; // reflow
+    stripe.style.animation = "cutinSlide 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards";
+
+    if (cutinTimer) clearTimeout(cutinTimer);
+    cutinTimer = setTimeout(() => {
+        overlay.style.display = "none";
+        cutinTimer = null;
+    }, 850);
+}
+
+/**
  * 스펠 룬 발동 실행
  */
 function castSpellRune(spellItem) {
@@ -816,6 +872,9 @@ function castSpellRune(spellItem) {
     if (rInfo.usageType === 'single') {
         usedSpellRunes[runeId] = true;
     }
+
+    // v0.28.0: 대각선 지휘관 스펠 컷인 연출 발동
+    triggerSpellCutin(spellItem.charId, rInfo);
 
     // 스펠 고유 효과 실행
     if (runeId === 'rune_spell_gold') {

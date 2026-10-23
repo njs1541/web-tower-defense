@@ -71,6 +71,25 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - **전투 UX**: 몬스터 머리 위 체력바, 사거리 프리뷰, 배속(1x/2x) 및 스페이스바 일시정지.
 
 ## 🐛 수정된 버그 및 업데이트 (Fixed Bugs & Updates)
+- **v0.28.0 (Anime Visual Expansion & In-Game Cut-In System)**:
+    - **제안 1. 인게임 지휘관 상주 초상화 & 스펠 발동 대각선 컷인(Cut-in) 연출 (`index.html`, `js/ui.js`, `js/tower.js`, `style.css`)**:
+        - 인게임 정보 패널 상단에 출전 덱에 편성된 지휘관(최대 3인)의 상주 초상화 바(`.ingame-commanders-bar`, `.ingame-commander-chip`) 배치 및 칩 클릭 시 플로팅 대사 팝업 지원.
+        - 마나(MP)를 소모해 액티브 스펠(지휘관 룬)을 발동할 때, 화면 중앙을 가르는 대각선 띠(`spell-cutin-stripe`)와 함께 시전 지휘관의 일러스트 슬라이드 인, 스킬명, 시그니처 대사가 0.85초간 번쩍이는 극적인 컷인(`spell-cutin-overlay`) 발동.
+    - **제안 2. 가챠 소환 도파민 예고 시퀀스 & 신규 획득 타이핑 대사 (`index.html`, `js/gacha.js`, `style.css`)**:
+        - 소환 버튼 클릭 시 즉시 결과가 뜨지 않고, 화면 중앙에서 회전하는 차원 소환 마법진(`gacha-summon-sequence`, `.summon-magic-circle`)이 1.25초간 에너지를 모으는 시퀀스 추가.
+        - 획득 등급에 따라 블루(C/UC), 바이올렛(R), 골드(SR), 무지개빛 레인보우 사이클 + 스크린 쉐이크(UR/U)로 등급별 사전 예고 차별화.
+        - 신규 지휘관 최초 획득 결과창에서 지휘관의 시그니처 대사가 말풍선(`.new-char-speech-bubble`)에 타이핑 애니메이션(`typewriterEffect`)으로 출력.
+    - **제안 3. 로비 대표 지휘관(전속 보좌관) 메인 쇼케이스 & 터치 인터랙션 (`index.html`, `js/lobby.js`, `style.css`)**:
+        - 로비 상단에 출전 덱 1번 지휘관을 보여주는 대형 스탠딩 배너(`.adjutant-card-banner`) 배치.
+        - 보좌관 일러스트 클릭/터치 시 경쾌한 팝-바운스 모션(`.adjutant-tap-bounce`)과 함께 11인 전용 3종 랜덤 대사 말풍선(`.adjutant-speech-bubble`) 실시간 갱신.
+        - 더블 클릭 시 고화질 일러스트 확대 뷰어 모달 연동.
+    - **제안 4. 잔존 에셋(`shard_*.jpg`) 리퍼포징 (속성 크리스탈 엠블럼) (`index.html`, `js/constants.js`, `js/ui.js`, `js/tower.js`, `style.css`)**:
+        - 기존 미사용 상태였던 4종의 크리스탈 조각(`shard_*.jpg`)을 `TOWER_DATA`에 매핑.
+        - 인게임 타워 건설 버튼 목록에 속성 크리스탈 미니 뱃지 표시.
+        - 타워 상세 관리 패널(`#tower-detail-panel`) 헤더에 속성 크리스탈 엠블럼(`.detail-tower-shard-icon`) 표시.
+        - 상점 차원 소환 제단 룬 카드 배경에 크리스탈 오버레이 텍스처(`.shop-rune-card-bg`) 적용.
+    - **버전 일괄 동기화 (v0.28.0)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md`, `기획문서.md` 완벽 동기화.
 - **v0.27.1 (First-Time Gacha Presentation & Modal Illustration Viewer)**:
     - **가챠 연출 차별화 (최초 획득 vs 중복 획득 분기 연출) (`index.html`, `js/gacha.js`, `style.css`)**:
         - **최초(신규) 지휘관 획득 시**:

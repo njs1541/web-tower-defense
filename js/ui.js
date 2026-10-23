@@ -157,8 +157,22 @@ function updateTowerButtons() {
         if (!stats) return;
 
         const btn = document.createElement("button");
-        btn.textContent = `${stats.name} (${stats.cost}G)`;
         btn.dataset.towerId = towerId; // 식별자
+        btn.style.display = "flex";
+        btn.style.alignItems = "center";
+        btn.style.justifyContent = "space-between";
+        btn.style.width = "100%";
+        btn.style.marginBottom = "4px";
+
+        // 속성 크리스탈 미니 뱃지 (v0.28.0 New)
+        const shardThumb = stats.shardImage 
+            ? `<img src="${stats.shardImage}" style="width: 18px; height: 18px; border-radius: 4px; object-fit: cover; margin-right: 6px; border: 1px solid rgba(0,0,0,0.15);">` 
+            : '';
+
+        btn.innerHTML = `
+            <span style="display: flex; align-items: center;">${shardThumb}<strong>${stats.name}</strong></span>
+            <span style="font-size: 11px; opacity: 0.85;">${stats.cost}G</span>
+        `;
 
         // 이벤트 바인딩
         btn.onclick = (e) => {
@@ -170,4 +184,51 @@ function updateTowerButtons() {
     });
 
     updateButtonVisuals();
+    updateInGameCommandersBar();
+}
+
+/**
+ * 인게임 출전 지휘관 상주 바 UI 갱신 (v0.28.0 New)
+ */
+function updateInGameCommandersBar() {
+    const bar = document.getElementById("in-game-commanders-bar");
+    if (!bar || typeof USER_DATA === 'undefined' || typeof CHARACTER_DATA === 'undefined') return;
+
+    const deckIds = USER_DATA.characterDeck || [];
+    if (deckIds.length === 0) {
+        bar.innerHTML = `<span style="font-size: 11px; color: #94a3b8; padding: 4px;">출전 중인 지휘관이 없습니다.</span>`;
+        return;
+    }
+
+    bar.innerHTML = "";
+
+    deckIds.forEach(charId => {
+        const charBase = CHARACTER_DATA[charId];
+        if (!charBase) return;
+
+        const gradeInfo = CARD_GRADES[charBase.grade] || { name: charBase.grade, color: "#3b82f6", border: "#3b82f6" };
+        const chip = document.createElement("div");
+        chip.className = "ingame-commander-chip";
+        chip.style.borderColor = gradeInfo.border || gradeInfo.color;
+        chip.title = `${charBase.name} (${charBase.title})\n클릭하여 지휘관 대사 감상`;
+
+        chip.innerHTML = `
+            <img src="${charBase.image || ''}" alt="${charBase.name}" class="ingame-chip-avatar" style="border-color:${gradeInfo.color};">
+            <div class="ingame-chip-info">
+                <span class="ingame-chip-name">${charBase.name}</span>
+                <span class="ingame-chip-title" style="color:${gradeInfo.color}; font-weight:bold;">${gradeInfo.name}</span>
+            </div>
+        `;
+
+        // 클릭 시 말풍선 또는 효과 플로팅
+        chip.onclick = () => {
+            const quotes = charBase.quotes || [charBase.desc || "출격 준비 완료!"];
+            const q = quotes[Math.floor(Math.random() * quotes.length)];
+            if (typeof showFloatingDamage === 'function') {
+                showFloatingDamage(10, 10, `💬 ${charBase.name}: "${q}"`, gradeInfo.color);
+            }
+        };
+
+        bar.appendChild(chip);
+    });
 }

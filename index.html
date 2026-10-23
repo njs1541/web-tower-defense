@@ -78,7 +78,7 @@
           </div>
 
           <!-- 2. 룬 소환 -->
-          <div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border: 1.5px solid #d8b4fe; border-radius: 10px; padding: 14px 12px; text-align: center;">
+          <div class="shop-rune-card-bg" style="border: 1.5px solid #d8b4fe; border-radius: 10px; padding: 14px 12px; text-align: center; box-shadow: 0 4px 10px rgba(147,51,234,0.1);">
             <div style="font-size: 28px;">🔮</div>
             <div style="font-weight: bold; font-size: 15px; color: #7e22ce; margin-top: 4px;">신비한 룬 소환</div>
             <div style="font-size: 11px; color: #64748b; margin: 4px 0 12px 0;">속성 패시브 / 액티브 스펠</div>
@@ -86,6 +86,11 @@
           </div>
         </div>
         <div id="gacha-result" style="margin-top: 10px; font-weight: bold; color: blue;"></div>
+      </div>
+
+      <!-- [v0.28.0 New] 로비 대표 지휘관(전속 보좌관) 쇼케이스 & 터치 인터랙션 대사 -->
+      <div id="lobby-adjutant-banner" class="adjutant-card-banner">
+        <!-- JS로 동적 렌더링 -->
       </div>
 
       <!-- 미소녀 지휘관 & 소켓 룬 편성 센터 (단일 메인 섹션) -->
@@ -108,6 +113,12 @@
 
         <div id="info-panel">
           <h2>🎮 Game Info</h2>
+
+          <!-- [v0.28.0 New] 인게임 출전 지휘관 상주 바 -->
+          <div id="in-game-commanders-bar" class="ingame-commanders-bar">
+            <!-- JS로 동적 렌더링 (출전 지휘관 3인 초상화 및 스펠 룬 힌트) -->
+          </div>
+
           <p>🌟 라운드: <span id="round">1</span></p>
           <p>❤️ HP: <span id="hp">10</span></p>
           <p>🪙 TP (타워포인트): <span id="gold">10</span></p>
@@ -147,7 +158,10 @@
 
           <!-- 타워 상세 관리 패널 (Phase B: 타깃팅, v0.22.0 인게임 강화 및 판매) -->
           <div id="tower-detail-panel">
-            <h4 id="detail-tower-name">타워 이름</h4>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+              <h4 id="detail-tower-name" style="margin: 0;">타워 이름</h4>
+              <img id="detail-tower-shard" src="" alt="Shard Emblem" class="detail-tower-shard-icon" style="display: none;">
+            </div>
             <div id="detail-tower-stats" class="detail-stats">스탯 정보</div>
             <div class="targeting-label">🎯 타깃팅 우선순위:</div>
             <div class="targeting-buttons">
@@ -162,7 +176,7 @@
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.25.2</div>
+          v0.28.0</div>
       </div>
     </div>
   </div>
@@ -195,7 +209,35 @@
     </div>
   </div>
 
-  <!-- 1. 신규 지휘관 최초 획득 풀스크린 딤드 연출 모달 (v0.27.1 New) -->
+  <!-- [v0.28.0 New] 가챠 차원 소환 시퀀스 오버레이 (도파민 연출) -->
+  <div id="gacha-summon-sequence" style="display: none;" class="summon-sequence-overlay">
+    <div class="summon-sequence-content">
+      <div id="summon-magic-circle" class="summon-magic-circle"></div>
+      <div id="summon-light-beam" class="summon-light-beam"></div>
+      <div class="summon-gate-label">
+        <div class="summon-gate-title">차원의 문이 열립니다...</div>
+        <div id="summon-gate-grade-hint" class="summon-gate-grade-hint">미지의 영혼을 공명하는 중...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- [v0.28.0 New] 인게임 지휘관 스펠 발동 대각선 컷인 오버레이 -->
+  <div id="spell-cutin-overlay" style="display: none;" class="spell-cutin-overlay">
+    <div class="spell-cutin-container">
+      <div id="spell-cutin-stripe" class="spell-cutin-stripe">
+        <div class="cutin-char-wrapper">
+          <img id="cutin-char-img" src="" alt="Commander" class="cutin-char-img">
+        </div>
+        <div class="cutin-info-wrapper">
+          <div id="cutin-commander-name" class="cutin-commander-name">지휘관 이름</div>
+          <div id="cutin-skill-name" class="cutin-skill-name">스킬명</div>
+          <div id="cutin-skill-quote" class="cutin-skill-quote">"스킬 시그니처 대사"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. 신규 지휘관 최초 획득 풀스크린 딤드 연출 모달 (v0.27.1 / v0.28.0 타이핑 대사 확장) -->
   <div id="new-commander-modal" style="display: none;" class="new-char-modal-overlay" onclick="closeNewCommanderModal()">
     <div class="new-char-container" onclick="event.stopPropagation()">
       <div class="new-char-illust-box">
@@ -209,6 +251,13 @@
       <div class="new-char-info-box">
         <div id="new-char-title" class="new-char-title">칭호</div>
         <div id="new-char-name" class="new-char-name">캐릭터 이름</div>
+        
+        <!-- [v0.28.0 New] 타이핑 애니메이션 시그니처 대사 말풍선 -->
+        <div id="new-char-speech-bubble" class="new-char-speech-bubble">
+          <span class="speech-quote-icon">💬</span>
+          <span id="new-char-speech-text" class="new-char-speech-text"></span>
+        </div>
+
         <div id="new-char-desc" class="new-char-desc">캐릭터 설명</div>
         <div id="new-char-license" class="new-char-license">타워 라이선스 정보</div>
         <div class="new-char-actions">

@@ -1862,3 +1862,489 @@ button.selected {
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   v0.28.0 서브컬처 가챠 비주얼 & 인게임 컷인 확장 스타일
+   ========================================================================== */
+
+/* 1. 로비 대표 지휘관(전속 보좌관) 쇼케이스 배너 */
+.adjutant-card-banner {
+  max-width: 800px;
+  margin: 0 auto 20px auto;
+  background: linear-gradient(135deg, #0b1120 0%, #1e1b4b 50%, #0f172a 100%);
+  border: 1.5px solid rgba(129, 140, 248, 0.35);
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(99, 102, 241, 0.15);
+  position: relative;
+  overflow: visible;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.adjutant-card-banner:hover {
+  border-color: rgba(165, 180, 252, 0.6);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 25px rgba(99, 102, 241, 0.25);
+}
+
+.adjutant-portrait-box {
+  position: relative;
+  flex: 0 0 96px;
+  height: 120px;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.adjutant-portrait-box:hover {
+  transform: scale(1.05);
+  border-color: #818cf8;
+}
+
+.adjutant-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+  display: block;
+}
+
+.adjutant-grade-badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.adjutant-tap-hint {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(15, 23, 42, 0.75);
+  color: #e2e8f0;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.adjutant-info-box {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.adjutant-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.adjutant-role-tag {
+  background: rgba(99, 102, 241, 0.25);
+  border: 1px solid #818cf8;
+  color: #c7d2fe;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+.adjutant-stars {
+  color: #fbbf24;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.adjutant-name {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.adjutant-title {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+/* 대사 말풍선 (인터랙션 스피치 버블) */
+.adjutant-speech-bubble {
+  position: relative;
+  margin-top: 10px;
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #f1f5f9;
+  font-size: 13px;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adjutant-speech-bubble:hover {
+  background: rgba(30, 41, 59, 1);
+  border-color: #818cf8;
+}
+
+.adjutant-speech-bubble::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 24px;
+  width: 10px;
+  height: 10px;
+  background: rgba(30, 41, 59, 0.85);
+  border-left: 1px solid rgba(148, 163, 184, 0.3);
+  border-top: 1px solid rgba(148, 163, 184, 0.3);
+  transform: rotate(45deg);
+}
+
+.adjutant-tap-bounce {
+  animation: adjutantBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes adjutantBounce {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08) translateY(-4px); }
+  100% { transform: scale(1); }
+}
+
+/* 2. 가챠 소환 연출 시퀀스 (도파민 마법진 오버레이) */
+.summon-sequence-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #090d1a 0%, #030712 100%);
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  animation: fadeInSequence 0.25s ease;
+}
+
+@keyframes fadeInSequence {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.summon-sequence-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.summon-magic-circle {
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: 3px dashed #60a5fa;
+  box-shadow: 0 0 35px rgba(96, 165, 250, 0.5), inset 0 0 30px rgba(96, 165, 250, 0.4);
+  position: relative;
+  animation: summonCircleRotate 3s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.summon-magic-circle::before {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  animation: summonCircleRotate 2s linear infinite reverse;
+}
+
+.summon-magic-circle::after {
+  content: "✦";
+  font-size: 40px;
+  color: #ffffff;
+  animation: pulseStar 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes summonCircleRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulseStar {
+  from { transform: scale(0.85); opacity: 0.7; }
+  to { transform: scale(1.2); opacity: 1; text-shadow: 0 0 20px #ffffff; }
+}
+
+/* 등급별 소환 오라 */
+.summon-magic-circle.aura-normal {
+  border-color: #38bdf8;
+  box-shadow: 0 0 40px rgba(56, 189, 248, 0.6), inset 0 0 30px rgba(56, 189, 248, 0.4);
+}
+
+.summon-magic-circle.aura-rare {
+  border-color: #a855f7;
+  box-shadow: 0 0 50px rgba(168, 85, 247, 0.75), inset 0 0 35px rgba(168, 85, 247, 0.5);
+}
+
+.summon-magic-circle.aura-epic {
+  border-color: #f59e0b;
+  box-shadow: 0 0 65px rgba(245, 158, 11, 0.85), inset 0 0 45px rgba(245, 158, 11, 0.6);
+}
+
+.summon-magic-circle.aura-legendary {
+  border-color: #ec4899;
+  box-shadow: 0 0 80px rgba(236, 72, 153, 0.95), 0 0 120px rgba(139, 92, 246, 0.8), inset 0 0 50px rgba(255, 255, 255, 0.7);
+  animation: summonCircleRotate 1.2s linear infinite, rainbowPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes rainbowPulse {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.screen-shake {
+  animation: screenShake 0.4s ease-in-out;
+}
+
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-4px, 4px); }
+  40% { transform: translate(4px, -4px); }
+  60% { transform: translate(-3px, -2px); }
+  80% { transform: translate(3px, 2px); }
+}
+
+.summon-gate-label {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.summon-gate-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 2px;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+}
+
+.summon-gate-grade-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* 3. 신규 지휘관 획득 모달 내 타이핑 대사 말풍선 */
+.new-char-speech-bubble {
+  margin-bottom: 14px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.speech-quote-icon {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.new-char-speech-text {
+  font-size: 13.5px;
+  font-style: italic;
+  font-weight: 600;
+  color: #e0e7ff;
+  line-height: 1.45;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* 4. 인게임 출전 지휘관 상주 바 */
+.ingame-commanders-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px;
+  justify-content: flex-start;
+}
+
+.ingame-commander-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 4px 8px;
+  flex: 1;
+  min-width: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease;
+}
+
+.ingame-commander-chip:hover {
+  transform: translateY(-1px);
+  border-color: #3b82f6;
+}
+
+.ingame-chip-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #64748b;
+  flex-shrink: 0;
+}
+
+.ingame-chip-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  text-align: left;
+}
+
+.ingame-chip-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ingame-chip-title {
+  font-size: 9px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 5. 인게임 지휘관 스펠 발동 '대각선 컷인' */
+.spell-cutin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spell-cutin-container {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.spell-cutin-stripe {
+  width: 120%;
+  height: 110px;
+  background: linear-gradient(90deg, transparent 0%, rgba(15, 23, 42, 0.95) 15%, rgba(30, 27, 75, 0.95) 85%, transparent 100%);
+  border-top: 3px solid #818cf8;
+  border-bottom: 3px solid #818cf8;
+  box-shadow: 0 0 35px rgba(99, 102, 241, 0.6), inset 0 0 20px rgba(99, 102, 241, 0.4);
+  transform: skewX(-14deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  padding: 0 40px;
+  animation: cutinSlide 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes cutinSlide {
+  0% { transform: skewX(-14deg) translateX(-100%); opacity: 0; }
+  15% { transform: skewX(-14deg) translateX(0); opacity: 1; }
+  75% { transform: skewX(-14deg) translateX(0); opacity: 1; }
+  100% { transform: skewX(-14deg) translateX(100%); opacity: 0; }
+}
+
+.cutin-char-wrapper {
+  transform: skewX(14deg); /* 이미지 왜곡 상쇄 */
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+  flex-shrink: 0;
+}
+
+.cutin-char-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+}
+
+.cutin-info-wrapper {
+  transform: skewX(14deg); /* 텍스트 왜곡 상쇄 */
+  text-align: left;
+}
+
+.cutin-commander-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #93c5fd;
+  letter-spacing: 1px;
+}
+
+.cutin-skill-name {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 0 15px rgba(129, 140, 248, 0.8), 0 2px 4px rgba(0, 0, 0, 0.8);
+  margin: 2px 0;
+}
+
+.cutin-skill-quote {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fde047;
+  font-style: italic;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* 6. 타워 상세 패널 속성 크리스탈 엠블럼 */
+.detail-tower-shard-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* 상점 룬 제단 크리스탈 텍스처 효과 */
+.shop-rune-card-bg {
+  background: linear-gradient(135deg, rgba(250, 245, 255, 0.95) 0%, rgba(243, 232, 255, 0.95) 100%), url('assets/shard_ice.jpg') center center / cover no-repeat !important;
+  background-blend-mode: overlay;
+}
