@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.29.0";
+const GAME_VERSION = "v0.31.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -577,6 +577,7 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "C",
         icon: "🔥",
+        image: "assets/rune_passive.jpg",
         burnDurationSec: 3,
         burnRatio: 0.25,
         desc: "타워 공격 시 3초간 매초 공격력의 25% 화염 도트 피해를 부여합니다."
@@ -588,6 +589,7 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "UC",
         icon: "⚡",
+        image: "assets/rune_passive.jpg",
         critChance: 0.25,
         critMultiplier: 2.0,
         desc: "25% 확률로 200%의 치명타 폭발 피해를 입힙니다."
@@ -599,6 +601,7 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "R",
         icon: "🎯",
+        image: "assets/rune_passive.jpg",
         pierceCount: 1,
         bonusDamageRatio: 0.15,
         desc: "투사체 공격력 +15% 및 관통 충격파를 발산합니다."
@@ -610,6 +613,7 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "SR",
         icon: "🌩️",
+        image: "assets/rune_passive.jpg",
         chainChance: 0.35,
         chainCount: 2,
         chainRatio: 0.6,
@@ -622,6 +626,7 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "UR",
         icon: "💰",
+        image: "assets/rune_passive.jpg",
         plunderChance: 0.4,
         plunderGold: 2,
         desc: "타워가 적 처치 시 40% 확률로 추가 +2 TP를 전리품으로 강탈합니다."
@@ -633,6 +638,7 @@ const RUNE_DATA = {
         usageType: "passive",
         grade: "U",
         icon: "🌌",
+        image: "assets/rune_passive.jpg",
         collapseChance: 0.2,
         collapseRadius: 60,
         collapseDamage: 35,
@@ -647,6 +653,7 @@ const RUNE_DATA = {
         usageType: "multi",
         grade: "C",
         icon: "📦",
+        image: "assets/rune_spell.jpg",
         mpCost: 30,
         cooldownSec: 20,
         effectValue: 8,
@@ -659,6 +666,7 @@ const RUNE_DATA = {
         usageType: "multi",
         grade: "UC",
         icon: "🌪️",
+        image: "assets/rune_spell.jpg",
         mpCost: 25,
         cooldownSec: 15,
         durationSec: 4,
@@ -672,6 +680,7 @@ const RUNE_DATA = {
         usageType: "multi",
         grade: "R",
         icon: "⚡",
+        image: "assets/rune_spell.jpg",
         mpCost: 40,
         cooldownSec: 25,
         damage: 18,
@@ -684,6 +693,7 @@ const RUNE_DATA = {
         usageType: "single", // 판당 1회 궁극기
         grade: "SR",
         icon: "🌀",
+        image: "assets/rune_spell.jpg",
         mpCost: 75,
         desc: "마나 75 소모 [전투당 1회 궁극기]: 현재 필드의 모든 몬스터를 스폰 입구로 강제 송환합니다."
     },
@@ -694,6 +704,7 @@ const RUNE_DATA = {
         usageType: "multi",
         grade: "UR",
         icon: "✨",
+        image: "assets/rune_spell.jpg",
         mpCost: 50,
         cooldownSec: 30,
         durationSec: 6,
@@ -706,6 +717,7 @@ const RUNE_DATA = {
         usageType: "single", // 판당 1회 궁극기
         grade: "U",
         icon: "☄️",
+        image: "assets/rune_spell.jpg",
         mpCost: 90,
         damage: 60,
         desc: "마나 90 소모 [전투당 1회 궁극기]: 하늘에서 거대한 메테오를 낙하시켜 전장의 모든 적에게 60의 파멸 피해를 입힙니다."

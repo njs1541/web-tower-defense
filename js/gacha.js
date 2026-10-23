@@ -182,7 +182,7 @@ function drawMultiCommanderGacha() {
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
 
     playSummonSequence(highestGrade, true, () => {
-        openMultiGachaModal('commander', results);
+        startMultiGachaFlow('commander', results);
     });
 }
 
@@ -212,6 +212,7 @@ function drawRuneGacha() {
         badgeText: `🔮 [${gradeInfo.name}] ${isSpell ? '액티브 스펠 룬' : '속성 패시브 룬'}`,
         badgeType: isSpell ? "card" : "frag",
         isLegendary: runeInfo.grade === 'SR' || runeInfo.grade === 'UR' || runeInfo.grade === 'U' || runeInfo.grade === 'R',
+        image: runeInfo.image || (isSpell ? 'assets/rune_spell.jpg' : 'assets/rune_passive.jpg'),
         emblem: runeInfo.icon || "🔮",
         title: runeInfo.name,
         desc: runeInfo.desc,
@@ -257,7 +258,7 @@ function drawMultiRuneGacha() {
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
 
     playSummonSequence(highestGrade, true, () => {
-        openMultiGachaModal('rune', results);
+        startMultiGachaFlow('rune', results);
     });
 }
 
@@ -525,17 +526,19 @@ function openNewCommanderModal(charId, result) {
     // 인가 타워 및 보급 정보 요약
     if (licenseEl) {
         const caps = [];
-        if (charBase.towerCaps) {
-            for (const [tType, capVal] of Object.entries(charBase.towerCaps)) {
+        const rawCaps = charBase.levelCaps || charBase.towerCaps;
+        if (rawCaps) {
+            for (const [tType, capVal] of Object.entries(rawCaps)) {
                 const tName = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[tType]) ? TOWER_DATA[tType].name.replace(" 타워", "") : tType;
-                caps.push(`${tName} Lv.${capVal}`);
+                caps.push(`${tName} +${capVal}강`);
             }
         }
         const capsText = caps.length > 0 ? caps.join(", ") : "기본 타워";
 
         const supplies = [];
-        if (charBase.initialSupplies) {
-            for (const [sKey, sCount] of Object.entries(charBase.initialSupplies)) {
+        const rawSupplies = charBase.startingTowers || charBase.initialSupplies;
+        if (rawSupplies) {
+            for (const [sKey, sCount] of Object.entries(rawSupplies)) {
                 if (sCount > 0) {
                     const sName = (sKey === 'base') ? '기반' : ((typeof TOWER_DATA !== 'undefined' && TOWER_DATA[sKey]) ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey);
                     supplies.push(`${sName} ${sCount}${sKey === 'base' ? '개' : '기'}`);
@@ -562,6 +565,295 @@ function closeNewCommanderModal() {
     if (modal) {
         modal.style.display = "none";
     }
+    if (typingTimer) {
+        clearInterval(typingTimer);
+        typingTimer = null;
+    }
+}
+
+/**
+ * --------------------------------------------------------------------------
+ * [v0.30.0 New] 10+1 연차 신규 & 최고등급 지휘관 강림 쇼케이스 시스템
+ * (원신 / 젠레스 존 제로 스타일 하이라이트 인터럽트 연출)
+ * --------------------------------------------------------------------------
+ */
+
+let showcaseQueue = [];
+let currentShowcaseIndex = 0;
+
+/**
+ * 10+1 소환 종료 후 쇼케이스 플로우 시작
+ */
+function startMultiGachaFlow(type, results) {
+    lastMultiType = type;
+    lastMultiResults = results;
+    showcaseQueue = [];
+    currentShowcaseIndex = 0;
+
+    if (type === 'commander') {
+        const seenCharIds = new Set();
+
+        // 1차: 신규 획득 지휘관 우선 추출
+        results.forEach(item => {
+            if (item.result && item.result.isNew && !seenCharIds.has(item.charId)) {
+                seenCharIds.add(item.charId);
+                showcaseQueue.push({ type: 'commander', item: item, reason: 'new' });
+            }
+        });
+
+        // 2차: SR, UR, U 등급의 초희귀/최고등급 지휘관 추출 (신규가 아닌 중복이라도 하이라이트)
+        results.forEach(item => {
+            const grade = item.charBase.grade;
+            if ((grade === 'SR' || grade === 'UR' || grade === 'U') && !seenCharIds.has(item.charId)) {
+                seenCharIds.add(item.charId);
+                showcaseQueue.push({ type: 'commander', item: item, reason: 'high_grade' });
+            }
+        });
+
+        // 3차: 신규나 SR 이상이 하나도 없다면, 11장 중 최고 등급 지휘관 1명을 대표로 쇼케이스!
+        if (showcaseQueue.length === 0 && results.length > 0) {
+            let bestItem = results[0];
+            results.forEach(item => {
+                if (getGradeWeight(item.charBase.grade) > getGradeWeight(bestItem.charBase.grade)) {
+                    bestItem = item;
+                }
+            });
+            showcaseQueue.push({ type: 'commander', item: bestItem, reason: 'best' });
+        }
+
+        // 쇼케이스 진행
+        if (showcaseQueue.length > 0) {
+            showNextShowcaseItem();
+            return;
+        }
+    } else {
+        // 룬 10+1 소환: SR, UR, U 등급의 희귀 룬이 있는 경우 쇼케이스
+        const rareRunes = results.filter(r => {
+            const g = r.runeInfo.grade;
+            return g === 'SR' || g === 'UR' || g === 'U';
+        });
+
+        if (rareRunes.length > 0) {
+            rareRunes.forEach(item => {
+                showcaseQueue.push({ type: 'rune', item: item, reason: 'high_grade' });
+            });
+        } else if (results.length > 0) {
+            // 만약 SR 이상이 없더라도 11개 룬 중 가장 높은 등급(예: R등급) 1개를 대표로 쇼케이스!
+            let bestRune = results[0];
+            results.forEach(r => {
+                if (getGradeWeight(r.runeInfo.grade) > getGradeWeight(bestRune.runeInfo.grade)) {
+                    bestRune = r;
+                }
+            });
+            showcaseQueue.push({ type: 'rune', item: bestRune, reason: 'best' });
+        }
+
+        if (showcaseQueue.length > 0) {
+            showNextShowcaseItem();
+            return;
+        }
+    }
+
+    // 쇼케이스 대상이 없으면 곧바로 종합 그리드 모달 오픈
+    openMultiGachaModal(type, results);
+}
+
+/**
+ * 큐의 다음 쇼케이스 아이템 렌더링
+ */
+function showNextShowcaseItem() {
+    if (currentShowcaseIndex >= showcaseQueue.length) {
+        closeShowcaseModal();
+        openMultiGachaModal(lastMultiType, lastMultiResults);
+        return;
+    }
+
+    const modal = document.getElementById("gacha-showcase-modal");
+    if (!modal) {
+        openMultiGachaModal(lastMultiType, lastMultiResults);
+        return;
+    }
+
+    const current = showcaseQueue[currentShowcaseIndex];
+    const item = current.item;
+    const isLast = (currentShowcaseIndex === showcaseQueue.length - 1);
+    const stepText = `(${currentShowcaseIndex + 1}/${showcaseQueue.length})`;
+
+    const charImg = document.getElementById("showcase-char-img");
+    const auraRing = document.getElementById("showcase-aura-ring");
+    const newBadge = document.getElementById("showcase-new-badge");
+    const gradeBadge = document.getElementById("showcase-grade-badge");
+    const stepEl = document.getElementById("showcase-queue-step");
+    const titleEl = document.getElementById("showcase-char-title");
+    const nameEl = document.getElementById("showcase-char-name");
+    const speechEl = document.getElementById("showcase-speech-text");
+    const specBox = document.getElementById("showcase-spec-box");
+    const nextBtn = document.getElementById("btn-showcase-next");
+
+    if (stepEl) stepEl.textContent = stepText;
+    if (nextBtn) {
+        nextBtn.innerHTML = isLast 
+            ? `✨ 최종 결과 확인 (${lastMultiResults.length}개) ⏩` 
+            : `다음 지휘관 ▶ ${stepText}`;
+    }
+
+    if (current.type === 'commander') {
+        const charBase = item.charBase;
+        const res = item.result;
+        const gradeInfo = CARD_GRADES[charBase.grade] || { name: charBase.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.2)", border: "#3b82f6" };
+
+        if (charImg) {
+            charImg.src = charBase.image || "";
+            charImg.alt = charBase.name;
+            // 애니메이션 재실행
+            charImg.style.animation = "none";
+            void charImg.offsetWidth;
+            charImg.style.animation = "showcaseCharAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards";
+        }
+
+        // 등급 오라 링
+        if (auraRing) {
+            auraRing.className = "showcase-aura-ring";
+            if (charBase.grade === 'UR' || charBase.grade === 'U') {
+                auraRing.classList.add("aura-legendary");
+            } else {
+                auraRing.style.borderColor = gradeInfo.border || gradeInfo.color;
+                auraRing.style.boxShadow = `0 0 35px ${gradeInfo.color}`;
+            }
+        }
+
+        // NEW 뱃지 노출 여부
+        if (newBadge) {
+            newBadge.style.display = res.isNew ? "block" : "none";
+        }
+
+        if (gradeBadge) {
+            gradeBadge.textContent = `${gradeInfo.name} (${charBase.grade})`;
+            gradeBadge.style.background = gradeInfo.bg;
+            gradeBadge.style.color = gradeInfo.color;
+            gradeBadge.style.borderColor = gradeInfo.border || gradeInfo.color;
+        }
+
+        if (titleEl) titleEl.textContent = `👑 ${charBase.title || "미소녀 지휘관"}`;
+        if (nameEl) nameEl.textContent = charBase.name;
+
+        // 시그니처 대사 타이핑
+        const quote = (charBase.quotes && charBase.quotes.length > 0) ? charBase.quotes[0] : (charBase.desc || "지휘관님, 합류를 명 받았습니다!");
+        if (speechEl) {
+            playTypewriterEffect(speechEl, `"${quote}"`, 28);
+        }
+
+        // 인가 타워 및 보급 정보 요약
+        if (specBox) {
+            const caps = [];
+            const rawCaps = charBase.levelCaps || charBase.towerCaps;
+            if (rawCaps) {
+                for (const [tType, capVal] of Object.entries(rawCaps)) {
+                    const tName = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[tType]) ? TOWER_DATA[tType].name.replace(" 타워", "") : tType;
+                    caps.push(`${tName} +${capVal}강`);
+                }
+            }
+            const capsText = caps.length > 0 ? caps.join(", ") : "기본 타워";
+
+            const supplies = [];
+            const rawSupplies = charBase.startingTowers || charBase.initialSupplies;
+            if (rawSupplies) {
+                for (const [sKey, sCount] of Object.entries(rawSupplies)) {
+                    if (sCount > 0) {
+                        const sName = (sKey === 'base') ? '기반' : ((typeof TOWER_DATA !== 'undefined' && TOWER_DATA[sKey]) ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey);
+                        supplies.push(`${sName} ${sCount}${sKey === 'base' ? '개' : '기'}`);
+                    }
+                }
+            }
+            const suppliesText = supplies.length > 0 ? supplies.join(", ") : "없음";
+
+            const statusText = res.isNew 
+                ? `<span style="color:#38bdf8; font-weight:bold;">✨ 신규 영입 지휘관!</span>` 
+                : (res.upgraded ? `<span style="color:#f59e0b; font-weight:bold;">🎉 ★${res.star} 성급 승급 완료!</span>` : `<span style="color:#94a3b8;">🔁 성급 경험치 +1 (★${res.star})</span>`);
+
+            specBox.innerHTML = `
+                <div style="margin-bottom: 4px;">${statusText}</div>
+                <div>🏗️ <strong>인가 타워 한도</strong>: ${capsText}</div>
+                <div style="margin-top: 3px;">🎁 <strong>시작 무료 보급</strong>: ${suppliesText}</div>
+                <div style="margin-top: 3px; color: #a5b4fc;">🔮 <strong>소켓 정보</strong>: ${res.sockets || 1}칸 개방</div>
+            `;
+        }
+    } else {
+        // 룬 쇼케이스
+        const rInfo = item.runeInfo;
+        const gradeInfo = CARD_GRADES[rInfo.grade] || { name: rInfo.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.2)", border: "#3b82f6" };
+        const isSpell = rInfo.type === 'spell';
+        const runeImgPath = rInfo.image || (isSpell ? 'assets/rune_spell.jpg' : 'assets/rune_passive.jpg');
+
+        if (charImg) {
+            charImg.src = runeImgPath;
+            charImg.alt = rInfo.name;
+            charImg.style.display = "block";
+            // 애니메이션 재실행
+            charImg.style.animation = "none";
+            void charImg.offsetWidth;
+            charImg.style.animation = "showcaseCharAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards";
+        }
+        if (newBadge) newBadge.style.display = "none";
+
+        if (auraRing) {
+            auraRing.className = "showcase-aura-ring";
+            if (rInfo.grade === 'UR' || rInfo.grade === 'U') {
+                auraRing.classList.add("aura-legendary");
+            } else {
+                auraRing.style.borderColor = gradeInfo.border || gradeInfo.color;
+                auraRing.style.boxShadow = `0 0 35px ${gradeInfo.color}`;
+            }
+        }
+
+        if (gradeBadge) {
+            gradeBadge.textContent = `${gradeInfo.name} (${rInfo.grade})`;
+            gradeBadge.style.background = gradeInfo.bg;
+            gradeBadge.style.color = gradeInfo.color;
+            gradeBadge.style.borderColor = gradeInfo.border || gradeInfo.color;
+        }
+
+        if (titleEl) titleEl.textContent = `🔮 ${isSpell ? '신비한 액티브 스펠 룬' : '신비한 속성 패시브 룬'}`;
+        if (nameEl) nameEl.textContent = `${rInfo.icon || '✨'} ${rInfo.name}`;
+
+        if (speechEl) {
+            playTypewriterEffect(speechEl, `"${rInfo.desc}"`, 25);
+        }
+
+        if (specBox) {
+            specBox.innerHTML = `
+                <div>🔮 <strong>룬 속성</strong>: ${isSpell ? '인게임 마나(MP) 발동 액티브 마법' : '타워 상시 강화 패시브'}</div>
+                <div style="margin-top: 4px; color: #fde047; font-weight: bold;">${isSpell ? `💧 마나 소모: ${rInfo.mpCost} MP` : '⚔️ 지휘관 소켓 장착 시 아군 타워에 영구 적용'}</div>
+                <div style="margin-top: 4px; color: #94a3b8; font-size: 11px;">${rInfo.desc}</div>
+            `;
+        }
+    }
+
+    modal.style.display = "flex";
+}
+
+/**
+ * 다음 쇼케이스 아이템으로 넘어가기
+ */
+function nextShowcaseItem() {
+    currentShowcaseIndex++;
+    showNextShowcaseItem();
+}
+
+/**
+ * 쇼케이스 즉시 스킵(SKIP)
+ */
+function skipShowcaseQueue() {
+    closeShowcaseModal();
+    openMultiGachaModal(lastMultiType, lastMultiResults);
+}
+
+/**
+ * 쇼케이스 모달 닫기
+ */
+function closeShowcaseModal() {
+    const modal = document.getElementById("gacha-showcase-modal");
+    if (modal) modal.style.display = "none";
     if (typingTimer) {
         clearInterval(typingTimer);
         typingTimer = null;
@@ -634,19 +926,20 @@ function openMultiGachaModal(type, results) {
             const rInfo = item.runeInfo;
             const gradeInfo = CARD_GRADES[rInfo.grade] || { name: rInfo.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.15)", border: "#3b82f6" };
             const isSpell = rInfo.type === 'spell';
+            const runeImg = rInfo.image || (isSpell ? 'assets/rune_spell.jpg' : 'assets/rune_passive.jpg');
 
             const cardEl = document.createElement("div");
             cardEl.className = "multi-gacha-item";
             cardEl.style.borderColor = gradeInfo.border || gradeInfo.color;
 
             cardEl.innerHTML = `
-                <div class="multi-item-thumb-box" style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);">
-                    <span class="multi-item-icon">${rInfo.icon || '🔮'}</span>
+                <div class="multi-item-thumb-box">
+                    <img src="${runeImg}" alt="${rInfo.name}" class="multi-item-img">
                     <span class="multi-item-grade" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border-color:${gradeInfo.border};">
                         ${gradeInfo.name}
                     </span>
                 </div>
-                <div class="multi-item-name">${rInfo.name}</div>
+                <div class="multi-item-name">${rInfo.icon || ''} ${rInfo.name}</div>
                 <div class="multi-item-desc" style="color:${isSpell ? '#60a5fa' : '#fb923c'};">${isSpell ? '액티브 스펠' : '속성 패시브'}</div>
             `;
 

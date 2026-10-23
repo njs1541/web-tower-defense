@@ -71,6 +71,38 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - **전투 UX**: 몬스터 머리 위 체력바, 사거리 프리뷰, 배속(1x/2x) 및 스페이스바 일시정지.
 
 ## 🐛 수정된 버그 및 업데이트 (Fixed Bugs & Updates)
+- **v0.31.0 (Arcane Runestone Illustration Assets & Gacha Showcase Visual Polish)**:
+    - **룬 전용 판타지 아니메 고화질 일러스트 에셋 제작 (`assets/rune_*.jpg`)**:
+        - `assets/rune_spell.jpg`: 고대 마도 문양이 푸른/보랏빛 성운과 함께 찬란하게 회전하는 액티브 스펠 룬스톤 일러스트 생성.
+        - `assets/rune_passive.jpg`: 타오르는 원소 화염과 번개 마력이 응축된 진홍빛 속성 패시브 룬스톤 일러스트 생성.
+        - `constants.js` 내 `RUNE_DATA`의 모든 12종 룬에 타입별 고화질 룬스톤 `image` 속성 공식 매핑.
+    - **룬 소환 빈 공간 노출 버그 완벽 해결 (`index.html`, `js/gacha.js`)**:
+        - 강림 쇼케이스 모달(`showNextShowcaseItem`)에서 룬 쇼케이스 시 좌측 이미지가 숨겨져 빈 공간이 생기던 문제를 수정하고, 룬스톤 이미지가 등급 오라와 함께 웅장하게 줌인 팝업되도록 연동 (`showcaseCharAppear`).
+        - 1회 단일 룬 소환(`drawRuneGacha`) 시 3D 카드 플립 결과창에 룬스톤 일러스트가 회전하며 나타나도록 연동.
+        - 10+1 종합 결과 그리드(`openMultiGachaModal`)에서 기존 이모지 대신 고화질 룬스톤 썸네일 이미지를 꽉 채워 배치하여 비주얼 완성도 극대화.
+        - 룬 10+1 소환 시에도 최소 1회 이상의 룬스톤 강림 쇼케이스가 반드시 발동되도록 보장.
+    - **버전 일괄 동기화 (v0.31.0)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md`, `기획문서.md` 완벽 동기화.
+- **v0.30.0 (Gacha 10+1 Highlights Showcase & Grand Descent Presentation)**:
+    - **가챠 강림 쇼케이스 전용 배경 에셋 제작 (`assets/gacha_showcase_bg.jpg`)**:
+        - 원신/스타레일 스타일의 웅장한 천상 성운 제단과 빛의 기둥, 황금/무지개 파티클이 수놓아진 신비로운 고화질 가챠 배경 생성 및 연동.
+    - **신규(NEW) & 최고등급(SR/UR/U) 지휘관 컷인 쇼케이스 시스템 (`index.html`, `js/gacha.js`, `style.css`)**:
+        - 10+1 연차 진행 시 무미건조하게 곧바로 종합 그리드로 넘어가지 않고, 11장의 결과 중 **신규 획득 지휘관** 및 **SR 이상 최고등급 지휘관**을 자동 선별하여 1명씩 대형 풀스크린 컷인 쇼케이스(`gacha-showcase-modal`)로 인터럽트 연출.
+        - 만약 신규 지휘관이나 SR 이상이 없더라도 11장 중 최고 등급 지휘관 1명을 대표로 선별하여 최소 1회 쇼케이스를 보장함으로써 연차의 감동 유지.
+        - 쇼케이스 연출 구성:
+            - 회전하는 천상의 광선(Sunburst, `showcase-light-rays`) 및 제단 배경 줌인 애니메이션.
+            - 지휘관 일러스트 다이나믹 팝업(`showcaseCharAppear`, 플로팅 광원, 등급별 오라 링 `showcase-aura-ring`).
+            - 신규 영입 시 좌상단 대각선 펄스 `NEW!` 뱃지 점멸.
+            - 지휘관 시그니처 대사 타이핑 효과(`playTypewriterEffect`).
+            - 인가 타워 한도(예: `근거리 +1강`), 시작 무료 보급, 소켓 정보 스펙 박스.
+    - **쇼케이스 순차 제어 및 언제든 즉시 스킵(SKIP) 지원 (`js/gacha.js`)**:
+        - 하단 `[다음 지휘관 ▶ (1/2)]` 버튼으로 대상 지휘관들을 순차적으로 감상.
+        - 마지막 쇼케이스 종료 시 `[✨ 최종 결과 확인 ⏩]` 버튼으로 11개 종합 그리드 모달 연계.
+        - 쇼케이스 중 언제든 우측 상단 `[⏩ SKIP]` 버튼을 누르면 남아있는 쇼케이스를 즉시 건너뛰고 11개 종합 결과 모달로 직행.
+    - **신규 지휘관 최초 획득 모달 타워 한도 및 무료 보급 필드명 버그 수정 (`js/gacha.js`)**:
+        - `charBase.levelCaps || charBase.towerCaps`, `charBase.startingTowers || charBase.initialSupplies` 방어 처리 완료.
+    - **버전 일괄 동기화 (v0.30.0)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md`, `기획문서.md` 완벽 동기화.
 - **v0.29.0 (Gacha Interactive Touch Unseal, Skip Sequence & 10+1 Multi-Summon System)**:
     - **가챠 마법진 터치 봉인 개방 인터랙션 (`index.html`, `js/gacha.js`, `style.css`)**:
         - 소환 버튼 클릭 시 즉시 오라가 폭발하지 않고, 차원의 문 마법진이 펄스 애니메이션(`waiting-tap`, `waitingPulse`)을 유지하며 플레이어의 터치를 유도 (`#summon-touch-prompt`).

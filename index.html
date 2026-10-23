@@ -23,7 +23,7 @@
           <div class="op-start-sub">CLICK ANYWHERE TO START</div>
         </div>
 
-        <div class="op-footer-version">v0.29.0</div>
+        <div class="op-footer-version">v0.31.0</div>
       </div>
     </div>
 
@@ -34,7 +34,7 @@
         <button onclick="returnToOpScreen()"
           style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">◀
           타이틀 화면</button>
-        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.29.0</span>
+        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.31.0</span>
       </div>
       <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card & Commander</h1>
 
@@ -211,7 +211,7 @@
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.28.0</div>
+          v0.31.0</div>
       </div>
     </div>
   </div>
@@ -303,6 +303,45 @@
         <div id="new-char-license" class="new-char-license">타워 라이선스 정보</div>
         <div class="new-char-actions">
           <button class="btn-new-char-confirm" onclick="closeNewCommanderModal()">확인</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- [v0.30.0 New] 미소녀 지휘관/고등급 전용 강림 쇼케이스 모달 (원신/스타레일 스타일) -->
+  <div id="gacha-showcase-modal" style="display: none;" class="showcase-modal-overlay">
+    <div class="showcase-backdrop"></div>
+    <div class="showcase-light-rays"></div>
+    <button id="btn-showcase-skip" class="btn-showcase-skip" onclick="skipShowcaseQueue()">⏩ SKIP</button>
+
+    <div class="showcase-content">
+      <!-- 좌측: 캐릭터 일러스트 & 오라 -->
+      <div class="showcase-illust-wrap">
+        <div id="showcase-aura-ring" class="showcase-aura-ring"></div>
+        <div id="showcase-new-badge" class="showcase-new-badge">NEW!</div>
+        <img id="showcase-char-img" src="" alt="Commander" class="showcase-char-img">
+      </div>
+
+      <!-- 우측: 정보 및 대사 타이핑 -->
+      <div class="showcase-info-wrap">
+        <div class="showcase-header">
+          <span id="showcase-grade-badge" class="showcase-grade-badge">UR</span>
+          <span id="showcase-queue-step" class="showcase-queue-step">(1/2)</span>
+        </div>
+        <div id="showcase-char-title" class="showcase-char-title">칭호</div>
+        <h2 id="showcase-char-name" class="showcase-char-name">지휘관 이름</h2>
+
+        <div id="showcase-speech-box" class="showcase-speech-box">
+          <span class="speech-quote-icon">💬</span>
+          <span id="showcase-speech-text" class="showcase-speech-text"></span>
+        </div>
+
+        <div id="showcase-spec-box" class="showcase-spec-box">
+          <!-- 동적 렌더링 -->
+        </div>
+
+        <div class="showcase-actions">
+          <button id="btn-showcase-next" class="btn-showcase-next" onclick="nextShowcaseItem()">다음 ▶</button>
         </div>
       </div>
     </div>
