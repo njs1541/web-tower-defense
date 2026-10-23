@@ -3,6 +3,7 @@ let enemies = [];
 let path = [];
 let round = 1;
 let playerHP = 10;
+let maxPlayerHP = 10;
 let gold = 10;
 let gameRunning = false;
 let selectedTower = null;

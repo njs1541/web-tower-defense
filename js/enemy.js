@@ -315,6 +315,15 @@ function gameLoopTick() {
             gold += 50;
         }
 
+        // v0.34.0 전술가 2셋: 웨이브 클리어 시 추가 TP/골드 지급
+        if (typeof calculateDeckSynergies === 'function') {
+            const syn = calculateDeckSynergies();
+            if (syn && syn.bonusStats && syn.bonusStats.roundClearGoldBonus > 0) {
+                gold += syn.bonusStats.roundClearGoldBonus;
+                console.log(`[전술가 시너지] 웨이브 클리어 보너스 +${syn.bonusStats.roundClearGoldBonus} TP 지급!`);
+            }
+        }
+
         // 라운드 종료 후 버튼 및 보드 상태 갱신
         if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
     }
@@ -421,8 +430,16 @@ function handleCrawlerMovement(enemy) {
         enemy.channelingTicks = (enemy.channelingTicks || 0) + 1;
         if (enemy.element) enemy.element.classList.add("demolishing");
 
-        // 7틱(약 1.4초) 동안 공격 시 기반 파괴!
-        if (enemy.channelingTicks >= 7) {
+        // 7틱(약 1.4초) 동안 공격 시 기반 파괴! (수호자 3셋 시너지: 소요 시간 2배 증가 반영)
+        let requiredDemolishTicks = 7;
+        if (typeof calculateDeckSynergies === 'function') {
+            const syn = calculateDeckSynergies();
+            if (syn && syn.bonusStats && syn.bonusStats.crawlerDemolishTimeMulti) {
+                requiredDemolishTicks = Math.round(requiredDemolishTicks * syn.bonusStats.crawlerDemolishTimeMulti);
+            }
+        }
+
+        if (enemy.channelingTicks >= requiredDemolishTicks) {
             demolishBase(touchingBase);
             enemy.channelingTicks = 0;
             if (enemy.element) enemy.element.classList.remove("demolishing");
@@ -521,6 +538,25 @@ function startRound() {
 
     if (spawnInterval) clearInterval(spawnInterval);
     if (gameInterval) clearInterval(gameInterval);
+
+    // v0.34.0 시너지 보너스 (신성 2셋 기지 체력 회복, 수호자 2셋 무료 기반 보급)
+    if (typeof calculateDeckSynergies === 'function') {
+        const syn = calculateDeckSynergies();
+        if (syn && syn.bonusStats) {
+            // 신성 2셋: 라운드 시작 시 기지 HP +1 회복 (최대 체력 범위 내)
+            if (syn.bonusStats.roundHpRegen > 0 && typeof maxPlayerHP !== 'undefined') {
+                if (playerHP < maxPlayerHP) {
+                    playerHP = Math.min(maxPlayerHP, playerHP + syn.bonusStats.roundHpRegen);
+                    console.log(`[신성 시너지] 라운드 시작 기지 HP +${syn.bonusStats.roundHpRegen} 회복! (현재: ${playerHP}/${maxPlayerHP})`);
+                }
+            }
+            // 수호자 2셋: 매 라운드 시작 시 무료 기반 +1개 추가 보급
+            if (syn.bonusStats.extraBasePerRound > 0 && typeof freeBases !== 'undefined') {
+                freeBases = (freeBases || 0) + syn.bonusStats.extraBasePerRound;
+                console.log(`[수호자 시너지] 라운드 시작 무료 기반 +${syn.bonusStats.extraBasePerRound}개 보급! (현재: ${freeBases}개)`);
+            }
+        }
+    }
 
     gameRunning = true;
     isPaused = false;

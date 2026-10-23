@@ -135,6 +135,10 @@ function handleCellClick(x, y) {
                 alert("이미 타워가 배치된 기반입니다!");
                 return;
             }
+            if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
+                alert("대장이 서 있는 기반에는 타워를 설치할 수 없습니다! (대장을 이동시켜 주세요)");
+                return;
+            }
 
             // 무료 설치 (골드 차감 없음, 환불 누적금 0)
             const towerKey = selectedSupplyType;
@@ -222,6 +226,11 @@ function handleCellClick(x, y) {
             return;
         }
 
+        if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
+            alert("대장이 서 있는 기반에는 타워를 건설할 수 없습니다! (대장을 이동시켜 주세요)");
+            return;
+        }
+
         if (gold >= towerInfo.cost) {
             cell.tower = selectedTower;
             cell.targeting = 'first'; // 기본 타깃팅: 선두
@@ -264,6 +273,8 @@ function selectTargetEnemy(cell, inRangeEnemies) {
  */
 function attackFromTowers() {
     const passives = typeof getActiveRunePassives === 'function' ? getActiveRunePassives() : {};
+    const synData = typeof calculateDeckSynergies === 'function' ? calculateDeckSynergies() : null;
+    const synStats = (synData && synData.bonusStats) ? synData.bonusStats : {};
 
     for (const cell of board) {
         if (!cell.tower) continue;
@@ -292,12 +303,26 @@ function attackFromTowers() {
         const targetEnemy = selectTargetEnemy(cell, inRangeEnemies);
         if (!targetEnemy) continue;
 
-        // 데미지 계산: 관통 보너스 및 치명타 판정 (v0.24.0)
+        // 데미지 계산: 관통 보너스 및 치명타 판정 (v0.24.0 / v0.34.0 시너지 반영)
+        let totalCritChance = (passives.critChance || 0) + (synStats.critChance || 0);
+        let totalCritMulti = Math.max(passives.critMultiplier || 2.0, synStats.critMultiplier || 2.0);
+
         let baseDmg = towerStats.damage * (1 + (passives.bonusDamageRatio || 0));
+
+        // 사수 3셋: 보스 및 비행 유닛 상대 대미지 증폭
+        if (synStats.bossFlyingDamageRatio > 0 && (targetEnemy.isBoss || targetEnemy.moveType === 'flying')) {
+            baseDmg *= (1 + synStats.bossFlyingDamageRatio);
+        }
+
+        // 빙결 3셋: 슬로우 상태 적 대미지 증폭
+        if (synStats.damageToSlowedRatio > 0 && targetEnemy.isSlowed) {
+            baseDmg *= (1 + synStats.damageToSlowedRatio);
+        }
+
         let isCrit = false;
-        if (passives.critChance > 0 && Math.random() < passives.critChance) {
+        if (totalCritChance > 0 && Math.random() < totalCritChance) {
             isCrit = true;
-            baseDmg *= (passives.critMultiplier || 2.0);
+            baseDmg *= totalCritMulti;
         }
         const finalDamage = Math.max(1, Math.round(baseDmg * 10) / 10);
 
@@ -314,18 +339,23 @@ function attackFromTowers() {
         setTimeout(() => {
             if (!targetEnemy.alive) return;
 
-            // 1. 얼음 타워 (Ice): 슬로우 효과 부여
+            // 1. 얼음 타워 (Ice): 슬로우 효과 부여 (빙결 2셋 지속시간 보너스 반영)
             if (cell.tower === 'ice') {
                 targetEnemy.hp -= finalDamage;
-                applySlowEffect(targetEnemy, towerStats.slowTicks || 10);
+                let slowTicks = towerStats.slowTicks || 10;
+                if (synStats.slowDurationBonusSec > 0) {
+                    slowTicks += Math.round(synStats.slowDurationBonusSec * 5);
+                }
+                applySlowEffect(targetEnemy, slowTicks);
                 onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#00e5ff", isCrit);
             }
-            // 2. 폭탄 타워 (Bomb): 착탄 지점 3x3 광역 스플래시 데미지
+            // 2. 폭탄 타워 (Bomb): 착탄 지점 광역 스플래시 데미지 (화염 3셋 폭발 반경 +1 반영)
             else if (cell.tower === 'bomb') {
                 createSplashEffect(targetEnemy.x, targetEnemy.y);
+                const splashRad = 1 + (synStats.bombSplashExtraRadius || 0);
 
                 const victims = enemies.filter(e => {
-                    return e.alive && Math.abs(e.x - targetEnemy.x) <= 1 && Math.abs(e.y - targetEnemy.y) <= 1 && e.moveType !== 'flying';
+                    return e.alive && Math.abs(e.x - targetEnemy.x) <= splashRad && Math.abs(e.y - targetEnemy.y) <= splashRad && e.moveType !== 'flying';
                 });
 
                 for (const victim of victims) {
@@ -350,17 +380,20 @@ function attackFromTowers() {
                 onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : (towerStats.color || "#ffeb3b"), isCrit);
             }
 
-            // [속성 룬 패시브 추가 발동]
+            // [속성 룬 패시브 및 원소 시너지 추가 발동]
             if (targetEnemy.alive) {
-                // A. 작열의 룬 (화상 도트 부여)
-                if (passives.burn) {
-                    targetEnemy.burnTicks = passives.burnDuration || 3;
+                // A. 작열의 룬 / 화염 2셋 시너지 (화상 도트 부여)
+                const shouldBurn = passives.burn || (synStats.burnChance > 0 && Math.random() < synStats.burnChance);
+                if (shouldBurn) {
+                    targetEnemy.burnTicks = passives.burnDuration || synStats.burnDuration || 3;
                     targetEnemy.burnDmg = Math.max(1, Math.round(finalDamage * (passives.burnRatio || 0.25)));
                 }
 
-                // B. 연쇄 전격 룬 발동
-                if (passives.chainChance > 0 && Math.random() < passives.chainChance) {
-                    triggerRuneChainLightning(targetEnemy, finalDamage * (passives.chainRatio || 0.6), passives.chainCount || 2);
+                // B. 연쇄 전격 룬 / 전격 3셋 시너지 (연쇄 번개 발동)
+                const totalChainChance = Math.max(passives.chainChance || 0, synStats.chainChance || 0);
+                if (totalChainChance > 0 && Math.random() < totalChainChance) {
+                    const chainRatio = passives.chainRatio || synStats.chainDamageRatio || 0.6;
+                    triggerRuneChainLightning(targetEnemy, finalDamage * chainRatio, passives.chainCount || 2);
                 }
 
                 // C. 시공 붕괴 룬 발동
@@ -383,11 +416,11 @@ function handleLeaderDeployClick(cell) {
 
     // 대장은 타워가 없는 '기반(벽)' 위에만 배치 가능
     if (!cell.buildable || cell.tower) {
-        alert("⚠️ 대장은 타워가 배치되지 않은 '기반(벽)' 위에만 강림/이동할 수 있습니다!");
+        showFloatingDamage(cell.x, cell.y, "⚠️ 타워 없는 기반(벽)에만 배치 가능!", "#ef4444");
         return;
     }
 
-    // 이미 대장이 해당 자리에 서 있는 경우
+    // 이미 대장이 해당 자리에 서 있는 경우 (모드 해제)
     if (leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
         isLeaderDeployMode = false;
         render();
@@ -398,7 +431,7 @@ function handleLeaderDeployClick(cell) {
     // 이미 배치되어 있는 상태에서 이동하려는 경우 -> 라운드 1회 제한 검사
     if (leaderDeployed && leaderPos) {
         if (leaderRelocatedThisRound) {
-            alert("⚠️ 이번 라운드의 대장 전술 이동을 이미 사용했습니다!\n(이동은 라운드당 1회만 가능하며 다음 라운드에 다시 이동할 수 있습니다.)");
+            showFloatingDamage(cell.x, cell.y, "⚠️ 이번 라운드 이동 소모 완료 (턴당 1회)", "#ef4444");
             isLeaderDeployMode = false;
             render();
             if (typeof updateInGameCommandersBar === 'function') updateInGameCommandersBar();
@@ -428,13 +461,13 @@ function handleLeaderDeployClick(cell) {
 function toggleLeaderDeployMode() {
     const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
     if (!leaderInfo || !leaderInfo.charBase) {
-        alert("출전 덱에 편성된 지휘관이 없습니다!");
+        showFloatingDamage(10, 10, "⚠️ 출전 덱에 편성된 지휘관이 없습니다!", "#ef4444");
         return;
     }
 
     // 이미 배치된 상태에서 이번 라운드 이동을 소모한 경우
     if (leaderDeployed && leaderRelocatedThisRound) {
-        alert("⚠️ 이번 라운드의 대장 전술 이동을 이미 사용했습니다!\n(다음 라운드가 시작되면 다시 이동할 수 있습니다.)");
+        showFloatingDamage(10, 10, "🔒 이번 라운드 이동을 이미 사용했습니다! (다음 라운드 가능)", "#94a3b8");
         return;
     }
 
@@ -448,7 +481,7 @@ function toggleLeaderDeployMode() {
         interactionMode = 'none';
         clearActiveRange();
         hideTowerDetailPanel();
-        showFloatingDamage(10, 10, "👑 대장을 배치할 비어있는 기반을 클릭하세요!", "#f59e0b");
+        showFloatingDamage(10, 10, "👑 대장을 배치할 비어있는 기반(벽)을 클릭하세요!", "#f59e0b");
     }
 
     render();
@@ -571,8 +604,15 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false) {
         // 1. 기본 TP(골드) 획득
         gold++;
 
-        // 2. 마나 포인트(MP) 회복 (+2 MP, 최대치까지)
-        mp = Math.min(maxMp || 100, (mp || 0) + 2);
+        // 2. 마나 포인트(MP) 회복 (+2 MP, 마법사 2셋 시너지 반영)
+        let mpGain = 2;
+        if (typeof calculateDeckSynergies === 'function') {
+            const syn = calculateDeckSynergies();
+            if (syn && syn.bonusStats && syn.bonusStats.extraMpPerKill) {
+                mpGain += syn.bonusStats.extraMpPerKill;
+            }
+        }
+        mp = Math.min(maxMp || 100, (mp || 0) + mpGain);
 
         // 3. 10라운드 보스 처치 시 프리즘 포인트 (PP) 1개 확정 지급! (v0.22.0)
         if (enemy.isBoss) {
@@ -764,8 +804,8 @@ function upgradeSelectedTower() {
         return;
     }
 
-    // 강화 비용: 기본 타워 비용 * 0.8 + (다음레벨 * 2) TP
-    const upgradeCost = Math.floor(towerInfo.cost * 0.8) + (currentLv + 1) * 2;
+    // 강화 비용: 기본 타워 비용 * 0.8 + (다음레벨 * 2) TP (전술가 3셋 할인 반영)
+    const upgradeCost = calculateTowerUpgradeCost(cell);
 
     if (gold < upgradeCost) {
         alert(`타워 포인트(TP)가 부족합니다! (필요 TP: ${upgradeCost})`);
@@ -784,6 +824,26 @@ function upgradeSelectedTower() {
     render();
 
     console.log(`타워 강화 완료: ${towerInfo.name} Lv.${cell.inGameLevel} (소모 TP: ${upgradeCost}, 총 투자: ${cell.investedGold})`);
+}
+
+/**
+ * 인게임 타워 강화 비용 계산 (전술가 3셋 할인 시너지 20% 반영)
+ */
+function calculateTowerUpgradeCost(cell) {
+    if (!cell || !cell.tower) return 0;
+    const towerInfo = TOWER_DATA[cell.tower];
+    if (!towerInfo) return 0;
+
+    const currentLv = cell.inGameLevel || 0;
+    let cost = Math.floor(towerInfo.cost * 0.8) + (currentLv + 1) * 2;
+
+    if (typeof calculateDeckSynergies === 'function') {
+        const syn = calculateDeckSynergies();
+        if (syn && syn.bonusStats && syn.bonusStats.upgradeCostDiscountRatio > 0) {
+            cost = Math.max(1, Math.floor(cost * (1 - syn.bonusStats.upgradeCostDiscountRatio)));
+        }
+    }
+    return cost;
 }
 
 /**
@@ -832,7 +892,7 @@ function showTowerDetailPanel(cell, stats) {
         const dmgText = Math.round(stats.damage * 10) / 10;
         let specialDesc = "";
         if (cell.tower === 'ice') specialDesc = "<br>❄️ 효과: 50% 슬로우";
-        if (cell.tower === 'bomb') specialDesc = "<br>💣 효과: 3x3 범위 폭발";
+        if (cell.tower === 'bomb') specialDesc = "<br>💣 효과: 광역 폭발";
         if (cell.tower === 'shock') specialDesc = "<br>⚡ 효과: 3기 연쇄 번개";
         if (cell.tower === 'sniper') specialDesc = "<br>🎯 효과: 초장거리 단일 정밀 저격";
 
@@ -844,7 +904,7 @@ function showTowerDetailPanel(cell, stats) {
         deckTowerCaps = calculateDeckTowerCaps();
     }
     const maxCap = (deckTowerCaps && deckTowerCaps[cell.tower]) || 0;
-    const upgradeCost = Math.floor(stats.cost * 0.8) + (inGameLv + 1) * 2;
+    const upgradeCost = calculateTowerUpgradeCost(cell);
 
     if (upgradeBtn) {
         if (maxCap === 0) {
@@ -897,7 +957,7 @@ function updateTargetingButtonsUI(currentMode) {
     });
 }
 
-// 타워 스탯 가져오기 (전역 함수 getTowerStats 사용, 없으면 기본값)
+// 타워 스탯 가져오기 (전역 함수 getTowerStats 사용, 없으면 기본값, v0.34.0 시너지 반영)
 function getGameTowerStats(cellOrType) {
     let type = cellOrType;
     let inGameLevel = 0;
@@ -906,10 +966,29 @@ function getGameTowerStats(cellOrType) {
         inGameLevel = cellOrType.inGameLevel || 0;
     }
 
+    let stats = null;
     if (typeof getTowerStats === "function") {
-        return getTowerStats(type, TOWER_DATA, inGameLevel);
+        stats = { ...getTowerStats(type, TOWER_DATA, inGameLevel) };
+    } else if (TOWER_DATA[type]) {
+        stats = { ...TOWER_DATA[type] };
     }
-    return TOWER_DATA[type];
+    if (!stats) return null;
+
+    // v0.34.0 시너지 보너스 적용 (사수 2셋 사거리 +1, 화염 3셋/공허 공격력 증폭)
+    if (typeof calculateDeckSynergies === 'function') {
+        const syn = calculateDeckSynergies();
+        if (syn && syn.bonusStats) {
+            const b = syn.bonusStats;
+            if (b.extraRange && b.extraRange[type]) {
+                stats.range = (stats.range || 1) + b.extraRange[type];
+            }
+            if (b.extraDamageRatio > 0) {
+                stats.damage = stats.damage * (1 + b.extraDamageRatio);
+            }
+        }
+    }
+
+    return stats;
 }
 
 /**

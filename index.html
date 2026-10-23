@@ -23,7 +23,7 @@
           <div class="op-start-sub">CLICK ANYWHERE TO START</div>
         </div>
 
-        <div class="op-footer-version">v0.32.0</div>
+        <div class="op-footer-version">v0.33.0</div>
       </div>
     </div>
 
@@ -34,7 +34,7 @@
         <button onclick="returnToOpScreen()"
           style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">◀
           타이틀 화면</button>
-        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.32.0</span>
+        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.33.0</span>
       </div>
       <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card & Commander</h1>
 
@@ -136,15 +136,23 @@
 
     <div id="game-screen" style="display: none;">
       <div id="game-container">
+        <!-- [v0.33.0 New] 디펜스 영역 좌측 전용 출전 지휘관 패널 -->
+        <div id="game-commanders-panel" class="game-commanders-panel">
+          <div class="commanders-panel-header">
+            <h3>👑 출전 지휘관</h3>
+            <span class="commanders-panel-subtitle">Commanders</span>
+          </div>
+          <div id="in-game-commanders-bar" class="ingame-commanders-list">
+            <!-- JS로 동적 렌더링 (지휘관 카드 및 대장 컨트롤) -->
+          </div>
+        </div>
+
+        <!-- 중앙: 디펜스 게임 보드 -->
         <div id="game-board"></div>
 
+        <!-- 우측: 게임 인포 패널 -->
         <div id="info-panel">
           <h2>🎮 Game Info</h2>
-
-          <!-- [v0.28.0 New] 인게임 출전 지휘관 상주 바 -->
-          <div id="in-game-commanders-bar" class="ingame-commanders-bar">
-            <!-- JS로 동적 렌더링 (출전 지휘관 3인 초상화 및 스펠 룬 힌트) -->
-          </div>
 
           <p>🌟 라운드: <span id="round">1</span></p>
           <p>❤️ HP: <span id="hp">10</span></p>
@@ -211,7 +219,7 @@
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.31.0</div>
+          v0.33.0</div>
       </div>
     </div>
   </div>

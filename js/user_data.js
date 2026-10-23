@@ -396,11 +396,19 @@ function calculateDeckTowerCaps() {
         }
     }
 
+    // 3. 역할군 시너지 한도 가산 (v0.34.0 New: 수호자 3셋 근거리 +2강)
+    if (typeof calculateDeckSynergies === 'function') {
+        const syn = calculateDeckSynergies();
+        if (syn && syn.bonusStats && syn.bonusStats.meleeExtraCap) {
+            caps.melee = (caps.melee || 0) + syn.bonusStats.meleeExtraCap;
+        }
+    }
+
     return caps;
 }
 
 /**
- * 현재 출전 덱에 편성된 지휘관들로부터 시작 시 무료 보급 타워/기반 총합 계산 (v0.25.0 / v0.32.0 대장 보너스 반영)
+ * 현재 출전 덱에 편성된 지휘관들로부터 시작 시 무료 보급 타워/기반 총합 계산 (v0.25.0 / v0.32.0 대장 보너스 / v0.34.0 시너지 반영)
  * @returns {Object} { melee: 2, ranged: 1, base: 2, ... }
  */
 function calculateDeckStartingSupplies() {
@@ -425,7 +433,205 @@ function calculateDeckStartingSupplies() {
         }
     }
 
+    // 3. 수호자 2셋 시너지 무료 기반 +1개 추가 가산 (v0.34.0 New)
+    if (typeof calculateDeckSynergies === 'function') {
+        const syn = calculateDeckSynergies();
+        if (syn && syn.bonusStats && syn.bonusStats.extraBasePerRound) {
+            supplies.base = (supplies.base || 0) + syn.bonusStats.extraBasePerRound;
+        }
+    }
+
     return supplies;
+}
+
+/**
+ * 출전 덱에 편성된 지휘관들로부터 듀얼 시너지(원소 & 역할군) 계산 및 종합 버프 산출 (v0.34.0 New)
+ * - 100인 이상의 캐릭터 확장에도 완벽히 대응하는 태그형 시너지 엔진
+ * @returns {Object} { activeSynergies, bonusStats, elementCounts, roleCounts }
+ */
+function calculateDeckSynergies() {
+    const result = {
+        activeSynergies: [],
+        bonusStats: {
+            extraHp: 0,                   // holy 2
+            roundHpRegen: 0,             // holy 2
+            critChance: 0,               // holy 3
+            critMultiplier: 2.0,         // holy 3 (2.5)
+            extraDamageRatio: 0,         // fire 3 (+0.2), void (+0.1)
+            burnChance: 0,               // fire 2 (0.25)
+            burnDuration: 3,             // fire 2
+            bombSplashExtraRadius: 0,    // fire 3 (+1)
+            slowRatioBonus: 0,           // frost 2 (+0.15)
+            slowDurationBonusSec: 0,     // frost 2 (+1.5)
+            damageToSlowedRatio: 0,      // frost 3 (+0.3)
+            attackSpeedRatio: 0,         // shock 2 (+0.18)
+            chainChance: 0,              // shock 3 (0.25)
+            chainDamageRatio: 0.6,       // shock 3
+            extraBasePerRound: 0,        // guardian 2 (+1)
+            meleeExtraCap: 0,            // guardian 3 (+2)
+            crawlerDemolishTimeMulti: 1.0, // guardian 3 (2.0)
+            extraRange: { ranged: 0, sniper: 0 }, // ranger 2 (+1)
+            bossFlyingDamageRatio: 0,    // ranger 3 (+0.3)
+            extraMpPerKill: 0,           // mage 2 (+1)
+            maxMpBonus: 0,               // mage 2 (+20)
+            spellPowerRatio: 0,          // mage 3 (+0.3)
+            roundClearGoldBonus: 0,      // tactician 2 (+3)
+            upgradeCostDiscountRatio: 0  // tactician 3 (0.2)
+        },
+        elementCounts: {},
+        roleCounts: {}
+    };
+
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck) || typeof SYNERGY_DATA === 'undefined') {
+        return result;
+    }
+
+    // 1. 덱 내 지휘관들의 원소 및 역할군 카운트 집계
+    let hasVoid = false;
+    for (const charId of USER_DATA.characterDeck) {
+        const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+        if (!charBase) continue;
+
+        if (charBase.element === 'void') {
+            hasVoid = true;
+        }
+
+        if (charBase.element) {
+            result.elementCounts[charBase.element] = (result.elementCounts[charBase.element] || 0) + 1;
+        }
+        if (charBase.role) {
+            result.roleCounts[charBase.role] = (result.roleCounts[charBase.role] || 0) + 1;
+        }
+    }
+
+    // 2. 공허(Void) 조커 효과 적용: 다른 모든 원소/역할군 카운트에 +1 기여
+    if (hasVoid) {
+        const voidData = SYNERGY_DATA.elements.void;
+        if (voidData && voidData.tiers[1]) {
+            result.activeSynergies.push({
+                type: 'element',
+                key: 'void',
+                count: 1,
+                name: `${voidData.symbol} ${voidData.name} (1)`,
+                title: voidData.tiers[1].title,
+                desc: voidData.tiers[1].desc,
+                color: voidData.color,
+                bg: voidData.bg,
+                border: voidData.border
+            });
+            result.bonusStats.extraDamageRatio += 0.10;
+        }
+
+        // 활성화 가능성 있는 다른 모든 원소/역할군에 +1 조커 부스트
+        for (const eKey of Object.keys(SYNERGY_DATA.elements)) {
+            if (eKey !== 'void' && result.elementCounts[eKey] > 0) {
+                result.elementCounts[eKey] += 1;
+            }
+        }
+        for (const rKey of Object.keys(SYNERGY_DATA.roles)) {
+            if (result.roleCounts[rKey] > 0) {
+                result.roleCounts[rKey] += 1;
+            }
+        }
+    }
+
+    // 3. 원소(Element) 시너지 판정 및 버프 합산
+    for (const [eKey, count] of Object.entries(result.elementCounts)) {
+        if (eKey === 'void') continue;
+        const synInfo = SYNERGY_DATA.elements[eKey];
+        if (!synInfo) continue;
+
+        const activeTierKey = count >= 3 ? 3 : (count >= 2 ? 2 : null);
+        if (activeTierKey && synInfo.tiers[activeTierKey]) {
+            const tierData = synInfo.tiers[activeTierKey];
+            result.activeSynergies.push({
+                type: 'element',
+                key: eKey,
+                count: count,
+                name: `${synInfo.symbol} ${synInfo.name} (${activeTierKey})`,
+                title: tierData.title,
+                desc: tierData.desc,
+                color: synInfo.color,
+                bg: synInfo.bg,
+                border: synInfo.border
+            });
+
+            if (eKey === 'fire') {
+                result.bonusStats.burnChance = 0.25;
+                if (activeTierKey === 3) {
+                    result.bonusStats.bombSplashExtraRadius += 1;
+                    result.bonusStats.extraDamageRatio += 0.20;
+                }
+            } else if (eKey === 'frost') {
+                result.bonusStats.slowRatioBonus += 0.15;
+                result.bonusStats.slowDurationBonusSec += 1.5;
+                if (activeTierKey === 3) {
+                    result.bonusStats.damageToSlowedRatio += 0.30;
+                }
+            } else if (eKey === 'shock') {
+                result.bonusStats.attackSpeedRatio += 0.18;
+                if (activeTierKey === 3) {
+                    result.bonusStats.chainChance = 0.25;
+                }
+            } else if (eKey === 'holy') {
+                result.bonusStats.extraHp += 6;
+                result.bonusStats.roundHpRegen += 1;
+                if (activeTierKey === 3) {
+                    result.bonusStats.critChance += 0.15;
+                    result.bonusStats.critMultiplier = 2.5;
+                }
+            }
+        }
+    }
+
+    // 4. 역할군(Role) 시너지 판정 및 버프 합산
+    for (const [rKey, count] of Object.entries(result.roleCounts)) {
+        const roleInfo = SYNERGY_DATA.roles[rKey];
+        if (!roleInfo) continue;
+
+        const activeTierKey = count >= 3 ? 3 : (count >= 2 ? 2 : null);
+        if (activeTierKey && roleInfo.tiers[activeTierKey]) {
+            const tierData = roleInfo.tiers[activeTierKey];
+            result.activeSynergies.push({
+                type: 'role',
+                key: rKey,
+                count: count,
+                name: `${roleInfo.symbol} ${roleInfo.name} (${activeTierKey})`,
+                title: tierData.title,
+                desc: tierData.desc,
+                color: roleInfo.color,
+                bg: roleInfo.bg,
+                border: roleInfo.border
+            });
+
+            if (rKey === 'guardian') {
+                result.bonusStats.extraBasePerRound += 1;
+                if (activeTierKey === 3) {
+                    result.bonusStats.meleeExtraCap += 2;
+                    result.bonusStats.crawlerDemolishTimeMulti = 2.0;
+                }
+            } else if (rKey === 'ranger') {
+                result.bonusStats.extraRange.ranged += 1;
+                result.bonusStats.extraRange.sniper += 1;
+                if (activeTierKey === 3) {
+                    result.bonusStats.bossFlyingDamageRatio += 0.30;
+                }
+            } else if (rKey === 'mage') {
+                result.bonusStats.extraMpPerKill += 1;
+                result.bonusStats.maxMpBonus += 20;
+                if (activeTierKey === 3) {
+                    result.bonusStats.spellPowerRatio += 0.30;
+                }
+            } else if (rKey === 'tactician') {
+                result.bonusStats.roundClearGoldBonus += 3;
+                if (activeTierKey === 3) {
+                    result.bonusStats.upgradeCostDiscountRatio = 0.20;
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 /**
@@ -454,6 +660,12 @@ function getAuthorizedTowerTypes() {
                 if (type !== 'base') authorized.add(type);
             });
         }
+    }
+
+    // 3. 대장 오버클럭(U등급 등)에 의한 추가 인가 타워 반영 (v0.32.0 New)
+    const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
+    if (leaderInfo && leaderInfo.extraCaps) {
+        Object.keys(leaderInfo.extraCaps).forEach(type => authorized.add(type));
     }
 
     return Array.from(authorized);

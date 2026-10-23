@@ -85,7 +85,13 @@ function startGame() {
     // 1. 연구소 특성 보너스 적용 (Phase D)
     const bonusHp = ((USER_DATA.talents && USER_DATA.talents.maxHp) || 0) * 2;
     const bonusGold = ((USER_DATA.talents && USER_DATA.talents.startGold) || 0) * 3;
-    playerHP = 10 + bonusHp;
+
+    // 1-2. 지휘관 듀얼 시너지 스탯 적용 (v0.34.0 New)
+    const synergyData = (typeof calculateDeckSynergies === 'function') ? calculateDeckSynergies() : null;
+    const synStats = (synergyData && synergyData.bonusStats) ? synergyData.bonusStats : {};
+
+    playerHP = 10 + bonusHp + (synStats.extraHp || 0);
+    maxPlayerHP = playerHP;
     gold = 10 + bonusGold;
     builtBaseCount = 0;
 
@@ -95,7 +101,7 @@ function startGame() {
         console.log("출전 지휘관 덱 타워 강화 한도 적용 완료:", deckTowerCaps);
     }
     mp = 0;
-    maxMp = 100;
+    maxMp = 100 + (synStats.maxMpBonus || 0);
     if (typeof usedSpellRunes !== 'undefined') {
         usedSpellRunes = {};
     }

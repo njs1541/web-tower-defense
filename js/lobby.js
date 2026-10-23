@@ -229,6 +229,34 @@ function renderCommanderSection() {
         </div>
     ` : '';
 
+    // 5. 활성 듀얼 시너지 배너 (v0.34.0 New)
+    const synergyData = (typeof calculateDeckSynergies === 'function') ? calculateDeckSynergies() : { activeSynergies: [] };
+    let synergyChipsHtml = "";
+    if (synergyData.activeSynergies && synergyData.activeSynergies.length > 0) {
+        synergyData.activeSynergies.forEach(syn => {
+            synergyChipsHtml += `
+                <div class="deck-synergy-badge" style="background:${syn.bg}; border-color:${syn.border}; color:${syn.color};" title="${syn.title}: ${syn.desc}">
+                    <span style="font-weight: 800;">${syn.name}</span>
+                    <span style="font-size: 10px; opacity: 0.85;">${syn.title}</span>
+                </div>
+            `;
+        });
+    } else {
+        synergyChipsHtml = `<span style="font-size: 11px; color: #94a3b8;">활성화된 시너지 없음 (동일 원소 2인 이상 또는 동일 역할군 2인 이상 편성 시 발동)</span>`;
+    }
+
+    const synergyBannerHtml = `
+        <div class="deck-synergies-container">
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                <span>✨ 활성 시너지 콤보 (${synergyData.activeSynergies ? synergyData.activeSynergies.length : 0})</span>
+                <span style="font-size: 10px; color: #8b5cf6;">속성/역할군 2세트 이상</span>
+            </div>
+            <div class="deck-synergies-list">
+                ${synergyChipsHtml}
+            </div>
+        </div>
+    `;
+
     summaryCard.innerHTML = `
         <div class="deck-summary-header">
             <div class="deck-summary-title">
@@ -245,6 +273,7 @@ function renderCommanderSection() {
             </div>
         </div>
         ${leaderBannerHtml}
+        ${synergyBannerHtml}
         <div>
             <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; display: flex; justify-content: space-between;">
                 <span>🏗️ 인게임 건설 가능 타워</span>
@@ -330,10 +359,24 @@ function renderCommanderSection() {
         const leaderBadgeHtml = isLeader ? `<span class="commander-leader-crown-badge">👑 대장(총사령관)</span>` : '';
         const setLeaderBtnHtml = (isInDeck && !isLeader) ? `<button class="btn-set-leader" onclick="setLeaderAction('${charId}')">👑 대장으로 임명</button>` : '';
 
+        // 원소 & 역할군 태그 마크업 (v0.34.0 New)
+        let tagsHtml = "";
+        if (typeof SYNERGY_DATA !== 'undefined') {
+            const elemInfo = baseInfo.element ? SYNERGY_DATA.elements[baseInfo.element] : null;
+            const roleInfo = baseInfo.role ? SYNERGY_DATA.roles[baseInfo.role] : null;
+            if (elemInfo) {
+                tagsHtml += `<span class="commander-tag-badge" style="background:${elemInfo.bg}; color:${elemInfo.color}; border:1px solid ${elemInfo.border};">${elemInfo.symbol}${elemInfo.name}</span>`;
+            }
+            if (roleInfo) {
+                tagsHtml += `<span class="commander-tag-badge" style="background:${roleInfo.bg}; color:${roleInfo.color}; border:1px solid ${roleInfo.border};">${roleInfo.symbol}${roleInfo.name}</span>`;
+            }
+        }
+
         card.innerHTML = `
             <div class="commander-card-header">
-                <div style="display:flex; align-items:center; gap:6px;">
+                <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
                     <span class="commander-grade-badge" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border:1px solid ${gradeInfo.border};">${gradeInfo.name} (${baseInfo.grade})</span>
+                    ${tagsHtml}
                     ${leaderBadgeHtml}
                 </div>
                 <span class="commander-stars" style="color: #f59e0b; font-size: 12px; letter-spacing: 1px;">${starsHtml}</span>

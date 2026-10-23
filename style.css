@@ -3374,3 +3374,329 @@ button.selected {
   0% { transform: scale(1); }
   100% { transform: scale(1.08); }
 }
+
+/* ==========================================================================
+   v0.33.0 디펜스 영역 좌측 전용 출전 지휘관 패널 레이아웃 & 카드 스타일
+   ========================================================================== */
+
+/* 1. 디펜스 보드 좌측 출전 지휘관 전용 패널 */
+.game-commanders-panel {
+  width: 250px;
+  max-height: 620px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.commanders-panel-header {
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 8px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.commanders-panel-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #0f172a;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.commanders-panel-subtitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+.ingame-commanders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 2. 지휘관 카드 UI */
+.ingame-commander-card {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.ingame-commander-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 대장 전용 카드 스타일 (골드 엠페러 테마) */
+.ingame-commander-card.is-leader {
+  background: linear-gradient(145deg, #fffdf5 0%, #fffbeb 100%);
+  border: 2px solid #f59e0b !important;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.22);
+}
+
+.ingame-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ingame-card-role-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ingame-card-role-badge.leader {
+  color: #b45309;
+  background: #fef3c7;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid #fde047;
+}
+
+.ingame-card-grade-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.ingame-card-body {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.ingame-card-body:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.ingame-card-avatar-box {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ingame-card-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.12);
+  display: block;
+}
+
+.ingame-card-crown-float {
+  position: absolute;
+  top: -7px;
+  right: -5px;
+  font-size: 14px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  animation: crownBounce 2s infinite ease-in-out;
+}
+
+.ingame-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ingame-card-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ingame-card-title {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.ingame-card-tower-spec {
+  font-size: 11px;
+  color: #3b82f6;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 대장 오버클럭 혜택 미니 태그 */
+.ingame-leader-bonus-tag {
+  background: #fef3c7;
+  border: 1px dashed #f59e0b;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #92400e;
+  line-height: 1.35;
+}
+
+/* 3. 대형 대장 강림 / 전술 이동 액션 버튼 (독립된 풀와이드 버튼) */
+.btn-leader-card-action {
+  width: 100%;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border: 1.5px solid #fbbf24;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 9px 12px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(217, 119, 6, 0.35);
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-leader-card-action:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(217, 119, 6, 0.45);
+}
+
+.btn-leader-card-action.active {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6) !important;
+  animation: btnPulse 1s infinite alternate;
+}
+
+.btn-leader-card-action.relocate {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-color: #60a5fa;
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35);
+}
+
+.btn-leader-card-action.relocate:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+}
+
+.ingame-leader-relocated-notice {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* ==========================================================================
+   v0.34.0 지휘관 듀얼 태그 (원소 + 역할군) 및 덱 시너지 시스템 스타일
+   ========================================================================== */
+
+/* 지휘관 카드 헤더 태그 뱃지 */
+.commander-tag-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  line-height: 1.2;
+}
+
+/* 로비 출전 덱 요약 패널 내 활성 시너지 컨테이너 */
+.deck-synergies-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.deck-synergy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.2;
+  cursor: help;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.deck-synergy-badge:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* 인게임 좌측 패널 상단 시너지 요약 박스 */
+.ingame-synergies-summary-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.ingame-synergy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 10px;
+  line-height: 1.2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  cursor: help;
+  transition: transform 0.15s ease;
+}
+
+.ingame-synergy-pill:hover {
+  transform: translateY(-1px);
+}
+
+.ingame-tag-pill {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.2;
+}

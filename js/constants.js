@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.32.0";
+const GAME_VERSION = "v0.34.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -284,9 +284,198 @@ const CURRENCY_INFO = {
 };
 
 /**
+ * 지휘관 듀얼 시너지 시스템 마스터 데이터 (v0.34.0 New)
+ * - 100인 이상의 대규모 캐릭터 확장에 유연하게 대응하는 원소(Element) & 역할군(Role) 태그 체계
+ */
+const SYNERGY_DATA = {
+    // 5대 원소 (Element)
+    elements: {
+        fire: {
+            id: "fire",
+            name: "화염",
+            symbol: "🔥",
+            color: "#ef4444",
+            bg: "#fef2f2",
+            border: "#fca5a5",
+            tiers: {
+                2: {
+                    count: 2,
+                    title: "작열의 불꽃",
+                    desc: "전 타워 공격 시 25% 확률로 대상에게 3초간 화상 도트 피해 부여"
+                },
+                3: {
+                    count: 3,
+                    title: "홍련의 업화",
+                    desc: "폭탄 타워 폭발 반경 +1칸 및 전 타워 공격력 +20% 증폭"
+                }
+            }
+        },
+        frost: {
+            id: "frost",
+            name: "빙결",
+            symbol: "❄️",
+            color: "#06b6d4",
+            bg: "#ecfeff",
+            border: "#a5f3fc",
+            tiers: {
+                2: {
+                    count: 2,
+                    title: "서리 발자국",
+                    desc: "얼음 타워 슬로우 감속 효과 +15% 강화 및 지속시간 +1.5초"
+                },
+                3: {
+                    count: 3,
+                    title: "절대 영도",
+                    desc: "슬로우 상태인 적에게 모든 타워가 주는 피해 +30% 증폭"
+                }
+            }
+        },
+        shock: {
+            id: "shock",
+            name: "전격",
+            symbol: "⚡",
+            color: "#eab308",
+            bg: "#fefce8",
+            border: "#fde047",
+            tiers: {
+                2: {
+                    count: 2,
+                    title: "과전류 충전",
+                    desc: "모든 타워의 공격 속도(쿨다운) 18% 가속"
+                },
+                3: {
+                    count: 3,
+                    title: "초전도 방전",
+                    desc: "타워 공격 시 25% 확률로 인접 적 2기에게 60% 피해의 연쇄 번개 방전"
+                }
+            }
+        },
+        holy: {
+            id: "holy",
+            name: "신성",
+            symbol: "✨",
+            color: "#f59e0b",
+            bg: "#fffbeb",
+            border: "#fcd34d",
+            tiers: {
+                2: {
+                    count: 2,
+                    title: "신성한 방벽",
+                    desc: "플레이어 최대 기지 HP +6 및 라운드마다 기지 HP +1 회복"
+                },
+                3: {
+                    count: 3,
+                    title: "천상의 서광",
+                    desc: "모든 타워 치명타 확률 +15% 및 치명타 배율 2.5배로 상향"
+                }
+            }
+        },
+        void: {
+            id: "void",
+            name: "공허",
+            symbol: "🌌",
+            color: "#a855f7",
+            bg: "#faf5ff",
+            border: "#d8b4fe",
+            tiers: {
+                1: {
+                    count: 1,
+                    title: "시공 왜곡 (조커)",
+                    desc: "단독 편성 시에도 모든 활성 원소/역할군 카운트에 +1 추가(와일드카드) 및 전 타워 피해 +10%"
+                }
+            }
+        }
+    },
+    // 4대 역할군 (Role/Class)
+    roles: {
+        guardian: {
+            id: "guardian",
+            name: "수호자",
+            symbol: "🛡️",
+            color: "#3b82f6",
+            bg: "#eff6ff",
+            border: "#93c5fd",
+            tiers: {
+                2: {
+                    count: 2,
+                    title: "철벽 방진",
+                    desc: "게임 시작 시 및 라운드마다 무료 기반(벽) +1개 추가 보급"
+                },
+                3: {
+                    count: 3,
+                    title: "불굴의 요새",
+                    desc: "근거리 타워 한도 +2강 및 크롤러 몬스터의 기반 철거 소요 시간 2배 증가"
+                }
+            }
+        },
+        ranger: {
+            id: "ranger",
+            name: "사수",
+            symbol: "🏹",
+            color: "#10b981",
+            bg: "#ecfdf5",
+            border: "#6ee7b7",
+            tiers: {
+                2: {
+                    count: 2,
+                    title: "정밀 조준",
+                    desc: "원거리 및 저격 타워 공격 사거리 +1칸 확장"
+                },
+                3: {
+                    count: 3,
+                    title: "약점 사냥",
+                    desc: "보스 및 비행 몬스터에게 주는 모든 타워 피해 +30% 증폭"
+                }
+            }
+        },
+        mage: {
+            id: "mage",
+            name: "마법사",
+            symbol: "🔮",
+            color: "#8b5cf6",
+            bg: "#f5f3ff",
+            border: "#c4b5fd",
+            tiers: {
+                2: {
+                    count: 2,
+                    title: "마력 공명",
+                    desc: "적 처치 시 획득 MP +1 추가 및 마나 최대치 120으로 확장"
+                },
+                3: {
+                    count: 3,
+                    title: "비전 폭주",
+                    desc: "모든 액티브 스펠 룬 데미지 및 효과 +30% 강화"
+                }
+            }
+        },
+        tactician: {
+            id: "tactician",
+            name: "전술가",
+            symbol: "⚙️",
+            color: "#ea580c",
+            bg: "#fff7ed",
+            border: "#fdba74",
+            tiers: {
+                2: {
+                    count: 2,
+                    title: "보급로 확보",
+                    desc: "웨이브 클리어 보너스 +3 TP(골드) 추가 지급"
+                },
+                3: {
+                    count: 3,
+                    title: "전술 지휘",
+                    desc: "인게임 타워 레벨업 강화 비용(TP) 20% 할인"
+                }
+            }
+        }
+    }
+};
+
+/**
  * 미소녀 지휘관 캐릭터 레지스트리 (CHARACTER_DATA)
  * - 덱 편성 시 타워별 인게임 최대 강화 한도(levelCaps)를 제공
  * - 성급(star)에 따라 소켓 수 확장
+ * - element(5대 원소) 및 role(4대 역할군) 태그 보유 (v0.34.0)
  */
 const CHARACTER_DATA = {
     char_liana: {
@@ -294,6 +483,8 @@ const CHARACTER_DATA = {
         name: "리아나",
         title: "견습 성기사",
         grade: "C",
+        element: "holy",
+        role: "guardian",
         avatar: "🛡️",
         image: "assets/char_liana.jpg",
         maxSockets: 2,
@@ -317,6 +508,8 @@ const CHARACTER_DATA = {
         name: "엘레나",
         title: "바람의 사수",
         grade: "UC",
+        element: "frost",
+        role: "ranger",
         avatar: "🏹",
         image: "assets/char_elena.jpg",
         maxSockets: 2,
@@ -342,6 +535,8 @@ const CHARACTER_DATA = {
         name: "클로에",
         title: "강철의 검사",
         grade: "UC",
+        element: "fire",
+        role: "guardian",
         avatar: "⚔️",
         image: "assets/char_chloe.jpg",
         maxSockets: 2,
@@ -366,6 +561,8 @@ const CHARACTER_DATA = {
         name: "샤를로트",
         title: "매의 눈 저격수",
         grade: "UC",
+        element: "shock",
+        role: "ranger",
         avatar: "🎯",
         image: "assets/char_charlotte.jpg",
         maxSockets: 2,
@@ -390,6 +587,8 @@ const CHARACTER_DATA = {
         name: "세실리아",
         title: "서리의 마도사",
         grade: "UC",
+        element: "frost",
+        role: "mage",
         avatar: "❄️",
         image: "assets/char_cecilia.jpg",
         maxSockets: 2,
@@ -407,13 +606,15 @@ const CHARACTER_DATA = {
             "냉기 속에서 잠시 쉬어가시겠어요? 적들은 제가 꽁꽁 얼려둘게요."
         ],
         skillQuote: "영구 동토의 한기여... 모조리 얼어붙어라!",
-        desc: "차가운 서리 결정으로 적의 발을 묶는 빙결 마법사. 시작 시 얼음 타워 1기와 무료 기반 2개를 보급하며 얼음 타워 한도를 +2 확장합니다."
+        desc: "차가운 서리 결정으로 적의 발을묶는 빙결 마법사. 시작 시 얼음 타워 1기와 무료 기반 2개를 보급하며 얼음 타워 한도를 +2 확장합니다."
     },
     char_greta: {
         id: "char_greta",
         name: "그레타",
         title: "화약의 포격수",
         grade: "UC",
+        element: "fire",
+        role: "tactician",
         avatar: "💣",
         image: "assets/char_greta.jpg",
         maxSockets: 2,
@@ -438,6 +639,8 @@ const CHARACTER_DATA = {
         name: "에이다",
         title: "벽력의 정령사",
         grade: "UC",
+        element: "shock",
+        role: "mage",
         avatar: "⚡",
         image: "assets/char_ada.jpg",
         maxSockets: 2,
@@ -462,6 +665,8 @@ const CHARACTER_DATA = {
         name: "프레이야",
         title: "서리의 마녀",
         grade: "R",
+        element: "frost",
+        role: "mage",
         avatar: "❄️",
         image: "assets/char_freya.jpg",
         maxSockets: 3,
@@ -487,6 +692,8 @@ const CHARACTER_DATA = {
         name: "스칼렛",
         title: "비전 폭파술사",
         grade: "SR",
+        element: "fire",
+        role: "tactician",
         avatar: "💣",
         image: "assets/char_scarlet.jpg",
         maxSockets: 4,
@@ -511,6 +718,8 @@ const CHARACTER_DATA = {
         name: "세라피나",
         title: "성스러운 대사제",
         grade: "UR",
+        element: "holy",
+        role: "mage",
         avatar: "✨",
         image: "assets/char_seraphina.jpg",
         maxSockets: 5,
@@ -536,6 +745,8 @@ const CHARACTER_DATA = {
         name: "루미나",
         title: "성간의 지배자",
         grade: "U",
+        element: "void",
+        role: "guardian",
         avatar: "🌌",
         image: "assets/char_lumina.jpg",
         maxSockets: 6,
