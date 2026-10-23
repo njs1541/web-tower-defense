@@ -374,9 +374,8 @@ function renderCommanderSection() {
 
         card.innerHTML = `
             <div class="commander-card-header">
-                <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; gap:6px;">
                     <span class="commander-grade-badge" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border:1px solid ${gradeInfo.border};">${gradeInfo.name} (${baseInfo.grade})</span>
-                    ${tagsHtml}
                     ${leaderBadgeHtml}
                 </div>
                 <span class="commander-stars" style="color: #f59e0b; font-size: 12px; letter-spacing: 1px;">${starsHtml}</span>
@@ -389,6 +388,9 @@ function renderCommanderSection() {
                 <div class="commander-name-box">
                     <div class="commander-name">${baseInfo.name}</div>
                     <div class="commander-title">${baseInfo.title}</div>
+                    <div class="commander-tags-row" style="display:flex; gap:4px; margin-top:4px;">
+                        ${tagsHtml}
+                    </div>
                 </div>
             </div>
 

@@ -226,9 +226,10 @@ function updateInGameCommandersBar() {
 
     // 1. 인게임 활성 시너지 요약 배너 (v0.34.0 New)
     const synergyData = (typeof calculateDeckSynergies === 'function') ? calculateDeckSynergies() : { activeSynergies: [] };
+    const synBox = document.createElement("div");
+    synBox.className = "ingame-synergies-summary-box";
+
     if (synergyData.activeSynergies && synergyData.activeSynergies.length > 0) {
-        const synBox = document.createElement("div");
-        synBox.className = "ingame-synergies-summary-box";
         let synListHtml = "";
         synergyData.activeSynergies.forEach(syn => {
             synListHtml += `
@@ -242,8 +243,13 @@ function updateInGameCommandersBar() {
             <div class="ingame-synergy-title">✨ 덱 시너지 효과 (${synergyData.activeSynergies.length})</div>
             <div class="ingame-synergy-pills">${synListHtml}</div>
         `;
-        bar.appendChild(synBox);
+    } else {
+        synBox.innerHTML = `
+            <div class="ingame-synergy-title" style="color: #94a3b8; font-size: 11px;">✨ 덱 시너지 (동일 속성 2인 이상 시 발동)</div>
+            <div style="font-size: 10.5px; color: #94a3b8; margin-top: 2px;">현재 활성화된 시너지 조합이 없습니다.</div>
+        `;
     }
+    bar.appendChild(synBox);
 
     // 2. 출전 지휘관 카드 렌더링
     deckIds.forEach((charId, idx) => {
@@ -315,14 +321,11 @@ function updateInGameCommandersBar() {
 
         card.innerHTML = `
             <div class="ingame-card-header">
-                <div style="display:flex; align-items:center; gap:4px; flex-wrap:wrap;">
-                    <span class="ingame-card-role-badge ${isLeader ? 'leader' : ''}">
-                        ${isLeader ? '👑 대장' : '⚔️ 지휘관'}
-                    </span>
-                    ${tagsHtml}
-                </div>
+                <span class="ingame-card-role-badge ${isLeader ? 'leader' : ''}">
+                    ${isLeader ? '👑 대장' : '⚔️ 지휘관'}
+                </span>
                 <span class="ingame-card-grade-badge" style="background:${gradeInfo.bg || '#eff6ff'}; color:${gradeInfo.color}; border:1px solid ${gradeInfo.border};">
-                    ${gradeInfo.name}
+                    ${gradeInfo.name} (${charBase.grade})
                 </span>
             </div>
 
@@ -333,7 +336,9 @@ function updateInGameCommandersBar() {
                 </div>
                 <div class="ingame-card-info">
                     <div class="ingame-card-name">${charBase.name}</div>
-                    <div class="ingame-card-title">${charBase.title || ''}</div>
+                    <div class="ingame-card-tags-line" style="display:flex; gap:4px; margin: 3px 0 4px 0;">
+                        ${tagsHtml}
+                    </div>
                     <div class="ingame-card-tower-spec">🛡️ 관장: <strong>${capsText}</strong></div>
                 </div>
             </div>

@@ -3381,7 +3381,7 @@ button.selected {
 
 /* 1. 디펜스 보드 좌측 출전 지휘관 전용 패널 */
 .game-commanders-panel {
-  width: 250px;
+  width: 280px;
   max-height: 620px;
   overflow-y: auto;
   background: rgba(255, 255, 255, 0.96);
@@ -3635,14 +3635,21 @@ button.selected {
   gap: 3px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 /* 로비 출전 덱 요약 패널 내 활성 시너지 컨테이너 */
 .deck-synergies-container {
   display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.deck-synergies-list {
+  display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 4px;
 }
 
 .deck-synergy-badge {
@@ -3656,6 +3663,7 @@ button.selected {
   cursor: help;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
 }
 
 .deck-synergy-badge:hover {
@@ -3669,8 +3677,25 @@ button.selected {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 8px 10px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.ingame-synergy-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.ingame-synergy-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
 }
 
 .ingame-synergy-pill {
@@ -3684,6 +3709,7 @@ button.selected {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   cursor: help;
   transition: transform 0.15s ease;
+  white-space: nowrap;
 }
 
 .ingame-synergy-pill:hover {
@@ -3691,12 +3717,21 @@ button.selected {
 }
 
 .ingame-tag-pill {
-  font-size: 9px;
+  font-size: 9.5px;
   font-weight: 700;
-  padding: 1px 5px;
+  padding: 1px 6px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 2px;
   line-height: 1.2;
+  white-space: nowrap;
+}
+
+.commander-tags-row,
+.ingame-card-tags-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
