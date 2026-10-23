@@ -45,6 +45,18 @@ function handleCellClick(x, y) {
     const cell = getCell(x, y);
     if (!cell) return;
 
+    // 0. 대장 지휘관 강림/이동 타일 선택 모드 (v0.32.0 New)
+    if (typeof isLeaderDeployMode !== 'undefined' && isLeaderDeployMode) {
+        handleLeaderDeployClick(cell);
+        return;
+    }
+
+    // 0-2. 필드 위 대장 토큰 직접 클릭 시 이동 모드 토글
+    if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
+        toggleLeaderDeployMode();
+        return;
+    }
+
     // 1. 이미 타워가 설치된 셀을 클릭한 경우 -> 사거리 및 타워 상세 관리 패널 표시
     if (cell.tower) {
         // 이미 선택된 타워라면 선택 해제
@@ -358,6 +370,153 @@ function attackFromTowers() {
             }
         }, hitDelay);
     }
+
+    // v0.32.0 대장 지휘관 직접 요격 전투 루프
+    handleLeaderCombat();
+}
+
+/**
+ * v0.32.0 대장 지휘관 강림/이동 셀 클릭 핸들러
+ */
+function handleLeaderDeployClick(cell) {
+    if (!cell) return;
+
+    // 대장은 타워가 없는 '기반(벽)' 위에만 배치 가능
+    if (!cell.buildable || cell.tower) {
+        alert("⚠️ 대장은 타워가 배치되지 않은 '기반(벽)' 위에만 강림/이동할 수 있습니다!");
+        return;
+    }
+
+    // 이미 대장이 해당 자리에 서 있는 경우
+    if (leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
+        isLeaderDeployMode = false;
+        render();
+        if (typeof updateInGameCommandersBar === 'function') updateInGameCommandersBar();
+        return;
+    }
+
+    // 이미 배치되어 있는 상태에서 이동하려는 경우 -> 라운드 1회 제한 검사
+    if (leaderDeployed && leaderPos) {
+        if (leaderRelocatedThisRound) {
+            alert("⚠️ 이번 라운드의 대장 전술 이동을 이미 사용했습니다!\n(이동은 라운드당 1회만 가능하며 다음 라운드에 다시 이동할 수 있습니다.)");
+            isLeaderDeployMode = false;
+            render();
+            if (typeof updateInGameCommandersBar === 'function') updateInGameCommandersBar();
+            return;
+        }
+        leaderRelocatedThisRound = true;
+    }
+
+    // 대장 배치 완료
+    leaderDeployed = true;
+    leaderPos = { x: cell.x, y: cell.y };
+    isLeaderDeployMode = false;
+
+    // 시각 피드백
+    showFloatingDamage(cell.x, cell.y, leaderRelocatedThisRound ? "👑 전술 이동 완료!" : "👑 대장 강림!", "#f59e0b");
+    console.log(`대장 지휘관 배치 좌표: (${cell.x}, ${cell.y}), 라운드 이동 사용: ${leaderRelocatedThisRound}`);
+
+    render();
+    if (typeof updateInGameCommandersBar === 'function') {
+        updateInGameCommandersBar();
+    }
+}
+
+/**
+ * v0.32.0 대장 지휘관 강림/이동 모드 토글
+ */
+function toggleLeaderDeployMode() {
+    const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
+    if (!leaderInfo || !leaderInfo.charBase) {
+        alert("출전 덱에 편성된 지휘관이 없습니다!");
+        return;
+    }
+
+    // 이미 배치된 상태에서 이번 라운드 이동을 소모한 경우
+    if (leaderDeployed && leaderRelocatedThisRound) {
+        alert("⚠️ 이번 라운드의 대장 전술 이동을 이미 사용했습니다!\n(다음 라운드가 시작되면 다시 이동할 수 있습니다.)");
+        return;
+    }
+
+    // 모드 토글
+    isLeaderDeployMode = !isLeaderDeployMode;
+
+    if (isLeaderDeployMode) {
+        // 기존 타워/보급 선택 모드 해제
+        resetSelection();
+        selectedSupplyType = null;
+        interactionMode = 'none';
+        clearActiveRange();
+        hideTowerDetailPanel();
+        showFloatingDamage(10, 10, "👑 대장을 배치할 비어있는 기반을 클릭하세요!", "#f59e0b");
+    }
+
+    render();
+    if (typeof updateInGameCommandersBar === 'function') {
+        updateInGameCommandersBar();
+    }
+}
+
+/**
+ * v0.32.0 대장 지휘관 직접 요격 전투 로직 (사거리 2칸 내 자동 공격)
+ */
+function handleLeaderCombat() {
+    if (!leaderDeployed || !leaderPos || !gameRunning || isPaused) return;
+
+    // 공격 쿨다운 처리 (약 0.8초 주기 = 4틱)
+    if (leaderAttackCooldown > 0) {
+        leaderAttackCooldown--;
+        return;
+    }
+
+    const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
+    if (!leaderInfo || !leaderInfo.charBase) return;
+
+    // 사거리 2칸 내의 살아있는 적 수집
+    const range = 2;
+    const inRangeEnemies = enemies.filter(e => {
+        return e.alive && Math.abs(e.x - leaderPos.x) <= range && Math.abs(e.y - leaderPos.y) <= range;
+    });
+
+    if (inRangeEnemies.length === 0) return;
+
+    // 골인 지점에 가장 가까운 선두 적 타깃
+    const targetEnemy = inRangeEnemies.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
+    if (!targetEnemy) return;
+
+    // 대장 등급별 스탯 및 투사체 색상 (R:25, SR:40, UR:65, U:100)
+    const gradeDmgMap = { R: 25, SR: 40, UR: 65, U: 100 };
+    const gradeColorMap = { R: "#38bdf8", SR: "#c084fc", UR: "#f43f5e", U: "#fbbf24" };
+    const baseDamage = gradeDmgMap[leaderInfo.grade] || 25;
+    const attackColor = gradeColorMap[leaderInfo.grade] || "#f59e0b";
+
+    // 룬 패시브 추가 데미지 보정 (치명타/추가뎀)
+    const passives = typeof getActiveRunePassives === 'function' ? getActiveRunePassives() : {};
+    let finalDamage = baseDamage * (1 + (passives.bonusDamageRatio || 0));
+    let isCrit = false;
+    if (passives.critChance > 0 && Math.random() < passives.critChance) {
+        isCrit = true;
+        finalDamage *= (passives.critMultiplier || 2.0);
+    }
+    finalDamage = Math.max(1, Math.round(finalDamage));
+
+    // 투사체 발사 시각 효과
+    const startDom = getDomCell(leaderPos.x, leaderPos.y);
+    const targetDom = targetEnemy.element;
+    if (startDom && targetDom) {
+        createProjectile(startDom, targetDom, isCrit ? "#ef4444" : attackColor);
+    }
+
+    // 피격 처리
+    const hitDelay = Math.max(50, Math.floor(180 / (gameSpeed || 1)));
+    setTimeout(() => {
+        if (!targetEnemy.alive) return;
+        targetEnemy.hp -= finalDamage;
+        onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : attackColor, isCrit);
+    }, hitDelay);
+
+    // 쿨다운 리셋 (4틱 = 0.8초)
+    leaderAttackCooldown = 4;
 }
 
 /**

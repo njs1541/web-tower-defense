@@ -41,6 +41,28 @@ function render() {
             dom.innerText = emblem;
         }
 
+        // v0.32.0 대장 지휘관 필드 토큰 렌더링 (원형 프레임, 부유 모션, 회전 오라, 왕관)
+        if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
+            dom.classList.add("has-leader");
+            const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
+            const leaderImg = (leaderInfo && leaderInfo.charBase && leaderInfo.charBase.image)
+                ? `<img src="${leaderInfo.charBase.image}" class="leader-token-img" alt="대장">`
+                : `<span class="leader-token-avatar">${(leaderInfo && leaderInfo.charBase && leaderInfo.charBase.avatar) || '👑'}</span>`;
+
+            dom.innerHTML = `
+                <div class="leader-field-token grade-${(leaderInfo && leaderInfo.grade) || 'R'}" title="👑 대장 ${(leaderInfo && leaderInfo.charBase && leaderInfo.charBase.name) || ''} (수호 결계 발동 중 / 클릭 시 이동 모드)">
+                    <div class="leader-token-aura"></div>
+                    ${leaderImg}
+                    <span class="leader-token-crown">👑</span>
+                </div>
+            `;
+        }
+
+        // 대장 강림/이동 모드 시 비어있는 기반(벽) 하이라이트
+        if (typeof isLeaderDeployMode !== 'undefined' && isLeaderDeployMode && cell.buildable && !cell.tower && !(leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y)) {
+            dom.classList.add("leader-targetable");
+        }
+
         if (selectedBoardTower && selectedBoardTower.x === cell.x && selectedBoardTower.y === cell.y) {
             dom.classList.add("selected-tower");
         }
@@ -202,22 +224,39 @@ function updateInGameCommandersBar() {
 
     bar.innerHTML = "";
 
-    deckIds.forEach(charId => {
+    deckIds.forEach((charId, idx) => {
         const charBase = CHARACTER_DATA[charId];
         if (!charBase) return;
 
+        const isLeader = (idx === 0);
         const gradeInfo = CARD_GRADES[charBase.grade] || { name: charBase.grade, color: "#3b82f6", border: "#3b82f6" };
         const chip = document.createElement("div");
-        chip.className = "ingame-commander-chip";
-        chip.style.borderColor = gradeInfo.border || gradeInfo.color;
-        chip.title = `${charBase.name} (${charBase.title})\n클릭하여 지휘관 대사 감상`;
+        chip.className = `ingame-commander-chip ${isLeader ? 'is-leader-chip' : ''}`;
+        chip.style.borderColor = isLeader ? "#f59e0b" : (gradeInfo.border || gradeInfo.color);
+        chip.title = `${charBase.name} (${charBase.title})\n${isLeader ? '👑 대장(총사령관)' : '출전 지휘관'}\n클릭하여 지휘관 대사 감상`;
+
+        // 대장 액션 버튼 HTML
+        let leaderActionBtnHtml = "";
+        if (isLeader) {
+            if (!leaderDeployed) {
+                leaderActionBtnHtml = `<button class="btn-leader-ingame-action ${isLeaderDeployMode ? 'active' : ''}" onclick="event.stopPropagation(); toggleLeaderDeployMode();">👑 강림</button>`;
+            } else if (!leaderRelocatedThisRound) {
+                leaderActionBtnHtml = `<button class="btn-leader-ingame-action ${isLeaderDeployMode ? 'active' : ''}" onclick="event.stopPropagation(); toggleLeaderDeployMode();" title="라운드당 1회 이동 가능">👑 이동</button>`;
+            } else {
+                leaderActionBtnHtml = `<span class="badge-leader-relocated" title="다음 라운드에 다시 이동 가능">🔒 이동완료</span>`;
+            }
+        }
 
         chip.innerHTML = `
-            <img src="${charBase.image || ''}" alt="${charBase.name}" class="ingame-chip-avatar" style="border-color:${gradeInfo.color};">
-            <div class="ingame-chip-info">
-                <span class="ingame-chip-name">${charBase.name}</span>
-                <span class="ingame-chip-title" style="color:${gradeInfo.color}; font-weight:bold;">${gradeInfo.name}</span>
+            <div style="position:relative;">
+                <img src="${charBase.image || ''}" alt="${charBase.name}" class="ingame-chip-avatar" style="border-color:${isLeader ? '#f59e0b' : gradeInfo.color};">
+                ${isLeader ? '<span class="ingame-chip-crown-tag">👑</span>' : ''}
             </div>
+            <div class="ingame-chip-info">
+                <span class="ingame-chip-name">${isLeader ? '👑 ' : ''}${charBase.name}</span>
+                <span class="ingame-chip-title" style="color:${isLeader ? '#b45309' : gradeInfo.color}; font-weight:bold;">${isLeader ? '총사령관' : gradeInfo.name}</span>
+            </div>
+            ${leaderActionBtnHtml}
         `;
 
         // 클릭 시 말풍선 또는 효과 플로팅
@@ -225,7 +264,7 @@ function updateInGameCommandersBar() {
             const quotes = charBase.quotes || [charBase.desc || "출격 준비 완료!"];
             const q = quotes[Math.floor(Math.random() * quotes.length)];
             if (typeof showFloatingDamage === 'function') {
-                showFloatingDamage(10, 10, `💬 ${charBase.name}: "${q}"`, gradeInfo.color);
+                showFloatingDamage(10, 10, `💬 ${charBase.name}: "${q}"`, isLeader ? "#f59e0b" : gradeInfo.color);
             }
         };
 

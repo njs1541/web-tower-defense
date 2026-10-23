@@ -3119,3 +3119,258 @@ button.selected {
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   v0.32.0 대장 지휘관(총사령관) 시스템 & 인게임 참전 연출 스타일
+   ========================================================================== */
+
+/* 1. 로비 덱 요약 대장 오버클럭 배너 */
+.deck-leader-bonus-box {
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.9) 0%, rgba(253, 230, 138, 0.7) 100%);
+  border: 1.5px solid #f59e0b;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11.5px;
+  color: #92400e;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
+  animation: leaderGlow 3s infinite ease-in-out;
+}
+
+.deck-leader-bonus-title {
+  font-weight: 800;
+  font-size: 12px;
+  color: #b45309;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.deck-chip-leader-tag {
+  background: #f59e0b;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 900;
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-right: 2px;
+}
+
+.deck-commander-chip.is-leader {
+  border-color: #f59e0b !important;
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+}
+
+/* 2. 지휘관 카드 내 대장 뱃지 & 임명 버튼 */
+.commander-leader-crown-badge {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(217, 119, 6, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.btn-set-leader {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #b45309;
+  border: 1px solid #f59e0b;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.15);
+}
+
+.btn-set-leader:hover {
+  background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* 3. 인게임 상단/하단 바 대장 칩 */
+.ingame-commander-chip.is-leader-chip {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px solid #f59e0b !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+}
+
+.ingame-chip-crown-tag {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  font-size: 12px;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  animation: crownBounce 2s infinite ease-in-out;
+}
+
+.btn-leader-ingame-action {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  cursor: pointer;
+  margin-left: 6px;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-leader-ingame-action:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  transform: scale(1.06);
+}
+
+.btn-leader-ingame-action.active {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  animation: btnPulse 1s infinite alternate;
+}
+
+.badge-leader-relocated {
+  background: #e2e8f0;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+/* 4. 필드 위 대장 전투 토큰 */
+.cell.has-leader {
+  position: relative;
+  z-index: 15;
+}
+
+.leader-field-token {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: leaderFloat 2.5s infinite ease-in-out;
+}
+
+.leader-token-img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.leader-token-avatar {
+  font-size: 18px;
+  z-index: 2;
+}
+
+.leader-token-crown {
+  position: absolute;
+  top: -10px;
+  font-size: 13px;
+  z-index: 3;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+  animation: crownBob 2s infinite ease-in-out;
+}
+
+/* 회전 오라 링 */
+.leader-token-aura {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px dashed rgba(245, 158, 11, 0.85);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+  z-index: 1;
+  animation: leaderAuraSpin 4s linear infinite;
+}
+
+/* 등급별 오라 색상 */
+.leader-field-token.grade-R .leader-token-aura {
+  border-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.7);
+}
+.leader-field-token.grade-SR .leader-token-aura {
+  border-color: #c084fc;
+  box-shadow: 0 0 9px rgba(192, 132, 252, 0.75);
+}
+.leader-field-token.grade-UR .leader-token-aura {
+  border-color: #f43f5e;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.8);
+}
+.leader-field-token.grade-U .leader-token-aura {
+  border-color: #fbbf24;
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.9);
+}
+
+/* 5. 대장 강림/이동 가능 기반 타일 하이라이트 */
+.cell.leader-targetable {
+  outline: 2px solid #f59e0b !important;
+  box-shadow: inset 0 0 10px rgba(245, 158, 11, 0.6), 0 0 8px rgba(245, 158, 11, 0.7) !important;
+  cursor: pointer !important;
+  animation: targetablePulse 1s infinite alternate;
+}
+
+/* 애니메이션 키프레임 */
+@keyframes leaderFloat {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0px);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-3px);
+  }
+}
+
+@keyframes leaderAuraSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes crownBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes crownBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+@keyframes leaderGlow {
+  0%, 100% { box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15); }
+  50% { box-shadow: 0 2px 12px rgba(245, 158, 11, 0.35); }
+}
+
+@keyframes targetablePulse {
+  0% { background-color: rgba(254, 243, 199, 0.5); }
+  100% { background-color: rgba(253, 230, 138, 0.85); }
+}
+
+@keyframes btnPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.08); }
+}

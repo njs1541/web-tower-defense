@@ -107,6 +107,13 @@ function startGame() {
         console.log("출전 지휘관 스타팅 무료 보급 수령 완료:", commanderSupplies);
     }
 
+    // 3-2. v0.32.0 대장 지휘관 상태 초기화
+    leaderDeployed = false;
+    leaderPos = null;
+    leaderRelocatedThisRound = false;
+    isLeaderDeployMode = false;
+    leaderAttackCooldown = 0;
+
     // 4. 스테이지 테마 및 보드 배경 적용 (Phase D)
     const stage = (typeof STAGE_DATA !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : { boardBg: "#94a3b8" };
     const boardEl = document.getElementById("game-board");

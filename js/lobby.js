@@ -164,11 +164,13 @@ function renderCommanderSection() {
     // 1. 편성된 지휘관 칩들
     let commanderChipsHtml = "";
     if (deckIds.length > 0) {
-        deckIds.forEach(id => {
+        deckIds.forEach((id, idx) => {
             const char = CHARACTER_DATA[id];
             if (char) {
+                const isLeader = (idx === 0);
                 const thumb = char.image ? `<img src="${char.image}" class="deck-chip-thumb" alt="${char.name}">` : (char.avatar || '👑');
-                commanderChipsHtml += `<span class="deck-commander-chip">${thumb} ${char.name}</span>`;
+                const leaderTag = isLeader ? `<span class="deck-chip-leader-tag">👑대장</span>` : '';
+                commanderChipsHtml += `<span class="deck-commander-chip ${isLeader ? 'is-leader' : ''}">${thumb} ${leaderTag}${char.name}</span>`;
             }
         });
     } else {
@@ -218,25 +220,35 @@ function renderCommanderSection() {
     }
     const suppliesSummary = suppliesText.length > 0 ? suppliesText.join(", ") : "없음";
 
+    // 4. 대장 오버클럭 보너스 배너
+    const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
+    const leaderBannerHtml = (leaderInfo && leaderInfo.bonusDesc) ? `
+        <div class="deck-leader-bonus-box">
+            <span class="deck-leader-bonus-title">👑 대장(${leaderInfo.charBase.name}) 오버클럭</span>
+            <span>${leaderInfo.bonusDesc}</span>
+        </div>
+    ` : '';
+
     summaryCard.innerHTML = `
         <div class="deck-summary-header">
             <div class="deck-summary-title">
                 <span>👑</span> 출전 지휘관 덱 (${deckIds.length}/3)
             </div>
             <span style="font-size: 11px; font-weight: 700; color: #2563eb; background: #dbeafe; padding: 2px 8px; border-radius: 10px;">
-                인게임 타워 인가
+                1번 슬롯 = 대장
             </span>
         </div>
         <div>
-            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px;">편성된 지휘관</div>
+            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px;">편성된 지휘관 (첫 번째가 대장)</div>
             <div class="deck-commanders-chips">
                 ${commanderChipsHtml}
             </div>
         </div>
+        ${leaderBannerHtml}
         <div>
             <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; display: flex; justify-content: space-between;">
                 <span>🏗️ 인게임 건설 가능 타워</span>
-                <span style="font-size: 10px; color: #3b82f6;">지휘관 강화 한도 합산</span>
+                <span style="font-size: 10px; color: #3b82f6;">지휘관+대장 한도 합산</span>
             </div>
             ${towerListHtml}
         </div>
@@ -255,10 +267,11 @@ function renderCommanderSection() {
         if (!baseInfo) return;
 
         const isInDeck = deckIds.includes(charId);
+        const isLeader = isInDeck && deckIds[0] === charId;
         const gradeInfo = CARD_GRADES[baseInfo.grade] || { name: baseInfo.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.1)" };
 
         const card = document.createElement("div");
-        card.className = `commander-card grade-${baseInfo.grade.toLowerCase()} ${isInDeck ? 'in-deck' : ''}`;
+        card.className = `commander-card grade-${baseInfo.grade.toLowerCase()} ${isInDeck ? 'in-deck' : ''} ${isLeader ? 'is-leader-card' : ''}`;
 
         // 타워 한도 보너스 및 시작 보급 텍스트 생성
         let capsText = [];
@@ -313,9 +326,16 @@ function renderCommanderSection() {
         const starCount = charData.star || 1;
         let starsHtml = "★".repeat(starCount) + "☆".repeat(Math.max(0, 5 - starCount));
 
+        // 대장 뱃지 마크업
+        const leaderBadgeHtml = isLeader ? `<span class="commander-leader-crown-badge">👑 대장(총사령관)</span>` : '';
+        const setLeaderBtnHtml = (isInDeck && !isLeader) ? `<button class="btn-set-leader" onclick="setLeaderAction('${charId}')">👑 대장으로 임명</button>` : '';
+
         card.innerHTML = `
             <div class="commander-card-header">
-                <span class="commander-grade-badge" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border:1px solid ${gradeInfo.border};">${gradeInfo.name} (${baseInfo.grade})</span>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span class="commander-grade-badge" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border:1px solid ${gradeInfo.border};">${gradeInfo.name} (${baseInfo.grade})</span>
+                    ${leaderBadgeHtml}
+                </div>
                 <span class="commander-stars" style="color: #f59e0b; font-size: 12px; letter-spacing: 1px;">${starsHtml}</span>
             </div>
             
@@ -340,6 +360,7 @@ function renderCommanderSection() {
             </div>
 
             <div class="commander-actions">
+                ${setLeaderBtnHtml}
                 <button class="btn-deck-toggle ${isInDeck ? 'in-deck' : ''}" onclick="toggleCharacterDeckAction('${charId}')">
                     ${isInDeck ? '⚔️ 출전 중 (해제)' : '⚔️ 출전 덱에 편성'}
                 </button>
@@ -348,6 +369,16 @@ function renderCommanderSection() {
 
         container.appendChild(card);
     });
+}
+
+/**
+ * 대장 임명 액션 핸들러
+ */
+function setLeaderAction(charId) {
+    if (typeof setDeckLeader === 'function') {
+        setDeckLeader(charId);
+        updateLobbyUI();
+    }
 }
 
 /**

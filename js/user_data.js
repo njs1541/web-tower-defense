@@ -290,13 +290,95 @@ function hardResetGame() {
 }
 
 /**
- * 현재 출전 덱에 편성된 캐릭터들로부터 타워별 최대 강화 한도(Level Cap) 총합 계산 (v0.22.0)
+ * 현재 출전 덱의 대장(총사령관, 1번 슬롯) 정보 및 대장 고유 오버클럭 보너스 조회 (v0.32.0 New)
+ */
+function getLeaderCommanderInfo() {
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck) || USER_DATA.characterDeck.length === 0) {
+        return null;
+    }
+    const leaderId = USER_DATA.characterDeck[0];
+    const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[leaderId] : null;
+    if (!charBase) return null;
+
+    const grade = charBase.grade || 'C';
+    let extraCaps = {};
+    let extraSupplies = {};
+    let bonusDesc = "";
+
+    // R 등급 이상 대장 임명 시 대장 전용 추가 오버클럭 옵션
+    if (grade === 'R') {
+        // R (레어): 관장 타워 한도 +1 추가
+        if (charBase.levelCaps) {
+            for (const tType of Object.keys(charBase.levelCaps)) {
+                extraCaps[tType] = 1;
+            }
+        }
+        bonusDesc = "👑 대장 특권: 관장 타워 최대 강화 한도 +1강 추가!";
+    } else if (grade === 'SR') {
+        // SR (스페셜 레어): 관장 타워 한도 +1 추가 및 타워 보급 +1기
+        if (charBase.levelCaps) {
+            for (const tType of Object.keys(charBase.levelCaps)) {
+                extraCaps[tType] = 1;
+            }
+        }
+        if (charBase.startingTowers) {
+            for (const [sKey, sVal] of Object.entries(charBase.startingTowers)) {
+                if (sKey !== 'base') {
+                    extraSupplies[sKey] = 1;
+                    break;
+                }
+            }
+        }
+        bonusDesc = "👑 대장 특권: 관장 타워 한도 +1강 & 시작 타워 +1기 추가 보급!";
+    } else if (grade === 'UR') {
+        // UR (울트라 레어): 관장 타워 한도 +2 추가 및 무료 기반 +2개
+        if (charBase.levelCaps) {
+            for (const tType of Object.keys(charBase.levelCaps)) {
+                extraCaps[tType] = 2;
+            }
+        }
+        extraSupplies['base'] = 2;
+        bonusDesc = "👑 대장 특권: 관장 타워 한도 +2강 & 무료 기반 +2개 추가 보급!";
+    } else if (grade === 'U') {
+        // U (유니크): 전 타워 한도 +2 추가 및 전 기본 타워 각 1기 보급
+        extraCaps = { ranged: 2, melee: 2, ice: 2, bomb: 2, sniper: 2 };
+        extraSupplies = { ranged: 1, melee: 1, ice: 1, bomb: 1, base: 2 };
+        bonusDesc = "👑 대장 특권: 전 타워 한도 +2강 & 전 타워 각 +1기 + 기반 +2개 추가 보급!";
+    }
+
+    return {
+        charId: leaderId,
+        charBase: charBase,
+        grade: grade,
+        extraCaps: extraCaps,
+        extraSupplies: extraSupplies,
+        bonusDesc: bonusDesc
+    };
+}
+
+/**
+ * 덱 내 지휘관을 대장(1번 슬롯)으로 지정/교체
+ */
+function setDeckLeader(charId) {
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return;
+    const idx = USER_DATA.characterDeck.indexOf(charId);
+    if (idx === -1) return;
+
+    // 해당 캐릭터를 1번 슬롯으로 이동
+    USER_DATA.characterDeck.splice(idx, 1);
+    USER_DATA.characterDeck.unshift(charId);
+    saveData();
+}
+
+/**
+ * 현재 출전 덱에 편성된 캐릭터들로부터 타워별 최대 강화 한도(Level Cap) 총합 계산 (v0.22.0 / v0.32.0 대장 보너스 반영)
  * @returns {Object} { ranged: 2, melee: 1, ice: 0, bomb: 0 }
  */
 function calculateDeckTowerCaps() {
-    const caps = { ranged: 0, melee: 0, ice: 0, bomb: 0 };
+    const caps = { ranged: 0, melee: 0, ice: 0, bomb: 0, sniper: 0 };
     if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return caps;
 
+    // 1. 기본 편성 지휘관들의 한도 합산
     for (const charId of USER_DATA.characterDeck) {
         const charInfo = CHARACTER_DATA[charId];
         if (charInfo && charInfo.levelCaps) {
@@ -305,17 +387,27 @@ function calculateDeckTowerCaps() {
             }
         }
     }
+
+    // 2. R 이상 대장 보너스 한도 추가 가산 (v0.32.0 New)
+    const leaderInfo = getLeaderCommanderInfo();
+    if (leaderInfo && leaderInfo.extraCaps) {
+        for (const [tType, extra] of Object.entries(leaderInfo.extraCaps)) {
+            caps[tType] = (caps[tType] || 0) + extra;
+        }
+    }
+
     return caps;
 }
 
 /**
- * 현재 출전 덱에 편성된 지휘관들로부터 시작 시 무료 보급 타워/기반 총합 계산 (v0.25.0 New)
+ * 현재 출전 덱에 편성된 지휘관들로부터 시작 시 무료 보급 타워/기반 총합 계산 (v0.25.0 / v0.32.0 대장 보너스 반영)
  * @returns {Object} { melee: 2, ranged: 1, base: 2, ... }
  */
 function calculateDeckStartingSupplies() {
     const supplies = {};
     if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return supplies;
 
+    // 1. 기본 보급 합산
     for (const charId of USER_DATA.characterDeck) {
         const charInfo = CHARACTER_DATA[charId];
         if (charInfo && charInfo.startingTowers) {
@@ -324,6 +416,15 @@ function calculateDeckStartingSupplies() {
             }
         }
     }
+
+    // 2. R 이상 대장 보너스 보급 추가 가산 (v0.32.0 New)
+    const leaderInfo = getLeaderCommanderInfo();
+    if (leaderInfo && leaderInfo.extraSupplies) {
+        for (const [key, count] of Object.entries(leaderInfo.extraSupplies)) {
+            supplies[key] = (supplies[key] || 0) + count;
+        }
+    }
+
     return supplies;
 }
 

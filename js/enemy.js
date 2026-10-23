@@ -457,6 +457,12 @@ function handleCrawlerMovement(enemy) {
 function demolishBase(cell) {
     if (!cell || !cell.buildable) return;
 
+    // v0.32.0 대장 지휘관 수호 결계: 대장이 서 있는 기반은 크롤러가 절대 철거 불가!
+    if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && cell.x === leaderPos.x && cell.y === leaderPos.y) {
+        showFloatingDamage(cell.x, cell.y, "🛡️ 대장 결계! 철거 차단!", "#38bdf8");
+        return;
+    }
+
     cell.buildable = false;
     const hadTower = cell.tower;
     cell.tower = null;
@@ -530,5 +536,14 @@ function startRound() {
 
     updateSpeedUI();
     restartGameLoops();
+
+    // v0.32.0 라운드 시작 시 대장 이동 기회 1회 리셋
+    if (typeof leaderRelocatedThisRound !== 'undefined') {
+        leaderRelocatedThisRound = false;
+        isLeaderDeployMode = false;
+        if (typeof updateInGameCommandersBar === 'function') {
+            updateInGameCommandersBar();
+        }
+    }
 }
 
