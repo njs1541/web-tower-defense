@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미소녀 지휘관 비주얼 스타일 가이드 (Visual Style Guide)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: rgba(18, 24, 38, 0.85);
+            --bg-card-hover: rgba(28, 38, 60, 0.95);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(99, 102, 241, 0.4);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --text-muted: #64748b;
+            
+            /* 속성 컬러 */
+            --col-fire: #ef4444;
+            --col-frost: #06b6d4;
+            --col-shock: #a855f7;
+            --col-holy: #eab308;
+            --col-void: #ec4899;
+            
+            /* 등급 컬러 */
+            --grade-c: #94a3b8;
+            --grade-uc: #22c55e;
+            --grade-r: #3b82f6;
+            --grade-sr: #a855f7;
+            --grade-ur: #f59e0b;
+            --grade-u: #ec4899;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.6;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.08) 0%, transparent 45%);
+            background-attachment: fixed;
+            padding-bottom: 80px;
+        }
+
+        /* 헤더 네비게이션 */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(16px);
+            background: rgba(11, 15, 25, 0.8);
+            border-bottom: 1px solid var(--border-glass);
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-badge {
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: white;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 20px;
+            letter-spacing: 1px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .logo-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+
+        nav a {
+            color: var(--text-sub);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #fff;
+        }
+
+        /* 컨테이너 */
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* 히어로 섹션 */
+        .hero {
+            text-align: center;
+            padding: 50px 20px 60px;
+            border-bottom: 1px solid var(--border-glass);
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            color: #818cf8;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .hero h1 {
+            font-size: 38px;
+            font-weight: 900;
+            line-height: 1.3;
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, #ffffff 40%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 760px;
+            margin: 0 auto;
+            color: var(--text-sub);
+            font-size: 15.5px;
+            line-height: 1.7;
+        }
+
+        /* 공통 섹션 헤더 */
+        .section-header {
+            margin-bottom: 30px;
+        }
+
+        .section-tag {
+            font-size: 12px;
+            font-weight: 700;
+            color: #a855f7;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .section-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-desc {
+            color: var(--text-sub);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
+        /* 벤치마킹 그리드 */
+        .bench-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 70px;
+        }
+
+        .bench-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bench-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-highlight);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .bench-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), transparent);
+        }
+
+        .bench-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .bench-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .bench-category {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+
+        .bench-strategy {
+            font-size: 13.5px;
+            color: #e2e8f0;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .bench-rules {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .bench-rules li {
+            font-size: 12.5px;
+            color: var(--text-sub);
+            display: flex;
+            gap: 8px;
+            line-height: 1.5;
+        }
+
+        .bench-rules li strong {
+            color: #f1f5f9;
+        }
+
+        /* 4축 가이드라인 */
+        .matrix-section {
+            margin-bottom: 70px;
+        }
+
+        /* 탭 내비게이션 */
+        .tab-nav {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-glass);
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: #fff;
+            background: rgba(99, 102, 241, 0.15);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 등급별 비교 카드 쇼케이스 */
+        .grade-showcase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .grade-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-glass);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s;
+        }
+
+        .grade-card:hover {
+            transform: translateY(-6px);
+        }
+
+        .grade-img-wrap {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background: #1e293b;
+            overflow: hidden;
+        }
+
+        .grade-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .grade-card:hover .grade-img-wrap img {
+            transform: scale(1.05);
+        }
+
+        .grade-badge-float {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 900;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .grade-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .grade-char-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grade-char-title {
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+
+        .grade-spec-list {
+            list-style: none;
+            font-size: 12px;
+            color: var(--text-sub);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 10px;
+        }
+
+        .grade-spec-list li strong {
+            color: #e2e8f0;
+        }
+
+        /* 3대 핵심 벤치마킹 인사이트 */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 70px;
+        }
+
+        .insight-card {
+            background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--border-glass);
+            border-radius: 18px;
+            padding: 28px;
+            position: relative;
+        }
+
+        .insight-card .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 18px;
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+        }
+
+        .insight-card h3 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .insight-card p {
+            font-size: 13.5px;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        .insight-highlight {
+            margin-top: 14px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+            font-size: 12.5px;
+            color: #cbd5e1;
+        }
+
+        /* 인터랙티브 프롬프트 생성기 */
+        .generator-card {
+            background: linear-gradient(135deg, rgba(20, 26, 45, 0.9), rgba(11, 15, 25, 0.95));
+            border: 1px solid var(--border-highlight);
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.15);
+            border-radius: 20px;
+            padding: 36px;
+        }
+
+        .gen-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .gen-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .gen-group label {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #cbd5e1;
+        }
+
+        .gen-select, .gen-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .gen-select:focus, .gen-input:focus {
+            border-color: var(--primary);
+        }
+
+        .prompt-output-box {
+            position: relative;
+            background: #060911;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .prompt-output-box pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #38bdf8;
+            font-size: 13px;
+            line-height: 1.6;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .btn-copy {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-copy:hover {
+            background: #4f46e5;
+        }
+
+        /* 테이블 스타일 */
+        .guide-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-glass);
+            margin-top: 16px;
+        }
+
+        .guide-table th, .guide-table td {
+            padding: 14px 18px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .guide-table th {
+            background: rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+            font-weight: 700;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .guide-table td {
+            color: var(--text-sub);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .guide-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .pill-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-top: 80px;
+            border-top: 1px solid var(--border-glass);
+            padding-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 헤더 -->
+    <header>
+        <div class="logo-box">
+            <span class="logo-badge">ART BIBLE</span>
+            <span class="logo-title">FANTASY TOWER DEFENSE</span>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#benchmarks">가챠 명작 분석</a></li>
+                <li><a href="#matrix">4축 가이드라인</a></li>
+                <li><a href="#sensual-styles">종족별 스타일 A/B</a></li>
+                <li><a href="#insights">3대 핵심 규칙</a></li>
+                <li><a href="#anti-defect">인체 오류 방지</a></li>
+                <li><a href="#generator">AI 프롬프트 생성기</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+
+        <!-- 히어로 배너 -->
+        <section class="hero">
+            <span class="hero-tag">Character Visual Style Guide & Design Rules</span>
+            <h1>미소녀 지휘관 아트 디렉션 가이드북</h1>
+            <p>
+                등급, 속성, 역할군, 종족 간의 시각적 통일감(Cohesion)과 위계(Hierarchy)를 완성하기 위해
+                시장 최고의 모바일 가챠 게임들의 시각 문법을 분석하고 우리 프로젝트를 위한 표준 비주얼 매트릭스를 정립합니다.
+            </p>
+        </section>
+
+        <!-- 1. 타 게임 벤치마킹 분석 -->
+        <section id="benchmarks">
+            <div class="section-header">
+                <span class="section-tag">Case Studies</span>
+                <h2 class="section-title">🏆 모바일 가챠 명작들의 비주얼 통일감 구축 사례</h2>
+                <p class="section-desc">완벽한 아트 디렉션을 구축한 게임들이 세력, 속성, 등급, 역할을 어떻게 시각화했는지 분석합니다.</p>
+            </div>
+
+            <div class="bench-grid">
+                <!-- ZZZ -->
+                <div class="bench-card">
+                    <div class="bench-card-header">
+                        <span class="bench-title">젠레스 존 제로 (ZZZ)</span>
+                        <span class="bench-category">어반 스트리트 펑크</span>
+                    </div>
+                    <div class="bench-strategy">진영(Faction)별 스트리트 테크웨어 테마의 철저한 규격화</div>
+                    <ul class="bench-rules">
+                        <li><strong>벨로보그:</strong> 안전모, 산업용 작업복, 투박한 중장비 부품, 옐로우/오렌지.</li>
+                        <li><strong>빅토리아:</strong> 고딕 호러 메이드/집사 복식, 가위·청소기 등 가사도구의 무기화.</li>
+                        <li><strong>등급(A vs S):</strong> S급은 광각(Fish-eye) 왜곡과 무기 기믹 변형, 네온 잔상 극대화.</li>
+                    </ul>
+                </div>
+
+                <!-- 트릭컬 -->
+                <div class="bench-card">
+                    <div class="bench-card-header">
+                        <span class="bench-title">트릭컬 리바이브</span>
+                        <span class="bench-category">순수 종족 & 감정 매칭</span>
+                    </div>
+                    <div class="bench-strategy">확고한 종족 체계와 종족별 상징 소품의 1:1 결합</div>
+                    <ul class="bench-rules">
+                        <li><strong>엘프 vs 마녀:</strong> 현대 오피스 정장/서류가방 vs 거대한 고깔모자/빗자루.</li>
+                        <li><strong>요정 vs 유령:</strong> 투명한 요정 날개/꽃 모티브 vs 반투명 하체/영혼 불꽃.</li>
+                        <li><strong>속성(성격):</strong> 순수(노랑), 냉정(청색), 광기(자색) 등 표정·컬러가 성격과 직관적 일치.</li>
+                    </ul>
+                </div>
+
+                <!-- 니케 -->
+                <div class="bench-card">
+                    <div class="bench-card-header">
+                        <span class="bench-title">승리의 여신: 니케</span>
+                        <span class="bench-category">기업 로고 & 밀리터리</span>
+                    </div>
+                    <div class="bench-strategy">3대 제조 기업 로고와 정체성 기반의 복식 규격화</div>
+                    <ul class="bench-rules">
+                        <li><strong>엘리시온:</strong> 정규군 제복, 베레모, 절제된 밀리터리 택티컬.</li>
+                        <li><strong>미실리스 vs 테트라:</strong> 각진 사이버네틱스 아머 vs 쇼걸/바니걸 엔터테인먼트.</li>
+                        <li><strong>필그림 (초월):</strong> 낡은 로브 속 압도적 화력, 성녀/천사 날개 모티브.</li>
+                    </ul>
+                </div>
+
+                <!-- 명조 -->
+                <div class="bench-card">
+                    <div class="bench-card-header">
+                        <span class="bench-title">명조: 워더링 웨이브</span>
+                        <span class="bench-category">공명 낙인 & 수묵 SF</span>
+                    </div>
+                    <div class="bench-strategy">공명 주파수(Tacet)라는 단일 세계관 앵커 + 동양 판타지</div>
+                    <ul class="bench-rules">
+                        <li><strong>공통 앵커:</strong> 모든 캐릭터의 몸(목, 손등)에 빛나는 '공명 낙인' 각인.</li>
+                        <li><strong>이펙트 형태:</strong> 기류(비취색 칼날), 응결(기하학 얼음), 융융(마그마 연기).</li>
+                        <li><strong>등급(4성 vs 5성):</strong> 5성은 동양 수묵화 붓터치와 거대한 음파 링이 화면 압도.</li>
+                    </ul>
+                </div>
+
+                <!-- 브라운더스트 -->
+                <div class="bench-card">
+                    <div class="bench-card-header">
+                        <span class="bench-title">브라운더스트 1 & 2</span>
+                        <span class="bench-category">클래식 직군 실루엣</span>
+                    </div>
+                    <div class="bench-strategy">직군(포지션)별 무게중심과 질감(Texture) 밀도의 분리</div>
+                    <ul class="bench-rules">
+                        <li><strong>방어형:</strong> 전신 판금 갑옷, 대형 방패 (하체로 쏠린 단단한 무게중심).</li>
+                        <li><strong>마법형 vs 지원형:</strong> 부유하는 마법구/로브 vs 성스러운 성서/악기/룬스톤.</li>
+                        <li><strong>등급 차별:</strong> 등급이 올라갈수록 금속 반사광(Specular)과 벨벳/실크 주름 밀도 비약적 상승.</li>
+                    </ul>
+                </div>
+
+                <!-- 데스티니 차일드 & 라스트 오리진 -->
+                <div class="bench-card">
+                    <div class="bench-card-header">
+                        <span class="bench-title">데스티니 차일드 & 라오</span>
+                        <span class="bench-category">과장된 비례 & 부대 제복</span>
+                    </div>
+                    <div class="bench-strategy">인체 비례의 과장(Exaggeration)과 부대별 고유 색상환</div>
+                    <ul class="bench-rules">
+                        <li><strong>실루엣 과장:</strong> 허벅지, 골반, 무기의 극단적 볼륨으로 썸네일 1초 식별.</li>
+                        <li><strong>부대별 제복:</strong> 스틸라인(보병 제복), 발할라(북유럽), 둠스데이(중화기 장갑).</li>
+                        <li><strong>등급 체계:</strong> 저등급의 양산형 단총에서 최고등급의 초거대 위성 폭격 유닛으로 진화.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 4축 비주얼 가이드라인 매트릭스 -->
+        <section id="matrix" class="matrix-section">
+            <div class="section-header">
+                <span class="section-tag">Design System</span>
+                <h2 class="section-title">📐 우리 게임을 위한 4축 비주얼 가이드라인 매트릭스</h2>
+                <p class="section-desc">등급(Grade), 속성(Element), 역할군(Role), 종족(Race)의 명확한 시각적 규칙을 정의합니다.</p>
+            </div>
+
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('tab-grade')">1. 등급별 비주얼 계층화 (Grade)</button>
+                <button class="tab-btn" onclick="switchTab('tab-element')">2. 5대 원소 컬러 & 이펙트 (Element)</button>
+                <button class="tab-btn" onclick="switchTab('tab-role')">3. 4대 역할군 실루엣 (Role)</button>
+                <button class="tab-btn" onclick="switchTab('tab-race')">4. 종족 해부학적 규칙 (Race)</button>
+            </div>
+
+            <!-- 탭 1: 등급별 -->
+            <div id="tab-grade" class="tab-content active">
+                <div class="grade-showcase-grid">
+                    <!-- C 등급 -->
+                    <div class="grade-card">
+                        <div class="grade-img-wrap">
+                            <img src="assets/char_liana.jpg" alt="C등급 리아나">
+                            <span class="grade-badge-float" style="background: var(--grade-c);">C GRADE</span>
+                        </div>
+                        <div class="grade-body">
+                            <div class="grade-char-name">
+                                <span>리아나</span>
+                                <span class="grade-char-title">숲의 견습 기사</span>
+                            </div>
+                            <ul class="grade-spec-list">
+                                <li><strong>복식:</strong> 소박한 견습생 가죽 경갑, 심플한 제복</li>
+                                <li><strong>포즈:</strong> 단정한 정면 스탠딩 자세</li>
+                                <li><strong>이펙트:</strong> <span style="color:#94a3b8;">마법 오라 없음, 소프트 배경</span></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- R 등급 -->
+                    <div class="grade-card">
+                        <div class="grade-img-wrap">
+                            <img src="assets/char_freya.jpg" alt="R등급 프레이야">
+                            <span class="grade-badge-float" style="background: var(--grade-r);">R GRADE</span>
+                        </div>
+                        <div class="grade-body">
+                            <div class="grade-char-name">
+                                <span>프레이야</span>
+                                <span class="grade-char-title">홍련의 마도사</span>
+                            </div>
+                            <ul class="grade-spec-list">
+                                <li><strong>복식:</strong> 정식 마법사 로브, 흩날리는 케이프</li>
+                                <li><strong>포즈:</strong> 3/4 측면 역동적인 시전 자세</li>
+                                <li><strong>이펙트:</strong> 옅은 1겹 원소 마법진, 불티 파티클</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- SR 등급 -->
+                    <div class="grade-card">
+                        <div class="grade-img-wrap">
+                            <img src="assets/char_scarlet.jpg" alt="SR등급 스칼렛">
+                            <span class="grade-badge-float" style="background: var(--grade-sr);">SR GRADE</span>
+                        </div>
+                        <div class="grade-body">
+                            <div class="grade-char-name">
+                                <span>스칼렛</span>
+                                <span class="grade-char-title">전장의 뇌제</span>
+                            </div>
+                            <ul class="grade-spec-list">
+                                <li><strong>복식:</strong> 화려한 금박 문양, 고급스러운 판타지 기사복</li>
+                                <li><strong>포즈:</strong> 역동적인 무기 겨누기, 머릿결 흩날림</li>
+                                <li><strong>이펙트:</strong> 선명한 회전 룬 헤일로, 번개 스파크</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- UR 등급 -->
+                    <div class="grade-card">
+                        <div class="grade-img-wrap">
+                            <img src="assets/char_seraphina.jpg" alt="UR등급 세라피나">
+                            <span class="grade-badge-float" style="background: var(--grade-ur);">UR GRADE</span>
+                        </div>
+                        <div class="grade-body">
+                            <div class="grade-char-name">
+                                <span>세라피나</span>
+                                <span class="grade-char-title">새벽의 성기사</span>
+                            </div>
+                            <ul class="grade-spec-list">
+                                <li><strong>복식:</strong> 성스러운 제단 백금 중갑, 날개 형상 견갑</li>
+                                <li><strong>포즈:</strong> 로우 앵글, 당당하고 위엄 있는 카리스마</li>
+                                <li><strong>이펙트:</strong> 거대한 다중 마법진, 빛의 깃털 폭발</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- U 등급 -->
+                    <div class="grade-card">
+                        <div class="grade-img-wrap">
+                            <img src="assets/char_lumina.jpg" alt="U등급 루미나">
+                            <span class="grade-badge-float" style="background: var(--grade-u);">U UNIQUE</span>
+                        </div>
+                        <div class="grade-body">
+                            <div class="grade-char-name">
+                                <span>루미나</span>
+                                <span class="grade-char-title">시원의 창세신</span>
+                            </div>
+                            <ul class="grade-spec-list">
+                                <li><strong>복식:</strong> 초월적인 천상 로브, 신비로운 보석 장식</li>
+                                <li><strong>포즈:</strong> 지면에서 떠 있는 부유(Levitation) 포즈</li>
+                                <li><strong>이펙트:</strong> 은하수(Nebula), 거대한 신성 후광, 별빛 가루</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 탭 2: 속성별 -->
+            <div id="tab-element" class="tab-content">
+                <table class="guide-table">
+                    <thead>
+                        <tr>
+                            <th>속성 (Element)</th>
+                            <th>대표 컬러 팔레트</th>
+                            <th>헤어/아이 추천 컬러</th>
+                            <th>시그니처 파티클 & 비주얼 모티브</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="pill-badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">🔥 화염 (Fire)</span></td>
+                            <td>Crimson Red (#E11D48), Amber (#F59E0B)</td>
+                            <td>붉은색, 루비색, 흑발에 붉은 브릿지</td>
+                            <td>타오르는 불꽃, 흩날리는 불티(Embers), 열기 왜곡, 검은 연기</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill-badge" style="background: rgba(6, 182, 212, 0.2); color: #38bdf8;">❄️ 빙결 (Frost)</span></td>
+                            <td>Cyan (#06B6D4), Ice Blue (#E0F2FE), Silver</td>
+                            <td>은발(백발), 플래티넘 블론드, 맑은 벽안</td>
+                            <td>각얼음 결정, 눈꽃 스파크(Snowflake), 차가운 서리 안개</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill-badge" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">⚡ 전격 (Shock)</span></td>
+                            <td>Violet (#8B5CF6), Electric Blue (#3B82F6)</td>
+                            <td>네온 바이올렛, 보라색, 짙은 남색</td>
+                            <td>정전기 스파크, 지그재그 번개 아크, 자기장 링 플라즈마</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill-badge" style="background: rgba(234, 179, 8, 0.2); color: #facc15;">✨ 신성 (Holy)</span></td>
+                            <td>Pure White, Gold (#FBBF24), Champagne</td>
+                            <td>금발(골든 블론드), 백금발, 따뜻한 꿀색 눈</td>
+                            <td>성스러운 원형 헤일로, 십자가 빛, 순백의 깃털, 천상 광선</td>
+                        </tr>
+                        <tr>
+                            <td><span class="pill-badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6;">🌌 공허 (Void)</span></td>
+                            <td>Deep Indigo (#1E1B4B), Cosmic Magenta</td>
+                            <td>오묘한 보랏빛 은발, 은하수 그라디언트</td>
+                            <td>공간 왜곡 균열, 은하수/별빛 가루(Stardust), 성운(Nebula)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 탭 3: 역할군별 -->
+            <div id="tab-role" class="tab-content">
+                <table class="guide-table">
+                    <thead>
+                        <tr>
+                            <th>역할군 (Role)</th>
+                            <th>상징적 무기 & 도구</th>
+                            <th>복식 실루엣 (Silhouette)</th>
+                            <th>무게중심 및 포즈</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>🛡️ 수호자 (Guardian)</strong></td>
+                            <td>대형 타워 실드, 건틀릿, 롱소드, 랜스</td>
+                            <td>금속 흉갑(Breastplate), 견갑, 견고한 하체 갑옷</td>
+                            <td>두 발을 땅에 딛고 선 단단한 방어/가드 자세 (역삼각형/직사각형 실루엣)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🏹 사수 (Ranger)</strong></td>
+                            <td>장궁, 마도 크로스보우, 저격 마도총</td>
+                            <td>가벼운 가죽 갑옷, 후드 케이프, 허벅지 홀스터</td>
+                            <td>한쪽 무릎을 낮추거나 도약하는 날렵한 사격 자세 (사선/V자 실루엣)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>🔮 마법사 (Mage)</strong></td>
+                            <td>마도서(Grimoire), 룬 스태프, 마법 보주</td>
+                            <td>넓은 챙 모자, 긴 롱 로브 드레스, 흩날리는 리본</td>
+                            <td>공중에 살짝 떠 있거나 마도서를 펼쳐 영창하는 부유 자세 (세로형 실루엣)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>⚙️ 전술가 (Tactician)</strong></td>
+                            <td>연금술 플라스크, 정밀 기계 태엽, 나침반</td>
+                            <td>고글, 연금술 가운, 공구 벨트, 포션 파우치</td>
+                            <td>설계도나 장치를 조작하며 관찰하는 지적인 포즈 (소품 집중형 실루엣)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 탭 4: 종족별 체형 & 복장 가이드라인 -->
+            <div id="tab-race" class="tab-content">
+                <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--border-highlight); padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; font-size: 13.5px; color: #e2e8f0;">
+                    <strong>👑 기본 전제 규칙:</strong> 모든 지휘관은 <strong>100% 성인 여성(Adult Female)</strong>으로 구성됩니다. 남성 캐릭터 대신 <strong>보이시/중성적인 매력의 여성 캐릭터</strong>가 배치되며, 아동/로리형 체형은 일절 배제합니다.
+                </div>
+
+                <div class="bench-grid" style="margin-bottom:0;">
+                    <!-- 숲의 종족 -->
+                    <div class="bench-card">
+                        <div class="bench-card-header">
+                            <span class="bench-title">🌲 숲의 종족 (Forest Folk)</span>
+                            <span class="bench-category" style="background: rgba(168, 85, 247, 0.2); color:#c084fc;">스타일 B (시스루&하이슬릿)</span>
+                        </div>
+                        <ul class="bench-rules">
+                            <li><strong>체형:</strong> 키가 크고(Tall), 글래머러스한 서구형 체형.</li>
+                            <li><strong>복장:</strong> 나뭇잎/꽃 모티브의 시스루 레이스, 우아한 키홀 컷아웃과 하이 사이드 슬릿.</li>
+                            <li><strong>특징:</strong> 긴 엘프 귀, 자연 친화적 보석 덩굴 장식.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 땅의 종족 -->
+                    <div class="bench-card">
+                        <div class="bench-card-header">
+                            <span class="bench-title">⛰️ 땅의 종족 (Earth Folk)</span>
+                            <span class="bench-category" style="background: rgba(239, 68, 68, 0.2); color:#f87171;">스타일 A (사이버 택티컬)</span>
+                        </div>
+                        <ul class="bench-rules">
+                            <li><strong>체형:</strong> 키가 작지만(Petite height), 가슴과 골반이 풍만한 성인 글래머(숏스택).</li>
+                            <li><strong>기계화 파츠:</strong> 신체 어딘가(팔, 다리, 관절)가 정밀 기계/사이보그로 대체.</li>
+                            <li><strong>복장:</strong> 밀착 글로시 바디슈트, 공학 고글, 중장비 가죽 하네스 벨트.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 수인족 -->
+                    <div class="bench-card">
+                        <div class="bench-card-header">
+                            <span class="bench-title">🐾 수인족 (Beastkin)</span>
+                            <span class="bench-category" style="background: rgba(239, 68, 68, 0.2); color:#f87171;">스타일 A (스포티 바디슈트)</span>
+                        </div>
+                        <ul class="bench-rules">
+                            <li><strong>체형:</strong> 표준 평균 키. 글래머 체형과 날렵한 슬렌더(빈유)가 이상적으로 공존.</li>
+                            <li><strong>복장:</strong> 활동성이 극대화된 가죽 캣슈트, 가슴 컷아웃, 체스트 하네스와 허벅지 스트랩.</li>
+                            <li><strong>신체 특징:</strong> 뚜렷한 동물 귀(여우/고양이/늑대)와 복슬복슬한 꼬리.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 인간족 -->
+                    <div class="bench-card">
+                        <div class="bench-card-header">
+                            <span class="bench-title">🏛️ 인간족 (Human Folk)</span>
+                            <span class="bench-category" style="background: rgba(99, 102, 241, 0.2); color:#818cf8;">스타일 A ↔ B 하이브리드</span>
+                        </div>
+                        <ul class="bench-rules">
+                            <li><strong>체형:</strong> 평균 키, 조화롭고 단정한 표준적인 신체 밸런스.</li>
+                            <li><strong>복장:</strong> <strong>스타일 A와 B를 자유롭게 넘나드는 올라운더</strong> (판금 갑옷 + 시스루 레이스, 바디슈트 + 하이슬릿 롱코트 등).</li>
+                            <li><strong>특징:</strong> 역할군이나 개성에 따라 택티컬과 판타지 매혹을 유연하게 교차.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 비행족 -->
+                    <div class="bench-card">
+                        <div class="bench-card-header">
+                            <span class="bench-title">🪽 비행족 (Avians / Winged)</span>
+                            <span class="bench-category" style="background: rgba(168, 85, 247, 0.2); color:#c084fc;">스타일 B (부유 쉬폰&가터)</span>
+                        </div>
+                        <ul class="bench-rules">
+                            <li><strong>체형:</strong> 키가 작고(Short), 풍만한 볼륨감을 지닌 글래머 성인 체형.</li>
+                            <li><strong>복장:</strong> 공중 부유에 최적화된 얇은 시스루 쉬폰 드레스, 골반 하이 슬릿, 가터벨트.</li>
+                            <li><strong>날개 다양성:</strong> 천사 날개, 악마 날개, 요정 날개, 기계 날개 등 다채로운 비행 윙.</li>
+                        </ul>
+                    </div>
+
+                    <!-- 돌연변이 규칙 -->
+                    <div class="bench-card" style="border-style: dashed; border-color: rgba(236, 72, 153, 0.5);">
+                        <div class="bench-card-header">
+                            <span class="bench-title">🧬 돌연변이 (Mutation & Anomaly)</span>
+                            <span class="bench-category" style="color:#ec4899;">예외적 개성 허용</span>
+                        </div>
+                        <ul class="bench-rules">
+                            <li><strong>반대 특성:</strong> 종족별 전형적 특성과 정반대되는 희귀 개체 허용.</li>
+                            <li><strong>예시 1:</strong> 스타일 B 시스루 드레스를 입은 장신 땅의 종족.</li>
+                            <li><strong>예시 2:</strong> 스타일 A 택티컬 슈트를 입은 기계 날개의 비행족 전사.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 종족별 섹시 스타일 양대 축 쇼케이스 (Style A vs Style B) -->
+        <section id="sensual-styles" style="margin-bottom: 70px;">
+            <div class="section-header">
+                <span class="section-tag" style="color: #ec4899;">Signature Sensual Aesthetics</span>
+                <h2 class="section-title">💎 종족별 양대 시그니처 스타일 쇼케이스 (Style A vs Style B)</h2>
+                <p class="section-desc">종족의 문화와 전투 방식에 맞추어 배정된 양대 섹시 비주얼 축과 인간족의 하이브리드 규정입니다.</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 28px; margin-bottom: 24px;">
+                <!-- 스타일 A 카드 -->
+                <div class="bench-card" style="padding: 0; overflow: hidden; border-color: rgba(239, 68, 68, 0.4);">
+                    <div style="width: 100%; height: 380px; position: relative; background: #0f172a; overflow: hidden;">
+                        <img src="assets/style_tactical_suit.jpg" alt="스타일 A 택티컬 바디슈트" style="width: 100%; height: 100%; object-fit: cover;">
+                        <span style="position: absolute; top: 14px; left: 14px; background: #ef4444; color: #fff; padding: 5px 12px; border-radius: 6px; font-weight: 800; font-size: 12px; letter-spacing: 1px;">STYLE A · TACTICAL</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <h3 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px;">스타일 A : 사이버 택티컬 & 글로시 바디슈트</h3>
+                        <div style="font-size: 12.5px; color: #f87171; font-weight: 700; margin-bottom: 14px;">
+                            🎯 배정 종족 : ⛰️ 땅의 종족, 🐾 수인족
+                        </div>
+                        <ul class="bench-rules">
+                            <li><strong>대표 모티브:</strong> 젠레스 존 제로(ZZZ), 승리의 여신 니케, 라스트 오리진.</li>
+                            <li><strong>핵심 요소:</strong> 밀착 글로시 블랙 라텍스 바디슈트, 가슴 컷아웃, 체스트 가죽 하네스 버클.</li>
+                            <li><strong>디테일 킬링포인트:</strong> 허벅지 권총 홀스터 밴드로 인한 <strong>허벅지 살 조임(Thigh Squeeze)</strong>과 비대칭 스타킹.</li>
+                            <li><strong>추천 프롬프트:</strong> <code>tight shiny black latex bodysuit, chest harness with buckles, thigh holster, thigh squeeze, asymmetrical stockings</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 스타일 B 카드 -->
+                <div class="bench-card" style="padding: 0; overflow: hidden; border-color: rgba(168, 85, 247, 0.4);">
+                    <div style="width: 100%; height: 380px; position: relative; background: #0f172a; overflow: hidden;">
+                        <img src="assets/style_sheer_dress.jpg" alt="스타일 B 판타지 시스루 드레스" style="width: 100%; height: 100%; object-fit: cover;">
+                        <span style="position: absolute; top: 14px; left: 14px; background: #a855f7; color: #fff; padding: 5px 12px; border-radius: 6px; font-weight: 800; font-size: 12px; letter-spacing: 1px;">STYLE B · ELEGANT SHEER</span>
+                    </div>
+                    <div style="padding: 24px;">
+                        <h3 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px;">스타일 B : 판타지 시스루 드레스 & 하이 슬릿</h3>
+                        <div style="font-size: 12.5px; color: #c084fc; font-weight: 700; margin-bottom: 14px;">
+                            🎯 배정 종족 : 🌲 숲의 종족, 🪽 비행족
+                        </div>
+                        <ul class="bench-rules">
+                            <li><strong>대표 모티브:</strong> 명조 (음림/장리), 브라운더스트 2.</li>
+                            <li><strong>핵심 요소:</strong> 반투명 시스루 레이스 직물, 깊은 물방울 가슴 컷아웃, 골반까지 트인 하이 사이드 슬릿.</li>
+                            <li><strong>디테일 킬링포인트:</strong> 은은하게 비치는 살결과 <strong>레이스업 가터벨트</strong>, 꽃자수 시스루 스타킹, 신비로운 팜므파탈 눈빛.</li>
+                            <li><strong>추천 프롬프트:</strong> <code>translucent sheer lace fabric, deep keyhole cutout, high side slit dress, lace-up garter belt, sheer stockings</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 인간족 하이브리드 안내 배너 -->
+            <div style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15)); border: 1px solid var(--border-highlight); border-radius: 16px; padding: 22px 28px; display: flex; align-items: center; gap: 20px;">
+                <div style="font-size: 36px;">🏛️</div>
+                <div>
+                    <h4 style="font-size: 16.5px; font-weight: 800; color: #fff; margin-bottom: 4px;">🏛️ 인간족 (Human Folk) : 스타일 A ↔ B 하이브리드 올라운더</h4>
+                    <p style="font-size: 13.5px; color: #cbd5e1; line-height: 1.6;">
+                        인간족은 문명의 다양성을 대표하여, <strong>스타일 A(사이버 택티컬 전사)</strong>와 <strong>스타일 B(우아한 마도 시스루 드레스)</strong>를 캐릭터의 역할군(수호자/사수/마법사/전술가)이나 성격에 따라 자유롭게 선택하거나 결합할 수 있습니다. (예: 정통 판금 흉갑 아래에 시스루 레이스를 매칭하거나, 라텍스 바디슈트 위에 하이슬릿 코트를 레이어드).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 3대 핵심 벤치마킹 인사이트 -->
+        <section id="insights">
+            <div class="section-header">
+                <span class="section-tag">Key Principles</span>
+                <h2 class="section-title">💡 타워디펜스에 바로 적용하는 3대 핵심 원칙</h2>
+                <p class="section-desc">완성도 높은 통일감을 위해 모든 이미지 생성 및 리터칭 시 반드시 지켜야 할 약속입니다.</p>
+            </div>
+
+            <div class="insights-grid">
+                <div class="insight-card">
+                    <div class="icon-box">💎</div>
+                    <h3>1. 세계관 공통 앵커(Core Anchor)</h3>
+                    <p>
+                        니케의 기업 로고, 명조의 공명 낙인처럼 모든 지휘관의 의상 한곳(가슴 브로치, 벨트 버클, 초커 등)에
+                        <strong>[타워 수호 기사단 엠블럼]</strong>과 <strong>[속성 코어 크리스탈]</strong>을 필수로 부착합니다.
+                    </p>
+                    <div class="insight-highlight">
+                        👉 전혀 다른 화풍이라도 엠블럼과 속성석 하나만으로 같은 소속임을 증명합니다.
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="icon-box">👤</div>
+                    <h3>2. 썸네일 1초 식별 실루엣</h3>
+                    <p>
+                        브라운더스트와 ZZZ처럼 로비의 작은 썸네일 카드에서도 실루엣만 보고 역할을 즉시 구분할 수 있어야 합니다.
+                        수호자는 대형 방패, 사수는 날렵한 케이프와 활, 마법사는 공중 부유와 로브, 전술가는 허리 벨트 소품을 강조합니다.
+                    </p>
+                    <div class="insight-highlight">
+                        👉 무기 크기와 포즈의 무게중심을 극단화하여 시인성을 확보합니다.
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div class="icon-box">✨</div>
+                    <h3>3. 등급별 렌더링 & 이펙트 격차</h3>
+                    <p>
+                        C등급이 과도하게 화려하거나 UR등급이 수수하면 가챠의 도파민이 파괴됩니다.
+                        C/UC는 이펙트 없는 플랫 셀화, R/SR은 1겹 마법진과 금속 반사광, UR/U는 풀 백드롭과 다중 룬 헤일로 링으로 철저히 차등화합니다.
+                    </p>
+                    <div class="insight-highlight">
+                        👉 등급에 따른 배경 연출 밀도와 이펙트 폭발력을 계단식으로 통제합니다.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. AI 인체 오류 방지 & 퀄리티 컨트롤 (Anti-Defect QC) -->
+        <section id="anti-defect" style="margin-bottom: 70px;">
+            <div class="section-header">
+                <span class="section-tag" style="color: #ef4444;">Anti-Defect Quality Control</span>
+                <h2 class="section-title">🚨 AI 이미지 인체 기형 오류 방지 프로토콜</h2>
+                <p class="section-desc">팔이 3개 나오거나 다리/손가락이 뒤틀리는 치명적인 AI 오류를 원천 차단하는 표준 검증 체계입니다.</p>
+            </div>
+
+            <div class="bench-grid" style="margin-bottom:0;">
+                <div class="bench-card" style="border-left: 4px solid #ef4444;">
+                    <div class="bench-card-header">
+                        <span class="bench-title" style="color: #f87171;">🚫 사지 기형 방지 규칙 (Strict 2 Arms & 2 Legs)</span>
+                        <span class="bench-category" style="background: rgba(239, 68, 68, 0.2); color: #f87171;">최우선 방어</span>
+                    </div>
+                    <p style="font-size:13px; color:var(--text-sub); margin-bottom:10px;">
+                        포즈가 복잡해지거나 무기를 든 손이 뒤쪽으로 겹칠 때 AI가 팔을 3개 이상 생성하는 현상을 차단합니다.
+                    </p>
+                    <div style="background: #060911; padding: 12px; border-radius: 8px; font-size: 12px; color: #cbd5e1; font-family: monospace;">
+                        <strong>포지티브 의무 주입:</strong> anatomically correct, exactly two arms, exactly two legs, adult female proportions<br><br>
+                        <strong>네거티브 의무 차단:</strong> extra arms, extra legs, extra limbs, third arm, fused limbs, malformed limbs, cloned limbs, floating limbs
+                    </div>
+                </div>
+
+                <div class="bench-card" style="border-left: 4px solid #f59e0b;">
+                    <div class="bench-card-header">
+                        <span class="bench-title" style="color: #fbbf24;">✋ 손/손가락 왜곡 방지 규칙</span>
+                        <span class="bench-category" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">세부 렌더링</span>
+                    </div>
+                    <p style="font-size:13px; color:var(--text-sub); margin-bottom:10px;">
+                        손가락이 6개 이상이 되거나 뭉개지는 현상을 방어하기 위해 손 묘사를 전용 프롬프트로 고정합니다.
+                    </p>
+                    <div style="background: #060911; padding: 12px; border-radius: 8px; font-size: 12px; color: #cbd5e1; font-family: monospace;">
+                        <strong>포지티브 의무 주입:</strong> perfectly drawn hands, detailed fingers, 5 fingers per hand<br><br>
+                        <strong>네거티브 의무 차단:</strong> poorly drawn hands, mutated hands, extra fingers, deformed fingers, fused fingers, missing fingers
+                    </div>
+                </div>
+
+                <div class="bench-card" style="border-left: 4px solid #a855f7;">
+                    <div class="bench-card-header">
+                        <span class="bench-title" style="color: #c084fc;">🔞 성인 여성 & 성별 고정 규칙</span>
+                        <span class="bench-category" style="background: rgba(168, 85, 247, 0.2); color: #c084fc;">세계관 통일</span>
+                    </div>
+                    <p style="font-size:13px; color:var(--text-sub); margin-bottom:10px;">
+                        아동/미성년자 체형이나 원치 않는 남성 캐릭터가 섞여 나오는 것을 원천 차단합니다.
+                    </p>
+                    <div style="background: #060911; padding: 12px; border-radius: 8px; font-size: 12px; color: #cbd5e1; font-family: monospace;">
+                        <strong>포지티브 의무 주입:</strong> adult woman, mature female body proportions, 1girl, solo<br><br>
+                        <strong>네거티브 의무 차단:</strong> child, kid, underage, loli, male, man, boy, multiple people
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 인터랙티브 AI 프롬프트 생성기 -->
+        <section id="generator">
+            <div class="section-header">
+                <span class="section-tag">Prompt Generator</span>
+                <h2 class="section-title">⚡ AI 이미지 생성 표준 프롬프트 빌더 (인체 오류 방지 탑재)</h2>
+                <p class="section-desc">가이드라인 규칙과 인체 기형 방지 네거티브가 100% 반영된 프롬프트를 원클릭으로 조립하고 복사할 수 있습니다.</p>
+            </div>
+
+            <div class="generator-card">
+                <div class="gen-controls">
+                    <div class="gen-group">
+                        <label>⭐ 등급 (Grade)</label>
+                        <select id="gen-grade" class="gen-select" onchange="updatePrompt()">
+                            <option value="C">C (커먼 - 수수한 견습생, 무이펙트)</option>
+                            <option value="UC">UC (언커먼 - 정돈된 제복, 소프트)</option>
+                            <option value="R">R (레어 - 정식 기사, 미세 파티클)</option>
+                            <option value="SR" selected>SR (스페셜레어 - 화려한 의상, 룬 마법진)</option>
+                            <option value="UR">UR (울트라레어 - 제단 백금 중갑, 날개/오라)</option>
+                            <option value="U">U (유니크 - 신성 성간 로브, 은하수/다중후광)</option>
+                        </select>
+                    </div>
+
+                    <div class="gen-group">
+                        <label>🔥 속성 (Element)</label>
+                        <select id="gen-element" class="gen-select" onchange="updatePrompt()">
+                            <option value="fire">🔥 화염 (Fire - 진홍/주황 불꽃 & 불티)</option>
+                            <option value="frost">❄️ 빙결 (Frost - 청록/은색 얼음 결정 & 서리)</option>
+                            <option value="shock" selected>⚡ 전격 (Shock - 자색/남색 번개 스파크)</option>
+                            <option value="holy">✨ 신성 (Holy - 백금/골드 헤일로 & 깃털)</option>
+                            <option value="void">🌌 공허 (Void - 인디고/마젠타 성운 & 별빛)</option>
+                        </select>
+                    </div>
+
+                    <div class="gen-group">
+                        <label>🛡️ 역할군 (Role)</label>
+                        <select id="gen-role" class="gen-select" onchange="updatePrompt()">
+                            <option value="guardian">🛡️ 수호자 (Guardian - 대형 방패, 판금 흉갑)</option>
+                            <option value="ranger">🏹 사수 (Ranger - 활/저격총, 가죽 케이프)</option>
+                            <option value="mage" selected>🔮 마법사 (Mage - 지팡이/마도서, 롱 로브)</option>
+                            <option value="tactician">⚙️ 전술가 (Tactician - 고글, 기계 부품/포션)</option>
+                        </select>
+                    </div>
+
+                    <div class="gen-group">
+                        <label>🌍 5대 종족 (Race)</label>
+                        <select id="gen-race" class="gen-select" onchange="updatePrompt()">
+                            <option value="forest">🌲 숲의 종족 (장신 & 글래머, 얇고 시원한 의상, 긴 엘프 귀)</option>
+                            <option value="earth">⛰️ 땅의 종족 (단신 숏스택 & 글래머, 기계/사이보그 파츠)</option>
+                            <option value="beastkin">🐾 수인족 (평균 키 & 글래머/슬렌더, 동물 귀 & 꼬리)</option>
+                            <option value="human" selected>🏛️ 인간족 (평균 키 & 표준 밸런스, 다채로운 정통 복장)</option>
+                            <option value="avian">🪽 비행족 (단신 & 글래머, 천사/악마/요정/기계 날개)</option>
+                            <option value="mutation">🧬 돌연변이 (종족 전형과 반대되는 희귀 신체 개성)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="gen-controls" style="margin-bottom: 16px;">
+                    <div class="gen-group">
+                        <label>💃 체형 & 시그니처 섹시 스타일</label>
+                        <select id="gen-style" class="gen-select" onchange="updatePrompt()">
+                            <option value="style_a" selected>스타일 A (사이버 택티컬 바디슈트 & 가죽 하네스 - 땅/수인)</option>
+                            <option value="style_b">스타일 B (판타지 시스루 드레스 & 하이슬릿 가터벨트 - 숲/비행)</option>
+                            <option value="style_hybrid">하이브리드 (택티컬 + 시스루 레이어드 - 인간족 올라운더)</option>
+                            <option value="curvy">표준 성인 글래머 여성 (Voluptuous Curvy adult female)</option>
+                            <option value="slender">슬렌더/빈유 여성 (Slender Graceful adult female)</option>
+                            <option value="boyish">보이시/중성적 매력 여성 (Boyish Handsome female commander)</option>
+                        </select>
+                    </div>
+
+                    <div class="gen-group">
+                        <label>외모 및 세부 특징 (헤어, 눈, 분위기 등)</label>
+                        <input type="text" id="gen-details" class="gen-input" value="silver twintail hair, sharp violet eyes, confident smile" oninput="updatePrompt()">
+                    </div>
+                </div>
+
+                <!-- 포지티브 프롬프트 출력 -->
+                <div class="prompt-output-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span style="font-size:12px; font-weight:800; color:#38bdf8;">✨ [포지티브 프롬프트 (Positive Prompt)]</span>
+                        <button class="btn-copy" onclick="copyPrompt('positive')">📋 포지티브 복사</button>
+                    </div>
+                    <pre id="prompt-output"></pre>
+                </div>
+
+                <!-- 네거티브 프롬프트 출력 -->
+                <div class="prompt-output-box" style="margin-top: 14px; border-color: rgba(239, 68, 68, 0.3);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span style="font-size:12px; font-weight:800; color:#f87171;">🚫 [인체 기형 방지 네거티브 프롬프트 (Negative Prompt)]</span>
+                        <button class="btn-copy" style="background: #dc2626;" onclick="copyPrompt('negative')">📋 네거티브 복사</button>
+                    </div>
+                    <pre id="prompt-output-negative" style="color: #fca5a5;"></pre>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>🏰 Fantasy Tower Defense Project — Commander Visual Art Bible v1.1</p>
+            <p style="margin-top: 6px; font-size: 11.5px; color: #475569;">100% 성인 여성 지휘관 체제 및 AI 인체 오류 방지 규정 준수</p>
+        </footer>
+
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        const GRADE_PROMPTS = {
+            'C': "simple apprentice uniform, modest leather gear, calm standing pose, looking at viewer, flat simple gradient background, no complex aura, clean lineart, soft cel-shading",
+            'UC': "formal junior uniform, neat cape, gentle pose, clean composition, soft gradient studio background, no magical effects",
+            'R': "formal knight attire with flowing cloak, holding signature weapon, 3/4 angled battle pose, subtle floating elemental light particles, mild aura",
+            'SR': "ornate attire with intricate gold embroidery and lace, dynamic combat pose with fluttering hair, distinct glowing elemental rune circle floating behind, vibrant magical aura",
+            'UR': "majestic paladin armor with platinum accents, breathtaking royal costume, low angle heroic pose, multiple glowing holy halo rings, grand sanctuary background with radiant light pillars",
+            'U': "transcendent cosmic goddess attire, floating in mid-air levitation, majestic celestial wings, enormous sacred halo, grand galaxy nebula background with stardust and spatial distortion"
+        };
+
+        const ELEMENT_PROMPTS = {
+            'fire': "crimson red and warm amber color palette, burning flame effects, floating glowing embers, heat distortion, fire magic motif",
+            'frost': "cyan and icy blue with silver color palette, floating crystal frost shards, glowing snowflake particles, sub-zero aura, ice magic motif",
+            'shock': "neon violet and electric blue color palette, crackling lightning arcs, static plasma sparks, magnetic ring effects, thunder magic motif",
+            'holy': "pure white and brilliant golden color palette, radiant sunburst light beams, glowing divine halo, pure white feathers, holy sacred motif",
+            'void': "deep cosmic indigo and magenta color palette, dimensional space rift, sparkling stardust particles, cosmic nebula galaxy motif"
+        };
+
+        const ROLE_PROMPTS = {
+            'guardian': "guardian class, holding a massive tower shield and longsword, heavy metal breastplate and gauntlets, solid grounded guarding pose",
+            'ranger': "ranger sniper class, holding an ornate enchanted bow and mechanical crossbow, leather cape and thigh quiver, nimble aiming pose",
+            'mage': "mage sorceress class, holding an ornate glowing rune staff and floating grimoire, elegant flowing robe dress with witch hat, casting spell pose",
+            'tactician': "tactician alchemist class, wearing tactical goggles and tool belt with glowing potion flasks and mechanical gears, smart observing pose"
+        };
+
+        const RACE_PROMPTS = {
+            'forest': "forest folk, tall height, voluptuous curvy mature body, light revealing leaf and cloth attire, long pointed elf ears",
+            'earth': "earth folk, short height petite adult female, curvy voluptuous bust, cyborg mechanical prosthetic arm and legs, gears and wrench",
+            'beastkin': "beastkin folk, average height, fluffy animal ears on head and fluffy tail, light agile wild attire",
+            'human': "human folk, average height, balanced adult proportions, elaborate formal fantasy costume",
+            'avian': "avian folk, short height petite adult female, curvy bust, majestic wings on back, feather accents",
+            'mutation': "unique mutant anomaly, rare contrasting body proportions, exotic hybrid features"
+        };
+
+        const STYLE_PROMPTS = {
+            'style_a': "voluptuous curvy hourglass figure, tight shiny black latex and patent leather bodysuit with glossy specular highlights, chest leather body harness with metallic buckles, keyhole chest cutout, thigh holster with snug leather thigh strap squeeze, asymmetrical thigh-high stockings, black leather choker with ring",
+            'style_b': "voluptuous curvy hourglass figure, elegant dark fantasy silk dress, translucent sheer lace fabric over cleavage and shoulders, deep teardrop keyhole cutout, extremely high side slit exposing curvy hip and thigh, delicate lace-up black garter belt, sheer black stockings with floral embroidery",
+            'style_hybrid': "voluptuous hourglass figure, fantasy tactical hybrid costume, leather bodysuit layered under an elegant high-slit sheer silk coat, metallic armor buckles and lace-up garter details",
+            'curvy': "mature adult woman, voluptuous curvy figure",
+            'slender': "mature adult woman, slender graceful figure, petite chest",
+            'boyish': "handsome boyish female commander, androgynous charming aura, short hair, dashing cool expression"
+        };
+
+        const NEGATIVE_PROMPT_FIXED = "extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
+
+        function updatePrompt() {
+            const grade = document.getElementById('gen-grade').value;
+            const element = document.getElementById('gen-element').value;
+            const role = document.getElementById('gen-role').value;
+            const race = document.getElementById('gen-race').value;
+            const style = document.getElementById('gen-style').value;
+            const details = document.getElementById('gen-details').value.trim();
+
+            const baseStyle = "masterpiece, best quality, ultra-detailed anime mobile gacha illustration, Genshin and Blue Archive art style, 1girl, solo, adult female, anatomically correct, exactly two arms, exactly two legs, perfectly drawn hands, clean lineart, vibrant cel-shading, cinematic lighting, core guardian crest brooch on chest";
+
+            const prompt = `${baseStyle}, ${STYLE_PROMPTS[style]}, ${RACE_PROMPTS[race]}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role]}, ${ELEMENT_PROMPTS[element]}, ${GRADE_PROMPTS[grade]}`;
+
+            document.getElementById('prompt-output').textContent = prompt;
+            document.getElementById('prompt-output-negative').textContent = NEGATIVE_PROMPT_FIXED;
+        }
+
+        function copyPrompt(type) {
+            const targetId = type === 'positive' ? 'prompt-output' : 'prompt-output-negative';
+            const text = document.getElementById(targetId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert(type === 'positive' ? "✅ 포지티브 프롬프트가 복사되었습니다!" : "✅ 인체 오류 방지 네거티브 프롬프트가 복사되었습니다!");
+            });
+        }
+
+        // 초기 생성
+        updatePrompt();
+    </script>
+</body>
+</html>
+

@@ -16,6 +16,22 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - 버전 정보는 `QA_AND_RULES.md`, `index.html`, `script.js` 세 곳에서 항상 동기화되어야 합니다.
 3. **버그 수정 원칙**:
     - 게임 로직 추가 시 기존 맵 생성(`generateBoard`) 및 경로 생성(`generateEnemyPath`) 로직을 해치지 않도록 주의합니다.
+4. **버전 관리**:
+    - **어떠한 내용이든 업데이트가 될 때마다 반드시 버전을 상향(Version Up)합니다.**
+    - 버전 정보는 `QA_AND_RULES.md`, `index.html`, `constants.js` 세 곳에서 항상 동기화되어야 합니다.
+5. **캐릭터 디자인 및 연령/성별 규정 (Character Design Rules)**:
+    - **100% 성인 여성 지휘관**: 남성 캐릭터는 일절 배제하며, 남성성 대신 중성적/보이시(Boyish)한 매력을 지닌 여성 캐릭터를 배치합니다.
+    - **연령 규정**: 모든 지휘관은 엄격히 **성인(Adult, Mature)**으로 규정하며 아동/로리형 체형은 배제합니다.
+    - **5대 종족별 체형 & 복장 가이드라인 (스타일 A / B 배정)**:
+        - ⛰️ **땅의 종족 [스타일 A]**: 키가 작고 글래머러스한 체형(Shortstack), 사이보그 기계 파츠 대체, **밀착 글로시 라텍스 바디슈트 & 공학 하네스**.
+        - 🐾 **수인족 [스타일 A]**: 평균 키, 글래머와 슬렌더/빈유 고른 분포, 뚜렷한 동물 귀와 꼬리, **스포티한 가죽 캣슈트 & 체스트 하네스 & 허벅지 밴드 조임**.
+        - 🌲 **숲의 종족 [스타일 B]**: 키가 크고 글래머러스한 체형, 긴 엘프 귀, **나뭇잎/꽃 모티브의 시스루 레이스 드레스 & 깊은 키홀 컷아웃 & 하이 사이드 슬릿**.
+        - 🪽 **비행족 [스타일 B]**: 키가 작고 글래머러스한 체형, 천사/악마/요정/기계 등 다채로운 날개, **공중 부유용 얇은 시스루 쉬폰 드레스 & 가터벨트**.
+        - 🏛️ **인간족 [스타일 A ↔ B 하이브리드]**: 평균 키, 표준 밸런스, **역할군과 개성에 따라 스타일 A와 B를 자유롭게 교차하거나 결합하는 올라운더** (판금 갑옷+시스루 레이스, 바디슈트+하이슬릿 코트 등).
+        - 🧬 **돌연변이 룰**: 간혹 종족 고유 특성과 정반대되는 개성(예: 키 큰 땅의 종족, 시스루를 입은 비행족 전사 등)의 돌연변이 캐릭터 허용.
+6. **AI 이미지 생성 시 인체 오류 방지 규칙 (Anti-Defect Quality Control)**:
+    - **기형 사지 방지 (Strict 2 Arms & 2 Legs)**: 팔이나 다리가 3개 이상 생성되는 기형을 원천 차단하기 위해 포지티브(`anatomically correct, exactly two arms, exactly two legs, adult female`) 및 네거티브 프롬프트(`extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs`)를 의무 주입합니다.
+    - **손/손가락 왜곡 방지**: 부정확한 손가락 수 및 융합 방지 (`poorly drawn hands, mutated hands, extra fingers, deformed fingers`).
 
 ## 🛠️ 기능 메모 (Feature Notes)
 - **로비 지휘관 도감 UI 3열 3단 레이아웃 개편 & 6종 정렬·10종 필터 탑재 (v0.35.0 New)**:
