@@ -1,9 +1,17 @@
 /**
  * 상점 및 가챠 소환 전담 모듈 (js/gacha.js)
- * v0.26.1: 1) 미소녀 지휘관 소환(1 PP), 2) 신비한 룬 소환(5 RP) 2대 소환 제단
+ * v0.29.0: 
+ * 1) 1회 소환 및 10+1회(11연차) 소환 시스템
+ * 2) 플레이어 터치 개방 모션 (Waiting for Tap) & 소환 스킵(SKIP)
+ * 3) 10+1 종합 결과 그리드 모달 (Multi Gacha Grid Modal)
  */
 
 let lastGachaType = 'commander'; // 'commander', 'rune'
+let lastGachaMode = 'single';      // 'single', 'multi'
+let isSummonWaitingTap = false;
+let summonGateCallback = null;
+let summonPendingGrade = null;
+let summonSequenceTimer = null;
 
 /**
  * 상점 UI 열기/닫기 토글
@@ -14,24 +22,10 @@ function toggleShop() {
     shop.style.display = (shop.style.display === "none" || shop.style.display === "") ? "block" : "none";
 }
 
-
-
 /**
- * 2. 미소녀 지휘관 소환 (1 PP 소모) - v0.23.0 New
+ * 1인 지휘관 추첨 헬퍼 함수
  */
-function drawCommanderGacha() {
-    lastGachaType = 'commander';
-    const cost = (typeof COMMANDER_GACHA_CONFIG !== 'undefined') ? COMMANDER_GACHA_CONFIG.costPP : 1;
-    if ((USER_DATA.pp || 0) < cost) {
-        alert("프리즘 포인트(PP)가 부족합니다!\n10라운드마다 등장하는 보스를 격파하여 PP를 획득하세요.");
-        return;
-    }
-
-    USER_DATA.pp -= cost;
-    saveData();
-    if (typeof updateLobbyUI === 'function') updateLobbyUI();
-
-    // 확률 가중치 기반 캐릭터 추첨
+function rollSingleCommander() {
     const rates = COMMANDER_GACHA_CONFIG.rates;
     const totalWeight = rates.reduce((sum, r) => sum + r.weight, 0);
     let rand = Math.random() * totalWeight;
@@ -47,11 +41,73 @@ function drawCommanderGacha() {
 
     const charId = selectedRate.charId;
     const charBase = CHARACTER_DATA[charId];
+    const result = addCharacterOrDuplicate(charId);
+
+    return {
+        charId: charId,
+        charBase: charBase,
+        result: result,
+        grade: charBase.grade
+    };
+}
+
+/**
+ * 1개 룬 추첨 헬퍼 함수
+ */
+function rollSingleRune() {
+    const rates = RUNE_GACHA_CONFIG.rates;
+    const totalWeight = rates.reduce((sum, r) => sum + r.weight, 0);
+    let rand = Math.random() * totalWeight;
+    let selectedRuneId = rates[0].runeId;
+
+    for (const r of rates) {
+        if (rand < r.weight) {
+            selectedRuneId = r.runeId;
+            break;
+        }
+        rand -= r.weight;
+    }
+
+    const runeInfo = RUNE_DATA[selectedRuneId];
+    addRune(selectedRuneId);
+
+    return {
+        runeId: selectedRuneId,
+        runeInfo: runeInfo,
+        grade: runeInfo.grade
+    };
+}
+
+/**
+ * 등급 비교 가중치 헬퍼 (U > UR > SR > R > UC > C)
+ */
+function getGradeWeight(grade) {
+    const order = { 'C': 1, 'UC': 2, 'R': 3, 'SR': 4, 'UR': 5, 'U': 6 };
+    return order[grade] || 1;
+}
+
+/**
+ * 2. 미소녀 지휘관 1회 소환 (1 PP 소모)
+ */
+function drawCommanderGacha() {
+    lastGachaType = 'commander';
+    lastGachaMode = 'single';
+    const cost = (typeof COMMANDER_GACHA_CONFIG !== 'undefined') ? COMMANDER_GACHA_CONFIG.costPP : 1;
+    if ((USER_DATA.pp || 0) < cost) {
+        alert("프리즘 포인트(PP)가 부족합니다!\n10라운드마다 등장하는 보스를 격파하여 PP를 획득하세요.");
+        return;
+    }
+
+    USER_DATA.pp -= cost;
+    saveData();
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+
+    const rolled = rollSingleCommander();
+    const charBase = rolled.charBase;
+    const result = rolled.result;
     const gradeInfo = CARD_GRADES[charBase.grade] || { name: charBase.grade, color: "#3b82f6" };
 
-    const result = addCharacterOrDuplicate(charId);
     let gachaResultData = {};
-
     if (result.isNew) {
         gachaResultData = {
             type: 'commander_new',
@@ -84,10 +140,10 @@ function drawCommanderGacha() {
 
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
 
-    // v0.28.0: 도파민 소환 시퀀스 (등급별 오라 마법진 회전 후 모달 분기)
-    playSummonSequence(charBase.grade, result.isNew, () => {
+    // v0.29.0: 터치 인터랙션 소환 시퀀스 (터치 개방 후 모달 오픈)
+    playSummonSequence(charBase.grade, false, () => {
         if (result.isNew) {
-            openNewCommanderModal(charId, result);
+            openNewCommanderModal(rolled.charId, result);
         } else {
             openGachaModal(gachaResultData);
         }
@@ -95,10 +151,47 @@ function drawCommanderGacha() {
 }
 
 /**
- * 3. 신비한 룬 소환 (5 RP 소모) - v0.23.0 New
+ * [v0.29.0 New] 미소녀 지휘관 10+1회 연속 소환 (10 PP 소모, 11개 획득)
+ */
+function drawMultiCommanderGacha() {
+    lastGachaType = 'commander';
+    lastGachaMode = 'multi';
+    const cost = (typeof COMMANDER_GACHA_CONFIG !== 'undefined') ? (COMMANDER_GACHA_CONFIG.multiCostPP || 10) : 10;
+    const count = (typeof COMMANDER_GACHA_CONFIG !== 'undefined') ? (COMMANDER_GACHA_CONFIG.multiCount || 11) : 11;
+
+    if ((USER_DATA.pp || 0) < cost) {
+        alert(`프리즘 포인트(PP)가 부족합니다! (필요: ${cost} PP)\n10라운드마다 보스를 격파하여 PP를 획득하세요.`);
+        return;
+    }
+
+    USER_DATA.pp -= cost;
+    saveData();
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+
+    const results = [];
+    let highestGrade = 'C';
+
+    for (let i = 0; i < count; i++) {
+        const rolled = rollSingleCommander();
+        results.push(rolled);
+        if (getGradeWeight(rolled.grade) > getGradeWeight(highestGrade)) {
+            highestGrade = rolled.grade;
+        }
+    }
+
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+
+    playSummonSequence(highestGrade, true, () => {
+        openMultiGachaModal('commander', results);
+    });
+}
+
+/**
+ * 3. 신비한 룬 1회 소환 (5 RP 소모)
  */
 function drawRuneGacha() {
     lastGachaType = 'rune';
+    lastGachaMode = 'single';
     const cost = (typeof RUNE_GACHA_CONFIG !== 'undefined') ? RUNE_GACHA_CONFIG.costRP : 5;
     if ((USER_DATA.rp || 0) < cost) {
         alert(`룬 포인트(RP)가 부족합니다! (필요: ${cost} RP)\n몬스터를 사냥하거나 웨이브를 클리어하여 RP를 모아보세요.`);
@@ -109,23 +202,8 @@ function drawRuneGacha() {
     saveData();
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
 
-    // 확률 가중치 기반 룬 추첨
-    const rates = RUNE_GACHA_CONFIG.rates;
-    const totalWeight = rates.reduce((sum, r) => sum + r.weight, 0);
-    let rand = Math.random() * totalWeight;
-    let selectedRuneId = rates[0].runeId;
-
-    for (const r of rates) {
-        if (rand < r.weight) {
-            selectedRuneId = r.runeId;
-            break;
-        }
-        rand -= r.weight;
-    }
-
-    const runeInfo = RUNE_DATA[selectedRuneId];
-    addRune(selectedRuneId);
-
+    const rolled = rollSingleRune();
+    const runeInfo = rolled.runeInfo;
     const isSpell = runeInfo.type === 'spell';
     const gradeInfo = CARD_GRADES[runeInfo.grade] || { name: runeInfo.grade, color: "#3b82f6" };
 
@@ -142,9 +220,44 @@ function drawRuneGacha() {
 
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
 
-    // v0.28.0: 도파민 소환 시퀀스 적용
     playSummonSequence(runeInfo.grade, false, () => {
         openGachaModal(gachaResultData);
+    });
+}
+
+/**
+ * [v0.29.0 New] 신비한 룬 10+1회 연속 소환 (50 RP 소모, 11개 획득)
+ */
+function drawMultiRuneGacha() {
+    lastGachaType = 'rune';
+    lastGachaMode = 'multi';
+    const cost = (typeof RUNE_GACHA_CONFIG !== 'undefined') ? (RUNE_GACHA_CONFIG.multiCostRP || 50) : 50;
+    const count = (typeof RUNE_GACHA_CONFIG !== 'undefined') ? (RUNE_GACHA_CONFIG.multiCount || 11) : 11;
+
+    if ((USER_DATA.rp || 0) < cost) {
+        alert(`룬 포인트(RP)가 부족합니다! (필요: ${cost} RP)\n몬스터를 처치하여 RP를 획득하세요.`);
+        return;
+    }
+
+    USER_DATA.rp -= cost;
+    saveData();
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+
+    const results = [];
+    let highestGrade = 'C';
+
+    for (let i = 0; i < count; i++) {
+        const rolled = rollSingleRune();
+        results.push(rolled);
+        if (getGradeWeight(rolled.grade) > getGradeWeight(highestGrade)) {
+            highestGrade = rolled.grade;
+        }
+    }
+
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+
+    playSummonSequence(highestGrade, true, () => {
+        openMultiGachaModal('rune', results);
     });
 }
 
@@ -238,23 +351,61 @@ function retryGacha() {
 }
 
 /**
- * 차원 소환 시퀀스 오버레이 연출 (v0.28.0 New - 도파민 연출)
- * 등급에 따라 마법진의 회전 속도, 발광 색상, 스크린 쉐이크 차별화
+ * 차원 소환 시퀀스 오버레이 연출 (v0.28.0 / v0.29.0 터치 개방 인터랙션 & 스킵 확장)
+ * 1) 초기: 마법진 봉인 상태 + 터치 유도 ("봉인을 터치하여 개방!")
+ * 2) 유저 터치 시: 쾅! 봉인 해제 & 등급별 오라 폭발 및 스크린 쉐이크
+ * 3) 스킵 클릭 시: 즉시 연출 종료 후 종합 결과창 직행
  */
-function playSummonSequence(grade, isNew, callback) {
+function playSummonSequence(grade, isMulti, callback) {
     const seqOverlay = document.getElementById("gacha-summon-sequence");
     const circle = document.getElementById("summon-magic-circle");
     const hintEl = document.getElementById("summon-gate-grade-hint");
+    const titleEl = document.getElementById("summon-gate-title");
+    const touchPrompt = document.getElementById("summon-touch-prompt");
 
     if (!seqOverlay || !circle) {
         if (callback) callback();
         return;
     }
 
-    // 등급별 스타일 및 텍스트 힌트 매핑
-    circle.className = "summon-magic-circle";
-    seqOverlay.classList.remove("screen-shake");
+    if (summonSequenceTimer) {
+        clearTimeout(summonSequenceTimer);
+        summonSequenceTimer = null;
+    }
 
+    // 상태 저장
+    summonGateCallback = callback;
+    summonPendingGrade = grade;
+    isSummonWaitingTap = true;
+
+    // 1. 초기 대기 상태: 펄스 테두리 및 터치 유도
+    circle.className = "summon-magic-circle waiting-tap";
+    seqOverlay.classList.remove("screen-shake");
+    if (touchPrompt) touchPrompt.style.display = "flex";
+
+    if (titleEl) titleEl.textContent = isMulti ? "차원의 문 10+1 소환 준비 완료!" : "차원의 문이 응축되고 있습니다...";
+    if (hintEl) hintEl.textContent = "화면이나 마법진을 터치하여 봉인된 마력을 개방하세요!";
+
+    seqOverlay.style.display = "flex";
+}
+
+/**
+ * 플레이어가 마법진/화면 터치 시 봉인 해제 및 등급 오라 폭발 (v0.29.0 New)
+ */
+function triggerSummonGateOpen() {
+    if (!isSummonWaitingTap) return;
+    isSummonWaitingTap = false;
+
+    const seqOverlay = document.getElementById("gacha-summon-sequence");
+    const circle = document.getElementById("summon-magic-circle");
+    const hintEl = document.getElementById("summon-gate-grade-hint");
+    const titleEl = document.getElementById("summon-gate-title");
+    const touchPrompt = document.getElementById("summon-touch-prompt");
+
+    if (touchPrompt) touchPrompt.style.display = "none";
+    if (circle) circle.classList.remove("waiting-tap");
+
+    const grade = summonPendingGrade || 'C';
     let auraClass = "aura-normal";
     let hintText = "미지의 푸른 파동이 전장에 공명합니다...";
 
@@ -267,20 +418,46 @@ function playSummonSequence(grade, isNew, callback) {
     } else if (grade === 'UR' || grade === 'U') {
         auraClass = "aura-legendary";
         hintText = "경이로운 무지갯빛 천상의 기운이 소용돌이칩니다!!!";
-        seqOverlay.classList.add("screen-shake");
+        if (seqOverlay) seqOverlay.classList.add("screen-shake");
     }
 
-    circle.classList.add(auraClass);
+    if (circle) circle.classList.add(auraClass);
+    if (titleEl) titleEl.textContent = "차원의 문이 활짝 열렸습니다!!";
     if (hintEl) hintEl.textContent = hintText;
 
-    seqOverlay.style.display = "flex";
+    // 1.1초간 오라 감상 후 결과창 오픈
+    summonSequenceTimer = setTimeout(() => {
+        completeSummonSequence();
+    }, 1100);
+}
 
-    // 1.25초 후 소환 시퀀스 페이드아웃 및 결과창 호출
-    setTimeout(() => {
+/**
+ * 소환 연출 즉시 건너뛰기 (SKIP) (v0.29.0 New)
+ */
+function skipGachaSequence() {
+    if (summonSequenceTimer) {
+        clearTimeout(summonSequenceTimer);
+        summonSequenceTimer = null;
+    }
+    isSummonWaitingTap = false;
+    completeSummonSequence();
+}
+
+/**
+ * 소환 연출 종료 및 콜백 실행 공통 헬퍼
+ */
+function completeSummonSequence() {
+    const seqOverlay = document.getElementById("gacha-summon-sequence");
+    if (seqOverlay) {
         seqOverlay.style.display = "none";
         seqOverlay.classList.remove("screen-shake");
-        if (callback) callback();
-    }, 1250);
+    }
+
+    if (summonGateCallback) {
+        const cb = summonGateCallback;
+        summonGateCallback = null;
+        cb();
+    }
 }
 
 /**
@@ -391,4 +568,113 @@ function closeNewCommanderModal() {
     }
 }
 
+/**
+ * --------------------------------------------------------------------------
+ * 10+1 연차 소환 종합 결과 모달 (v0.29.0 New - Multi Gacha Grid Modal)
+ * --------------------------------------------------------------------------
+ */
 
+let lastMultiResults = [];
+let lastMultiType = 'commander';
+
+/**
+ * 10+1 종합 결과 모달 오픈
+ */
+function openMultiGachaModal(type, results) {
+    const modal = document.getElementById("multi-gacha-modal");
+    const grid = document.getElementById("multi-gacha-grid");
+    const titleEl = document.getElementById("multi-gacha-title");
+    const retryBtn = document.getElementById("btn-multi-retry");
+
+    if (!modal || !grid) return;
+
+    lastMultiType = type;
+    lastMultiResults = results;
+
+    grid.innerHTML = "";
+
+    if (type === 'commander') {
+        if (titleEl) titleEl.innerHTML = `👑 지휘관 10+1회 소환 결과 (${results.length}장)`;
+        if (retryBtn) retryBtn.innerText = "👑 한 번 더 소환 (10 PP)";
+
+        results.forEach((item, index) => {
+            const charBase = item.charBase;
+            const res = item.result;
+            const gradeInfo = CARD_GRADES[charBase.grade] || { name: charBase.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.15)", border: "#3b82f6" };
+
+            const cardEl = document.createElement("div");
+            cardEl.className = "multi-gacha-item";
+            cardEl.style.borderColor = gradeInfo.border || gradeInfo.color;
+
+            const newBadgeHtml = res.isNew ? `<div class="multi-item-new-badge">NEW!</div>` : '';
+            const statusHtml = res.isNew 
+                ? `<span style="color:#38bdf8; font-size:9.5px;">신규 합류!</span>`
+                : (res.upgraded ? `<span style="color:#f59e0b; font-weight:bold; font-size:9.5px;">★${res.star} 승급!</span>` : `<span style="color:#94a3b8; font-size:9.5px;">성급 +1</span>`);
+
+            cardEl.innerHTML = `
+                ${newBadgeHtml}
+                <div class="multi-item-thumb-box">
+                    <img src="${charBase.image || ''}" alt="${charBase.name}" class="multi-item-img">
+                    <span class="multi-item-grade" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border-color:${gradeInfo.border};">
+                        ${gradeInfo.name}
+                    </span>
+                </div>
+                <div class="multi-item-name">${charBase.name}</div>
+                <div class="multi-item-desc">${statusHtml}</div>
+            `;
+
+            grid.appendChild(cardEl);
+        });
+    } else {
+        // 룬 10+1 소환
+        if (titleEl) titleEl.innerHTML = `🔮 신비한 룬 10+1회 소환 결과 (${results.length}개)`;
+        if (retryBtn) retryBtn.innerText = "🔮 한 번 더 소환 (50 RP)";
+
+        results.forEach((item, index) => {
+            const rInfo = item.runeInfo;
+            const gradeInfo = CARD_GRADES[rInfo.grade] || { name: rInfo.grade, color: "#3b82f6", bg: "rgba(59,130,246,0.15)", border: "#3b82f6" };
+            const isSpell = rInfo.type === 'spell';
+
+            const cardEl = document.createElement("div");
+            cardEl.className = "multi-gacha-item";
+            cardEl.style.borderColor = gradeInfo.border || gradeInfo.color;
+
+            cardEl.innerHTML = `
+                <div class="multi-item-thumb-box" style="background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);">
+                    <span class="multi-item-icon">${rInfo.icon || '🔮'}</span>
+                    <span class="multi-item-grade" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border-color:${gradeInfo.border};">
+                        ${gradeInfo.name}
+                    </span>
+                </div>
+                <div class="multi-item-name">${rInfo.name}</div>
+                <div class="multi-item-desc" style="color:${isSpell ? '#60a5fa' : '#fb923c'};">${isSpell ? '액티브 스펠' : '속성 패시브'}</div>
+            `;
+
+            grid.appendChild(cardEl);
+        });
+    }
+
+    modal.style.display = "flex";
+}
+
+/**
+ * 10+1 종합 결과 모달 닫기
+ */
+function closeMultiGachaModal() {
+    const modal = document.getElementById("multi-gacha-modal");
+    if (modal) modal.style.display = "none";
+}
+
+/**
+ * 10+1 모달에서 바로 한 번 더 소환하기
+ */
+function retryMultiGacha() {
+    closeMultiGachaModal();
+    setTimeout(() => {
+        if (lastMultiType === 'rune') {
+            drawMultiRuneGacha();
+        } else {
+            drawMultiCommanderGacha();
+        }
+    }, 150);
+}

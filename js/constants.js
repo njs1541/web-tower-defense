@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.28.0";
+const GAME_VERSION = "v0.29.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -713,10 +713,12 @@ const RUNE_DATA = {
 };
 
 /**
- * 지휘관 및 룬 가챠(소환) 설정 (v0.24.0)
+ * 지휘관 및 룬 가챠(소환) 설정 (v0.24.0 / v0.29.0 10+1 연차 확장)
  */
 const COMMANDER_GACHA_CONFIG = {
-    costPP: 1, // 1회 소환 시 1 PP 소모
+    costPP: 1,       // 1회 소환 시 1 PP 소모
+    multiCostPP: 10, // 10회 소환 시 10 PP 소모
+    multiCount: 11,  // 10회 소환 시 보너스로 총 11장 지급
     rates: [
         { grade: "C", charId: "char_liana", weight: 35 },
         { grade: "UC", charId: "char_elena", weight: 6 },
@@ -733,7 +735,9 @@ const COMMANDER_GACHA_CONFIG = {
 };
 
 const RUNE_GACHA_CONFIG = {
-    costRP: 5, // 1회 소환 시 5 RP 소모
+    costRP: 5,       // 1회 소환 시 5 RP 소모
+    multiCostRP: 50, // 10회 소환 시 50 RP 소모
+    multiCount: 11,  // 10회 소환 시 보너스로 총 11개 지급
     rates: [
         { runeId: "rune_flame", weight: 22 },
         { runeId: "rune_spell_gold", weight: 22 },

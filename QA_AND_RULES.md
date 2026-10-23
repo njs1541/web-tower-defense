@@ -71,6 +71,26 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - **전투 UX**: 몬스터 머리 위 체력바, 사거리 프리뷰, 배속(1x/2x) 및 스페이스바 일시정지.
 
 ## 🐛 수정된 버그 및 업데이트 (Fixed Bugs & Updates)
+- **v0.29.0 (Gacha Interactive Touch Unseal, Skip Sequence & 10+1 Multi-Summon System)**:
+    - **가챠 마법진 터치 봉인 개방 인터랙션 (`index.html`, `js/gacha.js`, `style.css`)**:
+        - 소환 버튼 클릭 시 즉시 오라가 폭발하지 않고, 차원의 문 마법진이 펄스 애니메이션(`waiting-tap`, `waitingPulse`)을 유지하며 플레이어의 터치를 유도 (`#summon-touch-prompt`).
+        - 플레이어가 마법진 또는 화면을 클릭(터치)하는 순간 봉인이 해제되며 등급별 오라(C/UC 푸른빛, R 보랏빛, SR 황금빛, UR/U 천상의 무지개빛 & 화면 진동)가 화려하게 개방되는 조작감 부여.
+    - **소환 연출 스킵(SKIP) 기능 지원 (`index.html`, `js/gacha.js`, `style.css`)**:
+        - 소환 시퀀스 화면 우측 상단에 고정된 `[⏩ SKIP]` 버튼(`#btn-summon-skip`) 추가.
+        - 클릭 시 터치 대기 및 1.1초의 오라 감상 타이머를 즉시 해제하고 소환 결과창으로 직행.
+    - **10+1 연차 소환 시스템 (10회 비용으로 11개 획득) (`constants.js`, `index.html`, `js/gacha.js`, `style.css`)**:
+        - 상점에 `10+1회 소환` 버튼 신설:
+            - 지휘관: 10 PP 소모 시 11장 소환 (`drawMultiCommanderGacha`)
+            - 룬: 50 RP 소모 시 11개 소환 (`drawMultiRuneGacha`)
+        - 10+1 소환 시 11개 획득물 중 최고 등급(Highest Grade)을 감지하여 차원의 문 오라 색상 자동 반영.
+        - **10+1 종합 결과 전용 모달 (`#multi-gacha-modal`)**:
+            - 획득한 11개의 카드/룬을 4열 그리드(`.multi-gacha-grid`)로 한눈에 정돈하여 출력.
+            - 신규 캐릭터 획득 시 `NEW!` 뱃지 점멸 표시, 중복 획득 시 승급(★) 진행도 노출.
+            - 하단에 [🔄 한 번 더 소환] 버튼 및 [확인] 버튼 지원.
+    - **QA 디버그 패널 10연차 편의 버튼 추가 (`index.html`, `js/qa.js`)**:
+        - `[💎 PP +10 (10연차)]`, `[🔮 RP +50 (10연차)]` 원클릭 충전 버튼 연동.
+    - **버전 일괄 동기화 (v0.29.0)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md`, `기획문서.md` 완벽 동기화.
 - **v0.28.0 (Anime Visual Expansion & In-Game Cut-In System)**:
     - **제안 1. 인게임 지휘관 상주 초상화 & 스펠 발동 대각선 컷인(Cut-in) 연출 (`index.html`, `js/ui.js`, `js/tower.js`, `style.css`)**:
         - 인게임 정보 패널 상단에 출전 덱에 편성된 지휘관(최대 3인)의 상주 초상화 바(`.ingame-commanders-bar`, `.ingame-commander-chip`) 배치 및 칩 클릭 시 플로팅 대사 팝업 지원.

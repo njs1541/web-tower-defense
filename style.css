@@ -23,11 +23,13 @@ body {
 
 #game-container {
   display: flex;
-  align-items: flex-start; /* 우측 인포창이 길어져도 좌측 보드가 위/아래로 밀리거나 늘어나지 않도록 고정 */
+  align-items: flex-start;
+  /* 우측 인포창이 길어져도 좌측 보드가 위/아래로 밀리거나 늘어나지 않도록 고정 */
   justify-content: center;
   gap: 24px;
   margin: 0 auto;
-  width: fit-content;      /* 가로 100%를 차지하지 않고 콘텐츠 크기에 딱 맞춤 */
+  width: fit-content;
+  /* 가로 100%를 차지하지 않고 콘텐츠 크기에 딱 맞춤 */
   position: relative;
   box-sizing: border-box;
 }
@@ -42,16 +44,20 @@ body {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  flex-shrink: 0;          /* 보드 크기 절대 축소/왜곡 방지 */
+  flex-shrink: 0;
+  /* 보드 크기 절대 축소/왜곡 방지 */
   width: 620px;
-  height: 620px;           /* 보드 높이 620px 정확히 고정 (회색 배경 아래로 늘어남 방지) */
+  height: 620px;
+  /* 보드 높이 620px 정확히 고정 (회색 배경 아래로 늘어남 방지) */
 }
 
 /* 우측 정보 및 조작 패널 (독립된 화이트 카드 박스) */
 #info-panel {
   width: 260px;
-  max-height: 620px;       /* 게임 보드 높이(620px)와 동일하게 일치 */
-  overflow-y: auto;        /* 강화창 및 버튼이 늘어나도 인포 패널 내부에서 부드럽게 스크롤 */
+  max-height: 620px;
+  /* 게임 보드 높이(620px)와 동일하게 일치 */
+  overflow-y: auto;
+  /* 강화창 및 버튼이 늘어나도 인포 패널 내부에서 부드럽게 스크롤 */
   overflow-x: hidden;
   padding: 16px;
   background: #ffffff;
@@ -64,10 +70,12 @@ body {
 #info-panel::-webkit-scrollbar {
   width: 5px;
 }
+
 #info-panel::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 4px;
 }
+
 #info-panel::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -106,6 +114,7 @@ body {
   background: rgba(255, 255, 255, 0.5) !important;
   box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.8);
 }
+
 .path::after {
   content: "•";
   font-size: 16px;
@@ -146,16 +155,31 @@ body {
 }
 
 @keyframes pulseStart {
-  0%, 100% { box-shadow: inset 0 0 6px #6ee7b7; }
-  50% { box-shadow: inset 0 0 12px #34d399; }
+
+  0%,
+  100% {
+    box-shadow: inset 0 0 6px #6ee7b7;
+  }
+
+  50% {
+    box-shadow: inset 0 0 12px #34d399;
+  }
 }
 
 @keyframes pulseGoal {
-  0%, 100% { box-shadow: inset 0 0 6px #fca5a5; }
-  50% { box-shadow: inset 0 0 12px #f87171; }
+
+  0%,
+  100% {
+    box-shadow: inset 0 0 6px #fca5a5;
+  }
+
+  50% {
+    box-shadow: inset 0 0 12px #f87171;
+  }
 }
-  background: rgba(249, 115, 22, 0.4) !important;
-  box-shadow: inset 0 0 0 2px #ea580c;
+
+background: rgba(249, 115, 22, 0.4) !important;
+box-shadow: inset 0 0 0 2px #ea580c;
 }
 
 .cell.selected-tower {
@@ -167,6 +191,7 @@ body {
 .cell.ranged {
   background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
 }
+
 .cell.ranged::after {
   content: "🏹";
   font-size: 15px;
@@ -180,6 +205,7 @@ body {
 .cell.melee {
   background: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
 }
+
 .cell.melee::after {
   content: "⚔️";
   font-size: 15px;
@@ -193,6 +219,7 @@ body {
 .cell.ice {
   background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%);
 }
+
 .cell.ice::after {
   content: "❄️";
   font-size: 15px;
@@ -206,6 +233,7 @@ body {
 .cell.bomb {
   background: linear-gradient(135deg, #c084fc 0%, #7e22ce 100%);
 }
+
 .cell.bomb::after {
   content: "💣";
   font-size: 15px;
@@ -372,9 +400,19 @@ button.selected {
 }
 
 @keyframes floatDamageAnim {
-  0% { opacity: 1; transform: translateY(0) scale(1); }
-  40% { transform: translateY(-12px) scale(1.3); }
-  100% { opacity: 0; transform: translateY(-24px) scale(0.9); }
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  40% {
+    transform: translateY(-12px) scale(1.3);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.9);
+  }
 }
 
 /* 폭탄 타워 광역 폭발 이펙트 */
@@ -391,9 +429,20 @@ button.selected {
 }
 
 @keyframes splashAnim {
-  0% { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
-  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.9; }
-  100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0; }
+  0% {
+    transform: translate(-50%, -50%) scale(0.2);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0;
+  }
 }
 
 /* 몬스터 컨테이너 래퍼 (체력바 + 바디) */
@@ -473,8 +522,13 @@ button.selected {
 }
 
 @keyframes crawlerCrawl {
-  from { transform: scale(0.95); }
-  to { transform: scale(1.05); }
+  from {
+    transform: scale(0.95);
+  }
+
+  to {
+    transform: scale(1.05);
+  }
 }
 
 /* 크롤러가 기반을 철거할 때의 진동 채널링 효과 */
@@ -484,9 +538,17 @@ button.selected {
 }
 
 @keyframes crawlerDemolish {
-  0% { transform: translate(-2px, 1px) rotate(-5deg); }
-  50% { transform: translate(2px, -1px) rotate(5deg); }
-  100% { transform: translate(-1px, -2px) rotate(0deg); }
+  0% {
+    transform: translate(-2px, 1px) rotate(-5deg);
+  }
+
+  50% {
+    transform: translate(2px, -1px) rotate(5deg);
+  }
+
+  100% {
+    transform: translate(-1px, -2px) rotate(0deg);
+  }
 }
 
 /* 비행형 유닛 */
@@ -497,8 +559,15 @@ button.selected {
 }
 
 @keyframes flyingFloat {
-  0%, 100% { transform: translateY(-3px); }
-  50% { transform: translateY(1px); }
+
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+
+  50% {
+    transform: translateY(1px);
+  }
 }
 
 /* 보스 3종 */
@@ -606,8 +675,15 @@ button.selected {
 }
 
 @keyframes pulseGlow {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  100% { transform: scale(1.08); opacity: 1; }
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
 }
 
 /* 카드 앞면 (소환 결과) */
@@ -967,10 +1043,13 @@ button.selected {
 }
 
 @keyframes op-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 15px rgba(56, 189, 248, 0.3);
     border-color: rgba(56, 189, 248, 0.5);
   }
+
   50% {
     box-shadow: 0 8px 35px rgba(0, 0, 0, 0.5), 0 0 30px rgba(56, 189, 248, 0.6);
     border-color: rgba(56, 189, 248, 0.9);
@@ -981,6 +1060,7 @@ button.selected {
   0% {
     transform: translateY(0px);
   }
+
   100% {
     transform: translateY(-6px);
   }
@@ -990,6 +1070,7 @@ button.selected {
   0% {
     transform: translateY(-2px);
   }
+
   100% {
     transform: translateY(3px);
   }
@@ -1128,7 +1209,8 @@ button.selected {
 
 .commander-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2열 균등 배치로 4명이 2x2 완벽 대칭 */
+  grid-template-columns: repeat(2, 1fr);
+  /* 2열 균등 배치로 4명이 2x2 완벽 대칭 */
   gap: 14px;
   justify-content: center;
 }
@@ -1375,7 +1457,8 @@ button.selected {
 
 .commander-sockets-list {
   display: flex;
-  flex-direction: row; /* 가로형 슬롯 */
+  flex-direction: row;
+  /* 가로형 슬롯 */
   flex-wrap: wrap;
   gap: 6px;
 }
@@ -1568,8 +1651,13 @@ button.selected {
 }
 
 @keyframes fadeInDimOverlay {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .new-char-container {
@@ -1587,8 +1675,15 @@ button.selected {
 }
 
 @keyframes popInNewChar {
-  0% { transform: scale(0.82) translateY(24px); opacity: 0; }
-  100% { transform: scale(1) translateY(0); opacity: 1; }
+  0% {
+    transform: scale(0.82) translateY(24px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
 }
 
 .new-char-illust-box {
@@ -1637,10 +1732,12 @@ button.selected {
     transform: rotate(-18deg) scale(0.96);
     filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
   }
+
   50% {
     transform: rotate(-18deg) scale(1.15);
     filter: drop-shadow(0 0 16px rgba(255, 107, 107, 0.95));
   }
+
   100% {
     transform: rotate(-18deg) scale(0.96);
     filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
@@ -1856,6 +1953,7 @@ button.selected {
     max-height: 90vh;
     overflow-y: auto;
   }
+
   .new-char-illust-box {
     flex: 0 0 260px;
     height: 260px;
@@ -2024,9 +2122,17 @@ button.selected {
 }
 
 @keyframes adjutantBounce {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.08) translateY(-4px); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.08) translateY(-4px);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* 2. 가챠 소환 연출 시퀀스 (도파민 마법진 오버레이) */
@@ -2043,8 +2149,13 @@ button.selected {
 }
 
 @keyframes fadeInSequence {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .summon-sequence-content {
@@ -2086,13 +2197,26 @@ button.selected {
 }
 
 @keyframes summonCircleRotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulseStar {
-  from { transform: scale(0.85); opacity: 0.7; }
-  to { transform: scale(1.2); opacity: 1; text-shadow: 0 0 20px #ffffff; }
+  from {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+
+  to {
+    transform: scale(1.2);
+    opacity: 1;
+    text-shadow: 0 0 20px #ffffff;
+  }
 }
 
 /* 등급별 소환 오라 */
@@ -2118,8 +2242,13 @@ button.selected {
 }
 
 @keyframes rainbowPulse {
-  0% { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
+  0% {
+    filter: hue-rotate(0deg);
+  }
+
+  100% {
+    filter: hue-rotate(360deg);
+  }
 }
 
 .screen-shake {
@@ -2127,11 +2256,27 @@ button.selected {
 }
 
 @keyframes screenShake {
-  0%, 100% { transform: translate(0, 0); }
-  20% { transform: translate(-4px, 4px); }
-  40% { transform: translate(4px, -4px); }
-  60% { transform: translate(-3px, -2px); }
-  80% { transform: translate(3px, 2px); }
+
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  20% {
+    transform: translate(-4px, 4px);
+  }
+
+  40% {
+    transform: translate(4px, -4px);
+  }
+
+  60% {
+    transform: translate(-3px, -2px);
+  }
+
+  80% {
+    transform: translate(3px, 2px);
+  }
 }
 
 .summon-gate-label {
@@ -2281,14 +2426,30 @@ button.selected {
 }
 
 @keyframes cutinSlide {
-  0% { transform: skewX(-14deg) translateX(-100%); opacity: 0; }
-  15% { transform: skewX(-14deg) translateX(0); opacity: 1; }
-  75% { transform: skewX(-14deg) translateX(0); opacity: 1; }
-  100% { transform: skewX(-14deg) translateX(100%); opacity: 0; }
+  0% {
+    transform: skewX(-14deg) translateX(-100%);
+    opacity: 0;
+  }
+
+  15% {
+    transform: skewX(-14deg) translateX(0);
+    opacity: 1;
+  }
+
+  75% {
+    transform: skewX(-14deg) translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: skewX(-14deg) translateX(100%);
+    opacity: 0;
+  }
 }
 
 .cutin-char-wrapper {
-  transform: skewX(14deg); /* 이미지 왜곡 상쇄 */
+  transform: skewX(14deg);
+  /* 이미지 왜곡 상쇄 */
   width: 90px;
   height: 90px;
   border-radius: 50%;
@@ -2306,7 +2467,8 @@ button.selected {
 }
 
 .cutin-info-wrapper {
-  transform: skewX(14deg); /* 텍스트 왜곡 상쇄 */
+  transform: skewX(14deg);
+  /* 텍스트 왜곡 상쇄 */
   text-align: left;
 }
 
@@ -2347,4 +2509,278 @@ button.selected {
 .shop-rune-card-bg {
   background: linear-gradient(135deg, rgba(250, 245, 255, 0.95) 0%, rgba(243, 232, 255, 0.95) 100%), url('assets/shard_ice.jpg') center center / cover no-repeat !important;
   background-blend-mode: overlay;
+}
+
+/* ==========================================================================
+   v0.29.0 New: 가챠 연출 개선 (터치 개방, 스킵, 10+1 모달)
+   ========================================================================== */
+
+/* 소환 스킵 버튼 */
+.btn-summon-skip {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  color: #f1f5f9;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 800;
+  border-radius: 20px;
+  cursor: pointer;
+  z-index: 2200;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.btn-summon-skip:hover {
+  background: rgba(239, 68, 68, 0.85);
+  border-color: #f87171;
+  transform: scale(1.05);
+}
+
+/* 마법진 터치 대기 상태 (펄스 및 잠금 상태) */
+.summon-magic-circle.waiting-tap {
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.3);
+  animation: summonCircleRotate 10s linear infinite, waitingPulse 1.4s ease-in-out infinite alternate !important;
+}
+
+@keyframes waitingPulse {
+  0% {
+    transform: scale(0.92);
+    box-shadow: 0 0 20px rgba(147, 197, 253, 0.4);
+  }
+  100% {
+    transform: scale(1.06);
+    box-shadow: 0 0 40px rgba(192, 132, 252, 0.8), inset 0 0 30px rgba(255, 255, 255, 0.6);
+  }
+}
+
+/* 터치 유도 프롬프트 문구 */
+.summon-touch-prompt {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 8px 18px;
+  border-radius: 20px;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 700;
+  animation: promptBounce 1s infinite alternate;
+  pointer-events: none;
+}
+
+.touch-hand-icon {
+  font-size: 18px;
+  animation: handTap 0.8s infinite alternate;
+}
+
+@keyframes promptBounce {
+  from { transform: translateY(0); opacity: 0.85; }
+  to { transform: translateY(-4px); opacity: 1; }
+}
+
+@keyframes handTap {
+  from { transform: scale(1); }
+  to { transform: scale(1.25) translateY(-2px); }
+}
+
+/* 10+1 연차 소환 종합 결과 모달 (Multi Gacha Modal) */
+.multi-gacha-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.multi-gacha-box {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  padding: 20px;
+  box-sizing: border-box;
+  animation: popInNewChar 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.multi-gacha-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.multi-gacha-header h3 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* 11개 아이템 그리드 레이아웃 (4열 배치) */
+.multi-gacha-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 58vh;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 540px) {
+  .multi-gacha-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.multi-gacha-item {
+  position: relative;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1.5px solid #475569;
+  border-radius: 10px;
+  padding: 8px 6px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.multi-gacha-item:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+}
+
+.multi-item-new-badge {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  font-size: 8.5px;
+  font-weight: 900;
+  padding: 1px 5px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  z-index: 2;
+  animation: pulseGlow 1s infinite alternate;
+}
+
+.multi-item-thumb-box {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+  background: #0f172a;
+}
+
+.multi-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.multi-item-icon {
+  font-size: 26px;
+}
+
+.multi-item-grade {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 8.5px;
+  font-weight: 900;
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+
+.multi-item-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.multi-item-desc {
+  font-size: 9.5px;
+  color: #94a3b8;
+}
+
+.multi-gacha-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-multi-action {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.btn-multi-action.retry {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #fef08a;
+  border: 1px solid #38bdf8;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+}
+
+.btn-multi-action.retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(2, 132, 199, 0.5);
+}
+
+.btn-multi-action.close {
+  background: #334155;
+  color: white;
+  border: 1px solid #475569;
+}
+
+.btn-multi-action.close:hover {
+  background: #475569;
 }
