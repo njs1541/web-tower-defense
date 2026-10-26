@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.35.3";
+const GAME_VERSION = "v0.35.4";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
