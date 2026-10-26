@@ -2136,18 +2136,59 @@
                     </div>
                 </div>
 
-                <!-- 나노바나나 / 단일 입력창 전용 원클릭 올인원 복사 바 -->
-                <div style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(99, 102, 241, 0.15)); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <div style="font-size: 13.5px; font-weight: 800; color: #fde047; display: flex; align-items: center; gap: 6px;">
-                            <span>🍌 나노바나나 / 제미나이(단일창) 전용 원클릭 복사</span>
-                            <span style="background: #eab308; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">FULL BODY 보장</span>
+                <!-- 🛠️ 에셋 추출 & 설정 시트 생성 옵션 패널 (NEW v0.35.8) -->
+                <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+                        <span style="font-size: 13.5px; font-weight: 800; color: #c084fc; display: flex; align-items: center; gap: 6px;">
+                            <span>⚙️ 에셋 추출 & 설정 시트 생성 모드 옵션 (Asset & Sheet Tools)</span>
+                            <span style="background: #a855f7; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">v0.36.1 NEW</span>
+                        </span>
+                        <span style="font-size: 12px; color: #94a3b8;">인게임 투명 PNG 누끼 추출 및 한글 라벨 삼면도·원본 체형 유지·속옷 상/하의 정밀 분해도(미착용 표기) 지원</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                        <!-- 모드 선택: 일반 일러스트 vs 설정 시트 -->
+                        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px;">
+                            <label style="font-size: 12px; font-weight: 800; color: #e2e8f0; display: block; margin-bottom: 8px;">📑 생성 모드 선택</label>
+                            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #f1f5f9; cursor: pointer;">
+                                    <input type="radio" name="gen-mode" value="illust" checked onchange="updatePrompt()" style="accent-color: #a855f7;">
+                                    <span>✨ 전신 일러스트 (Full Standing)</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #fde047; font-weight: 700; cursor: pointer;">
+                                    <input type="radio" name="gen-mode" value="sheet" onchange="updatePrompt()" style="accent-color: #f59e0b;">
+                                    <span>📐 설정 시트 (한글 삼면도·복장 분해도·기본 체형)</span>
+                                </label>
+                            </div>
                         </div>
-                        <div style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">
+
+                        <!-- 배경 제거 (투명화 에셋 모드) 토글 -->
+                        <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <label for="gen-remove-bg" style="font-size: 12.5px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <span>⬜ 배경 제거 / 투명화 에셋 모드 (Clean White BG)</span>
+                                </label>
+                                <span style="font-size: 11.5px; color: #94a3b8; display: block; margin-top: 3px;">
+                                    복잡한 배경을 배제하고 단색 순백 배경으로 출력하여 1초 만에 누끼/투명 PNG 추출
+                                </span>
+                            </div>
+                            <input type="checkbox" id="gen-remove-bg" onchange="updatePrompt()" style="width: 20px; height: 20px; accent-color: #38bdf8; cursor: pointer;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 나노바나나 / 단일 입력창 전용 원클릭 올인원 복사 바 -->
+                <div id="copy-bar-box" style="background: linear-gradient(135deg, rgba(234, 179, 8, 0.15), rgba(99, 102, 241, 0.15)); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <div id="copy-bar-title" style="font-size: 13.5px; font-weight: 800; color: #fde047; display: flex; align-items: center; gap: 6px;">
+                            <span>🍌 나노바나나 / 제미나이(단일창) 전용 원클릭 복사</span>
+                            <span id="copy-bar-badge" style="background: #eab308; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">FULL BODY 보장</span>
+                        </div>
+                        <div id="copy-bar-desc" style="font-size: 12px; color: #cbd5e1; margin-top: 3px;">
                             머리부터 발끝까지 잘리지 않는 전신 샷 키워드와 인체 기형 배제 지시문이 단일 문장으로 자동 결합됩니다.
                         </div>
                     </div>
-                    <button type="button" class="btn-preset" style="background: linear-gradient(135deg, #f59e0b, #6366f1); color: #fff; font-weight: 800; padding: 9px 18px; font-size: 13px; border: none;" onclick="copyPrompt('all_in_one')">
+                    <button type="button" id="btn-main-copy" class="btn-preset" style="background: linear-gradient(135deg, #f59e0b, #6366f1); color: #fff; font-weight: 800; padding: 9px 18px; font-size: 13px; border: none;" onclick="copyPrompt('all_in_one')">
                         🚀 나노바나나 전용 통합 복사
                     </button>
                 </div>
@@ -2554,6 +2595,37 @@
             document.querySelector('.prompt-output-box').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
+        function applyCleanWhiteBackground(rawPrompt) {
+            const bgPatterns = [
+                /standing on stone floor/gi,
+                /standing on grassy plain ground/gi,
+                /standing on mossy stone ground in sunlit forest/gi,
+                /standing on stone fortress courtyard/gi,
+                /stone fortress dungeon background[^,]*/gi,
+                /ancient temple throne background[^,]*/gi,
+                /ancient sacred grove sanctuary background[^,]*/gi,
+                /grand cloud sanctuary background[^,]*/gi,
+                /grand cathedral sanctuary[^,]*/gi,
+                /castle ramparts background[^,]*/gi,
+                /misty ancient woodland background/gi,
+                /blue sky cloud background/gi,
+                /stardust nebula [^,]*background[^,]*/gi,
+                /cosmic [^,]*nebula background/gi,
+                /flat simple gradient background/gi,
+                /soft gradient studio background/gi,
+                /floating slightly above cloudy ground/gi,
+                /stardust nebula galaxy background with shooting stars/gi
+            ];
+            let cleaned = rawPrompt;
+            bgPatterns.forEach(pat => {
+                cleaned = cleaned.replace(pat, "");
+            });
+            cleaned = cleaned.replace(/,\s*,/g, ",").replace(/\s{2,}/g, " ").trim();
+            cleaned = cleaned.replace(/,\s*$/, "");
+            cleaned += ", simple solid pure white background, clean plain white backdrop, no background elements, solo isolated character, full body asset cutout ready";
+            return cleaned;
+        }
+
         function updatePrompt() {
             const grade = document.getElementById('gen-grade').value;
             const element = document.getElementById('gen-element').value;
@@ -2561,48 +2633,159 @@
             const race = document.getElementById('gen-race').value;
             const style = document.getElementById('gen-style').value;
             const details = document.getElementById('gen-details').value.trim();
+            const isRemoveBg = document.getElementById('gen-remove-bg').checked;
+            const genMode = document.querySelector('input[name="gen-mode"]:checked')?.value || 'illust';
 
             let prompt = "";
             let negativePrompt = NEGATIVE_PROMPT_FIXED;
 
-            // 땅의 종족 프리셋이 활성화된 경우: 충돌하는 일반 키워드를 배제하고 검증된 골든 프롬프트 직접 출력
-            if (race === 'earth' && EARTH_GOLDEN_PROMPTS[grade]) {
-                prompt = EARTH_GOLDEN_PROMPTS[grade];
-                if (grade === 'U') {
-                    negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, " + NEGATIVE_PROMPT_FIXED;
-                }
-            } else if (race === 'beastkin' && BEASTKIN_GOLDEN_PROMPTS[grade]) {
-                prompt = BEASTKIN_GOLDEN_PROMPTS[grade];
-                if (grade === 'U') {
-                    negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, human ears, four ears, extra ears, " + NEGATIVE_PROMPT_FIXED;
-                } else {
-                    negativePrompt = "human ears, four ears, extra ears, " + NEGATIVE_PROMPT_FIXED;
-                }
-            } else if (race === 'forest' && FOREST_GOLDEN_PROMPTS[grade]) {
-                prompt = FOREST_GOLDEN_PROMPTS[grade];
-                if (grade === 'U') {
-                    negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, short ears, round ears, " + NEGATIVE_PROMPT_FIXED;
-                } else {
-                    negativePrompt = "short ears, round human ears, " + NEGATIVE_PROMPT_FIXED;
-                }
-            } else if (race === 'avian' && AVIAN_GOLDEN_PROMPTS[grade]) {
-                prompt = AVIAN_GOLDEN_PROMPTS[grade];
-                if (grade === 'U') {
-                    negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, no wings, missing wings, " + NEGATIVE_PROMPT_FIXED;
-                } else {
-                    negativePrompt = "no wings, missing wings, " + NEGATIVE_PROMPT_FIXED;
-                }
-            } else if (race === 'human' && HUMAN_GOLDEN_PROMPTS[grade]) {
-                prompt = HUMAN_GOLDEN_PROMPTS[grade];
-                if (grade === 'U') {
-                    negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy armor, plate armor, heavy dress, robe, hat, animal ears, elf ears, wings, " + NEGATIVE_PROMPT_FIXED;
-                } else {
-                    negativePrompt = "animal ears, elf ears, wings, cyborg arm, mechanical parts, " + NEGATIVE_PROMPT_FIXED;
-                }
+            if (genMode === 'sheet') {
+                // 📐 캐릭터 설정 시트 (Model Sheet / Setting Guide) 모드
+                const RACE_SHEET_SPECS = {
+                    'earth': "earth folk, short petite adult female 150cm height, huge breasts, cybernetic mechanical prosthetic arm with visible brass gears and hydraulics",
+                    'beastkin': "beastkin folk, athletic adult female 165cm height, voluptuous bust, fluffy animal ears on head and fluffy expressive animal tail, canine fangs",
+                    'forest': "forest folk, tall slender elf adult female 172cm height, long pointed elf ears, emerald eyes, sensual high-slit sheer dress",
+                    'avian': "avian folk, petite adult female 152cm height, huge breasts, majestic feathered wings spread on back, floating in air",
+                    'human': "human folk, average height adult female 164cm height, balanced voluptuous hourglass figure, hybrid imperial tactical officer uniform"
+                };
+
+                const GRADE_SHEET_SPECS = {
+                    'C': "apprentice rank uniform, simple neat costume, training gear",
+                    'UC': "junior officer uniform, formal cape, light armor",
+                    'R': "formal knight officer uniform with side-slit and thigh holster snug strap squeeze",
+                    'SR': "elite commander attire with seductive cutouts, leather body harness, garter belt and thigh-high boots, floating magic circle",
+                    'UR': "apex imperial royal costume, ornate gold chain bikini armor, micro high-leg plating, sheer veil, holy halo",
+                    'U': "transcendent cosmic goddess attire, micro slingshot lingerie, delicate diamond body chains, celestial halo"
+                };
+
+                const RACE_BODY_SPECS = {
+                    'earth': "shortstack voluptuous build, 150cm height, 6.0 head ratio, huge bust (E-G cup), wide curvy hips, thick thighs, cybernetic prosthetic arm",
+                    'beastkin': "athletic sensual mature build, 165cm height, 7.0 head ratio, toned curves, voluptuous bust, fluffy animal ears and tail, canine fangs",
+                    'forest': "tall slender elegant model build, 172cm height, 7.8 head ratio, long graceful legs, voluptuous bust, pointed elf ears",
+                    'avian': "petite curvy winged build, 152cm height, 6.2 head ratio, voluptuous bust, graceful posture, majestic wings on back",
+                    'human': "balanced perfect hourglass model build, 164cm height, 7.2 head ratio, natural voluptuous D-F cup bust, feminine waist and hip curves"
+                };
+
+                // 🩱 5대 종족 및 등급별 속옷 상세 명세 (착용 형태 / 미착용 여부)
+                const UNDERWEAR_SPECS = {
+                    'earth': {
+                        'C': "활동성 높은 그레이 스포츠 브라탑 & 로우라이즈 코튼 팬티 착용 (gray athletic stretch sport bra top and low-rise cotton briefs)",
+                        'UC': "활동성 높은 그레이 스포츠 브라탑 & 로우라이즈 코튼 팬티 착용 (gray athletic stretch sport bra top and low-rise cotton briefs)",
+                        'R': "블랙 통기성 메쉬 하프탑 브라 & 심리스 쇼츠 팬티 착용 (black breathable mesh half-top sports bra and seamless boy-shorts panties)",
+                        'SR': "바디슈트 안감 밀착용 블랙 새틴 스트랩 브라 & 하이레그 티백 스트링 팬티 착용 (black satin strappy minimal bra and high-leg micro thong panties under the catsuit)",
+                        'UR': "황금 플레이트와 맞물리는 메탈릭 골드 스트링 비키니 브라 & 마이크로 사이드타이 팬티 착용 (metallic gold string bikini under-bra and micro side-tie low-rise panties)",
+                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with radiant holographic body-chains and golden circuit lines)"
+                    },
+                    'beastkin': {
+                        'C': "탄력적인 블랙 스포츠 브라탑 & 야성적인 신축성 쇼츠 팬티 착용 (elastic black athletic bra top and low-waist flexible stretch panties)",
+                        'UC': "탄력적인 블랙 스포츠 브라탑 & 야성적인 신축성 쇼츠 팬티 착용 (elastic black athletic bra top and low-waist flexible stretch panties)",
+                        'R': "타이트한 레더 룩 스트랩 브라탑 & 하이웨이스트 심리스 압박 팬티 착용 (tight leatherette strappy bralette and high-waist seamless compression panties)",
+                        'SR': "키홀 컷아웃 전용 오픈 가슴 레이스 브라 & 골반 컷아웃 하이레그 티백 팬티 착용 (plunging open-bust lace bralette and pelvic cutout high-leg thong panties)",
+                        'UR': "호피 퍼 트림 골드 마이크로 비키니 탑 & 하이레그 스트링 T팬티 착용 (leopard-fur trimmed gold micro bikini top and ultra high-leg string thong panties)",
+                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with beast-god aurora body-chains and divine 9-tail aura)"
+                    },
+                    'forest': {
+                        'C': "정갈한 순백 리넨 레이스업 소프트 브라탑 & 로우컷 리넨 브리프 착용 (pure white linen lace-up soft bra and comfortable low-cut linen panties)",
+                        'UC': "정갈한 순백 리넨 레이스업 소프트 브라탑 & 로우컷 리넨 브리프 착용 (pure white linen lace-up soft bra and comfortable low-cut linen panties)",
+                        'R': "에메랄드빛 실크 하프컵 브라탑 & 누드톤 심리스 사이드 스트링 팬티 착용 (emerald sheer silk half-cup bra and seamless nude-tone side-string panties)",
+                        'SR': "딥 그린 시스루 플로럴 레이스 브라탑 & 가터벨트용 레이스 하이레그 티백 팬티 착용 (deep emerald sheer floral lace bralette and matching lace high-leg thong panties with garter straps)",
+                        'UR': "황금 나뭇잎 컵 비키니 브라 & 시스루 마이크로 에메랄드 사이드타이 스트링 팬티 착용 (ornate gold leaf-cup bikini bra and sheer micro emerald side-tie string panties)",
+                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with botanical vine jewels and emerald dewdrop body-chains)"
+                    },
+                    'avian': {
+                        'C': "하늘빛 코튼 소프트 브라탑 & 프릴 레이스 파스텔 쇼츠 팬티 착용 (sky-blue soft cotton bralette and ruffled edge pastel lace panties)",
+                        'UC': "하늘빛 코튼 소프트 브라탑 & 프릴 레이스 파스텔 쇼츠 팬티 착용 (sky-blue soft cotton bralette and ruffled edge pastel lace panties)",
+                        'R': "순백 실크 리본 브라탑 & 골반 트임 레이스 사이드타이 팬티 착용 (pure white silk ribbon bra and high-slit lace side-tie panties)",
+                        'SR': "고혹적인 블랙 쉬폰 플런징 브라탑 & 시스루 레이스 가터 티백 팬티 착용 (seductive black sheer chiffon plunging bra and sheer lace garter-loop thong panties)",
+                        'UR': "순금 깃털 양각 마이크로 비키니 브라탑 & 초소형 골드 체인 T팬티 착용 (sculpted gold feather micro bikini bra and ultra-minimal gold chain thong panties)",
+                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with starlight diamond body-chains and glowing feather light ribbons)"
+                    },
+                    'human': {
+                        'C': "단정한 제국 네이비/화이트 규정 면 스포츠 브라탑 & 활동성 쇼츠 팬티 착용 (neat imperial navy/white athletic regulation cotton bra and flexible boxer-brief panties)",
+                        'UC': "단정한 제국 네이비/화이트 규정 면 스포츠 브라탑 & 활동성 쇼츠 팬티 착용 (neat imperial navy/white athletic regulation cotton bra and flexible boxer-brief panties)",
+                        'R': "가슴골 모아주는 블랙 푸시업 브라 & 심리스 로우라이즈 보이쇼츠 팬티 착용 (black push-up cleavage bra and low-rise seamless boy-shorts panties under leather shorts)",
+                        'SR': "키홀 컷아웃 전용 누디 코르셋 브라탑 & 가터벨트 일체형 하이레그 레이스 팬티 착용 (plunging keyhole nude-cut corset bralette and high-leg lace garter-belt panties)",
+                        'UR': "정교한 백금 흉갑형 마이크로 비키니 브라탑 & 골반 90% 개방 골드 스트링 플레이트 T팬티 착용 (ornate platinum sculpted micro bikini bra and 90% open pelvic gold chain micro thong panties)",
+                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with stardust diamond body-chains and holy light halos)"
+                    }
+                };
+
+                const currentUnderwear = (UNDERWEAR_SPECS[race] && UNDERWEAR_SPECS[race][grade]) 
+                    ? UNDERWEAR_SPECS[race][grade] 
+                    : "appropriate stylized inner underwear matching the costume grade (bra/top and panties)";
+
+                prompt = `Based on the attached character design image, generate a professional game production character reference sheet (official model sheet & setting guide), multiple turnaround angles of the exact same character: full body front view, full body side view, full body back view.
+[1. Korean Text Annotations]: All section titles, part labels, callouts, and explanatory notes on the sheet MUST be written in Korean text (한글 라벨: '정면', '측면', '후면', '기본 체형', '표정 모음', '복장 분해도', '갑옷/의상 상의', '하의', '속옷 상의(브라)', '속옷 하의(팬티)', '속옷 착용 상태', '망토', '머리 장식/티아라', '신발/부츠', '무기/장신구').
+[2. Character Natural Base Body Model (기본 체형)]: Full body natural base body model shot of the EXACT SAME character (CRITICAL: NOT a mannequin, NOT a wooden/plastic doll, MUST have the identical face, identical hair, exact same adult female face and eye features, identical voluptuous body proportions, identical breast size, curvy hips, and natural muscle/curves as the original character: ${RACE_BODY_SPECS[race] || 'voluptuous adult female'}, standing without outer armor and heavy clothing in minimal inner base layer or bare silhouette to showcase her true anatomical proportions and height scale for 3D modeling reference).
+[3. Exploded Costume Breakdown (복장 분해도)]: Detailed deconstructed layers display of all wearable items: upper armor / outer top, lower armor / skirt or pants, cape / cloak, tiara / hair accessories, boots / sandals, leather harness buckles and straps, signature weapon and crest close-up cutaways.
+[3-1. Specific Underwear Layer Breakdown (속옷 상·하의 분해도 및 착용 상태)]: Detailed isolated breakdown of the inner underwear: [Underwear Spec: ${currentUnderwear}]. If underwear is worn, clearly illustrate both the isolated Upper Underwear (bra/top) and isolated Lower Underwear (panties/thong/briefs) with clear fabric texture, straps, and clasps. If specified as '물리적 섬유 속옷 미착용 / No traditional fabric underwear (commando)', explicitly depict her wearing no fabric underwear with only the sacred radiant body-chains or bare skin, labeled in Korean as '속옷 미착용 (신성 바디체인 전신 샷)'.
+[4. Facial Expression Sheet]: 4 distinct facial expression portraits labeled in Korean (기본 무표정, 밝은 미소, 자신감, 진지한 결의).
+[5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 3D game modeling, animation rigging, and costume tailoring reference, clean precise lineart, safe for work, character production study, simple solid pure white background, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${GRADE_SHEET_SPECS[grade] || ''}${details ? ', ' + details : ''}`;
+                
+                negativePrompt = "mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, flat chest, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, " + NEGATIVE_PROMPT_FIXED;
+
+                // UI 안내 문구 업데이트
+                document.getElementById('copy-bar-title').innerHTML = `<span>📐 나노바나나 설정 시트 (한글 라벨·속옷 분해도·원본 체형 유지) 복사</span><span id="copy-bar-badge" style="background: #f59e0b; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">MODEL SHEET</span>`;
+                document.getElementById('copy-bar-desc').textContent = `📌 [속옷 사양: ${currentUnderwear}] 원본 캐릭터 체형 유지 기본 체형 샷 + 속옷 상/하의 분해도(또는 미착용 표기) + 착용 복장 분해도가 안전하게 일괄 생성됩니다.`;
+                document.getElementById('btn-main-copy').textContent = "📐 설정 시트 전용 복사";
+                document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #f59e0b, #ec4899)";
             } else {
-                const baseStyle = "masterpiece, best quality, ultra-detailed anime mobile gacha illustration, Genshin and Blue Archive art style, 1girl, solo, adult female, full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose, anatomically correct, exactly two arms, exactly two legs, perfectly drawn hands, clean lineart, vibrant cel-shading, cinematic lighting, core guardian crest brooch on chest";
-                let raceAndStylePrompt = `${STYLE_PROMPTS[style]}, ${RACE_PROMPTS[race]}`;
-                prompt = `${baseStyle}, ${raceAndStylePrompt}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role]}, ${ELEMENT_PROMPTS[element]}, ${GRADE_PROMPTS[grade]}`;
+                // ✨ 전신 일러스트 모드
+                // 땅의 종족 프리셋이 활성화된 경우: 충돌하는 일반 키워드를 배제하고 검증된 골든 프롬프트 직접 출력
+                if (race === 'earth' && EARTH_GOLDEN_PROMPTS[grade]) {
+                    prompt = EARTH_GOLDEN_PROMPTS[grade];
+                    if (grade === 'U') {
+                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, " + NEGATIVE_PROMPT_FIXED;
+                    }
+                } else if (race === 'beastkin' && BEASTKIN_GOLDEN_PROMPTS[grade]) {
+                    prompt = BEASTKIN_GOLDEN_PROMPTS[grade];
+                    if (grade === 'U') {
+                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, human ears, four ears, extra ears, " + NEGATIVE_PROMPT_FIXED;
+                    } else {
+                        negativePrompt = "human ears, four ears, extra ears, " + NEGATIVE_PROMPT_FIXED;
+                    }
+                } else if (race === 'forest' && FOREST_GOLDEN_PROMPTS[grade]) {
+                    prompt = FOREST_GOLDEN_PROMPTS[grade];
+                    if (grade === 'U') {
+                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, short ears, round ears, " + NEGATIVE_PROMPT_FIXED;
+                    } else {
+                        negativePrompt = "short ears, round human ears, " + NEGATIVE_PROMPT_FIXED;
+                    }
+                } else if (race === 'avian' && AVIAN_GOLDEN_PROMPTS[grade]) {
+                    prompt = AVIAN_GOLDEN_PROMPTS[grade];
+                    if (grade === 'U') {
+                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, no wings, missing wings, " + NEGATIVE_PROMPT_FIXED;
+                    } else {
+                        negativePrompt = "no wings, missing wings, " + NEGATIVE_PROMPT_FIXED;
+                    }
+                } else if (race === 'human' && HUMAN_GOLDEN_PROMPTS[grade]) {
+                    prompt = HUMAN_GOLDEN_PROMPTS[grade];
+                    if (grade === 'U') {
+                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy armor, plate armor, heavy dress, robe, hat, animal ears, elf ears, wings, " + NEGATIVE_PROMPT_FIXED;
+                    } else {
+                        negativePrompt = "animal ears, elf ears, wings, cyborg arm, mechanical parts, " + NEGATIVE_PROMPT_FIXED;
+                    }
+                } else {
+                    const baseStyle = "masterpiece, best quality, ultra-detailed anime mobile gacha illustration, Genshin and Blue Archive art style, 1girl, solo, adult female, full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose, anatomically correct, exactly two arms, exactly two legs, perfectly drawn hands, clean lineart, vibrant cel-shading, cinematic lighting, core guardian crest brooch on chest";
+                    let raceAndStylePrompt = `${STYLE_PROMPTS[style]}, ${RACE_PROMPTS[race]}`;
+                    prompt = `${baseStyle}, ${raceAndStylePrompt}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role]}, ${ELEMENT_PROMPTS[element]}, ${GRADE_PROMPTS[grade]}`;
+                }
+
+                // 배경 제거 모드 활성화 시 배경 교체
+                if (isRemoveBg) {
+                    prompt = applyCleanWhiteBackground(prompt);
+                    negativePrompt = "scenery, landscape, complex background, outdoors, indoors, furniture, sky, clouds, space, nebula, stars, shadows on background, gradient background, " + negativePrompt;
+                    
+                    document.getElementById('copy-bar-title').innerHTML = `<span>🍌 나노바나나 에셋 누끼용(순백 배경) 원클릭 복사</span><span id="copy-bar-badge" style="background: #38bdf8; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">WHITE BG CUTOUT</span>`;
+                    document.getElementById('copy-bar-desc').textContent = "순백 단색 배경으로 캐릭터만 분리 출력되어 그래픽 툴에서 1초 만에 투명 PNG 누끼를 딸 수 있습니다.";
+                    document.getElementById('btn-main-copy').textContent = "⬜ 에셋 누끼용 통합 복사";
+                    document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #0284c7, #6366f1)";
+                } else {
+                    document.getElementById('copy-bar-title').innerHTML = `<span>🍌 나노바나나 / 제미나이(단일창) 전용 원클릭 복사</span><span id="copy-bar-badge" style="background: #eab308; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">FULL BODY 보장</span>`;
+                    document.getElementById('copy-bar-desc').textContent = "머리부터 발끝까지 잘리지 않는 전신 샷 키워드와 인체 기형 배제 지시문이 단일 문장으로 자동 결합됩니다.";
+                    document.getElementById('btn-main-copy').textContent = "🚀 나노바나나 전용 통합 복사";
+                    document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #f59e0b, #6366f1)";
+                }
             }
 
             document.getElementById('prompt-output').textContent = prompt;
@@ -2614,6 +2797,8 @@
             let message = "";
             const pos = document.getElementById('prompt-output').textContent;
             const neg = document.getElementById('prompt-output-negative').textContent;
+            const genMode = document.querySelector('input[name="gen-mode"]:checked')?.value || 'illust';
+            const isRemoveBg = document.getElementById('gen-remove-bg').checked;
 
             if (type === 'positive') {
                 text = pos;
@@ -2622,9 +2807,14 @@
                 text = neg;
                 message = "✅ 인체 오류/잘림 방지 네거티브 프롬프트가 복사되었습니다!";
             } else if (type === 'all_in_one') {
-                // 제미나이(나노바나나)가 100% 오해 없이 알아듣는 검증 포맷: 골든 프롬프트 + 깔끔한 Avoid 태그
                 text = `${pos}. Avoid: ${neg}`;
-                message = "🍌 나노바나나 전용 검증 프롬프트가 100% 동일하게 복사되었습니다!\n나노바나나 입력창에 그대로 붙여넣기(Ctrl+V) 하세요.";
+                if (genMode === 'sheet') {
+                    message = "📐 [캐릭터 설정 시트 모드] 복사 완료!\n\n📌 안내: 나노바나나(제미나이)에 '캐릭터 원본 이미지'를 먼저 첨부(Ctrl+V)하고 이 프롬프트를 함께 붙여넣어 전송하세요!";
+                } else if (isRemoveBg) {
+                    message = "⬜ [에셋 누끼/순백 배경 모드] 복사 완료!\n\n나노바나나 입력창에 그대로 붙여넣기(Ctrl+V) 하시면 단색 순백 배경으로 캐릭터가 단독 출력됩니다.";
+                } else {
+                    message = "🍌 나노바나나 전용 검증 프롬프트가 100% 동일하게 복사되었습니다!\n나노바나나 입력창에 그대로 붙여넣기(Ctrl+V) 하세요.";
+                }
             }
 
             navigator.clipboard.writeText(text).then(() => {

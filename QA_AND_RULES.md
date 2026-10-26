@@ -209,6 +209,59 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - **전투 UX**: 몬스터 머리 위 체력바, 사거리 프리뷰, 배속(1x/2x) 및 스페이스바 일시정지.
 
 ## 🐛 수정된 버그 및 업데이트 (Fixed Bugs & Updates)
+- **v0.36.1 (Character Sheet Detailed Underwear Breakdown & Spec Mapping)**:
+    - **설정 시트 내 착용 속옷 상/하의 분해도 및 착용/미착용 명세 완비 (`visual_style_guide.html`)**:
+        - **5대 종족 및 전 등급별 속옷 상세 스펙 매핑 (`UNDERWEAR_SPECS`)**:
+            - ⛰️ 땅의 종족: C/UC(활동성 그레이 스포츠 브라탑 & 로우라이즈 코튼 팬티) / R(블랙 통기성 메쉬 하프탑 & 심리스 쇼츠) / SR(새틴 스트랩 브라 & 하이레그 티백 스트링) / UR(메탈릭 골드 스트링 비키니 브라 & 마이크로 사이드타이 팬티) / U(물리적 섬유 속옷 미착용, 홀로그램 나노 바디체인).
+            - 🐾 수인족: C/UC(탄력 블랙 스포츠 브라 & 신축성 쇼츠) / R(타이트 레더 룩 스트랩 브라탑 & 하이웨이스트 압박 팬티) / SR(키홀 오픈 레이스 브라 & 골반 컷아웃 티백) / UR(호피 퍼 트림 골드 마이크로 비키니 & 하이레그 T팬티) / U(물리적 속옷 미착용, 신수 오로라 바디체인).
+            - 🌲 숲의 종족: C/UC(순백 리넨 레이스업 소프트 브라 & 로우컷 리넨 브리프) / R(에메랄드 실크 하프컵 & 누드톤 심리스 사이드 스트링) / SR(딥 그린 시스루 플로럴 레이스 브라 & 가터벨트용 레이스 티백) / UR(황금 나뭇잎 컵 비키니 & 시스루 에메랄드 사이드타이 스트링) / U(물리적 속옷 미착용, 덩굴 보석 & 에메랄드 바디체인).
+            - 🪽 비행족: C/UC(하늘빛 코튼 소프트 브라 & 프릴 레이스 파스텔 쇼츠) / R(순백 실크 리본 브라 & 골반 트임 사이드타이) / SR(블랙 쉬폰 플런징 브라 & 가터 루프 티백) / UR(순금 깃털 양각 마이크로 비키니 & 초소형 골드 체인 T팬티) / U(물리적 속옷 미착용, 성운 다이아몬드 바디체인).
+            - 🏛️ 인간족: C/UC(제국 규정 네이비/화이트 면 스포츠 브라 & 복서 브리프 쇼츠) / R(블랙 푸시업 가슴골 브라 & 심리스 보이쇼츠) / SR(키홀 누디 코르셋 브라 & 가터벨트 일체형 레이스 팬티) / UR(백금 흉갑형 마이크로 비키니 & 90% 개방 골드 스트링 플레이트 T팬티) / U(물리적 속옷 미착용, 순백 성광 스타더스트 바디체인).
+        - **설정 시트 프롬프트에 `[3-1. Specific Underwear Layer Breakdown]` 전용 섹션 신설**:
+            - 속옷 착용 시: 상의(브라탑), 하의(팬티/티백/쇼츠)를 재질감·스트랩 디테일까지 독립 분해하여 렌더링하도록 지시.
+            - 속옷 미착용(U등급 등) 시: 섬유 속옷을 착용하지 않았음을 명시하고, 신성 바디체인 상태임을 한국어 라벨 `'속옷 미착용 (신성 바디체인 전신 샷)'`으로 표기하도록 강제.
+        - **UI 인터랙션 개선**: 복사 바 설명에 현재 선택된 종족/등급의 속옷 사양이 실시간으로 노출되도록 업데이트.
+    - **버전 일괄 동기화 (v0.36.1)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md` 동기화 완료.
+- **v0.36.0 (Character Sheet True Body Model & Anti-Mannequin Overhaul)**:
+    - **설정 시트 기본 체형 샷의 마네킹 변질 문제 완벽 해결 (`visual_style_guide.html`)**:
+        - **마네킹 키워드 전면 퇴출**: `mannequin`, `anatomical mannequin reference` 등 얼굴이 지워지거나 마른 목각/플라스틱 인형 체형으로 퇴화시키던 키워드를 프롬프트 및 안전 가이드에서 전면 제거.
+        - **원본 캐릭터 동일성 100% 보장 지시문 탑재**: `CRITICAL: NOT a mannequin, NOT a wooden/plastic doll, MUST have identical face, identical hair, exact same adult female face features, identical voluptuous body proportions, identical breast size, curvy hips, and natural curves as original character`.
+        - **종족별 신체 스펙(`RACE_BODY_SPECS`) 체형 샷 직결 주입**:
+            - ⛰️ 땅의 종족: 150cm 단신 숏스택, 6.0등신, E~G컵 폭발적 볼륨, 넓은 골반과 묵직한 허벅지, 사이보그 기계 의수.
+            - 🐾 수인족: 165cm 탄력 글래머, 7.0등신, 복근/골반 곡선, 동물 귀/꼬리 및 송곳니.
+            - 🌲 숲의 종족: 172cm 장신 엘프 모델 체형, 7.8등신, 긴 다리와 풍만한 바스트, 엘프 귀.
+            - 🪽 비행족: 152cm 육감 볼륨 숏스택, 6.2등신, 거대 날개 파츠.
+            - 🏛️ 인간족: 164cm 황금비 모래시계 아이돌 체형, 7.2등신, D~F컵 자연스러운 바스트.
+        - **네거티브 방어막 강화**: `mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, changed body type, flat chest, altered proportions` 주입으로 얼굴 지워짐이나 체형 축소 현상 원천 봉쇄.
+    - **버전 일괄 동기화 (v0.36.0)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md` 동기화 완료.
+- **v0.35.9 (Character Sheet Deconstruction & Korean Annotations & Base Model Shot)**:
+    - **캐릭터 설정 시트(Model Sheet) 프롬프트 엔진 대폭 고도화 (`visual_style_guide.html`)**:
+        - **1) 한글 텍스트 라벨 출력 보장 (Korean Text Annotations)**:
+            - 시트 내 모든 타이틀 및 섹션 라벨을 한글로 강제 출력하도록 명시 (`정면`, `측면`, `후면`, `기본 체형`, `표정 모음`, `복장 분해도`, `갑옷/의상 상의`, `하의`, `속옷 상의`, `속옷 하의`, `망토`, `머리 장식/티아라`, `신발/부츠`, `무기/장신구`).
+            - 영어/한자/일본어 텍스트 오출력 방지 네거티브 추가 (`english text labels, english words, chinese characters, japanese text`).
+        - **2) 복장 완전 분해도 (Exploded Costume Breakdown)**:
+            - 캐릭터가 착용 중인 모든 복장 아이템을 낱개 부품 형태로 분해하여 배치하도록 지시:
+            - 갑옷/의상 상의, 하의, 펄럭이는 망토, 머리 장식/티아라, 롱부츠/신발, 스트랩/하네스, 무기 및 장신구.
+            - 속옷 상의(브라탑), 속옷 하의(팬티) 언더웨어 레이어 분해 컷 포함.
+        - **3) 외투를 벗은 전신 기본 체형 샷 (Base Body Model Shot)**:
+            - 3D 모델링 및 인체 비례 확인용으로 캐릭터의 순수 체형 실루엣을 확인할 수 있는 마네킹 베이스 체형 샷 포함.
+        - **4) 비성적 설정집 안전 프롬프트 (Non-sexual Production Context)**:
+            - 속옷 및 맨몸 체형 분해도가 포함되더라도 AI 세이프티 필터에 차단되지 않고 게임 제작 원화로 인식되도록 전문적 콘셉트 아트 바이블 맥락 부여 (`Strictly non-sexual, professional concept art bible for 3D game modeling and animation rigging, artistic anatomical mannequin reference, safe for work, clean precise lineart`).
+            - 네거티브에 `nsfw, explicit, erotic, sexual`을 주입하여 건강하고 정밀한 게임 개발용 설정집으로 출력되도록 보장.
+    - **버전 일괄 동기화 (v0.35.9)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md` 동기화 완료.
+- **v0.35.8 (Isolated White BG Asset Cutout & Character Model Sheet Generator)**:
+    - **visual_style_guide 에셋 추출 및 설정 시트 생성 파이프라인 신설 (`visual_style_guide.html`)**:
+        - **1) 배경 제거 / 투명화 에셋 모드 (Clean White BG Cutout)**:
+            - 토글 체크박스 지원: 복잡한 전장/구름/성운 배경을 정규식으로 자동 발라내고, 순백 단색 배경(`simple solid pure white background, no background elements, isolated solo character, asset cutout ready`)으로 자동 교체.
+            - 네거티브에 풍경/배경 배제 키워드(`scenery, landscape, complex background, outdoors, indoors, furniture, sky, clouds, space, nebula`) 강력 주입하여 1초 만에 투명 PNG 누끼 추출 보장.
+        - **2) 캐릭터 설정 시트 (Model Sheet / Setting Guide) 생성 모드**:
+            - PixAI의 캐릭터 설정 시트 생성 방식을 나노바나나(제미나이 멀티모달) 워크플로우에 최적화하여 구현.
+            - 제미나이에 "원본 캐릭터 이미지"를 첨부(Ctrl+V)하고 원클릭 복사본을 함께 전송하여 오피셜 삼면도(정면/측면/후면) + 표정 4종(미소/자신감/홍조/진지) + 의상/무기 디테일 클로즈업 컷을 1장의 공식 설정집으로 분해·생성.
+    - **버전 일괄 동기화 (v0.35.8)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md` 동기화 완료.
 - **v0.35.7 (Human Folk Visual Bible Deep Dive & Grade-Specific Sensual Progression)**:
     - **🏛️ 인간족(Human Folk) 상세 체형 및 등급별 노출도·관능미 가이드라인 정립**:
         - 신체 스펙 규정: 160~167cm 평균 신장 성인 여성(Mature Adult Female, 7.0~7.5등신 모델-아이돌 체형), D~F컵 자연스럽고 탄력 있는 바스트, 균형 잡힌 허리·골반 라인.
