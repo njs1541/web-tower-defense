@@ -25,10 +25,11 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - **5대 종족별 체형 & 복장 가이드라인 (스타일 A / B 배정)**:
         - ⛰️ **땅의 종족 [스타일 A]**: 키가 작고 글래머러스한 체형(Shortstack), 사이보그 기계 파츠 대체, **밀착 글로시 라텍스 바디슈트 & 공학 하네스**.
             - **신체 스펙**: 145~155cm, 6.0~6.5등신, E~G컵 풍만한 바디와 넓은 골반, 묵직하고 탄탄한 꿀벅지 (로리/아동형 신체 엄격 배제).
-            - **C/UC 등급 (노출도 ★☆☆☆☆)**: 캔버스 멜빵 작업복(Overalls), 헐렁한 면 티셔츠, 노출 최소화하되 옷태로 감출 수 없는 묵직한 가슴 볼륨감, 이마/볼의 기름 얼룩과 땀방울, 투박한 철제 렌치.
-            - **R 등급 (노출도 ★★☆☆☆)**: 슬림핏 방열 언더슈트, 지퍼를 반쯤 내린 가슴골 윗선 노출, 숏 카고 팬츠, 허벅지 홀스터 스트랩으로 인한 탄탄한 살 눌림, 황동 피스톤 유압 의수.
-            - **SR 등급 (노출도 ★★★☆☆)**: 초밀착 광택 에나멜 라텍스 바디슈트, 가슴 중심의 대담한 키홀 컷아웃(Keyhole Cleavage), 가슴/골반/허벅지를 강하게 조이는 버클 하네스 스트랩(Flesh Pinch), 네온 발광 티타늄 사이보그 암.
-            - **UR/U 최고등급 (노출도 ★★★★★ Apex)**: 성스러운 황금 체인 비키니 메카닉 아머 또는 마이크로 하이레그 사이버 슈트, 골반 뼈와 엉덩이 굴곡 90% 이상 개방, 반투명 실크 베일/나노 성운 란제리, 자율 비행 비트 병기, 황금 에너지 역장 헤일로.
+            - **C/UC 등급 (노출도 ★☆☆☆☆)**: 캔버스 멜빵 작업복(Overalls), 헐렁한 면 티셔츠, 묵직한 가슴 볼륨감, 이마/볼의 기름 얼룩과 땀방울, **기초형 황동 톱니 기계 의수 손/팔뚝**, 투박한 철제 렌치.
+            - **R 등급 (노출도 ★★☆☆☆)**: 슬림핏 방열 언더슈트, 지퍼를 반쯤 내린 가슴골 윗선 노출, 숏 카고 팬츠, 허벅지 홀스터 스트랩으로 인한 탄탄한 살 눌림, **유압 피스톤 정밀 황동 사이보그 팔**.
+            - **SR 등급 (노출도 ★★★☆☆)**: 초밀착 광택 에나멜 라텍스 바디슈트, 대담한 키홀 컷아웃, 가슴/골반/허벅지를 강하게 조이는 버클 하네스 스트랩(Flesh Pinch), **네온 에너지 튜브가 흐르는 티타늄 사이보그 팔**.
+            - **UR 등급 (노출도 ★★★★★ Apex)**: 황금 체인 비키니 메카닉 아머, 마이크로 하이레그 플레이트(골반·엉덩이 90% 개방), 순백 실크 베일, **백금 & 순금 도금의 정밀 기계 사이보그 의수 팔 & 허벅지 메카닉 관절**.
+            - **U 등급 (노출도 ★★★★★+ Unique)**: 모자/긴 드레스 배제, **극소 면적의 투명 홀로그램 에너지 란제리 & 황금 바디 체인**, 전신 100% 개방 실루엣, **투명 크리스털 에너지와 황금 나노 회로 초월 사이보그 팔**, 공전하는 자율 나노 비트 병기.
         - 🐾 **수인족 [스타일 A]**: 평균 키, 글래머와 슬렌더/빈유 고른 분포, 뚜렷한 동물 귀와 꼬리, **스포티한 가죽 캣슈트 & 체스트 하네스 & 허벅지 밴드 조임**.
         - 🌲 **숲의 종족 [스타일 B]**: 키가 크고 글래머러스한 체형, 긴 엘프 귀, **나뭇잎/꽃 모티브의 시스루 레이스 드레스 & 깊은 키홀 컷아웃 & 하이 사이드 슬릿**.
         - 🪽 **비행족 [스타일 B]**: 키가 작고 글래머러스한 체형, 천사/악마/요정/기계 등 다채로운 날개, **공중 부유용 얇은 시스루 쉬폰 드레스 & 가터벨트**.
@@ -39,7 +40,8 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
         - **1) 황금 체인 비키니 아머**: 성스러운 금빛 체인, 백금 흉갑, 하이레그 아머, 순백 실크 베일 (브더2/라오 성기사·여신 감성).
         - **2) 하이엔드 SF 하이레그 슈트**: 골반 뼈가 드러나는 초고수위 하이레그 라인, 투명 홀로그램 패널, 에나멜 라텍스, 허벅지 살 조임 극대화.
         - **3) 창세신의 천상 란제리**: 은하수가 투과되는 반투명 오간자/쉬폰 로브, 황금 헤일로, 부유 연출 (U등급 루미나 전용).
-6. **AI 이미지 생성 시 인체 오류 방지 규칙 (Anti-Defect Quality Control)**:
+6. **AI 이미지 생성 시 인체 오류 및 에셋 규격 방지 규칙 (Anti-Defect & Asset Quality Control)**:
+    - **게임 에셋 전용 전신 샷 보장 (Strict Full Body Shot & No Cropping)**: 카드 일러스트 및 도감, 컷인 에셋으로 바로 사용할 수 있도록 머리부터 발끝/신발까지 잘리지 않는 전신 샷(`full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose`)을 의무 지정하며, 상반신만 잘려 나오는 것을 원천 차단하기 위해 네거티브에 `cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot`을 필수로 주입합니다.
     - **기형 사지 방지 (Strict 2 Arms & 2 Legs)**: 팔이나 다리가 3개 이상 생성되는 기형을 원천 차단하기 위해 포지티브(`anatomically correct, exactly two arms, exactly two legs, adult female`) 및 네거티브 프롬프트(`extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs`)를 의무 주입합니다.
     - **손/손가락 왜곡 방지**: 부정확한 손가락 수 및 융합 방지 (`poorly drawn hands, mutated hands, extra fingers, deformed fingers`).
 
@@ -183,6 +185,26 @@ Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 
     - **전투 UX**: 몬스터 머리 위 체력바, 사거리 프리뷰, 배속(1x/2x) 및 스페이스바 일시정지.
 
 ## 🐛 수정된 버그 및 업데이트 (Fixed Bugs & Updates)
+- **v0.35.3 (Cybernetic Prosthetic Mandate & U-Grade Apex Holographic Overhaul)**:
+    - **땅의 종족 전 등급 신체 기계 대체(Cybernetic Prosthetic) 의무화**:
+        - C/UC: 기초형 황동 톱니 의수 손/팔뚝
+        - R: 정밀 황동 유압 피스톤 사이보그 팔
+        - SR: 티타늄 네온 튜브 고출력 사이보그 팔
+        - UR: 백금 & 황금 도금 정밀 기계 의수 팔 & 허벅지 메카닉 조인트
+        - U: 투명 크리스털 에너지와 황금 나노 회로 초월체 사이보그 팔
+    - **UR vs U 등급 시각적 격차 및 관능미 재정의**:
+        - U등급의 마녀 모자 및 긴 드레스 로브를 일절 배제하고, 극소 면적의 투명 홀로그램 에너지 란제리와 자율 부유 궤도 비트 병기를 탑재하여 초월적 여황제 비주얼 완성.
+    - **버전 일괄 동기화 (v0.35.3)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md` 동기화 완료.
+- **v0.35.2 (Game Asset Full Body Shot Guarantee & NanoBanana One-Click Bundle)**:
+    - **게임 에셋 전용 전신 샷(Full Body Shot) 보장 프롬프트 엔진 전면 개편**:
+        - 포지티브 기본 베이스에 머리부터 발끝까지 잘리지 않는 `full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose` 키워드 의무 주입.
+        - 등급별 의상 묘사에 작업용 워커, 컴뱃 부츠, 허벅지 하이 플랫폼 부츠 등 **신발/발끝 착지 묘사를 의무화**하여 줌인/상반신 잘림 원천 차단.
+        - 네거티브 프롬프트에 `cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot` 대폭 보강.
+    - **나노바나나 / 제미나이(단일 입력창) 전용 원클릭 올인원 복사 버튼 탑재**:
+        - 단일 프롬프트 입력창을 지원하는 나노바나나 환경에 맞춰, 전신 보장 지시문과 인체 결함 배제문이 하나로 조합된 `🚀 나노바나나 전용 통합 복사` 원클릭 기능 추가.
+    - **버전 일괄 동기화 (v0.35.2)**:
+        - `constants.js`, `index.html`, `QA_AND_RULES.md` 동기화 완료.
 - **v0.35.1 (Earth Folk Visual Bible Deep Dive & Grade-Specific Sensual Progression)**:
     - **⛰️ 땅의 종족(Earth Folk) 상세 체형 및 등급별 노출도·관능미 가이드라인 정립**:
         - 신체 스펙 규정: 145~155cm 성인 숏스택(Shortstack, 6.0~6.5등신, E~G컵, 로리/아동형 신체 배제).
