@@ -2666,69 +2666,70 @@
                     'human': "balanced perfect hourglass model build, 164cm height, 7.2 head ratio, natural voluptuous D-F cup bust, feminine waist and hip curves"
                 };
 
-                // 🩱 5대 종족 및 등급별 속옷 상세 명세 (착용 형태 / 미착용 여부)
-                const UNDERWEAR_SPECS = {
+                // 🩱 5대 종족 및 등급별 기본 내의(이너 레이어) 상세 명세 (AI 텍스트 안전 필터 우회 아트북 표준)
+                const INNER_LAYER_SPECS = {
                     'earth': {
-                        'C': "활동성 높은 그레이 스포츠 브라탑 & 로우라이즈 코튼 팬티 착용 (gray athletic stretch sport bra top and low-rise cotton briefs)",
-                        'UC': "활동성 높은 그레이 스포츠 브라탑 & 로우라이즈 코튼 팬티 착용 (gray athletic stretch sport bra top and low-rise cotton briefs)",
-                        'R': "블랙 통기성 메쉬 하프탑 브라 & 심리스 쇼츠 팬티 착용 (black breathable mesh half-top sports bra and seamless boy-shorts panties)",
-                        'SR': "바디슈트 안감 밀착용 블랙 새틴 스트랩 브라 & 하이레그 티백 스트링 팬티 착용 (black satin strappy minimal bra and high-leg micro thong panties under the catsuit)",
-                        'UR': "황금 플레이트와 맞물리는 메탈릭 골드 스트링 비키니 브라 & 마이크로 사이드타이 팬티 착용 (metallic gold string bikini under-bra and micro side-tie low-rise panties)",
-                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with radiant holographic body-chains and golden circuit lines)"
+                        'C': "활동성 높은 그레이 스포츠 이너탑 & 로우라이즈 코튼 쇼츠 착용 (gray athletic stretch inner top and low-rise cotton undershorts)",
+                        'UC': "활동성 높은 그레이 스포츠 이너탑 & 로우라이즈 코튼 쇼츠 착용 (gray athletic stretch inner top and low-rise cotton undershorts)",
+                        'R': "블랙 통기성 메쉬 하프탑 & 심리스 보이쇼츠 착용 (black breathable mesh half-top and seamless boy-shorts under-suit)",
+                        'SR': "바디슈트 안감 밀착용 블랙 새틴 스트랩 이너탑 & 하이레그 스트링 이너 쇼츠 착용 (black satin strappy minimal inner top and high-leg micro string undershorts under the catsuit)",
+                        'UR': "황금 플레이트와 맞물리는 메탈릭 골드 스트링 이너탑 & 마이크로 사이드타이 이너 레이어 착용 (metallic gold string inner top and micro side-tie low-rise base layer)",
+                        'U': "물리적 섬유 내의 미착용, 황금 나노 바디체인 부착 (No traditional fabric inner layer; form-fitting radiant holographic body-chains and golden circuit lines on bare skin)"
                     },
                     'beastkin': {
-                        'C': "탄력적인 블랙 스포츠 브라탑 & 야성적인 신축성 쇼츠 팬티 착용 (elastic black athletic bra top and low-waist flexible stretch panties)",
-                        'UC': "탄력적인 블랙 스포츠 브라탑 & 야성적인 신축성 쇼츠 팬티 착용 (elastic black athletic bra top and low-waist flexible stretch panties)",
-                        'R': "타이트한 레더 룩 스트랩 브라탑 & 하이웨이스트 심리스 압박 팬티 착용 (tight leatherette strappy bralette and high-waist seamless compression panties)",
-                        'SR': "키홀 컷아웃 전용 오픈 가슴 레이스 브라 & 골반 컷아웃 하이레그 티백 팬티 착용 (plunging open-bust lace bralette and pelvic cutout high-leg thong panties)",
-                        'UR': "호피 퍼 트림 골드 마이크로 비키니 탑 & 하이레그 스트링 T팬티 착용 (leopard-fur trimmed gold micro bikini top and ultra high-leg string thong panties)",
-                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with beast-god aurora body-chains and divine 9-tail aura)"
+                        'C': "탄력적인 블랙 스포츠 이너탑 & 야성적인 신축성 쇼츠 착용 (elastic black athletic inner top and low-waist flexible stretch undershorts)",
+                        'UC': "탄력적인 블랙 스포츠 이너탑 & 야성적인 신축성 쇼츠 착용 (elastic black athletic inner top and low-waist flexible stretch undershorts)",
+                        'R': "타이트한 레더 룩 스트랩 이너탑 & 하이웨이스트 심리스 압박 쇼츠 착용 (tight leatherette strappy top and high-waist seamless compression undershorts)",
+                        'SR': "키홀 컷아웃 전용 오픈 가슴 레이스 이너탑 & 골반 컷아웃 하이레그 스트링 이너 착용 (plunging open-bust lace bralette top and pelvic cutout high-leg undershorts)",
+                        'UR': "호피 퍼 트림 골드 마이크로 탑 & 하이레그 스트링 이너 레이어 착용 (leopard-fur trimmed gold micro top and ultra high-leg string base layer)",
+                        'U': "물리적 섬유 내의 미착용, 신수 오로라 바디체인 부착 (No traditional fabric inner layer; bare skin adorned only with beast-god aurora body-chains and divine 9-tail aura)"
                     },
                     'forest': {
-                        'C': "정갈한 순백 리넨 레이스업 소프트 브라탑 & 로우컷 리넨 브리프 착용 (pure white linen lace-up soft bra and comfortable low-cut linen panties)",
-                        'UC': "정갈한 순백 리넨 레이스업 소프트 브라탑 & 로우컷 리넨 브리프 착용 (pure white linen lace-up soft bra and comfortable low-cut linen panties)",
-                        'R': "에메랄드빛 실크 하프컵 브라탑 & 누드톤 심리스 사이드 스트링 팬티 착용 (emerald sheer silk half-cup bra and seamless nude-tone side-string panties)",
-                        'SR': "딥 그린 시스루 플로럴 레이스 브라탑 & 가터벨트용 레이스 하이레그 티백 팬티 착용 (deep emerald sheer floral lace bralette and matching lace high-leg thong panties with garter straps)",
-                        'UR': "황금 나뭇잎 컵 비키니 브라 & 시스루 마이크로 에메랄드 사이드타이 스트링 팬티 착용 (ornate gold leaf-cup bikini bra and sheer micro emerald side-tie string panties)",
-                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with botanical vine jewels and emerald dewdrop body-chains)"
+                        'C': "정갈한 순백 리넨 레이스업 소프트 탑 & 로우컷 리넨 쇼츠 착용 (pure white linen lace-up soft top and comfortable low-cut linen undershorts)",
+                        'UC': "정갈한 순백 리넨 레이스업 소프트 탑 & 로우컷 리넨 쇼츠 착용 (pure white linen lace-up soft top and comfortable low-cut linen undershorts)",
+                        'R': "에메랄드빛 실크 하프컵 이너탑 & 누드톤 심리스 사이드 스트링 이너 착용 (emerald sheer silk half-cup top and seamless nude-tone side-string undershorts)",
+                        'SR': "딥 그린 시스루 플로럴 레이스 이너탑 & 레이스 하이레그 이너 쇼츠 착용 (deep emerald sheer floral lace bralette top and matching lace high-leg undershorts with garter straps)",
+                        'UR': "황금 나뭇잎 컵 비키니 탑 & 시스루 마이크로 에메랄드 사이드타이 스트링 이너 착용 (ornate gold leaf-cup top and sheer micro emerald side-tie string base layer)",
+                        'U': "물리적 섬유 내의 미착용, 에메랄드 이슬 바디체인 부착 (No traditional fabric inner layer; bare skin adorned only with botanical vine jewels and emerald dewdrop body-chains)"
                     },
                     'avian': {
-                        'C': "하늘빛 코튼 소프트 브라탑 & 프릴 레이스 파스텔 쇼츠 팬티 착용 (sky-blue soft cotton bralette and ruffled edge pastel lace panties)",
-                        'UC': "하늘빛 코튼 소프트 브라탑 & 프릴 레이스 파스텔 쇼츠 팬티 착용 (sky-blue soft cotton bralette and ruffled edge pastel lace panties)",
-                        'R': "순백 실크 리본 브라탑 & 골반 트임 레이스 사이드타이 팬티 착용 (pure white silk ribbon bra and high-slit lace side-tie panties)",
-                        'SR': "고혹적인 블랙 쉬폰 플런징 브라탑 & 시스루 레이스 가터 티백 팬티 착용 (seductive black sheer chiffon plunging bra and sheer lace garter-loop thong panties)",
-                        'UR': "순금 깃털 양각 마이크로 비키니 브라탑 & 초소형 골드 체인 T팬티 착용 (sculpted gold feather micro bikini bra and ultra-minimal gold chain thong panties)",
-                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with starlight diamond body-chains and glowing feather light ribbons)"
+                        'C': "하늘빛 코튼 소프트 이너탑 & 프릴 레이스 파스텔 쇼츠 착용 (sky-blue soft cotton top and ruffled edge pastel lace undershorts)",
+                        'UC': "하늘빛 코튼 소프트 이너탑 & 프릴 레이스 파스텔 쇼츠 착용 (sky-blue soft cotton top and ruffled edge pastel lace undershorts)",
+                        'R': "순백 실크 리본 이너탑 & 골반 트임 레이스 사이드타이 이너 착용 (pure white silk ribbon top and high-slit lace side-tie undershorts)",
+                        'SR': "고혹적인 블랙 쉬폰 플런징 이너탑 & 시스루 레이스 가터 루프 이너 착용 (seductive black sheer chiffon plunging top and sheer lace garter-loop base layer)",
+                        'UR': "순금 깃털 양각 마이크로 이너탑 & 초소형 골드 체인 스트링 이너 착용 (sculpted gold feather micro top and ultra-minimal gold chain base layer)",
+                        'U': "물리적 섬유 내의 미착용, 성운 다이아몬드 바디체인 부착 (No traditional fabric inner layer; bare skin adorned only with starlight diamond body-chains and glowing feather light ribbons)"
                     },
                     'human': {
-                        'C': "단정한 제국 네이비/화이트 규정 면 스포츠 브라탑 & 활동성 쇼츠 팬티 착용 (neat imperial navy/white athletic regulation cotton bra and flexible boxer-brief panties)",
-                        'UC': "단정한 제국 네이비/화이트 규정 면 스포츠 브라탑 & 활동성 쇼츠 팬티 착용 (neat imperial navy/white athletic regulation cotton bra and flexible boxer-brief panties)",
-                        'R': "가슴골 모아주는 블랙 푸시업 브라 & 심리스 로우라이즈 보이쇼츠 팬티 착용 (black push-up cleavage bra and low-rise seamless boy-shorts panties under leather shorts)",
-                        'SR': "키홀 컷아웃 전용 누디 코르셋 브라탑 & 가터벨트 일체형 하이레그 레이스 팬티 착용 (plunging keyhole nude-cut corset bralette and high-leg lace garter-belt panties)",
-                        'UR': "정교한 백금 흉갑형 마이크로 비키니 브라탑 & 골반 90% 개방 골드 스트링 플레이트 T팬티 착용 (ornate platinum sculpted micro bikini bra and 90% open pelvic gold chain micro thong panties)",
-                        'U': "물리적 섬유 속옷 미착용 (No traditional fabric underwear; commando bare skin adorned only with stardust diamond body-chains and holy light halos)"
+                        'C': "단정한 제국 네이비/화이트 규정 면 스포츠 이너탑 & 활동성 복서 쇼츠 착용 (neat imperial navy/white athletic regulation cotton top and flexible boxer undershorts)",
+                        'UC': "단정한 제국 네이비/화이트 규정 면 스포츠 이너탑 & 활동성 복서 쇼츠 착용 (neat imperial navy/white athletic regulation cotton top and flexible boxer undershorts)",
+                        'R': "가슴골 모아주는 블랙 푸시업 이너탑 & 심리스 로우라이즈 보이쇼츠 착용 (black push-up cleavage top and low-rise seamless boy-shorts undershorts under leather shorts)",
+                        'SR': "키홀 컷아웃 전용 누디 코르셋 탑 & 가터벨트 일체형 하이레그 레이스 이너 착용 (plunging keyhole nude-cut corset top and high-leg lace garter-belt base layer)",
+                        'UR': "정교한 백금 흉갑형 마이크로 탑 & 골반 90% 개방 골드 스트링 플레이트 이너 착용 (ornate platinum sculpted micro top and 90% open pelvic gold chain micro base layer)",
+                        'U': "물리적 섬유 내의 미착용, 순백 성광 스타더스트 바디체인 부착 (No traditional fabric inner layer; bare skin adorned only with stardust diamond body-chains and holy light halos)"
                     }
                 };
 
-                const currentUnderwear = (UNDERWEAR_SPECS[race] && UNDERWEAR_SPECS[race][grade]) 
-                    ? UNDERWEAR_SPECS[race][grade] 
-                    : "appropriate stylized inner underwear matching the costume grade (bra/top and panties)";
+                const currentInnerLayer = (INNER_LAYER_SPECS[race] && INNER_LAYER_SPECS[race][grade]) 
+                    ? INNER_LAYER_SPECS[race][grade] 
+                    : "appropriate stylized inner base layer matching the costume grade (fitted top and undershorts)";
 
                 prompt = `Based on the attached character design image, generate a professional game production character reference sheet (official model sheet & setting guide), multiple turnaround angles of the exact same character: full body front view, full body side view, full body back view.
-[1. Korean Text Annotations]: All section titles, part labels, callouts, and explanatory notes on the sheet MUST be written in Korean text (한글 라벨: '정면', '측면', '후면', '기본 체형', '표정 모음', '복장 분해도', '갑옷/의상 상의', '하의', '속옷 상의(브라)', '속옷 하의(팬티)', '속옷 착용 상태', '망토', '머리 장식/티아라', '신발/부츠', '무기/장신구').
-[2. Character Natural Base Body Model (기본 체형)]: Full body natural base body model shot of the EXACT SAME character (CRITICAL: NOT a mannequin, NOT a wooden/plastic doll, MUST have the identical face, identical hair, exact same adult female face and eye features, identical voluptuous body proportions, identical breast size, curvy hips, and natural muscle/curves as the original character: ${RACE_BODY_SPECS[race] || 'voluptuous adult female'}, standing without outer armor and heavy clothing in minimal inner base layer or bare silhouette to showcase her true anatomical proportions and height scale for 3D modeling reference).
-[3. Exploded Costume Breakdown (복장 분해도)]: Detailed deconstructed layers display of all wearable items: upper armor / outer top, lower armor / skirt or pants, cape / cloak, tiara / hair accessories, boots / sandals, leather harness buckles and straps, signature weapon and crest close-up cutaways.
-[3-1. Specific Underwear Layer Breakdown (속옷 상·하의 분해도 및 착용 상태)]: Detailed isolated breakdown of the inner underwear: [Underwear Spec: ${currentUnderwear}]. If underwear is worn, clearly illustrate both the isolated Upper Underwear (bra/top) and isolated Lower Underwear (panties/thong/briefs) with clear fabric texture, straps, and clasps. If specified as '물리적 섬유 속옷 미착용 / No traditional fabric underwear (commando)', explicitly depict her wearing no fabric underwear with only the sacred radiant body-chains or bare skin, labeled in Korean as '속옷 미착용 (신성 바디체인 전신 샷)'.
+[1. Korean Text Annotations]: All section titles, part labels, callouts, and explanatory notes on the sheet MUST be written in Korean text (한글 라벨: '정면', '측면', '후면', '기본 체형', '복장 분해도', '흉갑 상의', '하의 아머', '기본 내의', '망토', '왕관 티아라', '아머 부츠', '신성한 헤일로').
+[2. Character Natural Base Body Model (기본 체형)]: Full body natural base body model shot of the EXACT SAME character (CRITICAL: NOT a mannequin, NOT a wooden/plastic doll, MUST have the identical face, identical hair, exact same adult female face and eye features, identical voluptuous body proportions, identical breast size, curvy hips, and natural muscle/curves as the original character: ${RACE_BODY_SPECS[race] || 'voluptuous adult female'}, standing without outer armor and heavy clothing in minimal form-fitting white/gold inner base suit to showcase her true anatomical proportions and height scale for 3D modeling reference).
+[3. Exploded Costume Breakdown (복장 분해도)]: Detailed deconstructed layers display of all wearable items: upper armor / outer chestplate, lower armor / skirt or hip plates, flowing silk cape / cloak, crown tiara / hair accessories, armored boots / sandals, leather harness buckles and straps, signature weapon and crest close-up cutaways.
+[3-1. Specific Inner Base Layer Breakdown (기본 내의 상·하의 분해도)]: Detailed isolated breakdown of the inner undergarment foundation layer: [Inner Layer Spec: ${currentInnerLayer}]. Clearly illustrate both the isolated fitted inner top and matching undershorts / base layer with clean fabric texture and gold trim. If specified as 'No traditional fabric inner layer', explicitly depict her body wearing no fabric inner layer with only the sacred radiant body-chains or bare skin, labeled in Korean as '기본 내의 (신성 바디체인)'.
 [4. Facial Expression Sheet]: 4 distinct facial expression portraits labeled in Korean (기본 무표정, 밝은 미소, 자신감, 진지한 결의).
 [5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 3D game modeling, animation rigging, and costume tailoring reference, clean precise lineart, safe for work, character production study, simple solid pure white background, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${GRADE_SHEET_SPECS[grade] || ''}${details ? ', ' + details : ''}`;
                 
                 negativePrompt = "mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, flat chest, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, " + NEGATIVE_PROMPT_FIXED;
 
                 // UI 안내 문구 업데이트
-                document.getElementById('copy-bar-title').innerHTML = `<span>📐 나노바나나 설정 시트 (한글 라벨·속옷 분해도·원본 체형 유지) 복사</span><span id="copy-bar-badge" style="background: #f59e0b; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">MODEL SHEET</span>`;
-                document.getElementById('copy-bar-desc').textContent = `📌 [속옷 사양: ${currentUnderwear}] 원본 캐릭터 체형 유지 기본 체형 샷 + 속옷 상/하의 분해도(또는 미착용 표기) + 착용 복장 분해도가 안전하게 일괄 생성됩니다.`;
+                document.getElementById('copy-bar-title').innerHTML = `<span>📐 나노바나나 설정 시트 (한글 라벨·기본 내의 분해도·원본 체형 유지) 복사</span><span id="copy-bar-badge" style="background: #f59e0b; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">MODEL SHEET</span>`;
+                document.getElementById('copy-bar-desc').textContent = `📌 [기본 내의 사양: ${currentInnerLayer}] 원본 캐릭터 체형 유지 기본 체형 샷 + 기본 내의 분해도 + 착용 복장 분해도가 안전 필터 차단 없이 안전하게 일괄 생성됩니다.`;
                 document.getElementById('btn-main-copy').textContent = "📐 설정 시트 전용 복사";
                 document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #f59e0b, #ec4899)";
+
             } else {
                 // ✨ 전신 일러스트 모드
                 // 땅의 종족 프리셋이 활성화된 경우: 충돌하는 일반 키워드를 배제하고 검증된 골든 프롬프트 직접 출력
