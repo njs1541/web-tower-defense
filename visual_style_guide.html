@@ -2116,21 +2116,32 @@
 
                 <div class="gen-controls" style="margin-bottom: 16px;">
                     <div class="gen-group">
-                        <label>💃 체형 & 시그니처 섹시 스타일 (최고등급 특권 포함)</label>
+                        <label>👗 시그니처 의상 스타일 (Costume Style)</label>
                         <select id="gen-style" class="gen-select" onchange="updatePrompt()">
                             <option value="supreme_gold_chain" selected>👑 [UR/U 최고등급] 성스러운 황금 체인 비키니 아머 & 실크 베일 (브더2/라오 감성)</option>
                             <option value="supreme_cyber_highleg">👑 [UR/U 최고등급] 하이엔드 SF 하이레그 사이버네틱 슈트 (라오/ZZZ 감성)</option>
                             <option value="supreme_celestial_lingerie">👑 [U 유니크 전용] 창세신의 천상 성운 시스루 란제리 & 다중 헤일로</option>
                             <option value="style_a">스타일 A (사이버 택티컬 바디슈트 & 가죽 하네스 - 땅/수인)</option>
                             <option value="style_b">스타일 B (판타지 시스루 드레스 & 하이슬릿 가터벨트 - 숲/비행)</option>
-                            <option value="style_hybrid">하이브리드 (택티컬 + 시스루 레이어드 - 인간족 올라운더)</option>
-                            <option value="curvy">표준 성인 글래머 여성 (Voluptuous Curvy adult female)</option>
-                            <option value="slender">슬렌더/빈유 여성 (Slender Graceful adult female)</option>
-                            <option value="boyish">보이시/중성적 매력 여성 (Boyish Handsome female commander)</option>
+                            <option value="style_hybrid">하이브리드 (택티컬 바디슈트 + 시스루 레이어드 - 인간족 올라운더)</option>
+                            <option value="style_classic">클래식 (단정한 제국 제복 & 흉갑 판금 아머)</option>
                         </select>
                     </div>
 
                     <div class="gen-group">
+                        <label>💃 몸매 / 체형 선택 (Body Type)</label>
+                        <select id="gen-body-type" class="gen-select" onchange="updatePrompt()">
+                            <option value="auto" selected>🌐 종족 자동 (기본 종족별 표준 체형 & 키 반영)</option>
+                            <option value="slender">🌱 슬렌더 (Slender - 슬림·우아한 실루엣, 아담한 바스트, 롱 레그)</option>
+                            <option value="standard">⚖️ 표준 (Standard - 자연스러운 황금비율, C컵 바스트)</option>
+                            <option value="glamour">✨ 글래머 (Glamour - 풍만한 볼륨감, 잘록한 허리와 골반, D~E컵)</option>
+                            <option value="mega_glamour">💥 메가 글래머 (Mega Glamour - 압도적 폭유, 육감적 모래시계 힙, F~H컵)</option>
+                            <option value="tomboy">⚡ 톰보이 (Tomboy - 탄탄한 11자 복근, 역동적 잔근육, 건강미 체형)</option>
+                            <option value="petite">🎀 로리 / 쁘띠 (Petite - 아담한 단신 145cm, 요정 같은 소형 프레임)</option>
+                        </select>
+                    </div>
+
+                    <div class="gen-group" style="grid-column: 1 / -1;">
                         <label>외모 및 세부 특징 (헤어, 눈, 분위기 등)</label>
                         <input type="text" id="gen-details" class="gen-input" value="silver twintail hair, sharp violet eyes, confident smile" oninput="updatePrompt()">
                     </div>
@@ -2323,13 +2334,33 @@
             'mutation': "unique mutant anomaly, rare contrasting body proportions, exotic hybrid features"
         };
 
-        const STYLE_PROMPTS = {
+                // 💃 몸매 / 체형 명세 (종족 자동 + 슬랜더, 표준, 글래머, 메가 글래머, 톰보이, 로리/쁘띠)
+        // 🌍 종족별 기본 표준 체형 명세 (종족 자동 선택 시 적용)
+        const RACE_BODY_SPECS = {
+                    'earth': "shortstack voluptuous build, 150cm height, 6.0 head ratio, huge bust (E-G cup), wide curvy hips, thick thighs, cybernetic prosthetic arm",
+                    'beastkin': "athletic sensual mature build, 165cm height, 7.0 head ratio, toned curves, voluptuous bust, fluffy animal ears and tail, canine fangs",
+                    'forest': "tall slender elegant model build, 172cm height, 7.8 head ratio, long graceful legs, voluptuous bust, pointed elf ears",
+                    'avian': "petite curvy winged build, 152cm height, 6.2 head ratio, voluptuous bust, graceful posture, majestic wings on back",
+                    'human': "balanced perfect hourglass model build, 164cm height, 7.2 head ratio, natural voluptuous D-F cup bust, feminine waist and hip curves"
+                };
+
+        const BODY_TYPE_SPECS = {
+            'slender': "slender graceful adult female build, 166cm height, 7.3 head ratio, modest A-B cup bust, thin feminine waist, long slender legs, graceful posture",
+            'standard': "balanced perfect standard adult female build, 163cm height, 7.0 head ratio, natural healthy feminine curves, natural C-cup bust, harmonious waist-to-hip ratio, toned shapely legs",
+            'glamour': "voluptuous curvy hourglass adult female build, 165cm height, 7.0 head ratio, heavy D-E cup bust, narrow waist, wide feminine curvy hips, thick alluring thighs",
+            'mega_glamour': "hyper-voluptuous extreme hourglass adult female build, 167cm height, 6.8 head ratio, gigantic heavy breasts (F-H cup), tiny corseted waist, extremely wide curvy hips, plump thick thighs, deeply alluring mature feminine silhouette",
+            'tomboy': "athletic toned tomboy adult female build, 165cm height, 7.0 head ratio, defined 11-line abs, firm compact bust, toned athletic muscles, dynamic healthy silhouette, androgynous charming posture",
+            'petite': "petite adult female build, compact delicate stature, 145cm height, 5.8 head ratio, small feminine frame, slender waist and hips, graceful cute proportions (adult female)"
+        };
+
+const STYLE_PROMPTS = {
             'supreme_gold_chain': "voluptuous curvy hourglass figure, alluring sensual apex costume, ornate glowing gold chain bikini armor with platinum trims, jeweled chest piece with deep cleavage, micro high-leg armor plating exposing toned hips and thighs, translucent white sheer silk veil draped over shoulders and flowing behind, sheer lace-up garter stockings with gold embroidery, golden choker with glowing sacred crest gem",
             'supreme_cyber_highleg': "voluptuous curvy hourglass figure, futuristic high-leg cybernetic bodysuit, transparent holographic chest panels, deep cleavage, micro high-cut hip exposure with glowing cybernetic lines, glossy patent leather, snug thigh strap holster squeeze, translucent cyber stockings",
             'supreme_celestial_lingerie': "voluptuous divine goddess figure, sheer ethereal starlight lingerie, translucent flowing organza nebula robe, sacred golden chain jewelry across chest and hips, floating gracefully in the air, enormous celestial halo rings, stardust particles",
             'style_a': "voluptuous curvy hourglass figure, tight shiny black latex and patent leather bodysuit with glossy specular highlights, chest leather body harness with metallic buckles, keyhole chest cutout, thigh holster with snug leather thigh strap squeeze, asymmetrical thigh-high stockings, black leather choker with ring",
             'style_b': "voluptuous curvy hourglass figure, elegant dark fantasy silk dress, translucent sheer lace fabric over cleavage and shoulders, deep teardrop keyhole cutout, extremely high side slit exposing curvy hip and thigh, delicate lace-up black garter belt, sheer black stockings with floral embroidery",
             'style_hybrid': "voluptuous hourglass figure, fantasy tactical hybrid costume, leather bodysuit layered under an elegant high-slit sheer silk coat, metallic armor buckles and lace-up garter details",
+            'style_classic': "formal knight officer tunic and light breastplate armor, neat shoulder cape, high-waist leather shorts, silver filigree details, polished combat boots",
             'curvy': "mature adult woman, voluptuous curvy figure",
             'slender': "mature adult woman, slender graceful figure, petite chest",
             'boyish': "handsome boyish female commander, androgynous charming aura, short hair, dashing cool expression"
@@ -2408,7 +2439,7 @@
             document.getElementById('gen-grade').value = grade;
             
             if (grade === 'C' || grade === 'UC') {
-                document.getElementById('gen-style').value = 'curvy';
+                document.getElementById('gen-style').value = 'style_classic'; if(document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
                 document.getElementById('gen-role').value = 'tactician';
                 document.getElementById('gen-details').value = 'honey blonde messy short hair, amber eyes, brass prosthetic arm';
             } else if (grade === 'R') {
@@ -2490,7 +2521,7 @@
             document.getElementById('gen-grade').value = grade;
 
             if (grade === 'C' || grade === 'UC') {
-                document.getElementById('gen-style').value = 'curvy';
+                document.getElementById('gen-style').value = 'style_classic'; if(document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
                 document.getElementById('gen-role').value = 'mage';
                 document.getElementById('gen-details').value = 'long pointed elf ears, emerald green eyes, wavy green hair, wooden staff';
             } else if (grade === 'R') {
@@ -2530,7 +2561,7 @@
             document.getElementById('gen-grade').value = grade;
 
             if (grade === 'C' || grade === 'UC') {
-                document.getElementById('gen-style').value = 'curvy';
+                document.getElementById('gen-style').value = 'style_classic'; if(document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
                 document.getElementById('gen-role').value = 'ranger';
                 document.getElementById('gen-details').value = 'small white feathered wings, sky blue bob hair, sky blue eyes, mini flare tunic';
             } else if (grade === 'R') {
@@ -2570,7 +2601,7 @@
             document.getElementById('gen-grade').value = grade;
 
             if (grade === 'C' || grade === 'UC') {
-                document.getElementById('gen-style').value = 'curvy';
+                document.getElementById('gen-style').value = 'style_classic'; if(document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
                 document.getElementById('gen-role').value = 'guardian';
                 document.getElementById('gen-details').value = 'chestnut brown hair, warm brown eyes, imperial apprentice tunic, silver breastplate';
             } else if (grade === 'R') {
@@ -2632,9 +2663,15 @@
             const role = document.getElementById('gen-role').value;
             const race = document.getElementById('gen-race').value;
             const style = document.getElementById('gen-style').value;
+            const bodyType = document.getElementById('gen-body-type')?.value || 'auto';
             const details = document.getElementById('gen-details').value.trim();
             const isRemoveBg = document.getElementById('gen-remove-bg').checked;
             const genMode = document.querySelector('input[name="gen-mode"]:checked')?.value || 'illust';
+
+            // 💃 체형 결정: 'auto'면 종족 기본 스펙, 선택 시 커스텀 체형 스펙 적용
+            const selectedBodySpec = (bodyType !== 'auto' && BODY_TYPE_SPECS[bodyType]) 
+                ? BODY_TYPE_SPECS[bodyType] 
+                : (RACE_BODY_SPECS[race] || 'voluptuous adult female');
 
             let prompt = "";
             let negativePrompt = NEGATIVE_PROMPT_FIXED;
@@ -2658,13 +2695,7 @@
                     'U': "transcendent cosmic goddess attire, micro slingshot lingerie, delicate diamond body chains, celestial halo"
                 };
 
-                const RACE_BODY_SPECS = {
-                    'earth': "shortstack voluptuous build, 150cm height, 6.0 head ratio, huge bust (E-G cup), wide curvy hips, thick thighs, cybernetic prosthetic arm",
-                    'beastkin': "athletic sensual mature build, 165cm height, 7.0 head ratio, toned curves, voluptuous bust, fluffy animal ears and tail, canine fangs",
-                    'forest': "tall slender elegant model build, 172cm height, 7.8 head ratio, long graceful legs, voluptuous bust, pointed elf ears",
-                    'avian': "petite curvy winged build, 152cm height, 6.2 head ratio, voluptuous bust, graceful posture, majestic wings on back",
-                    'human': "balanced perfect hourglass model build, 164cm height, 7.2 head ratio, natural voluptuous D-F cup bust, feminine waist and hip curves"
-                };
+                // (RACE_BODY_SPECS moved to top)
 
                 // 🩱 5대 종족 및 등급별 기본 내의(이너 레이어) 상세 명세 (AI 텍스트 안전 필터 우회 아트북 표준)
                 const INNER_LAYER_SPECS = {
@@ -2769,7 +2800,7 @@
 
                 // ✨ 실전 골든 프롬프트 분석 기반 기본 체형(04) 묘사:
                 // 점토 마네킹 대신 동일 얼굴/헤어 + 스킨톤 반투명 세컨드스킨 바디슈트로 인체 볼륨과 빛 반사를 유지하며 안전 필터 완벽 회피
-                const baseBodyPrompt = `full body standing model of the exact same character with identical face and hair, 동일한 체형 유지 (${RACE_BODY_SPECS[race] || 'voluptuous adult female'}), 피부색과 동일하고 무늬가 없는 피부 같은 약간 투명한 전신슈트 착용, 전신슈트에 캐릭터가 받는 빛 반사 적용 (wearing a seamless skin-tone translucent form-fitting second-skin bodysuit matching her exact natural skin tone with subtle soft light reflections to highlight her natural feminine body curves, voluptuous proportions, and height scale for 3D rigging, without outer armor, without heavy clothing), 슈트 내부의 표현`;
+                const baseBodyPrompt = `full body standing model of the exact same character with identical face and hair, 동일한 체형 유지 (${selectedBodySpec}), 피부색과 동일하고 무늬가 없는 피부 같은 약간 투명한 전신슈트 착용, 전신슈트에 캐릭터가 받는 빛 반사 적용 (wearing a seamless skin-tone translucent form-fitting second-skin bodysuit matching her exact natural skin tone with subtle soft light reflections to highlight her natural feminine body curves, voluptuous proportions, and height scale for 3D rigging, without outer armor, without heavy clothing), 슈트 내부의 표현`;
 
                 prompt = `Based on the attached character design image, generate a professional game production character reference sheet (official model sheet & setting guide), multiple turnaround angles of the exact same character: full body front view, full body side view, full body back view.
 [1. Standard Numbered Korean Annotations]: All section titles, part labels, callouts, and explanatory notes on the sheet MUST be written in Korean text with precise numbered tags for seamless post-production text editing:
@@ -2787,7 +2818,7 @@
 [3. Exploded Costume Breakdown (복장 분해도: 09~14)]: isolated equipment display showing: headpiece (${currentCostumeLabels.head}), upper outerwear/armor (${currentCostumeLabels.top}), lower outerwear/skirt (${currentCostumeLabels.bottom}), back accessory/cape/wings (${currentCostumeLabels.outer}), accessory 1 (${currentCostumeLabels.acc1}), accessory 2 (${currentCostumeLabels.acc2}).
 [3-1. Specific Underwear Breakdown ('15. 복장 : 속옷 - 속옷 상의, 속옷 하의')]: Detailed isolated breakdown of the inner foundation layer: [Underwear Spec: ${currentInnerLayer}]. Clearly illustrate both the isolated fitted undergarment top (속옷 상의) and matching undershorts (속옷 하의) as distinct individual clothing items labeled in Korean as '15. 복장 : 속옷 (속옷 상의, 속옷 하의)'. If specified as 'No traditional fabric inner layer', explicitly depict her body wearing no fabric inner layer with only the sacred radiant body-chains or glowing aura on bare skin, labeled in Korean as '15. 복장 : 속옷 (신성 바디체인)'.
 [4. Facial Expression Sheet (표정 시트: 05~08)]: 4 distinct facial expression portraits labeled in Korean ('05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의').
-[5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 3D game modeling, animation rigging, and costume tailoring reference, clean precise lineart, safe for work, character production study, simple solid pure white background, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${GRADE_SHEET_SPECS[grade] || ''}${details ? ', ' + details : ''}`;
+[5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 3D game modeling, animation rigging, and costume tailoring reference, clean precise lineart, safe for work, character production study, simple solid pure white background, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${selectedBodySpec}, ${GRADE_SHEET_SPECS[grade] || ''}${details ? ', ' + details : ''}`;
                 
                 // 🛡️ 실전 검증된 설정 시트 전용 올인원 네거티브 프롬프트
                 negativePrompt = "mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, flat chest, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, cropped, out of frame, cut off head, cut off feet, cut off legs, cut off shoes, close-up, portrait, bust shot, upper body only, medium shot, zoom in, extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
@@ -2801,34 +2832,53 @@
             } else {
                 // ✨ 전신 일러스트 모드
                 // 땅의 종족 프리셋이 활성화된 경우: 충돌하는 일반 키워드를 배제하고 검증된 골든 프롬프트 직접 출력
-                if (race === 'earth' && EARTH_GOLDEN_PROMPTS[grade]) {
-                    prompt = EARTH_GOLDEN_PROMPTS[grade];
+                                // 체형 커스텀 함수: 골든 프롬프트에서 기존 체형 묘사를 선택된 커스텀 체형으로 지능적 치환
+                function applyCustomBody(rawPrompt) {
+                    if (bodyType === 'auto') return rawPrompt;
+                    let p = rawPrompt;
+                    p = p.replace(/tall slender adult female, 168cm height, voluptuous curvy hourglass figure, huge breasts, thick thighs/gi, selectedBodySpec);
+                    p = p.replace(/short height petite adult female, curvy voluptuous bust/gi, selectedBodySpec);
+                    p = p.replace(/short height petite adult female, curvy voluptuous hourglass figure, huge breasts, thick thighs/gi, selectedBodySpec);
+                    p = p.replace(/short height petite adult female, voluptuous hourglass figure, huge breasts, thick thighs/gi, selectedBodySpec);
+                    p = p.replace(/tall slender adult female, 165cm height, athletic slim figure, modest bust/gi, selectedBodySpec);
+                    p = p.replace(/tall slender adult female, 165cm height, athletic figure/gi, selectedBodySpec);
+                    p = p.replace(/tall slender adult female, 165cm height, curvy athletic body, voluptuous bust/gi, selectedBodySpec);
+                    p = p.replace(/tall slender adult female, 165cm height, voluptuous curvy hourglass figure, huge breasts, thick thighs/gi, selectedBodySpec);
+                    p = p.replace(/tall slender adult female, 168cm height, voluptuous divine goddess figure, huge breasts, thick thighs/gi, selectedBodySpec);
+                    if (!p.includes(selectedBodySpec)) {
+                        p = p.replace('standing pose, ', 'standing pose, ' + selectedBodySpec + ', ');
+                    }
+                    return p;
+                }
+
+if (race === 'earth' && EARTH_GOLDEN_PROMPTS[grade]) {
+                    prompt = applyCustomBody(EARTH_GOLDEN_PROMPTS[grade]);
                     if (grade === 'U') {
                         negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, " + NEGATIVE_PROMPT_FIXED;
                     }
                 } else if (race === 'beastkin' && BEASTKIN_GOLDEN_PROMPTS[grade]) {
-                    prompt = BEASTKIN_GOLDEN_PROMPTS[grade];
+                    prompt = applyCustomBody(BEASTKIN_GOLDEN_PROMPTS[grade]);
                     if (grade === 'U') {
                         negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, human ears, four ears, extra ears, " + NEGATIVE_PROMPT_FIXED;
                     } else {
                         negativePrompt = "human ears, four ears, extra ears, " + NEGATIVE_PROMPT_FIXED;
                     }
                 } else if (race === 'forest' && FOREST_GOLDEN_PROMPTS[grade]) {
-                    prompt = FOREST_GOLDEN_PROMPTS[grade];
+                    prompt = applyCustomBody(FOREST_GOLDEN_PROMPTS[grade]);
                     if (grade === 'U') {
                         negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, short ears, round ears, " + NEGATIVE_PROMPT_FIXED;
                     } else {
                         negativePrompt = "short ears, round human ears, " + NEGATIVE_PROMPT_FIXED;
                     }
                 } else if (race === 'avian' && AVIAN_GOLDEN_PROMPTS[grade]) {
-                    prompt = AVIAN_GOLDEN_PROMPTS[grade];
+                    prompt = applyCustomBody(AVIAN_GOLDEN_PROMPTS[grade]);
                     if (grade === 'U') {
                         negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, no wings, missing wings, " + NEGATIVE_PROMPT_FIXED;
                     } else {
                         negativePrompt = "no wings, missing wings, " + NEGATIVE_PROMPT_FIXED;
                     }
                 } else if (race === 'human' && HUMAN_GOLDEN_PROMPTS[grade]) {
-                    prompt = HUMAN_GOLDEN_PROMPTS[grade];
+                    prompt = applyCustomBody(HUMAN_GOLDEN_PROMPTS[grade]);
                     if (grade === 'U') {
                         negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy armor, plate armor, heavy dress, robe, hat, animal ears, elf ears, wings, " + NEGATIVE_PROMPT_FIXED;
                     } else {
