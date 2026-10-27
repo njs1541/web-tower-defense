@@ -2157,7 +2157,7 @@
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #fde047; font-weight: 700; cursor: pointer;">
                                     <input type="radio" name="gen-mode" value="sheet" onchange="updatePrompt()" style="accent-color: #f59e0b;">
-                                    <span>📐 설정 시트 (한글 삼면도·복장 분해도·기본 체형)</span>
+                                    <span>📐 설정 시트 (01~15 표준 넘버링·삼면도·복장 및 속옷 분해도)</span>
                                 </label>
                             </div>
                         </div>
@@ -2710,28 +2710,92 @@
                     }
                 };
 
+                // 🏷️ 종족별 표준 복장 분해도 라벨 명세 (09~14번 가변, 15번 공통 속옷)
+                const RACE_COSTUME_LABELS = {
+                    'earth': {
+                        'head': '09. 복장 : 고글 / 헤어핀',
+                        'top': '10. 복장 : 상의 (작업형 흉갑 상의)',
+                        'bottom': '11. 복장 : 하의 (카고 배틀 하의)',
+                        'outer': '12. 복장 : 기계의수 파츠 및 망토',
+                        'acc1': '13. 장신구 1 (레더 하네스 & 공구 벨트)',
+                        'acc2': '14. 장신구 2 (강철 엔지니어 부츠)'
+                    },
+                    'beastkin': {
+                        'head': '09. 복장 : 야성 머리띠 / 뿔 장식',
+                        'top': '10. 복장 : 상의 (가죽 크롭 상의)',
+                        'bottom': '11. 복장 : 하의 (배틀 레더 하의)',
+                        'outer': '12. 복장 : 털 망토 및 꼬리 장식',
+                        'acc1': '13. 장신구 1 (가죽 바디 스트랩)',
+                        'acc2': '14. 장신구 2 (발톱 각반 및 부츠)'
+                    },
+                    'forest': {
+                        'head': '09. 복장 : 잎새 티아라 / 헤어핀',
+                        'top': '10. 복장 : 상의 (실크 로브 상의)',
+                        'bottom': '11. 복장 : 하의 (시스루 슬릿 하의)',
+                        'outer': '12. 복장 : 오르간자 페어리 망토 / 날개',
+                        'acc1': '13. 장신구 1 (에메랄드 바디체인)',
+                        'acc2': '14. 장신구 2 (덩굴 발찌 및 샌들)'
+                    },
+                    'avian': {
+                        'head': '09. 복장 : 성간 나침반 헤일로',
+                        'top': '10. 복장 : 상의 (신성 상의)',
+                        'bottom': '11. 복장 : 하의 (신성 하의)',
+                        'outer': '12. 복장 : 결정체 오로라 날개',
+                        'acc1': '13. 장신구 1 (황금 바디체인)',
+                        'acc2': '14. 장신구 2 (반투명 리본 및 발목 넝쿨)'
+                    },
+                    'human': {
+                        'head': '09. 복장 : 제국 장교모 / 티아라',
+                        'top': '10. 복장 : 상의 (제국 기사 흉갑 상의)',
+                        'bottom': '11. 복장 : 하의 (제국 제복 스커트 하의)',
+                        'outer': '12. 복장 : 의전용 비단 망토',
+                        'acc1': '13. 장신구 1 (홀스터 레더 하네스)',
+                        'acc2': '14. 장신구 2 (기사단 플레이트 부츠)'
+                    }
+                };
+
+                const currentCostumeLabels = RACE_COSTUME_LABELS[race] || {
+                    'head': '09. 복장 : 머리 장식 / 헤일로 / 티아라',
+                    'top': '10. 복장 : 상의 (흉갑 / 상의)',
+                    'bottom': '11. 복장 : 하의 (스커트 / 하의 아머)',
+                    'outer': '12. 복장 : 외투 / 날개 / 망토',
+                    'acc1': '13. 장신구 1 (바디체인 / 하네스 / 벨트)',
+                    'acc2': '14. 장신구 2 (부츠 / 각반 / 발찌)'
+                };
+
                 const currentInnerLayer = (INNER_LAYER_SPECS[race] && INNER_LAYER_SPECS[race][grade]) 
                     ? INNER_LAYER_SPECS[race][grade] 
                     : "appropriate stylized inner base layer matching the costume grade (fitted top and undershorts)";
 
-                const baseBodyPrompt = (grade === 'U')
-                    ? "full body standing 3D digital clay sculpt mannequin of the exact same character with identical face and hair, rendered in smooth monochromatic digital clay material, clearly displaying her natural feminine body topology, voluptuous curves, and height scale for 3D rigging without fabric underwear"
-                    : `Full body natural base body model shot of the EXACT SAME character (CRITICAL: NOT a mannequin, NOT a wooden/plastic doll, MUST have the identical face, identical hair, exact same adult female face and eye features, identical voluptuous body proportions, identical breast size, curvy hips, and natural muscle/curves as the original character: ${RACE_BODY_SPECS[race] || 'voluptuous adult female'}, standing without outer armor and heavy clothing in minimal form-fitting white/gold inner base suit to showcase her true anatomical proportions and height scale for 3D modeling reference)`;
+                // ✨ 실전 골든 프롬프트 분석 기반 기본 체형(04) 묘사:
+                // 점토 마네킹 대신 동일 얼굴/헤어 + 스킨톤 반투명 세컨드스킨 바디슈트로 인체 볼륨과 빛 반사를 유지하며 안전 필터 완벽 회피
+                const baseBodyPrompt = `full body standing model of the exact same character with identical face and hair, 동일한 체형 유지 (${RACE_BODY_SPECS[race] || 'voluptuous adult female'}), 피부색과 동일하고 무늬가 없는 피부 같은 약간 투명한 전신슈트 착용, 전신슈트에 캐릭터가 받는 빛 반사 적용 (wearing a seamless skin-tone translucent form-fitting second-skin bodysuit matching her exact natural skin tone with subtle soft light reflections to highlight her natural feminine body curves, voluptuous proportions, and height scale for 3D rigging, without outer armor, without heavy clothing), 슈트 내부의 표현`;
 
                 prompt = `Based on the attached character design image, generate a professional game production character reference sheet (official model sheet & setting guide), multiple turnaround angles of the exact same character: full body front view, full body side view, full body back view.
-[1. Korean Text Annotations]: All section titles, part labels, callouts, and explanatory notes on the sheet MUST be written in Korean text (한글 라벨: '정면', '측면', '후면', '기본 체형', '복장 분해도', '흉갑 상의', '하의 아머', '기본 내의', '망토', '왕관 티아라', '아머 부츠', '신성한 헤일로').
-[2. Character Natural Base Body Model (기본 체형)]: ${baseBodyPrompt}.
-[3. Exploded Costume Breakdown (복장 분해도)]: Detailed deconstructed layers display of all wearable items: upper armor / outer chestplate, lower armor / skirt or hip plates, flowing silk cape / cloak, crown tiara / hair accessories, armored boots / sandals, leather harness buckles and straps, signature weapon and crest close-up cutaways.
-[3-1. Specific Inner Base Layer Breakdown (기본 내의 상·하의 분해도)]: Detailed isolated breakdown of the inner undergarment foundation layer: [Inner Layer Spec: ${currentInnerLayer}]. Clearly illustrate both the isolated fitted inner top and matching undershorts / base layer with clean fabric texture and gold trim. If specified as 'No traditional fabric inner layer', explicitly depict her body wearing no fabric inner layer with only the sacred radiant body-chains or bare skin, labeled in Korean as '기본 내의 (신성 바디체인)'.
-[4. Facial Expression Sheet]: 4 distinct facial expression portraits labeled in Korean (기본 무표정, 밝은 미소, 자신감, 진지한 결의).
+[1. Standard Numbered Korean Annotations]: All section titles, part labels, callouts, and explanatory notes on the sheet MUST be written in Korean text with precise numbered tags for seamless post-production text editing:
+- Main Turnaround & Base: '01. 정면', '02. 측면', '03. 후면', '04. 기본 체형'
+- Expression Sheet: '05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의'
+- Exploded Costume & Accessories (Isolated at the end):
+  '${currentCostumeLabels.head}',
+  '${currentCostumeLabels.top}',
+  '${currentCostumeLabels.bottom}',
+  '${currentCostumeLabels.outer}',
+  '${currentCostumeLabels.acc1}',
+  '${currentCostumeLabels.acc2}',
+  '15. 복장 : 속옷 (속옷 상의, 속옷 하의)'
+[2. Character Natural Base Body Model ('04. 기본 체형')]: ${baseBodyPrompt}.
+[3. Exploded Costume Breakdown (복장 분해도: 09~14)]: isolated equipment display showing: headpiece (${currentCostumeLabels.head}), upper outerwear/armor (${currentCostumeLabels.top}), lower outerwear/skirt (${currentCostumeLabels.bottom}), back accessory/cape/wings (${currentCostumeLabels.outer}), accessory 1 (${currentCostumeLabels.acc1}), accessory 2 (${currentCostumeLabels.acc2}).
+[3-1. Specific Underwear Breakdown ('15. 복장 : 속옷 - 속옷 상의, 속옷 하의')]: Detailed isolated breakdown of the inner foundation layer: [Underwear Spec: ${currentInnerLayer}]. Clearly illustrate both the isolated fitted undergarment top (속옷 상의) and matching undershorts (속옷 하의) as distinct individual clothing items labeled in Korean as '15. 복장 : 속옷 (속옷 상의, 속옷 하의)'. If specified as 'No traditional fabric inner layer', explicitly depict her body wearing no fabric inner layer with only the sacred radiant body-chains or glowing aura on bare skin, labeled in Korean as '15. 복장 : 속옷 (신성 바디체인)'.
+[4. Facial Expression Sheet (표정 시트: 05~08)]: 4 distinct facial expression portraits labeled in Korean ('05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의').
 [5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 3D game modeling, animation rigging, and costume tailoring reference, clean precise lineart, safe for work, character production study, simple solid pure white background, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${GRADE_SHEET_SPECS[grade] || ''}${details ? ', ' + details : ''}`;
                 
-                negativePrompt = "mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, flat chest, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, " + NEGATIVE_PROMPT_FIXED;
+                // 🛡️ 실전 검증된 설정 시트 전용 올인원 네거티브 프롬프트
+                negativePrompt = "mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, flat chest, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, cropped, out of frame, cut off head, cut off feet, cut off legs, cut off shoes, close-up, portrait, bust shot, upper body only, medium shot, zoom in, extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
 
                 // UI 안내 문구 업데이트
-                document.getElementById('copy-bar-title').innerHTML = `<span>📐 나노바나나 설정 시트 (한글 라벨·기본 내의 분해도·원본 체형 유지) 복사</span><span id="copy-bar-badge" style="background: #f59e0b; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">MODEL SHEET</span>`;
-                document.getElementById('copy-bar-desc').textContent = `📌 [기본 내의 사양: ${currentInnerLayer}] 원본 캐릭터 체형 유지 기본 체형 샷 + 기본 내의 분해도 + 착용 복장 분해도가 안전 필터 차단 없이 안전하게 일괄 생성됩니다.`;
-                document.getElementById('btn-main-copy').textContent = "📐 설정 시트 전용 복사";
+                document.getElementById('copy-bar-title').innerHTML = `<span>📐 나노바나나 설정 시트 (01~15번 표준 넘버링·속옷 분해도) 복사</span><span id="copy-bar-badge" style="background: #f59e0b; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">MODEL SHEET</span>`;
+                document.getElementById('copy-bar-desc').textContent = `📌 [01~15 표준 넘버링 적용] 01~04 턴어라운드 및 체형 / 05~08 표정 / 09~14 복장·장신구 / 15. 복장 : 속옷(속옷 상의, 속옷 하의) 분해도가 후가공 최적화 규격으로 안전하게 생성됩니다.`;
+                document.getElementById('btn-main-copy').textContent = "📐 설정 시트 전용 복사 (01~15 넘버링)";
                 document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #f59e0b, #ec4899)";
 
             } else {
