@@ -2886,7 +2886,11 @@ const STYLE_PROMPTS = {
 
                 // ✨ 실전 골든 프롬프트 분석 기반 기본 체형(04) 묘사:
                 // 점토 마네킹 대신 동일 얼굴/헤어 + 스킨톤 반투명 세컨드스킨 바디슈트로 인체 볼륨과 빛 반사를 유지하며 안전 필터 완벽 회피
-                const baseBodyPrompt = `full body standing model of the exact same character with identical face and hair, 동일한 체형 유지 (${selectedBodySpec}), 피부색과 동일하고 무늬가 없는 피부 같은 약간 투명한 전신슈트 착용, 전신슈트에 캐릭터가 받는 빛 반사 적용 (wearing a seamless skin-tone translucent form-fitting second-skin bodysuit matching her exact natural skin tone with subtle soft light reflections to highlight her natural feminine body curves, voluptuous proportions, and height scale for 3D rigging, without outer armor, without heavy clothing), 슈트 내부의 표현`;
+                const baseBodyPrompt = `full body standing reference model of the EXACT SAME character with identical facial features and identical hairstyle and hair color as views 01-03:
+- Complete Equipment Stripping (완전 탈의): Stripped of ALL costumes, outer armor, lingerie, underwear, wings, halo, tail, weapons, and jewelry (ZERO clothing, ZERO wings, ZERO halo, ZERO accessories on 04 base model).
+- Natural Anatomical Proportions: Depicting purely her natural bare body silhouette strictly maintaining her specified build (${selectedBodySpec}) for 3D modeling, rigging, and height scale reference.
+- Skin Surface & Lighting: Seamless smooth natural skin tone matching her face, with subtle soft studio rim lighting highlighting body silhouette, muscle contours, and natural anatomical proportions, strictly non-sexual safe-for-work concept art reference without explicit anatomical details.
+- Korean Label: '04. 기본 체형'`;
 
                 prompt = `Based on the attached character design image, generate a professional game production character reference sheet (official model sheet & setting guide), multiple turnaround angles of the exact same character: full body front view, full body side view, full body back view.
 [1. Standard Numbered Korean Annotations]: All section titles, part labels, callouts, and explanatory notes on the sheet MUST be written in Korean text with precise numbered tags for seamless post-production text editing:
@@ -2916,7 +2920,7 @@ const STYLE_PROMPTS = {
                     sheetBodyNegatives.push("huge breasts, gigantic breasts, flat chest, extreme curves");
                 }
 
-                const baseSheetNegative = "mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, cropped, out of frame, cut off head, cut off feet, cut off legs, cut off shoes, close-up, portrait, bust shot, upper body only, medium shot, zoom in, extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
+                const baseSheetNegative = "clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, underwear on 04 base body, different hairstyle on 04 base body, short hair on 04 base body, mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, cropped, out of frame, cut off head, cut off feet, cut off legs, cut off shoes, close-up, portrait, bust shot, upper body only, medium shot, zoom in, extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
 
                 negativePrompt = sheetBodyNegatives.concat([baseSheetNegative]).join(", ");
 
@@ -2994,8 +2998,10 @@ const STYLE_PROMPTS = {
                     customNegatives.push("animal ears, elf ears, wings");
                 }
 
-                if (style === 'supreme_celestial_lingerie' || grade === 'U') {
+                if (style === 'supreme_celestial_lingerie') {
                     customNegatives.push("bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy armor, plate armor, heavy coat, heavy dress, robe, hat");
+                } else if (style === 'supreme_cyber_highleg' || style === 'style_a') {
+                    customNegatives.push("loose robe, wedding dress, fluffy gown, lingerie, negligee, casual clothes");
                 }
 
                 negativePrompt = customNegatives.concat([NEGATIVE_PROMPT_FIXED]).join(", ");
