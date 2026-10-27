@@ -2142,8 +2142,16 @@
                     </div>
 
                     <div class="gen-group" style="grid-column: 1 / -1;">
-                        <label>외모 및 세부 특징 (헤어, 눈, 분위기 등)</label>
-                        <input type="text" id="gen-details" class="gen-input" value="silver twintail hair, sharp violet eyes, confident smile" oninput="updatePrompt()">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                            <label style="margin-bottom: 0;">외모 및 세부 특징 (헤어, 눈, 분위기 등)</label>
+                            <span style="font-size: 11.5px; color: #a5b4fc;">원하는 키워드를 직접 입력하거나 🎲 랜덤 버튼으로 즉시 생성할 수 있습니다</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="text" id="gen-details" class="gen-input" value="silver twintail hair, sharp violet eyes, confident smile" oninput="updatePrompt()" style="flex: 1;">
+                            <button type="button" id="btn-random-details" onclick="randomizeDetails()" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 10px 18px; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(168, 85, 247, 0.5)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 12px rgba(99, 102, 241, 0.35)';">
+                                <span>🎲 랜덤 생성</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -2321,17 +2329,17 @@
         const ROLE_PROMPTS = {
             'guardian': "guardian class, holding a massive tower shield and longsword, heavy metal breastplate and gauntlets, solid grounded guarding pose",
             'ranger': "ranger sniper class, holding an ornate enchanted bow and mechanical crossbow, leather cape and thigh quiver, nimble aiming pose",
-            'mage': "mage sorceress class, holding an ornate glowing rune staff and floating grimoire, elegant flowing robe dress with witch hat, casting spell pose",
+            'mage': "mage sorceress class, holding an ornate glowing rune staff and floating grimoire, elegant flowing dress with glowing magical circlet, casting spell pose",
             'tactician': "tactician alchemist class, wearing tactical goggles and tool belt with glowing potion flasks and mechanical gears, smart observing pose"
         };
 
         const RACE_PROMPTS = {
-            'forest': "forest folk, tall height, voluptuous curvy mature body, light revealing leaf and cloth attire, long pointed elf ears",
-            'earth': "earth folk, short height petite adult female, curvy voluptuous bust, cyborg mechanical prosthetic arm and legs, gears and wrench",
-            'beastkin': "beastkin folk, average height, fluffy animal ears on head and fluffy tail, light agile wild attire",
-            'human': "human folk, average height, balanced adult proportions, elaborate formal fantasy costume",
-            'avian': "avian folk, short height petite adult female, curvy bust, majestic wings on back, feather accents",
-            'mutation': "unique mutant anomaly, rare contrasting body proportions, exotic hybrid features"
+            'forest': "forest folk, long pointed elf ears, emerald foliage accents, graceful nature presence",
+            'earth': "earth folk, cybernetic mechanical prosthetic arm and legs, visible brass gears and hydraulics",
+            'beastkin': "beastkin folk, fluffy animal ears on head and fluffy tail, feline fangs, agile wild presence",
+            'human': "human folk, elegant imperial styling, versatile fantasy aura",
+            'avian': "avian folk, majestic feathered wings spread on back, feather accents, soaring aerial presence",
+            'mutation': "unique mutant anomaly, rare contrasting exotic hybrid features"
         };
 
                 // 💃 몸매 / 체형 명세 (종족 자동 + 슬랜더, 표준, 글래머, 메가 글래머, 톰보이, 로리/쁘띠)
@@ -2354,16 +2362,16 @@
         };
 
 const STYLE_PROMPTS = {
-            'supreme_gold_chain': "voluptuous curvy hourglass figure, alluring sensual apex costume, ornate glowing gold chain bikini armor with platinum trims, jeweled chest piece with deep cleavage, micro high-leg armor plating exposing toned hips and thighs, translucent white sheer silk veil draped over shoulders and flowing behind, sheer lace-up garter stockings with gold embroidery, golden choker with glowing sacred crest gem",
-            'supreme_cyber_highleg': "voluptuous curvy hourglass figure, futuristic high-leg cybernetic bodysuit, transparent holographic chest panels, deep cleavage, micro high-cut hip exposure with glowing cybernetic lines, glossy patent leather, snug thigh strap holster squeeze, translucent cyber stockings",
-            'supreme_celestial_lingerie': "voluptuous divine goddess figure, sheer ethereal starlight lingerie, translucent flowing organza nebula robe, sacred golden chain jewelry across chest and hips, floating gracefully in the air, enormous celestial halo rings, stardust particles",
-            'style_a': "voluptuous curvy hourglass figure, tight shiny black latex and patent leather bodysuit with glossy specular highlights, chest leather body harness with metallic buckles, keyhole chest cutout, thigh holster with snug leather thigh strap squeeze, asymmetrical thigh-high stockings, black leather choker with ring",
-            'style_b': "voluptuous curvy hourglass figure, elegant dark fantasy silk dress, translucent sheer lace fabric over cleavage and shoulders, deep teardrop keyhole cutout, extremely high side slit exposing curvy hip and thigh, delicate lace-up black garter belt, sheer black stockings with floral embroidery",
-            'style_hybrid': "voluptuous hourglass figure, fantasy tactical hybrid costume, leather bodysuit layered under an elegant high-slit sheer silk coat, metallic armor buckles and lace-up garter details",
+            'supreme_gold_chain': "alluring sensual apex costume, ornate glowing gold chain bikini armor with platinum trims, jeweled chest piece with cleavage cutout, micro high-leg armor plating exposing hips, translucent white sheer silk veil draped over shoulders and flowing behind, sheer lace-up garter stockings with gold embroidery, golden choker with glowing sacred crest gem",
+            'supreme_cyber_highleg': "futuristic high-leg cybernetic bodysuit, transparent holographic chest panels, micro high-cut hip exposure with glowing cybernetic lines, glossy patent leather, snug thigh strap holster squeeze, translucent cyber stockings",
+            'supreme_celestial_lingerie': "sheer ethereal starlight lingerie, translucent flowing organza nebula robe, sacred golden chain jewelry across chest and hips, floating gracefully in the air, enormous celestial halo rings, stardust particles",
+            'style_a': "tight shiny black latex and patent leather bodysuit with glossy specular highlights, chest leather body harness with metallic buckles, keyhole cutout, thigh holster with snug leather thigh strap squeeze, asymmetrical thigh-high stockings, black leather choker with ring",
+            'style_b': "elegant dark fantasy silk dress, translucent sheer lace fabric over chest and shoulders, deep teardrop keyhole cutout, extremely high side slit exposing hip, delicate lace-up black garter belt, sheer black stockings with floral embroidery",
+            'style_hybrid': "fantasy tactical hybrid costume, leather bodysuit layered under an elegant high-slit sheer silk coat, metallic armor buckles and lace-up garter details",
             'style_classic': "formal knight officer tunic and light breastplate armor, neat shoulder cape, high-waist leather shorts, silver filigree details, polished combat boots",
-            'curvy': "mature adult woman, voluptuous curvy figure",
-            'slender': "mature adult woman, slender graceful figure, petite chest",
-            'boyish': "handsome boyish female commander, androgynous charming aura, short hair, dashing cool expression"
+            'curvy': "alluring sensual costume, flattering feminine design",
+            'slender': "graceful elegant costume, slim fitting design",
+            'boyish': "handsome dashing tactical costume, sharp tailored design"
         };
 
         const NEGATIVE_PROMPT_FIXED = "cropped, out of frame, cut off head, cut off feet, cut off legs, cut off shoes, close-up, portrait, bust shot, upper body only, medium shot, zoom in, extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
@@ -2425,6 +2433,7 @@ const STYLE_PROMPTS = {
         let currentActiveHumanPreset = 'C';
 
         function applyEarthGradePreset(grade, btnEl) {
+            if (document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
             // 버튼 액티브 클래스 갱신
             document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
             if (btnEl) {
@@ -2467,6 +2476,7 @@ const STYLE_PROMPTS = {
         }
 
         function applyBeastkinGradePreset(grade, btnEl) {
+            if (document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
             // 버튼 액티브 클래스 갱신
             document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
             if (btnEl) {
@@ -2507,6 +2517,7 @@ const STYLE_PROMPTS = {
         }
 
         function applyForestGradePreset(grade, btnEl) {
+            if (document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
             // 버튼 액티브 클래스 갱신
             document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
             if (btnEl) {
@@ -2547,6 +2558,7 @@ const STYLE_PROMPTS = {
         }
 
         function applyAvianGradePreset(grade, btnEl) {
+            if (document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
             // 버튼 액티브 클래스 갱신
             document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
             if (btnEl) {
@@ -2587,6 +2599,7 @@ const STYLE_PROMPTS = {
         }
 
         function applyHumanGradePreset(grade, btnEl) {
+            if (document.getElementById('gen-body-type')) document.getElementById('gen-body-type').value = 'auto';
             // 버튼 액티브 클래스 갱신
             document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
             if (btnEl) {
@@ -2637,15 +2650,19 @@ const STYLE_PROMPTS = {
                 /ancient sacred grove sanctuary background[^,]*/gi,
                 /grand cloud sanctuary background[^,]*/gi,
                 /grand cathedral sanctuary[^,]*/gi,
+                /grand sanctuary background[^,]*/gi,
+                /grand galaxy nebula background[^,]*/gi,
                 /castle ramparts background[^,]*/gi,
                 /misty ancient woodland background/gi,
                 /blue sky cloud background/gi,
                 /stardust nebula [^,]*background[^,]*/gi,
                 /cosmic [^,]*nebula background/gi,
+                /stardust nebula galaxy background[^,]*/gi,
                 /flat simple gradient background/gi,
                 /soft gradient studio background/gi,
                 /floating slightly above cloudy ground/gi,
-                /stardust nebula galaxy background with shooting stars/gi
+                /floating in mid-air levitation, grand galaxy[^,]*/gi,
+                /with stardust and spatial distortion/gi
             ];
             let cleaned = rawPrompt;
             bgPatterns.forEach(pat => {
@@ -2655,6 +2672,74 @@ const STYLE_PROMPTS = {
             cleaned = cleaned.replace(/,\s*$/, "");
             cleaned += ", simple solid pure white background, clean plain white backdrop, no background elements, solo isolated character, full body asset cutout ready";
             return cleaned;
+        }
+
+        
+        // 🎲 외모 및 세부 특징 랜덤 생성기 (헤어 컬러, 스타일, 눈동자, 표정, 종족별 포인트)
+        function randomizeDetails() {
+            const HAIR_COLORS = [
+                'platinum blonde', 'silver white', 'radiant golden blonde', 'raven jet-black', 
+                'soft rose pink', 'sakura pastel pink', 'misty ash blue', 'deep royal navy blue',
+                'crimson ruby red', 'deep amethyst violet', 'emerald mint green', 'cosmic gradient pastel',
+                'warm honey chestnut', 'lavender purple'
+            ];
+
+            const HAIR_STYLES = [
+                'long flowing wavy hair', 'twin drill pigtails', 'high ponytail tied with ribbons',
+                'neat bob cut', 'straight elegant hime-cut hair', 'twin braided pigtails',
+                'loose messy side-braid', 'fluffy wavy twintails', 'voluminous wavy wolf cut',
+                'half-up ribbon ponytail', 'medium layered hair with straight bangs', 'low twin tails'
+            ];
+
+            const EYE_SPECS = [
+                'sharp violet eyes', 'sparkling sapphire blue eyes', 'glowing crimson ruby eyes',
+                'warm golden amber eyes', 'mystic emerald green eyes', 'heterochromia (blue and golden) eyes',
+                'deep amethyst slit eyes', 'gentle starlight cyan eyes', 'intense burning flame eyes',
+                'translucent diamond eyes'
+            ];
+
+            const EXPRESSIONS = [
+                'confident playful smile', 'gentle sweet smile', 'proud arrogant queen smirk',
+                'cool composed calm expression', 'mischievous daring grin', 'shy blushing gaze',
+                'dignified elegant smile', 'determined fierce battle expression', 'seductive charming smile'
+            ];
+
+            const RACE_ACCENTS = {
+                'forest': ['long pointed elf ears', 'botanical flower hairpins', 'delicate emerald vine ornaments', 'emerald drop earrings'],
+                'earth': ['steampunk brass goggles on head', 'rudimentary brass hairpin', 'cute grease smudge on cheek', 'leather headband with mini gear'],
+                'beastkin': ['fluffy animal ears with tipped fur', 'cute canine fangs', 'expressive fluffy striped animal tail', 'leather feather choker'],
+                'avian': ['delicate pure white feather hairpin', 'floating glowing starlight ribbons', 'crystal star hair clip', 'iridescent hair gradient'],
+                'human': ['royal platinum hairpin', 'velvet lace hair ribbon', 'cross jewel brooch', 'golden pearl hair ornament'],
+                'mutation': ['exotic gradient horns', 'mystic glowing rune tattoo on cheek', 'floating mana crystal shards']
+            };
+
+            const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+            const currentRace = document.getElementById('gen-race')?.value || 'human';
+            const accents = RACE_ACCENTS[currentRace] || RACE_ACCENTS['human'];
+
+            const color = pick(HAIR_COLORS);
+            const style = pick(HAIR_STYLES);
+            const eyes = pick(EYE_SPECS);
+            const expr = pick(EXPRESSIONS);
+            const accent = pick(accents);
+
+            // 최종 랜덤 외모 조합
+            const generatedDetails = `${color} ${style}, ${eyes}, ${expr}, ${accent}`;
+
+            const inputEl = document.getElementById('gen-details');
+            if (inputEl) {
+                inputEl.value = generatedDetails;
+                // 시각적 피드백 효과 (반짝임)
+                inputEl.style.transition = 'background 0.3s';
+                inputEl.style.background = 'rgba(99, 102, 241, 0.25)';
+                setTimeout(() => {
+                    inputEl.style.background = '';
+                }, 300);
+            }
+
+            // 프롬프트 즉시 동기화
+            updatePrompt();
         }
 
         function updatePrompt() {
@@ -2679,11 +2764,12 @@ const STYLE_PROMPTS = {
             if (genMode === 'sheet') {
                 // 📐 캐릭터 설정 시트 (Model Sheet / Setting Guide) 모드
                 const RACE_SHEET_SPECS = {
-                    'earth': "earth folk, short petite adult female 150cm height, huge breasts, cybernetic mechanical prosthetic arm with visible brass gears and hydraulics",
-                    'beastkin': "beastkin folk, athletic adult female 165cm height, voluptuous bust, fluffy animal ears on head and fluffy expressive animal tail, canine fangs",
-                    'forest': "forest folk, tall slender elf adult female 172cm height, long pointed elf ears, emerald eyes, sensual high-slit sheer dress",
-                    'avian': "avian folk, petite adult female 152cm height, huge breasts, majestic feathered wings spread on back, floating in air",
-                    'human': "human folk, average height adult female 164cm height, balanced voluptuous hourglass figure, hybrid imperial tactical officer uniform"
+                    'earth': "earth folk, cybernetic mechanical prosthetic arm with visible brass gears and hydraulics",
+                    'beastkin': "beastkin folk, fluffy animal ears on head and fluffy expressive animal tail, canine fangs",
+                    'forest': "forest folk, long pointed elf ears, emerald eyes, ethereal nature aura",
+                    'avian': "avian folk, majestic feathered wings spread on back, floating in air",
+                    'human': "human folk, elegant imperial styling, versatile commander presence",
+                    'mutation': "unique mutant anomaly, rare contrasting exotic hybrid features"
                 };
 
                 const GRADE_SHEET_SPECS = {
@@ -2818,10 +2904,21 @@ const STYLE_PROMPTS = {
 [3. Exploded Costume Breakdown (복장 분해도: 09~14)]: isolated equipment display showing: headpiece (${currentCostumeLabels.head}), upper outerwear/armor (${currentCostumeLabels.top}), lower outerwear/skirt (${currentCostumeLabels.bottom}), back accessory/cape/wings (${currentCostumeLabels.outer}), accessory 1 (${currentCostumeLabels.acc1}), accessory 2 (${currentCostumeLabels.acc2}).
 [3-1. Specific Underwear Breakdown ('15. 복장 : 속옷 - 속옷 상의, 속옷 하의')]: Detailed isolated breakdown of the inner foundation layer: [Underwear Spec: ${currentInnerLayer}]. Clearly illustrate both the isolated fitted undergarment top (속옷 상의) and matching undershorts (속옷 하의) as distinct individual clothing items labeled in Korean as '15. 복장 : 속옷 (속옷 상의, 속옷 하의)'. If specified as 'No traditional fabric inner layer', explicitly depict her body wearing no fabric inner layer with only the sacred radiant body-chains or glowing aura on bare skin, labeled in Korean as '15. 복장 : 속옷 (신성 바디체인)'.
 [4. Facial Expression Sheet (표정 시트: 05~08)]: 4 distinct facial expression portraits labeled in Korean ('05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의').
-[5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 3D game modeling, animation rigging, and costume tailoring reference, clean precise lineart, safe for work, character production study, simple solid pure white background, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${selectedBodySpec}, ${GRADE_SHEET_SPECS[grade] || ''}${details ? ', ' + details : ''}`;
+[5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 3D game modeling, animation rigging, and costume tailoring reference, clean precise lineart, safe for work, character production study, simple solid pure white background, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${selectedBodySpec}, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role]}, ${ELEMENT_PROMPTS[element]}`;
                 
-                // 🛡️ 실전 검증된 설정 시트 전용 올인원 네거티브 프롬프트
-                negativePrompt = "mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, flat chest, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, cropped, out of frame, cut off head, cut off feet, cut off legs, cut off shoes, close-up, portrait, bust shot, upper body only, medium shot, zoom in, extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
+                // 🛡️ 실전 검증된 설정 시트 전용 올인원 네거티브 프롬프트 (체형 맞춤형 분기)
+                let sheetBodyNegatives = [];
+                if (bodyType === 'slender' || bodyType === 'petite') {
+                    sheetBodyNegatives.push("huge breasts, large breasts, heavy cleavage, voluptuous, thick thighs, wide hips, plump");
+                } else if (bodyType === 'mega_glamour') {
+                    sheetBodyNegatives.push("flat chest, small breasts, skinny, slender, modest bust");
+                } else if (bodyType === 'standard') {
+                    sheetBodyNegatives.push("huge breasts, gigantic breasts, flat chest, extreme curves");
+                }
+
+                const baseSheetNegative = "mannequin, wooden mannequin, plastic doll, blank face, featureless face, faceless, different face, different character, changed body type, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, cropped, out of frame, cut off head, cut off feet, cut off legs, cut off shoes, close-up, portrait, bust shot, upper body only, medium shot, zoom in, extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
+
+                negativePrompt = sheetBodyNegatives.concat([baseSheetNegative]).join(", ");
 
                 // UI 안내 문구 업데이트
                 document.getElementById('copy-bar-title').innerHTML = `<span>📐 나노바나나 설정 시트 (01~15번 표준 넘버링·속옷 분해도) 복사</span><span id="copy-bar-badge" style="background: #f59e0b; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">MODEL SHEET</span>`;
@@ -2830,65 +2927,78 @@ const STYLE_PROMPTS = {
                 document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #f59e0b, #ec4899)";
 
             } else {
-                // ✨ 전신 일러스트 모드
-                // 땅의 종족 프리셋이 활성화된 경우: 충돌하는 일반 키워드를 배제하고 검증된 골든 프롬프트 직접 출력
-                                // 체형 커스텀 함수: 골든 프롬프트에서 기존 체형 묘사를 선택된 커스텀 체형으로 지능적 치환
-                function applyCustomBody(rawPrompt) {
-                    if (bodyType === 'auto') return rawPrompt;
-                    let p = rawPrompt;
-                    p = p.replace(/tall slender adult female, 168cm height, voluptuous curvy hourglass figure, huge breasts, thick thighs/gi, selectedBodySpec);
-                    p = p.replace(/short height petite adult female, curvy voluptuous bust/gi, selectedBodySpec);
-                    p = p.replace(/short height petite adult female, curvy voluptuous hourglass figure, huge breasts, thick thighs/gi, selectedBodySpec);
-                    p = p.replace(/short height petite adult female, voluptuous hourglass figure, huge breasts, thick thighs/gi, selectedBodySpec);
-                    p = p.replace(/tall slender adult female, 165cm height, athletic slim figure, modest bust/gi, selectedBodySpec);
-                    p = p.replace(/tall slender adult female, 165cm height, athletic figure/gi, selectedBodySpec);
-                    p = p.replace(/tall slender adult female, 165cm height, curvy athletic body, voluptuous bust/gi, selectedBodySpec);
-                    p = p.replace(/tall slender adult female, 165cm height, voluptuous curvy hourglass figure, huge breasts, thick thighs/gi, selectedBodySpec);
-                    p = p.replace(/tall slender adult female, 168cm height, voluptuous divine goddess figure, huge breasts, thick thighs/gi, selectedBodySpec);
-                    if (!p.includes(selectedBodySpec)) {
-                        p = p.replace('standing pose, ', 'standing pose, ' + selectedBodySpec + ', ');
-                    }
-                    return p;
+                // ✨ 전신 일러스트 모드: 사용자가 선택한 [체형 + 복장 + 역할군 + 속성 + 등급 + 종족 + 세부특징] 완전 동적 결합 엔진
+                const baseMaster = "masterpiece, best quality, ultra-detailed anime mobile gacha illustration, Genshin and Blue Archive art style, 1girl, solo, adult female, full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose, anatomically correct, clean lineart, vibrant cel-shading, cinematic lighting";
+                
+                // 1. 선택된 체형 주입 (슬랜더, 표준, 글래머, 메가 글래머, 톰보이, 로리/쁘띠 또는 종족 자동)
+                const bodyClause = selectedBodySpec;
+                
+                // 2. 선택된 의상 스타일 주입
+                const styleClause = STYLE_PROMPTS[style] || "stylish fantasy costume";
+                
+                // 3. 종족 고유 외형
+                const raceClause = RACE_PROMPTS[race] || "human folk";
+                
+                // 4. 역할군 & 무기/장비
+                const roleClause = ROLE_PROMPTS[role] || "";
+                
+                // 5. 원소 속성 이펙트
+                const elementClause = ELEMENT_PROMPTS[element] || "";
+                
+                // 6. 등급 아우라 및 배경 연출
+                const gradeClause = GRADE_PROMPTS[grade] || "";
+                
+                // 7. 세부 외모 (헤어, 눈, 표정, 장신구)
+                const detailClause = details ? details : "";
+
+                // 동적 결합
+                const promptParts = [
+                    baseMaster,
+                    bodyClause,
+                    styleClause,
+                    raceClause,
+                    detailClause,
+                    roleClause,
+                    elementClause,
+                    gradeClause
+                ].filter(p => p && p.trim().length > 0);
+
+                prompt = promptParts.join(", ");
+
+                // 🛡️ 체형 및 종족별 지능형 네거티브 프롬프트 결합
+                let customNegatives = [];
+
+                // 체형별 상반되는 키워드 자동 배제
+                if (bodyType === 'slender') {
+                    customNegatives.push("huge breasts, large breasts, heavy cleavage, voluptuous, thick thighs, wide hips, plump");
+                } else if (bodyType === 'petite') {
+                    customNegatives.push("tall, mature adult woman, huge breasts, long legs, heavy curves, voluptuous");
+                } else if (bodyType === 'standard') {
+                    customNegatives.push("huge breasts, gigantic breasts, flat chest, extreme curves");
+                } else if (bodyType === 'mega_glamour') {
+                    customNegatives.push("flat chest, small breasts, skinny, slender, modest bust");
+                } else if (bodyType === 'tomboy') {
+                    customNegatives.push("ultra feminine, soft fat, weak physique, heavy makeup");
                 }
 
-if (race === 'earth' && EARTH_GOLDEN_PROMPTS[grade]) {
-                    prompt = applyCustomBody(EARTH_GOLDEN_PROMPTS[grade]);
-                    if (grade === 'U') {
-                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, " + NEGATIVE_PROMPT_FIXED;
-                    }
-                } else if (race === 'beastkin' && BEASTKIN_GOLDEN_PROMPTS[grade]) {
-                    prompt = applyCustomBody(BEASTKIN_GOLDEN_PROMPTS[grade]);
-                    if (grade === 'U') {
-                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, human ears, four ears, extra ears, " + NEGATIVE_PROMPT_FIXED;
-                    } else {
-                        negativePrompt = "human ears, four ears, extra ears, " + NEGATIVE_PROMPT_FIXED;
-                    }
-                } else if (race === 'forest' && FOREST_GOLDEN_PROMPTS[grade]) {
-                    prompt = applyCustomBody(FOREST_GOLDEN_PROMPTS[grade]);
-                    if (grade === 'U') {
-                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, short ears, round ears, " + NEGATIVE_PROMPT_FIXED;
-                    } else {
-                        negativePrompt = "short ears, round human ears, " + NEGATIVE_PROMPT_FIXED;
-                    }
-                } else if (race === 'avian' && AVIAN_GOLDEN_PROMPTS[grade]) {
-                    prompt = applyCustomBody(AVIAN_GOLDEN_PROMPTS[grade]);
-                    if (grade === 'U') {
-                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy dress, robe, hat, witch hat, no wings, missing wings, " + NEGATIVE_PROMPT_FIXED;
-                    } else {
-                        negativePrompt = "no wings, missing wings, " + NEGATIVE_PROMPT_FIXED;
-                    }
-                } else if (race === 'human' && HUMAN_GOLDEN_PROMPTS[grade]) {
-                    prompt = applyCustomBody(HUMAN_GOLDEN_PROMPTS[grade]);
-                    if (grade === 'U') {
-                        negativePrompt = "bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy armor, plate armor, heavy dress, robe, hat, animal ears, elf ears, wings, " + NEGATIVE_PROMPT_FIXED;
-                    } else {
-                        negativePrompt = "animal ears, elf ears, wings, cyborg arm, mechanical parts, " + NEGATIVE_PROMPT_FIXED;
-                    }
-                } else {
-                    const baseStyle = "masterpiece, best quality, ultra-detailed anime mobile gacha illustration, Genshin and Blue Archive art style, 1girl, solo, adult female, full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose, anatomically correct, exactly two arms, exactly two legs, perfectly drawn hands, clean lineart, vibrant cel-shading, cinematic lighting, core guardian crest brooch on chest";
-                    let raceAndStylePrompt = `${STYLE_PROMPTS[style]}, ${RACE_PROMPTS[race]}`;
-                    prompt = `${baseStyle}, ${raceAndStylePrompt}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role]}, ${ELEMENT_PROMPTS[element]}, ${GRADE_PROMPTS[grade]}`;
+                // 종족별 비정상 파츠 배제
+                if (race === 'human') {
+                    customNegatives.push("animal ears, four ears, elf ears, pointed ears, wings, cyborg arm, mechanical parts");
+                } else if (race === 'beastkin') {
+                    customNegatives.push("human ears, four ears, extra ears, missing animal ears, missing tail");
+                } else if (race === 'forest') {
+                    customNegatives.push("short ears, round human ears, animal ears, wings");
+                } else if (race === 'avian') {
+                    customNegatives.push("no wings, missing wings, animal ears, elf ears");
+                } else if (race === 'earth') {
+                    customNegatives.push("animal ears, elf ears, wings");
                 }
+
+                if (style === 'supreme_celestial_lingerie' || grade === 'U') {
+                    customNegatives.push("bodysuit, catsuit, jumpsuit, full body suit, tights, leggings, heavy armor, plate armor, heavy coat, heavy dress, robe, hat");
+                }
+
+                negativePrompt = customNegatives.concat([NEGATIVE_PROMPT_FIXED]).join(", ");
 
                 // 배경 제거 모드 활성화 시 배경 교체
                 if (isRemoveBg) {
