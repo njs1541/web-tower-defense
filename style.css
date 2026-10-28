@@ -3832,6 +3832,146 @@ button.selected {
 }
 
 /* ==========================================================================
+   v0.39.0 UR/U 지휘관 전장 직접 강림(Hero Unit) & 3x3 지휘 오라 시스템 스타일
+   ========================================================================== */
+
+/* 1. 심플한 히어로 필드 토큰 (이후 모듈러 캐릭터 도입 전 단계) */
+.hero-simple-token {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #1e1b4b;
+  border: 2px solid #c084fc;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.7);
+  cursor: pointer;
+  z-index: 5;
+  animation: heroSimpleFloat 2s infinite ease-in-out;
+  transition: transform 0.15s ease;
+}
+
+.hero-simple-token:hover {
+  transform: translate(-50%, -50%) scale(1.15);
+}
+
+.hero-token-core {
+  font-size: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.hero-simple-token.grade-UR {
+  border-color: #f43f5e;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.85);
+  background: linear-gradient(135deg, #4c0519 0%, #881337 100%);
+}
+
+.hero-simple-token.grade-U {
+  border-color: #fbbf24;
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.95), inset 0 0 8px rgba(192, 132, 252, 0.6);
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+}
+
+@keyframes heroSimpleFloat {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0px);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-3px);
+  }
+}
+
+/* 2. 3x3 지휘 오라 필드 하이라이트 타일 */
+.cell.hero-aura-tile {
+  background: rgba(254, 240, 138, 0.14) !important;
+  box-shadow: inset 0 0 7px rgba(234, 179, 8, 0.22) !important;
+}
+
+/* 3. 히어로 강림/이동 가능 기반(벽) 하이라이트 타일 */
+.cell.hero-targetable {
+  outline: 2px solid #c084fc !important;
+  box-shadow: inset 0 0 10px rgba(192, 132, 252, 0.6), 0 0 9px rgba(168, 85, 247, 0.7) !important;
+  cursor: pointer !important;
+  animation: heroTargetPulse 1s infinite alternate;
+}
+
+@keyframes heroTargetPulse {
+  0% { background-color: rgba(243, 232, 255, 0.5); }
+  100% { background-color: rgba(216, 180, 254, 0.85); }
+}
+
+/* 4. 인게임 히어로 오라 뱃지 및 강림 버튼 */
+.ingame-hero-aura-tag {
+  background: #faf5ff;
+  border: 1px dashed #c084fc;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #7e22ce;
+  line-height: 1.35;
+}
+
+.btn-hero-card-action {
+  width: 100%;
+  background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+  color: #ffffff;
+  border: 1.5px solid #c084fc;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 9px 12px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(126, 34, 206, 0.35);
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-hero-card-action:hover {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(126, 34, 206, 0.45);
+}
+
+.btn-hero-card-action.active {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6) !important;
+  animation: btnPulse 1s infinite alternate;
+}
+
+.btn-hero-card-action.relocate {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  border-color: #38bdf8;
+  box-shadow: 0 3px 8px rgba(2, 132, 199, 0.35);
+}
+
+.btn-hero-card-action.relocate:hover {
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+}
+
+.ingame-hero-cooldown-notice {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+/* ==========================================================================
    v0.34.0 지휘관 듀얼 태그 (원소 + 역할군) 및 덱 시너지 시스템 스타일
    ========================================================================== */
 

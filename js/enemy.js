@@ -301,6 +301,29 @@ function gameLoopTick() {
     // 타워 공격 실행
     attackFromTowers();
 
+    // v0.39.0 전장 강림 히어로 유닛 요격 사격 실행
+    if (typeof handleHeroAttacks === 'function') {
+        handleHeroAttacks();
+    }
+
+    // 1초(5틱) 주기 히어로 전술 이동 쿨다운 차감
+    if (typeof deployedHeroes !== 'undefined') {
+        window.heroCooldownTickCounter = (window.heroCooldownTickCounter || 0) + 1;
+        if (window.heroCooldownTickCounter >= 5) {
+            window.heroCooldownTickCounter = 0;
+            let needUiUpdate = false;
+            for (const hero of Object.values(deployedHeroes)) {
+                if (hero && hero.cooldownSec > 0) {
+                    hero.cooldownSec--;
+                    needUiUpdate = true;
+                }
+            }
+            if (needUiUpdate && typeof updateInGameCommandersBar === 'function') {
+                updateInGameCommandersBar();
+            }
+        }
+    }
+
     // 라운드 종료 체크
     const aliveEnemies = enemies.filter(e => e.alive).length;
     if (spawnedCount >= totalEnemies && aliveEnemies === 0) {

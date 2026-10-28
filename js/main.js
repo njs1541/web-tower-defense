@@ -117,6 +117,10 @@ function startGame() {
     isLeaderDeployMode = false;
     leaderAttackCooldown = 0;
 
+    // 3-2-2. v0.39.0 UR/U 지휘관 강림 유닛 상태 초기화
+    deployedHeroes = {};
+    heroDeployingCharId = null;
+
     // 3-3. v0.36.0 지휘관 고정 타워 스톡(Stock) 및 전투 통계 초기화
     if (typeof calculateDeckTowerStocks === 'function') {
         commanderTowerStocks = calculateDeckTowerStocks();

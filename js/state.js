@@ -48,6 +48,10 @@ let leaderRelocatedThisRound = false;  // 라운드당 1회 이동 사용 여부
 let isLeaderDeployMode = false;        // 대장 강림/이동 타일 선택 모드
 let leaderAttackCooldown = 0;          // 대장 자체 공격 쿨다운
 
+// v0.39.0 UR/U 결전 지휘관 전장 직접 강림(Hero Unit) 상태
+let deployedHeroes = {};          // { [charId]: { x, y, cooldownSec: 0, maxCooldownSec: 15, auraRange: 1, attackCooldown: 0 } }
+let heroDeployingCharId = null;    // 현재 전장 강림/전술 이동 조작 중인 지휘관 ID (null이면 미선택)
+
 // v0.36.0 지휘관 고정 타워 스톡(Stock), 스마트 오버킬 방지 및 전투 통계
 let commanderTowerStocks = {};     // 이번 판 출전 지휘관들로부터 제공된 타워별 총 스톡 { melee: 4, ranged: 3, ... }
 let commanderTowerRemaining = {};  // 현재 필드에 추가 설치 가능한 잔여 타워 스톡

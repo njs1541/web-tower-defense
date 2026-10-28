@@ -48,13 +48,27 @@ function handleCellClick(x, y) {
     const cell = getCell(x, y);
     if (!cell) return;
 
-    // 0. 대장 지휘관 강림/이동 타일 선택 모드 (v0.32.0 New)
+    // 0. v0.39.0 히어로 유닛 전장 강림/이동 타일 선택 모드
+    if (typeof heroDeployingCharId !== 'undefined' && heroDeployingCharId) {
+        handleHeroDeployClick(cell, heroDeployingCharId);
+        return;
+    }
+
+    // 0-2. 필드 위 히어로 토큰 직접 클릭 시 이동 모드 토글
+    if (typeof deployedHeroes !== 'undefined') {
+        for (const [hId, hData] of Object.entries(deployedHeroes)) {
+            if (hData && hData.x === x && hData.y === y) {
+                handleHeroTokenClick(hId);
+                return;
+            }
+        }
+    }
+
+    // 0-3. 기존 대장 지휘관 하위 호환 처리
     if (typeof isLeaderDeployMode !== 'undefined' && isLeaderDeployMode) {
         handleLeaderDeployClick(cell);
         return;
     }
-
-    // 0-2. 필드 위 대장 토큰 직접 클릭 시 이동 모드 토글
     if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
         toggleLeaderDeployMode();
         return;
@@ -278,6 +292,29 @@ function attackFromTowers() {
         let totalCritMulti = Math.max(passives.critMultiplier || 2.0, synStats.critMultiplier || 2.0);
 
         let baseDmg = towerStats.damage * (1 + (passives.bonusDamageRatio || 0));
+
+        // v0.39.0 인접 3x3 강림 지휘관(Hero Unit) 지휘 오라 버프 집계
+        if (typeof deployedHeroes !== 'undefined') {
+            for (const [hId, hData] of Object.entries(deployedHeroes)) {
+                if (!hData) continue;
+                const auraSpec = (typeof getHeroAuraSpec === 'function') ? getHeroAuraSpec(hId) : null;
+                if (!auraSpec) continue;
+
+                // 1) 전 필드 글로벌 버프 (루미나 등)
+                if (auraSpec.globalDamageBonus > 0) {
+                    baseDmg *= (1 + auraSpec.globalDamageBonus);
+                }
+
+                // 2) 인접 3x3 오라 버프 (세라피나, 베로니카, 루미나 등)
+                if (Math.abs(cell.x - hData.x) <= 1 && Math.abs(cell.y - hData.y) <= 1) {
+                    if (auraSpec.critChance > 0) totalCritChance += auraSpec.critChance;
+                    if (auraSpec.critMulti > 0) totalCritMulti += auraSpec.critMulti;
+                    if (auraSpec.fireDamageBonus > 0 && (cell.tower === 'bomb' || cell.tower === 'fire')) {
+                        baseDmg *= (1 + auraSpec.fireDamageBonus);
+                    }
+                }
+            }
+        }
 
         // 사수 3셋: 보스 및 비행 유닛 상대 대미지 증폭
         if (synStats.bossFlyingDamageRatio > 0 && (targetEnemy.isBoss || targetEnemy.moveType === 'flying')) {
@@ -1214,5 +1251,190 @@ function renderStartingSuppliesUI() {
 
 function selectStartingSupply(type) {
     // 은퇴 처리
+}
+
+/**
+ * ============================================================================
+ * v0.39.0 UR/U 지휘관 전장 직접 강림(Hero Unit) & 3x3 지휘 오라 시스템
+ * ============================================================================
+ */
+
+/**
+ * UR/U 지휘관 강림/전술 이동 모드 토글
+ */
+function toggleHeroDeployMode(charId) {
+    if (typeof heroDeployingCharId !== 'undefined' && heroDeployingCharId === charId) {
+        heroDeployingCharId = null;
+        if (typeof showFloatingDamage === 'function') {
+            showFloatingDamage(10, 10, "강림 모드 취소", "#94a3b8");
+        }
+    } else {
+        heroDeployingCharId = charId;
+        interactionMode = 'none';
+        selectedTower = null;
+        clearActiveRange();
+        clearRangePreview();
+        hideTowerDetailPanel();
+        const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+        const charName = charBase ? charBase.name : '지휘관';
+        if (typeof showFloatingDamage === 'function') {
+            showFloatingDamage(10, 10, `⚡ ${charName} 강림 타일 선택 (기반 타일 클릭)`, "#eab308");
+        }
+    }
+    if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
+    if (typeof updateInGameCommandersBar === 'function') updateInGameCommandersBar();
+    if (typeof render === 'function') render();
+}
+
+/**
+ * 타일 클릭 시 히어로 유닛 강림/이동 처리
+ */
+function handleHeroDeployClick(cell, charId) {
+    if (!cell) return;
+    const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+    const charName = charBase ? charBase.name : '지휘관';
+
+    // 1. 기반(벽) 여부 검증
+    if (!cell.buildable) {
+        if (typeof showFloatingDamage === 'function') {
+            showFloatingDamage(cell.x, cell.y, "❌ 기반(벽) 위에만 강림 가능!", "#ef4444");
+        }
+        return;
+    }
+
+    // 2. 타워 존재 여부 검증
+    if (cell.tower) {
+        if (typeof showFloatingDamage === 'function') {
+            showFloatingDamage(cell.x, cell.y, "❌ 타워가 있는 타일엔 강림 불가!", "#ef4444");
+        }
+        return;
+    }
+
+    // 3. 다른 히어로 중복 배치 검증
+    if (typeof deployedHeroes !== 'undefined') {
+        for (const [oId, h] of Object.entries(deployedHeroes)) {
+            if (oId !== charId && h && h.x === cell.x && h.y === cell.y) {
+                if (typeof showFloatingDamage === 'function') {
+                    showFloatingDamage(cell.x, cell.y, "❌ 다른 지휘관이 이미 강림 중!", "#ef4444");
+                }
+                return;
+            }
+        }
+    }
+
+    // 4. 입구/출구 검증
+    if (cell.isStart || cell.isGoal) {
+        if (typeof showFloatingDamage === 'function') {
+            showFloatingDamage(cell.x, cell.y, "❌ 입구/출구 강림 불가!", "#ef4444");
+        }
+        return;
+    }
+
+    // 강림/이동 확정
+    if (typeof deployedHeroes === 'undefined') {
+        window.deployedHeroes = {};
+    }
+
+    const isRelocate = !!deployedHeroes[charId];
+    deployedHeroes[charId] = {
+        x: cell.x,
+        y: cell.y,
+        cooldownSec: 15, // 15초 전술 이동 쿨다운
+        attackCooldown: 0
+    };
+
+    heroDeployingCharId = null;
+
+    if (typeof showFloatingDamage === 'function') {
+        const msg = isRelocate ? `🔄 ${charName} 전술 재배치 완료!` : `⚡ ${charName} 전장 직접 강림!`;
+        showFloatingDamage(cell.x, cell.y, msg, "#f59e0b");
+    }
+
+    if (typeof render === 'function') render();
+    if (typeof updateInGameCommandersBar === 'function') updateInGameCommandersBar();
+    if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
+}
+
+/**
+ * 필드 위 히어로 토큰 직접 클릭 시 동작
+ */
+function handleHeroTokenClick(charId) {
+    if (typeof deployedHeroes === 'undefined' || !deployedHeroes[charId]) return;
+    const hero = deployedHeroes[charId];
+    const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+    const charName = charBase ? charBase.name : '지휘관';
+
+    if (hero.cooldownSec > 0) {
+        if (typeof showFloatingDamage === 'function') {
+            showFloatingDamage(hero.x, hero.y, `⏳ ${charName} 이동 쿨다운: ${hero.cooldownSec}초`, "#94a3b8");
+        }
+    } else {
+        toggleHeroDeployMode(charId);
+    }
+}
+
+/**
+ * 인게임 틱(200ms)마다 전장에 강림한 UR/U 히어로 유닛의 요격 사격 처리
+ */
+function handleHeroAttacks() {
+    if (typeof deployedHeroes === 'undefined' || !enemies || enemies.length === 0) return;
+
+    for (const [charId, hero] of Object.entries(deployedHeroes)) {
+        if (!hero) continue;
+
+        // 공격 쿨다운 처리 (기본 0.8초 주기 = 4틱)
+        if (hero.attackCooldown > 0) {
+            hero.attackCooldown--;
+            continue;
+        }
+
+        const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+        if (!charBase) continue;
+
+        const isGradeU = (charBase.grade === 'U');
+        const damage = isGradeU ? 100 : 65;
+        const range = 2.5; // 사거리 반경 2.5타일
+
+        // 사거리 내 살아있는 적 탐색 (진행도가 가장 높은 적 우선 타겟팅)
+        let target = null;
+        let maxProgress = -1;
+
+        for (const enemy of enemies) {
+            if (!enemy.alive) continue;
+            const dist = Math.hypot(enemy.x - hero.x, enemy.y - hero.y);
+            if (dist <= range) {
+                const progress = enemy.pathIndex || 0;
+                if (progress > maxProgress) {
+                    maxProgress = progress;
+                    target = enemy;
+                }
+            }
+        }
+
+        if (target) {
+            // 사격 실행 (공격 쿨다운 4틱 = 0.8초)
+            hero.attackCooldown = 4;
+
+            // 투사체/레이저 시각 효과
+            if (typeof createLaserEffect === 'function') {
+                const beamColor = isGradeU ? "#c084fc" : "#fbbf24";
+                createLaserEffect(hero.x, hero.y, target.x, target.y, beamColor);
+            }
+
+            // 데미지 적용
+            target.hp -= damage;
+            if (typeof onEnemyHit === 'function') {
+                const hitColor = isGradeU ? "#a855f7" : "#f59e0b";
+                onEnemyHit(target, damage, hitColor, true);
+            }
+
+            // 전투 통계 누적
+            if (typeof battleStats !== 'undefined' && battleStats) {
+                if (!battleStats.commanders) battleStats.commanders = {};
+                battleStats.commanders[charId] = (battleStats.commanders[charId] || 0) + damage;
+                battleStats.totalDamage = (battleStats.totalDamage || 0) + damage;
+            }
+        }
+    }
 }
 

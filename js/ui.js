@@ -61,9 +61,53 @@ function render() {
             `;
         }
 
+        // v0.39.0 전장 강림 히어로 유닛 및 3x3 지휘 오라 필드 렌더링
+        if (typeof deployedHeroes !== 'undefined') {
+            // 1. 3x3 지휘 오라 필드 착색
+            for (const [hId, hData] of Object.entries(deployedHeroes)) {
+                if (hData && Math.abs(cell.x - hData.x) <= 1 && Math.abs(cell.y - hData.y) <= 1) {
+                    dom.classList.add("hero-aura-tile");
+                    break;
+                }
+            }
+
+            // 2. 히어로 필드 토큰 (이후 모듈러 캐릭터 예정 -> 현재는 심플한 원형 토큰)
+            for (const [hId, hData] of Object.entries(deployedHeroes)) {
+                if (hData && hData.x === cell.x && hData.y === cell.y) {
+                    dom.classList.add("has-hero");
+                    const cBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[hId] : null;
+                    const cAvatar = (cBase && cBase.avatar) ? cBase.avatar : '⚡';
+                    const cGrade = (cBase && cBase.grade) ? cBase.grade : 'UR';
+                    const cName = (cBase && cBase.name) ? cBase.name : '히어로';
+                    dom.innerHTML = `
+                        <div class="hero-simple-token grade-${cGrade}" title="⚡ ${cName} (3x3 지휘 오라 전개 중 / 클릭 시 이동)">
+                            <span class="hero-token-core">${cAvatar}</span>
+                        </div>
+                    `;
+                    break;
+                }
+            }
+        }
+
         // 대장 강림/이동 모드 시 비어있는 기반(벽) 하이라이트
         if (typeof isLeaderDeployMode !== 'undefined' && isLeaderDeployMode && cell.buildable && !cell.tower && !(leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y)) {
             dom.classList.add("leader-targetable");
+        }
+
+        // 히어로 유닛 강림/이동 모드 시 비어있는 기반(벽) 하이라이트
+        if (typeof heroDeployingCharId !== 'undefined' && heroDeployingCharId && cell.buildable && !cell.tower && !cell.isStart && !cell.isGoal) {
+            let occupied = false;
+            if (typeof deployedHeroes !== 'undefined') {
+                for (const [oId, h] of Object.entries(deployedHeroes)) {
+                    if (h && h.x === cell.x && h.y === cell.y && oId !== heroDeployingCharId) {
+                        occupied = true;
+                        break;
+                    }
+                }
+            }
+            if (!occupied) {
+                dom.classList.add("hero-targetable");
+            }
         }
 
         if (selectedBoardTower && selectedBoardTower.x === cell.x && selectedBoardTower.y === cell.y) {
@@ -354,6 +398,49 @@ function updateInGameCommandersBar() {
             }
         }
 
+        // v0.39.0 UR/U 지휘관 전장 직접 강림 컨트롤 및 오라 마크업
+        let heroControlHtml = "";
+        if (charBase.grade === 'UR' || charBase.grade === 'U') {
+            const auraSpec = (typeof getHeroAuraSpec === 'function') ? getHeroAuraSpec(charId) : null;
+            const heroData = (typeof deployedHeroes !== 'undefined') ? deployedHeroes[charId] : null;
+            const isSelecting = (typeof heroDeployingCharId !== 'undefined' && heroDeployingCharId === charId);
+
+            let auraHtml = "";
+            if (auraSpec) {
+                auraHtml = `
+                    <div class="ingame-hero-aura-tag" title="${auraSpec.name}: ${auraSpec.desc}">
+                        <span>✨ 3x3 지휘 오라: ${auraSpec.desc}</span>
+                    </div>
+                `;
+            }
+
+            let actionBtnHtml = "";
+            if (!heroData) {
+                actionBtnHtml = `
+                    <button class="btn-hero-card-action ${isSelecting ? 'active' : ''}" onclick="event.stopPropagation(); toggleHeroDeployMode('${charId}');">
+                        ${isSelecting ? '⚡ 강림 타일 선택 중...' : '⚡ 전장 직접 강림'}
+                    </button>
+                `;
+            } else if (heroData.cooldownSec > 0) {
+                actionBtnHtml = `
+                    <div class="ingame-hero-cooldown-notice">
+                        ⏳ 전술 이동 쿨다운 (${heroData.cooldownSec}초)
+                    </div>
+                `;
+            } else {
+                actionBtnHtml = `
+                    <button class="btn-hero-card-action relocate ${isSelecting ? 'active' : ''}" onclick="event.stopPropagation(); toggleHeroDeployMode('${charId}');">
+                        ${isSelecting ? '🔄 이동 타일 선택 중...' : '🔄 전술 재배치 (15s)'}
+                    </button>
+                `;
+            }
+
+            heroControlHtml = `
+                ${auraHtml}
+                ${actionBtnHtml}
+            `;
+        }
+
         card.innerHTML = `
             <div class="ingame-card-header">
                 <span class="ingame-card-role-badge ${isLeader ? 'leader' : ''}">
@@ -380,6 +467,7 @@ function updateInGameCommandersBar() {
 
             ${leaderBonusHtml}
             ${leaderControlHtml}
+            ${heroControlHtml}
         `;
 
         bar.appendChild(card);

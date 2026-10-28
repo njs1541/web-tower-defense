@@ -884,4 +884,79 @@ function getActiveRunePassives() {
     return passives;
 }
 
+/**
+ * v0.39.0 결전 지휘관(Hero Unit) 고유 지휘 오라(Aura) 스펙 조회
+ * @param {string} charId - 지휘관 ID
+ * @returns {Object} { name, desc, color, range, critChance, critMulti, attackSpeedBonus, fireDamageBonus, globalDamageBonus, protectCrawler }
+ */
+function getHeroAuraSpec(charId) {
+    const cInfo = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+    if (!cInfo) return null;
+
+    // 1. 세라피나 (UR, 성스러운 대사제)
+    if (charId === 'char_seraphina') {
+        return {
+            name: "신성 지휘 오라",
+            desc: "주변 3x3 타워 치명타율 +15% & 치명타 피해 +0.5배 증폭",
+            color: "#f59e0b",
+            range: 1, // 3x3
+            critChance: 0.15,
+            critMulti: 0.5,
+            attackSpeedBonus: 0,
+            fireDamageBonus: 0,
+            globalDamageBonus: 0,
+            protectCrawler: false
+        };
+    }
+    // 2. 베로니카 (UR, 홍련의 총사령관)
+    if (charId === 'char_veronica') {
+        return {
+            name: "홍련 지휘 오라",
+            desc: "주변 3x3 타워 공격속도 +20% 가속 & 화염/폭탄 타워 피해 +25%",
+            color: "#ef4444",
+            range: 1, // 3x3
+            critChance: 0,
+            critMulti: 0,
+            attackSpeedBonus: 0.20,
+            fireDamageBonus: 0.25,
+            globalDamageBonus: 0,
+            protectCrawler: false
+        };
+    }
+    // 3. 루미나 (U, 성간의 지배자)
+    if (charId === 'char_lumina') {
+        return {
+            name: "창세 성간 결계 오라",
+            desc: "전 필드 타워 피해 +15% & 주변 3x3 타워 공속 +15% & 크롤러 철거 절대 차단",
+            color: "#a855f7",
+            range: 1, // 3x3
+            critChance: 0.10,
+            critMulti: 0.3,
+            attackSpeedBonus: 0.15,
+            fireDamageBonus: 0,
+            globalDamageBonus: 0.15,
+            protectCrawler: true
+        };
+    }
+
+    // 기본 UR/U 히어로 오라
+    if (cInfo.grade === 'UR' || cInfo.grade === 'U') {
+        return {
+            name: "결전 지휘 오라",
+            desc: "주변 3x3 타워 공격속도 +15% & 치명타율 +10%",
+            color: "#38bdf8",
+            range: 1,
+            critChance: 0.10,
+            critMulti: 0.3,
+            attackSpeedBonus: 0.15,
+            fireDamageBonus: 0,
+            globalDamageBonus: 0,
+            protectCrawler: false
+        };
+    }
+
+    return null;
+}
+
+
 
