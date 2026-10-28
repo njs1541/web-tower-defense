@@ -31,9 +31,20 @@ function render() {
         }
         if (cell.buildable) {
             dom.classList.add("buildable");
-            // 타워 건설 모드일 때 빈 기반을 '설치 가능'으로 맥동 하이라이트
+            // 타워 건설 모드일 때 대장/히어로가 없는 순수 빈 기반만 '설치 가능'으로 맥동 하이라이트
             if (isBuildMode && !cell.tower) {
-                dom.classList.add("tower-placeable");
+                let occupiedByUnit = (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y);
+                if (!occupiedByUnit && typeof deployedHeroes !== 'undefined') {
+                    for (const h of Object.values(deployedHeroes)) {
+                        if (h && h.x === cell.x && h.y === cell.y) {
+                            occupiedByUnit = true;
+                            break;
+                        }
+                    }
+                }
+                if (!occupiedByUnit) {
+                    dom.classList.add("tower-placeable");
+                }
             }
         }
 
@@ -89,15 +100,26 @@ function render() {
             }
         }
 
-        // 대장 강림/이동 모드 시 비어있는 기반(벽) 하이라이트
+        // 대장 강림/이동 모드 시 비어있는 기반(벽) 하이라이트 (다른 히어로 점유 타일 제외)
         if (typeof isLeaderDeployMode !== 'undefined' && isLeaderDeployMode && cell.buildable && !cell.tower && !(leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y)) {
-            dom.classList.add("leader-targetable");
+            let occupiedByHero = false;
+            if (typeof deployedHeroes !== 'undefined') {
+                for (const h of Object.values(deployedHeroes)) {
+                    if (h && h.x === cell.x && h.y === cell.y) {
+                        occupiedByHero = true;
+                        break;
+                    }
+                }
+            }
+            if (!occupiedByHero) {
+                dom.classList.add("leader-targetable");
+            }
         }
 
-        // 히어로 유닛 강림/이동 모드 시 비어있는 기반(벽) 하이라이트
+        // 히어로 유닛 강림/이동 모드 시 비어있는 기반(벽) 하이라이트 (대장 및 다른 히어로 점유 타일 제외)
         if (typeof heroDeployingCharId !== 'undefined' && heroDeployingCharId && cell.buildable && !cell.tower && !cell.isStart && !cell.isGoal) {
-            let occupied = false;
-            if (typeof deployedHeroes !== 'undefined') {
+            let occupied = (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y);
+            if (!occupied && typeof deployedHeroes !== 'undefined') {
                 for (const [oId, h] of Object.entries(deployedHeroes)) {
                     if (h && h.x === cell.x && h.y === cell.y && oId !== heroDeployingCharId) {
                         occupied = true;
@@ -218,8 +240,8 @@ function updateTowerButtons() {
     container.innerHTML = ""; // 버튼 초기화
 
     // 출전 지휘관 카드들에 등록/관장된 타워 목록(라이선스) 조회 (v0.25.1 New)
-    const authorizedTowers = (typeof getAuthorizedTowerTypes === 'function') 
-        ? getAuthorizedTowerTypes() 
+    const authorizedTowers = (typeof getAuthorizedTowerTypes === 'function')
+        ? getAuthorizedTowerTypes()
         : ['ranged'];
 
     if (authorizedTowers.length === 0) {
@@ -255,12 +277,12 @@ function updateTowerButtons() {
         }
 
         // 속성 크리스탈 미니 뱃지 (v0.28.0 New)
-        const shardThumb = stats.shardImage 
-            ? `<img src="${stats.shardImage}" style="width: 18px; height: 18px; border-radius: 4px; object-fit: cover; margin-right: 6px; border: 1px solid rgba(0,0,0,0.15);">` 
+        const shardThumb = stats.shardImage
+            ? `<img src="${stats.shardImage}" style="width: 18px; height: 18px; border-radius: 4px; object-fit: cover; margin-right: 6px; border: 1px solid rgba(0,0,0,0.15);">`
             : '';
 
         // 스톡 뱃지 스타일
-        const stockBadgeStyle = isOutOfStock 
+        const stockBadgeStyle = isOutOfStock
             ? "background: #ef4444; color: #fff; padding: 2px 6px; border-radius: 10px; font-weight: bold; font-size: 10px;"
             : "background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 6px; border-radius: 10px; font-weight: bold; font-size: 10px;";
 
@@ -364,9 +386,10 @@ function updateInGameCommandersBar() {
             }
         }
 
-        // 대장 컨트롤 및 보너스 마크업
+        // 대장 컨트롤 및 보너스 마크업 (UR/U 결전 히어로는 전용 강림 컨트롤을 사용하므로 구형 대장 버튼 중복 표시 제외)
         let leaderControlHtml = "";
         let leaderBonusHtml = "";
+        const isHeroUnit = (charBase.grade === 'UR' || charBase.grade === 'U');
         if (isLeader) {
             const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
             if (leaderInfo && leaderInfo.bonusDesc) {
@@ -377,24 +400,26 @@ function updateInGameCommandersBar() {
                 `;
             }
 
-            if (!leaderDeployed) {
-                leaderControlHtml = `
-                    <button class="btn-leader-card-action ${isLeaderDeployMode ? 'active' : ''}" onclick="event.stopPropagation(); toggleLeaderDeployMode();">
-                        👑 대장 필드 강림 (벽에 배치)
-                    </button>
-                `;
-            } else if (!leaderRelocatedThisRound) {
-                leaderControlHtml = `
-                    <button class="btn-leader-card-action relocate ${isLeaderDeployMode ? 'active' : ''}" onclick="event.stopPropagation(); toggleLeaderDeployMode();">
-                        👑 전술 위치 이동 (1회 가능)
-                    </button>
-                `;
-            } else {
-                leaderControlHtml = `
-                    <div class="ingame-leader-relocated-notice">
-                        🔒 이번 라운드 이동 완료 (다음 라운드 가능)
-                    </div>
-                `;
+            if (!isHeroUnit) {
+                if (!leaderDeployed) {
+                    leaderControlHtml = `
+                        <button class="btn-leader-card-action ${isLeaderDeployMode ? 'active' : ''}" onclick="event.stopPropagation(); toggleLeaderDeployMode();">
+                            👑 대장 필드 강림 (벽에 배치)
+                        </button>
+                    `;
+                } else if (!leaderRelocatedThisRound) {
+                    leaderControlHtml = `
+                        <button class="btn-leader-card-action relocate ${isLeaderDeployMode ? 'active' : ''}" onclick="event.stopPropagation(); toggleLeaderDeployMode();">
+                            👑 전술 위치 이동 (1회 가능)
+                        </button>
+                    `;
+                } else {
+                    leaderControlHtml = `
+                        <div class="ingame-leader-relocated-notice">
+                            🔒 이번 라운드 이동 완료 (다음 라운드 가능)
+                        </div>
+                    `;
+                }
             }
         }
 
@@ -519,17 +544,17 @@ function showBattleReport(isVictory = false) {
     const totalDmg = (typeof battleStats !== 'undefined') ? Math.round(battleStats.totalDamage || 0) : 0;
     if (dmgEl) dmgEl.innerText = `${totalDmg.toLocaleString()} DMG`;
 
-    // 3. MVP 지휘관 산출
+    // 3. MVP 지휘관 산출 (타워 관장 딜량 & 강림 지휘관 직접 요격 딜량 통합 비교)
     let mvpCharId = (typeof USER_DATA !== 'undefined' && USER_DATA.characterDeck) ? USER_DATA.characterDeck[0] : null;
     let mvpBase = (mvpCharId && typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[mvpCharId] : null;
+    let bestContributionDmg = -1;
 
-    // 타워 딜량이 가장 높은 타워의 관장 지휘관을 우선 탐색
+    // 3-1. 타워 딜량이 가장 높은 타워의 관장 지휘관 탐색
     if (typeof battleStats !== 'undefined' && battleStats.towers) {
-        let maxTowerDmg = -1;
         let bestTowerKey = null;
         for (const [tKey, tData] of Object.entries(battleStats.towers)) {
-            if (tData.damage > maxTowerDmg) {
-                maxTowerDmg = tData.damage;
+            if (tData.damage > bestContributionDmg) {
+                bestContributionDmg = tData.damage;
                 bestTowerKey = tKey;
             }
         }
@@ -541,6 +566,17 @@ function showBattleReport(isVictory = false) {
                     mvpBase = cInfo;
                     break;
                 }
+            }
+        }
+    }
+
+    // 3-2. 전장 직접 강림 히어로(UR/U)의 요격 딜량 비교
+    if (typeof battleStats !== 'undefined' && battleStats.commanders) {
+        for (const [cId, cDmg] of Object.entries(battleStats.commanders)) {
+            if (cDmg > bestContributionDmg && CHARACTER_DATA[cId]) {
+                bestContributionDmg = cDmg;
+                mvpCharId = cId;
+                mvpBase = CHARACTER_DATA[cId];
             }
         }
     }
@@ -561,35 +597,64 @@ function showBattleReport(isVictory = false) {
         }
     }
 
-    // 4. 타워별 딜량 지분율 리스트 렌더링
+    // 4. 타워 및 강림 지휘관 딜량 지분율 리스트 렌더링
     const towersList = document.getElementById("report-towers-list");
     if (towersList) {
         towersList.innerHTML = "";
         const towerStatsObj = (typeof battleStats !== 'undefined' && battleStats.towers) ? battleStats.towers : {};
-        const entries = Object.entries(towerStatsObj).filter(([k, d]) => d.damage > 0);
+        const cmdStatsObj = (typeof battleStats !== 'undefined' && battleStats.commanders) ? battleStats.commanders : {};
 
-        if (entries.length === 0) {
-            towersList.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 12px; padding: 10px;">전투에 참여한 타워 기록이 없습니다.</div>`;
+        const combinedEntries = [];
+        for (const [tKey, d] of Object.entries(towerStatsObj)) {
+            if (d && d.damage > 0) {
+                const tInfo = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[tKey]) ? TOWER_DATA[tKey] : { name: tKey, color: "#3b82f6" };
+                const emblem = (typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[tKey]) || '🏰';
+                combinedEntries.push({
+                    name: tInfo.name,
+                    emblem: emblem,
+                    color: tInfo.color || "#3b82f6",
+                    damage: d.damage,
+                    kills: d.kills || 0,
+                    isHero: false
+                });
+            }
+        }
+        for (const [cId, cDmg] of Object.entries(cmdStatsObj)) {
+            if (cDmg > 0) {
+                const cInfo = (typeof CHARACTER_DATA !== 'undefined' && CHARACTER_DATA[cId]) ? CHARACTER_DATA[cId] : { name: cId, avatar: '⚡', grade: 'UR' };
+                combinedEntries.push({
+                    name: `${cInfo.name} (강림 요격)`,
+                    emblem: cInfo.avatar || '⚡',
+                    color: cInfo.grade === 'U' ? "#c084fc" : "#f43f5e",
+                    damage: cDmg,
+                    kills: null,
+                    isHero: true
+                });
+            }
+        }
+
+        if (combinedEntries.length === 0) {
+            towersList.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 12px; padding: 10px;">전투에 참여한 타워 및 지휘관 기록이 없습니다.</div>`;
         } else {
             // 딜량 높은 순으로 정렬
-            entries.sort((a, b) => b[1].damage - a[1].damage);
+            combinedEntries.sort((a, b) => b.damage - a.damage);
 
-            entries.forEach(([tKey, data]) => {
-                const tInfo = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[tKey]) ? TOWER_DATA[tKey] : { name: tKey, color: "#3b82f6" };
-                const pct = totalDmg > 0 ? Math.round((data.damage / totalDmg) * 100) : 0;
+            combinedEntries.forEach(item => {
+                const pct = totalDmg > 0 ? Math.round((item.damage / totalDmg) * 100) : 0;
+                const killText = item.isHero ? `⚡ 결전 요격` : `<strong>${item.kills}</strong> Kills`;
 
                 const row = document.createElement("div");
                 row.className = "report-tower-row";
                 row.innerHTML = `
                     <div class="report-tower-info">
-                        <span style="font-size: 16px;">${(typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[tKey]) || '🏰'}</span>
-                        <span style="color:${tInfo.color || '#fff'}">${tInfo.name}</span>
+                        <span style="font-size: 16px;">${item.emblem}</span>
+                        <span style="color:${item.color}">${item.name}</span>
                     </div>
                     <div class="report-progress-bar-wrap">
-                        <div class="report-progress-fill" style="width: ${pct}%; background: ${tInfo.color || '#3b82f6'};"></div>
+                        <div class="report-progress-fill" style="width: ${pct}%; background: ${item.color};"></div>
                     </div>
                     <div class="report-tower-stats">
-                        <strong>${Math.round(data.damage).toLocaleString()}</strong> DMG (${pct}%) / <strong>${data.kills || 0}</strong> Kills
+                        <strong>${Math.round(item.damage).toLocaleString()}</strong> DMG (${pct}%) / ${killText}
                     </div>
                 `;
                 towersList.appendChild(row);

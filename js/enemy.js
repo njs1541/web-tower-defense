@@ -347,6 +347,16 @@ function gameLoopTick() {
             }
         }
 
+        // v0.39.0 라운드 종료 시 강림 히어로 전술 이동 쿨다운 즉시 초기화 (정비 시간 자유 이동)
+        if (typeof deployedHeroes !== 'undefined') {
+            for (const hero of Object.values(deployedHeroes)) {
+                if (hero) hero.cooldownSec = 0;
+            }
+            if (typeof updateInGameCommandersBar === 'function') {
+                updateInGameCommandersBar();
+            }
+        }
+
         // 라운드 종료 후 버튼 및 보드 상태 갱신
         if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
     }
@@ -531,10 +541,37 @@ function demolishBase(cell) {
         return;
     }
 
+    // v0.39.0 강림 히어로 유닛 본체 보호 및 루미나(U) 3x3 성간 결계 오라 크롤러 철거 차단
+    if (typeof deployedHeroes !== 'undefined') {
+        for (const [hId, hData] of Object.entries(deployedHeroes)) {
+            if (!hData) continue;
+            // 1) 히어로 본체가 직접 서 있는 기반은 절대 철거 불가
+            if (cell.x === hData.x && cell.y === hData.y) {
+                showFloatingDamage(cell.x, cell.y, "🛡️ 결전 지휘관! 철거 차단!", "#f59e0b");
+                return;
+            }
+            // 2) 루미나 등 protectCrawler 오라 보유 히어로의 3x3 범위 내 기반/타워 철거 절대 차단
+            const auraSpec = (typeof getHeroAuraSpec === 'function') ? getHeroAuraSpec(hId) : null;
+            if (auraSpec && auraSpec.protectCrawler && Math.abs(cell.x - hData.x) <= 1 && Math.abs(cell.y - hData.y) <= 1) {
+                showFloatingDamage(cell.x, cell.y, "🌌 성간 결계 오라! 철거 차단!", "#a855f7");
+                return;
+            }
+        }
+    }
+
     cell.buildable = false;
     const hadTower = cell.tower;
     cell.tower = null;
     cell.targeting = null;
+    cell.inGameLevel = 0;
+    cell.investedGold = 0;
+
+    // 크롤러에 의해 타워가 파괴된 경우 해당 타워의 설치 스톡 1 복구
+    if (hadTower && typeof commanderTowerRemaining !== 'undefined' && typeof commanderTowerStocks !== 'undefined') {
+        const maxStock = commanderTowerStocks[hadTower] || 0;
+        commanderTowerRemaining[hadTower] = Math.min(maxStock, (commanderTowerRemaining[hadTower] || 0) + 1);
+        if (typeof updateTowerButtons === 'function') updateTowerButtons();
+    }
 
     builtBaseCount = Math.max(0, (builtBaseCount || 0) - 1);
 

@@ -54,8 +54,8 @@ function handleCellClick(x, y) {
         return;
     }
 
-    // 0-2. 필드 위 히어로 토큰 직접 클릭 시 이동 모드 토글
-    if (typeof deployedHeroes !== 'undefined') {
+    // 0-2. 필드 위 히어로 토큰 직접 클릭 시 이동 모드 토글 (단, 타워 건설 모드일 때는 아래 건설 검증으로 넘김)
+    if (interactionMode !== 'build' && typeof deployedHeroes !== 'undefined') {
         for (const [hId, hData] of Object.entries(deployedHeroes)) {
             if (hData && hData.x === x && hData.y === y) {
                 handleHeroTokenClick(hId);
@@ -69,7 +69,7 @@ function handleCellClick(x, y) {
         handleLeaderDeployClick(cell);
         return;
     }
-    if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
+    if (interactionMode !== 'build' && typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
         toggleLeaderDeployMode();
         return;
     }
@@ -182,8 +182,16 @@ function handleCellClick(x, y) {
         }
 
         if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
-            alert("대장이 서 있는 기반에는 타워를 건설할 수 없습니다! (대장을 이동시켜 주세요)");
+            alert("대장이 서 있는 기반에는 타워를 건설할 수 없습니다! (대장을 먼저 이동시켜 주세요)");
             return;
+        }
+        if (typeof deployedHeroes !== 'undefined') {
+            for (const hData of Object.values(deployedHeroes)) {
+                if (hData && hData.x === x && hData.y === y) {
+                    alert("지휘관이 강림해 있는 기반에는 타워를 건설할 수 없습니다! (지휘관을 먼저 이동시켜 주세요)");
+                    return;
+                }
+            }
         }
 
         // 타워 설치 성공: 스톡 1 차감 (TP는 소모하지 않고 무료 설치, 레벨업 강화에 TP 집중 소모)
@@ -290,8 +298,9 @@ function attackFromTowers() {
         // 데미지 계산: 관통 보너스 및 치명타 판정 (v0.24.0 / v0.34.0 시너지 반영)
         let totalCritChance = (passives.critChance || 0) + (synStats.critChance || 0);
         let totalCritMulti = Math.max(passives.critMultiplier || 2.0, synStats.critMultiplier || 2.0);
+        let totalAtkSpeedBonus = (synStats.attackSpeedRatio || 0);
 
-        let baseDmg = towerStats.damage * (1 + (passives.bonusDamageRatio || 0));
+        let baseDmg = towerStats.damage * (1 + (passives.bonusDamageRatio || 0) + (synStats.extraDamageRatio || 0));
 
         // v0.39.0 인접 3x3 강림 지휘관(Hero Unit) 지휘 오라 버프 집계
         if (typeof deployedHeroes !== 'undefined') {
@@ -309,10 +318,21 @@ function attackFromTowers() {
                 if (Math.abs(cell.x - hData.x) <= 1 && Math.abs(cell.y - hData.y) <= 1) {
                     if (auraSpec.critChance > 0) totalCritChance += auraSpec.critChance;
                     if (auraSpec.critMulti > 0) totalCritMulti += auraSpec.critMulti;
+                    if (auraSpec.attackSpeedBonus > 0) totalAtkSpeedBonus += auraSpec.attackSpeedBonus;
                     if (auraSpec.fireDamageBonus > 0 && (cell.tower === 'bomb' || cell.tower === 'fire')) {
                         baseDmg *= (1 + auraSpec.fireDamageBonus);
                     }
                 }
+            }
+        }
+
+        // 공격속도 가속 게이지 누적 (1.0 도달 시 연속 2연사 발동)
+        let isRapidDoubleShot = false;
+        if (totalAtkSpeedBonus > 0) {
+            cell.accelGauge = (cell.accelGauge || 0) + totalAtkSpeedBonus;
+            if (cell.accelGauge >= 1.0) {
+                cell.accelGauge -= 1.0;
+                isRapidDoubleShot = true;
             }
         }
 
@@ -331,7 +351,8 @@ function attackFromTowers() {
             isCrit = true;
             baseDmg *= totalCritMulti;
         }
-        const finalDamage = Math.max(1, Math.round(baseDmg * 10) / 10);
+        const singleShotDmg = Math.max(1, Math.round(baseDmg * 10) / 10);
+        const finalDamage = isRapidDoubleShot ? Math.round(singleShotDmg * 2 * 10) / 10 : singleShotDmg;
 
         // v0.36.0 오버킬 방지용 대미지 예약 (Pending Damage 등록)
         if (pendingDamageMap && targetEnemy.id) {
@@ -339,11 +360,18 @@ function attackFromTowers() {
             pendingDamageMap.set(targetEnemy.id, currentPending + finalDamage);
         }
 
-        // 투사체 발사
+        // 투사체 발사 (가속 더블샷 발동 시 70ms 간격 2연사 연출)
         const startDom = getDomCell(cell.x, cell.y);
         const targetDom = targetEnemy.element;
         if (startDom && targetDom) {
             createProjectile(startDom, targetDom, isCrit ? "#ef4444" : towerStats.color);
+            if (isRapidDoubleShot) {
+                setTimeout(() => {
+                    if (targetEnemy.alive && targetEnemy.element) {
+                        createProjectile(startDom, targetEnemy.element, "#fde047");
+                    }
+                }, 70);
+            }
         }
 
         // 배속에 맞춘 투사체 도달 딜레이
@@ -457,6 +485,16 @@ function handleLeaderDeployClick(cell) {
     if (!cell.buildable || cell.tower) {
         showFloatingDamage(cell.x, cell.y, "⚠️ 타워 없는 기반(벽)에만 배치 가능!", "#ef4444");
         return;
+    }
+
+    // 다른 강림 히어로가 이미 점유 중인 기반인지 확인
+    if (typeof deployedHeroes !== 'undefined') {
+        for (const hData of Object.values(deployedHeroes)) {
+            if (hData && hData.x === cell.x && hData.y === cell.y) {
+                showFloatingDamage(cell.x, cell.y, "❌ 다른 지휘관이 이미 강림 중입니다!", "#ef4444");
+                return;
+            }
+        }
     }
 
     // 이미 대장이 해당 자리에 서 있는 경우 (모드 해제)
@@ -1310,7 +1348,7 @@ function handleHeroDeployClick(cell, charId) {
         return;
     }
 
-    // 3. 다른 히어로 중복 배치 검증
+    // 3. 다른 히어로 또는 대장 중복 배치 검증
     if (typeof deployedHeroes !== 'undefined') {
         for (const [oId, h] of Object.entries(deployedHeroes)) {
             if (oId !== charId && h && h.x === cell.x && h.y === cell.y) {
@@ -1320,6 +1358,12 @@ function handleHeroDeployClick(cell, charId) {
                 return;
             }
         }
+    }
+    if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
+        if (typeof showFloatingDamage === 'function') {
+            showFloatingDamage(cell.x, cell.y, "❌ 대장이 이미 배치된 기반입니다!", "#ef4444");
+        }
+        return;
     }
 
     // 4. 입구/출구 검증
@@ -1336,10 +1380,13 @@ function handleHeroDeployClick(cell, charId) {
     }
 
     const isRelocate = !!deployedHeroes[charId];
+    // 비전투 정비 시간(!gameRunning)에는 쿨다운 없이 즉시 재배치 허용, 전투 중에는 15초 쿨다운 적용
+    const nextCooldown = (typeof gameRunning !== 'undefined' && gameRunning) ? 15 : 0;
+
     deployedHeroes[charId] = {
         x: cell.x,
         y: cell.y,
-        cooldownSec: 15, // 15초 전술 이동 쿨다운
+        cooldownSec: nextCooldown,
         attackCooldown: 0
     };
 
@@ -1379,6 +1426,8 @@ function handleHeroTokenClick(charId) {
 function handleHeroAttacks() {
     if (typeof deployedHeroes === 'undefined' || !enemies || enemies.length === 0) return;
 
+    const passives = (typeof getActiveRunePassives === 'function') ? getActiveRunePassives() : {};
+
     for (const [charId, hero] of Object.entries(deployedHeroes)) {
         if (!hero) continue;
 
@@ -1392,10 +1441,10 @@ function handleHeroAttacks() {
         if (!charBase) continue;
 
         const isGradeU = (charBase.grade === 'U');
-        const damage = isGradeU ? 100 : 65;
+        const baseDamage = isGradeU ? 100 : 65;
         const range = 2.5; // 사거리 반경 2.5타일
 
-        // 사거리 내 살아있는 적 탐색 (진행도가 가장 높은 적 우선 타겟팅)
+        // 사거리 내 살아있는 적 탐색 (진행도가 가장 높은 선두 적 우선 타겟팅)
         let target = null;
         let maxProgress = -1;
 
@@ -1415,25 +1464,44 @@ function handleHeroAttacks() {
             // 사격 실행 (공격 쿨다운 4틱 = 0.8초)
             hero.attackCooldown = 4;
 
-            // 투사체/레이저 시각 효과
-            if (typeof createLaserEffect === 'function') {
-                const beamColor = isGradeU ? "#c084fc" : "#fbbf24";
-                createLaserEffect(hero.x, hero.y, target.x, target.y, beamColor);
+            // 룬 패시브 및 치명타 반영
+            let finalDamage = baseDamage * (1 + (passives.bonusDamageRatio || 0));
+            let isCrit = false;
+            if (passives.critChance > 0 && Math.random() < passives.critChance) {
+                isCrit = true;
+                finalDamage *= (passives.critMultiplier || 2.0);
+            }
+            finalDamage = Math.max(1, Math.round(finalDamage));
+
+            const beamColor = isGradeU ? "#c084fc" : "#fbbf24";
+            const hitColor = isCrit ? "#ef4444" : (isGradeU ? "#a855f7" : "#f59e0b");
+
+            // 투사체 시각 효과 발사
+            const startDom = getDomCell(hero.x, hero.y);
+            const targetDom = target.element;
+            if (startDom && targetDom && typeof createProjectile === 'function') {
+                createProjectile(startDom, targetDom, isCrit ? "#ef4444" : beamColor);
             }
 
-            // 데미지 적용
-            target.hp -= damage;
-            if (typeof onEnemyHit === 'function') {
-                const hitColor = isGradeU ? "#a855f7" : "#f59e0b";
-                onEnemyHit(target, damage, hitColor, true);
-            }
+            // 투사체 도달 딜레이 후 데미지 및 통계 처리
+            const hitDelay = Math.max(50, Math.floor(180 / (gameSpeed || 1)));
+            setTimeout(() => {
+                if (!target.alive) return;
 
-            // 전투 통계 누적
-            if (typeof battleStats !== 'undefined' && battleStats) {
-                if (!battleStats.commanders) battleStats.commanders = {};
-                battleStats.commanders[charId] = (battleStats.commanders[charId] || 0) + damage;
-                battleStats.totalDamage = (battleStats.totalDamage || 0) + damage;
-            }
+                const effectiveDmg = Math.min(target.hp, finalDamage);
+                target.hp -= finalDamage;
+
+                // 전투 통계 누적
+                if (typeof battleStats !== 'undefined' && battleStats) {
+                    if (!battleStats.commanders) battleStats.commanders = {};
+                    battleStats.commanders[charId] = (battleStats.commanders[charId] || 0) + effectiveDmg;
+                    battleStats.totalDamage = (battleStats.totalDamage || 0) + effectiveDmg;
+                }
+
+                if (typeof onEnemyHit === 'function') {
+                    onEnemyHit(target, finalDamage, hitColor, isCrit);
+                }
+            }, hitDelay);
         }
     }
 }
