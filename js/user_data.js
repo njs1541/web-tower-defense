@@ -445,6 +445,35 @@ function calculateDeckStartingSupplies() {
 }
 
 /**
+ * 출전 덱에 편성된 지휘관들로부터 이번 게임에 설치 가능한 고정 타워 스톡(Stock) 총합 계산 (v0.36.0 New)
+ * @returns {Object} { melee: 4, ranged: 3, ... }
+ */
+function calculateDeckTowerStocks() {
+    const stocks = {};
+    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return stocks;
+
+    for (const charId of USER_DATA.characterDeck) {
+        const charInfo = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+        if (charInfo && charInfo.towerStock) {
+            for (const [key, count] of Object.entries(charInfo.towerStock)) {
+                stocks[key] = (stocks[key] || 0) + count;
+            }
+        }
+    }
+    return stocks;
+}
+
+/**
+ * 타워가 속한 지휘관 등급에 따른 환급율 계산 (C: 100%, UC: 80%, 기타: 60%) (v0.36.0 New)
+ */
+function getTowerRefundRateForCell(cell) {
+    if (!cell) return 0.6;
+    if (cell.towerOwnerGrade === 'C') return 1.0;
+    if (cell.towerOwnerGrade === 'UC') return 0.8;
+    return (typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6;
+}
+
+/**
  * 출전 덱에 편성된 지휘관들로부터 듀얼 시너지(원소 & 역할군) 계산 및 종합 버프 산출 (v0.34.0 New)
  * - 100인 이상의 캐릭터 확장에도 완벽히 대응하는 태그형 시너지 엔진
  * @returns {Object} { activeSynergies, bonusStats, elementCounts, roleCounts }

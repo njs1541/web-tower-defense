@@ -332,7 +332,7 @@ function gameLoopTick() {
 }
 
 /**
- * 지상 몬스터 이동 로직
+ * 지상 몬스터 이동 로직 (v0.37.0 코너링 감속 관성 연동)
  */
 function handleGroundMovement(enemy) {
     if (!enemy.dynamicPath || enemy.dynamicPath.length === 0 || enemy.pathIndex >= enemy.dynamicPath.length - 1) {
@@ -341,10 +341,38 @@ function handleGroundMovement(enemy) {
         enemy.pathIndex = 0;
     }
 
+    // v0.37.0 코너링(U턴) 감속 관성 지연 처리
+    if (enemy.cornerLag && enemy.cornerLag > 0) {
+        enemy.cornerLag--;
+        return; // 코너 회전 관성으로 인해 이번 이동 틱 1회 지연 (감속 효과)
+    }
+
     if (enemy.dynamicPath && enemy.dynamicPath.length > 0 && enemy.pathIndex < enemy.dynamicPath.length - 1) {
         enemy.pathIndex++;
         const next = enemy.dynamicPath[enemy.pathIndex];
         if (next) {
+            const dx = next.x - enemy.x;
+            const dy = next.y - enemy.y;
+
+            // 직전 이동 방향과 비교하여 90도 이상 방향 전환(코너) 감지
+            if (typeof enemy.lastMoveDx !== 'undefined' && typeof enemy.lastMoveDy !== 'undefined') {
+                if (dx !== enemy.lastMoveDx || dy !== enemy.lastMoveDy) {
+                    // 코너링 발생! 관성 감속 1틱 부여 및 회전 애니메이션
+                    enemy.cornerLag = 1;
+                    if (enemy.element) {
+                        const body = enemy.element.querySelector(".monster-body");
+                        if (body) {
+                            body.classList.add("corner-turn");
+                            setTimeout(() => {
+                                if (body) body.classList.remove("corner-turn");
+                            }, 300);
+                        }
+                    }
+                }
+            }
+
+            enemy.lastMoveDx = dx;
+            enemy.lastMoveDy = dy;
             enemy.x = next.x;
             enemy.y = next.y;
             updateEnemyPosition(enemy);

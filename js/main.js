@@ -120,6 +120,21 @@ function startGame() {
     isLeaderDeployMode = false;
     leaderAttackCooldown = 0;
 
+    // 3-3. v0.36.0 지휘관 고정 타워 스톡(Stock) 및 전투 통계 초기화
+    if (typeof calculateDeckTowerStocks === 'function') {
+        commanderTowerStocks = calculateDeckTowerStocks();
+        commanderTowerRemaining = { ...commanderTowerStocks };
+        console.log("출전 지휘관 고정 타워 스톡 초기화 완료:", commanderTowerRemaining);
+    }
+    pendingDamageMap = new Map();
+    battleStats = {
+        towers: {},
+        commanders: {},
+        totalDamage: 0,
+        totalKills: 0,
+        wastedOverkillDamage: 0
+    };
+
     // 4. 스테이지 테마 및 보드 배경 적용 (Phase D)
     const stage = (typeof STAGE_DATA !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : { boardBg: "#94a3b8" };
     const boardEl = document.getElementById("game-board");
@@ -139,7 +154,7 @@ function startGame() {
     }
 }
 
-function endGame() {
+function endGame(isVictory = false) {
     // 인터벌 명확하게 해제
     if (window.gameInterval) clearInterval(window.gameInterval);
     if (window.spawnInterval) clearInterval(window.spawnInterval);
@@ -153,12 +168,17 @@ function endGame() {
     const baseReward = 100 + (round * 10);
     const reward = Math.floor(baseReward * (stage.rewardMulti || 1.0));
 
-    alert(`게임 오버! 보상으로 ${reward} 골드를 획득했습니다! (스테이지 보너스 x${stage.rewardMulti || 1.0})`);
+    if (typeof addUserGold === 'function') {
+        addUserGold(reward);
+    }
 
-    addUserGold(reward);
-
-    // 저장 및 리로드
-    location.reload();
+    // v0.38.0 종합 전투 현황판(Battle Report) 출력
+    if (typeof showBattleReport === 'function') {
+        showBattleReport(isVictory);
+    } else {
+        alert(`게임 오버! 보상으로 ${reward} 골드를 획득했습니다! (스테이지 보너스 x${stage.rewardMulti || 1.0})`);
+        location.reload();
+    }
 }
 
 // 초기화 호출

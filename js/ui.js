@@ -6,6 +6,26 @@ const monsterCountDisplay = document.getElementById("monster-count");
 const towerPanel = document.querySelector("#info-panel div");
 
 function render() {
+    // v0.37.0 킬존(Kill Zone) 화망 커버리지 맵 사전 계산 (타워 사거리 중첩)
+    const towerCoverageMap = new Map();
+    for (const cell of board) {
+        if (!cell.tower) continue;
+        const towerStats = (typeof getGameTowerStats === 'function') ? getGameTowerStats(cell) : null;
+        if (!towerStats) continue;
+
+        const r = towerStats.range || 1;
+        for (let dx = -r; dx <= r; dx++) {
+            for (let dy = -r; dy <= r; dy++) {
+                const tx = cell.x + dx;
+                const ty = cell.y + dy;
+                if (tx >= 0 && tx < boardSize && ty >= 0 && ty < boardSize) {
+                    const key = `${tx},${ty}`;
+                    towerCoverageMap.set(key, (towerCoverageMap.get(key) || 0) + 1);
+                }
+            }
+        }
+    }
+
     for (const cell of board) {
         const dom = getDomCell(cell.x, cell.y);
         if (!dom) continue;
@@ -32,6 +52,12 @@ function render() {
         }
         if (cell.buildable) {
             dom.classList.add("buildable");
+        }
+
+        // v0.37.0 킬존(Kill Zone) 화망 하이라이트 (사거리 2기 이상 중첩된 통로)
+        const coverage = towerCoverageMap.get(`${cell.x},${cell.y}`) || 0;
+        if (coverage >= 2 && !cell.buildable && !cell.tower && !cell.isStart && !cell.isGoal) {
+            dom.classList.add(coverage >= 3 ? "killzone-high" : "killzone-cell");
         }
 
         // 타워 설치 상태
@@ -178,27 +204,53 @@ function updateTowerButtons() {
         const stats = TOWER_DATA[towerId];
         if (!stats) return;
 
+        // v0.36.0 고정 타워 스톡 정보 조회
+        const remaining = (commanderTowerRemaining && typeof commanderTowerRemaining[towerId] === 'number')
+            ? commanderTowerRemaining[towerId]
+            : 0;
+        const total = (commanderTowerStocks && typeof commanderTowerStocks[towerId] === 'number')
+            ? commanderTowerStocks[towerId]
+            : 0;
+
+        const isOutOfStock = remaining <= 0;
+
         const btn = document.createElement("button");
         btn.dataset.towerId = towerId; // 식별자
+        btn.className = `btn-tower-select ${isOutOfStock ? 'out-of-stock' : ''}`;
         btn.style.display = "flex";
         btn.style.alignItems = "center";
         btn.style.justifyContent = "space-between";
         btn.style.width = "100%";
         btn.style.marginBottom = "4px";
+        btn.style.opacity = isOutOfStock ? "0.55" : "1.0";
+        if (isOutOfStock) {
+            btn.style.filter = "grayscale(50%)";
+        }
 
         // 속성 크리스탈 미니 뱃지 (v0.28.0 New)
         const shardThumb = stats.shardImage 
             ? `<img src="${stats.shardImage}" style="width: 18px; height: 18px; border-radius: 4px; object-fit: cover; margin-right: 6px; border: 1px solid rgba(0,0,0,0.15);">` 
             : '';
 
+        // 스톡 뱃지 스타일
+        const stockBadgeStyle = isOutOfStock 
+            ? "background: #ef4444; color: #fff; padding: 2px 6px; border-radius: 10px; font-weight: bold; font-size: 10px;"
+            : "background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 2px 6px; border-radius: 10px; font-weight: bold; font-size: 10px;";
+
         btn.innerHTML = `
             <span style="display: flex; align-items: center;">${shardThumb}<strong>${stats.name}</strong></span>
-            <span style="font-size: 11px; opacity: 0.85;">${stats.cost}G</span>
+            <span class="tower-stock-pill" style="${stockBadgeStyle}" title="남은 설치 가능 수량 / 총 스톡">${remaining}/${total} 스톡</span>
         `;
 
         // 이벤트 바인딩
         btn.onclick = (e) => {
             e.stopPropagation(); // 상위 요소 클릭 방지
+            if (isOutOfStock) {
+                if (typeof showFloatingDamage === 'function') {
+                    showFloatingDamage(10, 10, "⚠️ 설치 가능 스톡이 없습니다!", "#ef4444");
+                }
+                return;
+            }
             selectTower(towerId);
         };
 
@@ -366,4 +418,137 @@ function interactWithCommanderInGame(charId) {
     if (typeof showFloatingDamage === 'function') {
         showFloatingDamage(10, 10, `💬 ${charBase.name}: "${q}"`, gradeInfo.color || "#f59e0b");
     }
+}
+
+/**
+ * ============================================================
+ * v0.38.0 종합 전투 현황판(Battle Report) 모달 표시 및 렌더링
+ * ============================================================
+ */
+function showBattleReport(isVictory = false) {
+    const modal = document.getElementById("battle-report-modal");
+    if (!modal) return;
+
+    // 1. 승리 / 패배 배지
+    const badge = document.getElementById("report-outcome-badge");
+    if (badge) {
+        badge.className = `report-badge ${isVictory ? 'victory' : 'defeat'}`;
+        badge.innerText = isVictory ? "🏆 STAGE CLEAR (VICTORY)" : "💀 DEFENSE FAILED (DEFEAT)";
+    }
+
+    // 2. 종합 지표 (진행 라운드, 처치 수, 유효 데미지)
+    const roundEl = document.getElementById("report-round-val");
+    if (roundEl) roundEl.innerText = `${round} Round`;
+
+    const killsEl = document.getElementById("report-kills-val");
+    const totalKills = (typeof battleStats !== 'undefined') ? (battleStats.totalKills || 0) : 0;
+    if (killsEl) killsEl.innerText = `${totalKills} 마리`;
+
+    const dmgEl = document.getElementById("report-total-dmg-val");
+    const totalDmg = (typeof battleStats !== 'undefined') ? Math.round(battleStats.totalDamage || 0) : 0;
+    if (dmgEl) dmgEl.innerText = `${totalDmg.toLocaleString()} DMG`;
+
+    // 3. MVP 지휘관 산출
+    let mvpCharId = (typeof USER_DATA !== 'undefined' && USER_DATA.characterDeck) ? USER_DATA.characterDeck[0] : null;
+    let mvpBase = (mvpCharId && typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[mvpCharId] : null;
+
+    // 타워 딜량이 가장 높은 타워의 관장 지휘관을 우선 탐색
+    if (typeof battleStats !== 'undefined' && battleStats.towers) {
+        let maxTowerDmg = -1;
+        let bestTowerKey = null;
+        for (const [tKey, tData] of Object.entries(battleStats.towers)) {
+            if (tData.damage > maxTowerDmg) {
+                maxTowerDmg = tData.damage;
+                bestTowerKey = tKey;
+            }
+        }
+        if (bestTowerKey && typeof USER_DATA !== 'undefined' && USER_DATA.characterDeck) {
+            for (const cId of USER_DATA.characterDeck) {
+                const cInfo = CHARACTER_DATA[cId];
+                if (cInfo && cInfo.towerStock && cInfo.towerStock[bestTowerKey] > 0) {
+                    mvpCharId = cId;
+                    mvpBase = cInfo;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (mvpBase) {
+        const mvpImg = document.getElementById("report-mvp-img");
+        if (mvpImg) {
+            mvpImg.src = mvpBase.image || "assets/char_liana.jpg";
+            mvpImg.style.display = "block";
+        }
+        const mvpName = document.getElementById("report-mvp-name");
+        if (mvpName) mvpName.innerText = `${mvpBase.title || ''} ${mvpBase.name}`;
+
+        const mvpQuote = document.getElementById("report-mvp-quote");
+        if (mvpQuote) {
+            const quotes = mvpBase.quotes || [mvpBase.desc];
+            mvpQuote.innerText = `"${quotes[0]}"`;
+        }
+    }
+
+    // 4. 타워별 딜량 지분율 리스트 렌더링
+    const towersList = document.getElementById("report-towers-list");
+    if (towersList) {
+        towersList.innerHTML = "";
+        const towerStatsObj = (typeof battleStats !== 'undefined' && battleStats.towers) ? battleStats.towers : {};
+        const entries = Object.entries(towerStatsObj).filter(([k, d]) => d.damage > 0);
+
+        if (entries.length === 0) {
+            towersList.innerHTML = `<div style="text-align: center; color: #94a3b8; font-size: 12px; padding: 10px;">전투에 참여한 타워 기록이 없습니다.</div>`;
+        } else {
+            // 딜량 높은 순으로 정렬
+            entries.sort((a, b) => b[1].damage - a[1].damage);
+
+            entries.forEach(([tKey, data]) => {
+                const tInfo = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[tKey]) ? TOWER_DATA[tKey] : { name: tKey, color: "#3b82f6" };
+                const pct = totalDmg > 0 ? Math.round((data.damage / totalDmg) * 100) : 0;
+
+                const row = document.createElement("div");
+                row.className = "report-tower-row";
+                row.innerHTML = `
+                    <div class="report-tower-info">
+                        <span style="font-size: 16px;">${(typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[tKey]) || '🏰'}</span>
+                        <span style="color:${tInfo.color || '#fff'}">${tInfo.name}</span>
+                    </div>
+                    <div class="report-progress-bar-wrap">
+                        <div class="report-progress-fill" style="width: ${pct}%; background: ${tInfo.color || '#3b82f6'};"></div>
+                    </div>
+                    <div class="report-tower-stats">
+                        <strong>${Math.round(data.damage).toLocaleString()}</strong> DMG (${pct}%) / <strong>${data.kills || 0}</strong> Kills
+                    </div>
+                `;
+                towersList.appendChild(row);
+            });
+        }
+    }
+
+    // 5. 전술 피드백 한 줄 팁
+    const tipEl = document.getElementById("report-tactical-tip");
+    if (tipEl) {
+        const wasted = (typeof battleStats !== 'undefined') ? Math.round(battleStats.wastedOverkillDamage || 0) : 0;
+        if (wasted > 20) {
+            tipEl.innerHTML = `💡 <strong>전술 피드백</strong>: 오버킬로 인해 <strong>${wasted} DMG</strong>의 딜 누수가 발생했습니다. 타워를 분산 배치해 화망을 넓혀보세요!`;
+        } else if (!isVictory) {
+            tipEl.innerHTML = `💡 <strong>전술 피드백</strong>: 몬스터가 90도 회전할 때 감속되므로, 킬존 사거리 안에 <strong>'U턴 코너'</strong>를 2개 이상 구축해보세요!`;
+        } else {
+            tipEl.innerHTML = `💡 <strong>전술 피드백</strong>: 완벽한 화망 구축이었습니다! 다음 챕터에서도 지휘관의 시너지와 코너 킬존을 활용해보세요.`;
+        }
+    }
+
+    modal.classList.add("active");
+}
+
+/**
+ * 전투 결과 현황판 닫기
+ */
+function closeBattleReport() {
+    const modal = document.getElementById("battle-report-modal");
+    if (modal) {
+        modal.classList.remove("active");
+    }
+    location.reload();
 }

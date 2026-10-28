@@ -219,7 +219,7 @@
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.33.0</div>
+          v0.38.0</div>
       </div>
     </div>
   </div>
@@ -454,6 +454,59 @@
       <div id="qa-card-list">
         <!-- JS로 버튼 생성 -->
       </div>
+    </div>
+  </div>
+
+  <!-- [v0.38.0 New] 최종 전투 현황판(Battle Report) 종합 모달 -->
+  <div id="battle-report-modal">
+    <div class="battle-report-content">
+      <div class="report-header">
+        <div class="report-title">
+          <span>📊 전투 결과 보고서 (Battle Report)</span>
+        </div>
+        <div id="report-outcome-badge" class="report-badge victory">VICTORY</div>
+      </div>
+
+      <!-- 요약 메트릭 카드 -->
+      <div class="report-summary-cards">
+        <div class="report-metric-card">
+          <div class="lbl">진행 웨이브</div>
+          <div id="report-round-val" class="val">10R</div>
+        </div>
+        <div class="report-metric-card">
+          <div class="lbl">처치한 몬스터</div>
+          <div id="report-kills-val" class="val">0</div>
+        </div>
+        <div class="report-metric-card">
+          <div class="lbl">총 유효 데미지</div>
+          <div id="report-total-dmg-val" class="val">0</div>
+        </div>
+      </div>
+
+      <!-- MVP 지휘관 배너 -->
+      <div id="report-mvp-banner" class="report-mvp-banner">
+        <img id="report-mvp-img" src="assets/char_liana.jpg" class="report-mvp-avatar" alt="MVP">
+        <div>
+          <div style="font-size: 11px; color: #fbbf24; font-weight: bold;">⭐ 이번 판 최고 기여 지휘관 (MVP)</div>
+          <div id="report-mvp-name" style="font-size: 16px; font-weight: 800; color: #fff;">리아나</div>
+          <div id="report-mvp-quote" class="report-mvp-quote">"제가 지휘관님의 가장 든든한 방패가 되어 드릴게요!"</div>
+        </div>
+      </div>
+
+      <!-- 타워별 딜량 지분율 리스트 -->
+      <div>
+        <div style="font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #93c5fd;">⚔️ 타워별 딜 지분율 및 격파 수</div>
+        <div id="report-towers-list" class="report-towers-list">
+          <!-- JS 동적 생성 -->
+        </div>
+      </div>
+
+      <!-- 전술 피드백 한 줄 팁 -->
+      <div id="report-tactical-tip" style="background: rgba(59, 130, 246, 0.1); border: 1px dashed #3b82f6; border-radius: 8px; padding: 10px; font-size: 12px; color: #bfdbfe;">
+        💡 <strong>전술 브리핑</strong>: 코너링 구간에 감속 효과가 적용되므로 'U턴' 미로를 더 깊게 구축해보세요!
+      </div>
+
+      <button class="btn-report-close" onclick="closeBattleReport()">확인</button>
     </div>
   </div>
 

@@ -48,6 +48,14 @@ let leaderRelocatedThisRound = false;  // 라운드당 1회 이동 사용 여부
 let isLeaderDeployMode = false;        // 대장 강림/이동 타일 선택 모드
 let leaderAttackCooldown = 0;          // 대장 자체 공격 쿨다운
 
-
-
-
+// v0.36.0 지휘관 고정 타워 스톡(Stock), 스마트 오버킬 방지 및 전투 통계
+let commanderTowerStocks = {};     // 이번 판 출전 지휘관들로부터 제공된 타워별 총 스톡 { melee: 4, ranged: 3, ... }
+let commanderTowerRemaining = {};  // 현재 필드에 추가 설치 가능한 잔여 타워 스톡
+let pendingDamageMap = new Map();  // Map<enemyId, number> : 비행 중인 투사체 총 대미지 합산 (오버킬 방지용)
+let battleStats = {                // 최종 전투 현황판(Battle Report)용 실시간 통계
+    towers: {},                    // { ranged: { damage: 0, kills: 0, investedTP: 0 }, ... }
+    commanders: {},                // { charId: { directDmg: 0, auraBuffDmg: 0 }, ... }
+    totalDamage: 0,
+    totalKills: 0,
+    wastedOverkillDamage: 0
+};

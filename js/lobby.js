@@ -349,6 +349,7 @@ function renderCommanderSection() {
     // -------------------------------------------------------------
     const deckIds = USER_DATA.characterDeck || [];
     const deckCaps = (typeof calculateDeckTowerCaps === 'function') ? calculateDeckTowerCaps() : {};
+    const deckStocks = (typeof calculateDeckTowerStocks === 'function') ? calculateDeckTowerStocks() : {};
     const deckSupplies = (typeof calculateDeckStartingSupplies === 'function') ? calculateDeckStartingSupplies() : {};
     
     let authorizedTowers = [];
@@ -367,14 +368,15 @@ function renderCommanderSection() {
             const tInfo = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[tType]) ? TOWER_DATA[tType] : { name: tType };
             const emblem = (typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[tType]) ? TOWER_EMBLEMS[tType] : '🗼';
             const maxCap = deckCaps[tType] || 0;
-            const capBadgeText = maxCap > 0 ? `최대 Lv.${maxCap} (+${maxCap}강)` : `기본 Lv.0 (한도 없음)`;
+            const stockCount = deckStocks[tType] || 0;
+            const capBadgeText = `${stockCount}기 한정 스톡 (최대 +${maxCap}강)`;
 
             towerListHtml += `
                 <div class="deck-tower-item">
-                    <span style="font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+                    <span style="font-weight: 700; color: #1e3a8a; display: flex; align-items: center; gap: 6px;">
                         <span style="font-size: 14px;">${emblem}</span> ${tInfo.name.replace(" 타워", "")} 타워
                     </span>
-                    <span class="deck-tower-badge">${capBadgeText}</span>
+                    <span class="deck-tower-badge" style="background: #e0f2fe; color: #0284c7; border: 1px solid #7dd3fc; font-weight: bold;">${capBadgeText}</span>
                 </div>
             `;
         });

@@ -208,10 +208,15 @@ function handleCellClick(x, y) {
         return;
     }
 
-    // 3. 타워 건설 모드
+    // 3. 타워 건설 모드 (v0.36.0 지휘관 고정 타워 스톡 시스템)
     if (interactionMode === 'build') {
         if (!cell.buildable) {
             alert("타워는 '기반'이 건설된 영역 위에만 설치할 수 있습니다!");
+            return;
+        }
+
+        if (cell.tower) {
+            alert("이미 다른 타워가 배치된 기반입니다!");
             return;
         }
 
@@ -226,45 +231,80 @@ function handleCellClick(x, y) {
             return;
         }
 
+        // v0.36.0 고정 타워 스톡 검사
+        const remainingStock = (commanderTowerRemaining && typeof commanderTowerRemaining[selectedTower] === 'number')
+            ? commanderTowerRemaining[selectedTower]
+            : 0;
+
+        if (remainingStock <= 0) {
+            alert(`⚠️ '${towerInfo.name}'의 설치 가능 스톡이 모두 소진되었습니다!\n(출전 지휘관이 제공하는 최대 한도에 도달했습니다)`);
+            return;
+        }
+
         if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
             alert("대장이 서 있는 기반에는 타워를 건설할 수 없습니다! (대장을 이동시켜 주세요)");
             return;
         }
 
-        if (gold >= towerInfo.cost) {
-            cell.tower = selectedTower;
-            cell.targeting = 'first'; // 기본 타깃팅: 선두
-            cell.inGameLevel = 0;     // 인게임 0강 기본 상태
-            cell.investedGold = towerInfo.cost; // 환불 계산용 누적 투자 비용
-            gold -= towerInfo.cost;
-            clearRangePreview();
-            render(); // 즉시 갱신
-        } else {
-            alert("타워 포인트(TP)가 부족합니다!");
+        // 타워 설치 성공: 스톡 1 차감 (TP는 소모하지 않고 무료 설치, 레벨업 강화에 TP 집중 소모)
+        commanderTowerRemaining[selectedTower]--;
+        cell.tower = selectedTower;
+        cell.targeting = 'first'; // 기본 타깃팅: 선두
+        cell.inGameLevel = 0;     // 인게임 0강 기본 상태
+        cell.investedGold = 0;    // 강화에 투자한 TP 누적치
+
+        // 해당 타워를 제공한 출전 지휘관의 등급 판별 (환급율 결정용)
+        let ownerGrade = 'C';
+        if (typeof USER_DATA !== 'undefined' && Array.isArray(USER_DATA.characterDeck)) {
+            for (const cId of USER_DATA.characterDeck) {
+                const cInfo = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[cId] : null;
+                if (cInfo && cInfo.towerStock && cInfo.towerStock[selectedTower] > 0) {
+                    ownerGrade = cInfo.grade || 'C';
+                    break;
+                }
+            }
         }
+        cell.towerOwnerGrade = ownerGrade;
+
+        clearRangePreview();
+        render(); // 즉시 갱신
+        if (typeof updateTowerButtons === 'function') updateTowerButtons();
+        if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
+        showFloatingDamage(x, y, `🏰 ${towerInfo.name} 설치! (남은 스톡: ${commanderTowerRemaining[selectedTower]})`, "#38bdf8");
+        return;
     }
 }
 
 /**
- * 타깃팅 전략에 따른 공격 대상 선정 (Phase B)
+ * 타깃팅 전략에 따른 공격 대상 선정 (Phase B + v0.36.0 스마트 오버킬 방지)
  */
 function selectTargetEnemy(cell, inRangeEnemies) {
     if (!inRangeEnemies || inRangeEnemies.length === 0) return null;
 
+    // v0.36.0 스마트 오버킬(Overkill) 방지:
+    // 이미 비행 중인 다른 투사체 대미지만으로 사망할 적은 타깃팅 우선순위에서 후순위로 미룸
+    const survivingEnemies = inRangeEnemies.filter(e => {
+        const pending = (pendingDamageMap && e.id) ? (pendingDamageMap.get(e.id) || 0) : 0;
+        return (e.hp - pending) > 0;
+    });
+
+    // 모든 적이 날아가는 탄환에 사망 예정인 경우, 기존 전체 적 중에서 타깃팅
+    const candidates = survivingEnemies.length > 0 ? survivingEnemies : inRangeEnemies;
+
     const mode = cell.targeting || 'first';
 
     if (mode === 'strongest') {
-        return inRangeEnemies.slice().sort((a, b) => b.hp - a.hp || b.pathIndex - a.pathIndex)[0];
+        return candidates.slice().sort((a, b) => b.hp - a.hp || b.pathIndex - a.pathIndex)[0];
     } else if (mode === 'weakest') {
-        return inRangeEnemies.slice().sort((a, b) => a.hp - b.hp || b.pathIndex - a.pathIndex)[0];
+        return candidates.slice().sort((a, b) => a.hp - b.hp || b.pathIndex - a.pathIndex)[0];
     } else if (mode === 'boss') {
-        const bosses = inRangeEnemies.filter(e => e.isBoss || e.type.startsWith('boss'));
+        const bosses = candidates.filter(e => e.isBoss || e.type.startsWith('boss'));
         if (bosses.length > 0) {
             return bosses.sort((a, b) => b.pathIndex - a.pathIndex)[0];
         }
-        return inRangeEnemies.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
+        return candidates.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
     } else {
-        return inRangeEnemies.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
+        return candidates.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
     }
 }
 
@@ -326,6 +366,12 @@ function attackFromTowers() {
         }
         const finalDamage = Math.max(1, Math.round(baseDmg * 10) / 10);
 
+        // v0.36.0 오버킬 방지용 대미지 예약 (Pending Damage 등록)
+        if (pendingDamageMap && targetEnemy.id) {
+            const currentPending = pendingDamageMap.get(targetEnemy.id) || 0;
+            pendingDamageMap.set(targetEnemy.id, currentPending + finalDamage);
+        }
+
         // 투사체 발사
         const startDom = getDomCell(cell.x, cell.y);
         const targetDom = targetEnemy.element;
@@ -337,7 +383,33 @@ function attackFromTowers() {
         const hitDelay = Math.max(50, Math.floor(200 / (gameSpeed || 1)));
 
         setTimeout(() => {
-            if (!targetEnemy.alive) return;
+            // 투사체 도달 시 Pending Damage 차감
+            if (pendingDamageMap && targetEnemy.id) {
+                const currentPending = pendingDamageMap.get(targetEnemy.id) || 0;
+                pendingDamageMap.set(targetEnemy.id, Math.max(0, currentPending - finalDamage));
+            }
+
+            if (!targetEnemy.alive) {
+                // 이미 죽은 적에게 날아간 낭비된 데미지 집계
+                if (typeof battleStats !== 'undefined') {
+                    battleStats.wastedOverkillDamage = (battleStats.wastedOverkillDamage || 0) + finalDamage;
+                }
+                return;
+            }
+
+            // v0.36.0 전투 통계 집계 (Battle Report)
+            if (typeof battleStats !== 'undefined' && battleStats.towers) {
+                const tKey = cell.tower;
+                if (!battleStats.towers[tKey]) {
+                    battleStats.towers[tKey] = { damage: 0, kills: 0 };
+                }
+                const effectiveDmg = Math.min(targetEnemy.hp, finalDamage);
+                battleStats.towers[tKey].damage += effectiveDmg;
+                battleStats.totalDamage = (battleStats.totalDamage || 0) + effectiveDmg;
+                if (finalDamage > effectiveDmg) {
+                    battleStats.wastedOverkillDamage = (battleStats.wastedOverkillDamage || 0) + (finalDamage - effectiveDmg);
+                }
+            }
 
             // 1. 얼음 타워 (Ice): 슬로우 효과 부여 (빙결 2셋 지속시간 보너스 반영)
             if (cell.tower === 'ice') {
@@ -347,7 +419,7 @@ function attackFromTowers() {
                     slowTicks += Math.round(synStats.slowDurationBonusSec * 5);
                 }
                 applySlowEffect(targetEnemy, slowTicks);
-                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#00e5ff", isCrit);
+                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#00e5ff", isCrit, cell.tower);
             }
             // 2. 폭탄 타워 (Bomb): 착탄 지점 광역 스플래시 데미지 (화염 3셋 폭발 반경 +1 반영)
             else if (cell.tower === 'bomb') {
@@ -360,24 +432,24 @@ function attackFromTowers() {
 
                 for (const victim of victims) {
                     victim.hp -= finalDamage;
-                    onEnemyHit(victim, finalDamage, isCrit ? "#ef4444" : "#ff9100", isCrit);
+                    onEnemyHit(victim, finalDamage, isCrit ? "#ef4444" : "#ff9100", isCrit, cell.tower);
                 }
             }
             // 3. 전격 타워 (Shock): 연쇄 번개 피해
             else if (cell.tower === 'shock') {
                 targetEnemy.hp -= finalDamage;
-                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#f59e0b", isCrit);
+                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#f59e0b", isCrit, cell.tower);
 
                 const chainTargets = enemies.filter(e => e.alive && e !== targetEnemy && Math.abs(e.x - targetEnemy.x) <= 2 && Math.abs(e.y - targetEnemy.y) <= 2).slice(0, 2);
                 for (const chain of chainTargets) {
                     chain.hp -= finalDamage * 0.7;
-                    onEnemyHit(chain, finalDamage * 0.7, "#fbbf24");
+                    onEnemyHit(chain, finalDamage * 0.7, "#fbbf24", false, cell.tower);
                 }
             }
             // 4. 일반/저격 타워 (Ranged / Melee / Sniper)
             else {
                 targetEnemy.hp -= finalDamage;
-                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : (towerStats.color || "#ffeb3b"), isCrit);
+                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : (towerStats.color || "#ffeb3b"), isCrit, cell.tower);
             }
 
             // [속성 룬 패시브 및 원소 시너지 추가 발동]
@@ -580,7 +652,7 @@ function triggerRuneVoidCollapse(sourceEnemy, collapseDmg = 35) {
 /**
  * 단일 적 피격 후 체력바 갱신, 플로팅 텍스트 팝업 및 사망 처리
  */
-function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false) {
+function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey = null) {
     // 플로팅 데미지 텍스트 생성
     if (typeof damage === 'number' || typeof damage === 'string') {
         showFloatingDamage(enemy.x, enemy.y, damage, color, isCrit);
@@ -600,6 +672,14 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false) {
     if (enemy.hp <= 0 && enemy.alive) {
         enemy.alive = false;
         if (enemy.element) enemy.element.remove();
+
+        // v0.36.0 전투 통계 킬수 집계
+        if (typeof battleStats !== 'undefined') {
+            battleStats.totalKills = (battleStats.totalKills || 0) + 1;
+            if (sourceKey && battleStats.towers && battleStats.towers[sourceKey]) {
+                battleStats.towers[sourceKey].kills = (battleStats.towers[sourceKey].kills || 0) + 1;
+            }
+        }
 
         // 1. 기본 TP(골드) 획득
         gold++;
@@ -760,25 +840,40 @@ function sellSelectedTower() {
     if (!selectedBoardTower || !selectedBoardTower.tower) return;
 
     const cell = selectedBoardTower;
-    const towerInfo = TOWER_DATA[cell.tower];
+    const towerKey = cell.tower;
+    const towerInfo = TOWER_DATA[towerKey];
     if (!towerInfo) return;
 
-    const refundRate = (typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6;
-    const totalCost = cell.investedGold || towerInfo.cost;
+    // v0.36.0 지휘관 등급별 차등 환급율 (C: 100%, UC: 80%, 기타: 60%)
+    const refundRate = (typeof getTowerRefundRateForCell === 'function') 
+        ? getTowerRefundRateForCell(cell) 
+        : ((typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6);
+
+    const totalCost = cell.investedGold || 0;
     const refund = Math.floor(totalCost * refundRate);
+
+    // 잔여 스톡 1개 복구
+    if (typeof commanderTowerRemaining !== 'undefined') {
+        commanderTowerRemaining[towerKey] = (commanderTowerRemaining[towerKey] || 0) + 1;
+    }
 
     gold += refund;
     cell.tower = null;
     cell.targeting = null;
     cell.inGameLevel = 0;
     cell.investedGold = 0;
+    cell.towerOwnerGrade = null;
     // cell.buildable 은 true 유지! (기반은 환불 불가)
 
     clearActiveRange();
     hideTowerDetailPanel();
     render();
+    if (typeof updateTowerButtons === 'function') updateTowerButtons();
+    if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
 
-    console.log(`타워 판매 완료: ${towerInfo.name} (+${refund} TP, 60% 환급). 기반 영역은 유지됩니다.`);
+    const refundPercent = Math.round(refundRate * 100);
+    showFloatingDamage(cell.x, cell.y, `♻️ 타워 철거! (스톡 복구, +${refund}TP [${refundPercent}% 환급])`, "#10b981");
+    console.log(`타워 철거 완료: ${towerInfo.name} (+${refund} TP, ${refundPercent}% 환급). 스톡 복구 완료.`);
 }
 
 /**
