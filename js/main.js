@@ -106,12 +106,9 @@ function startGame() {
         usedSpellRunes = {};
     }
 
-    // 3. v0.25.0 지휘관 스타팅 무료 보급 타워/기반 초기화
-    if (typeof calculateDeckStartingSupplies === 'function') {
-        commanderSupplies = calculateDeckStartingSupplies();
-        selectedSupplyType = null;
-        console.log("출전 지휘관 스타팅 무료 보급 수령 완료:", commanderSupplies);
-    }
+    // 3. 지휘관 스타팅 보급 (은퇴: 고정 스톡 체계로 전환)
+    commanderSupplies = {};
+    selectedSupplyType = null;
 
     // 3-2. v0.32.0 대장 지휘관 상태 초기화
     leaderDeployed = false;

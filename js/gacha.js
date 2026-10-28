@@ -535,21 +535,22 @@ function openNewCommanderModal(charId, result) {
         }
         const capsText = caps.length > 0 ? caps.join(", ") : "기본 타워";
 
-        const supplies = [];
-        const rawSupplies = charBase.startingTowers || charBase.initialSupplies;
-        if (rawSupplies) {
-            for (const [sKey, sCount] of Object.entries(rawSupplies)) {
+        const stocks = [];
+        const rawStocks = charBase.towerStock;
+        if (rawStocks && Object.keys(rawStocks).length > 0) {
+            for (const [sKey, sCount] of Object.entries(rawStocks)) {
                 if (sCount > 0) {
-                    const sName = (sKey === 'base') ? '기반' : ((typeof TOWER_DATA !== 'undefined' && TOWER_DATA[sKey]) ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey);
-                    supplies.push(`${sName} ${sCount}${sKey === 'base' ? '개' : '기'}`);
+                    const sName = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[sKey]) ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey;
+                    stocks.push(`${sName} ${sCount}기`);
                 }
             }
         }
-        const suppliesText = supplies.length > 0 ? supplies.join(", ") : "없음";
+        const stocksText = stocks.length > 0 ? stocks.join(", ") : (charBase.isHeroUnit ? "전장 직접 강림 (히어로)" : "0기");
+        const refundRateText = charBase.refundRate ? `${Math.round(charBase.refundRate * 100)}%` : "60%";
 
         licenseEl.innerHTML = `
             <div>🏗️ <strong>인가 타워 한도</strong>: ${capsText}</div>
-            <div style="margin-top: 4px;">🎁 <strong>시작 무료 보급</strong>: ${suppliesText}</div>
+            <div style="margin-top: 4px;">🏰 <strong>타워 설치 스톡</strong>: ${stocksText} (철거 환급 ${refundRateText})</div>
             <div style="margin-top: 4px; color: #a5b4fc;">🔮 <strong>기본 룬 소켓</strong>: ${result.sockets || 1}칸 개방</div>
         `;
     }
@@ -755,17 +756,18 @@ function showNextShowcaseItem() {
             }
             const capsText = caps.length > 0 ? caps.join(", ") : "기본 타워";
 
-            const supplies = [];
-            const rawSupplies = charBase.startingTowers || charBase.initialSupplies;
-            if (rawSupplies) {
-                for (const [sKey, sCount] of Object.entries(rawSupplies)) {
+            const stocks = [];
+            const rawStocks = charBase.towerStock;
+            if (rawStocks && Object.keys(rawStocks).length > 0) {
+                for (const [sKey, sCount] of Object.entries(rawStocks)) {
                     if (sCount > 0) {
-                        const sName = (sKey === 'base') ? '기반' : ((typeof TOWER_DATA !== 'undefined' && TOWER_DATA[sKey]) ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey);
-                        supplies.push(`${sName} ${sCount}${sKey === 'base' ? '개' : '기'}`);
+                        const sName = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[sKey]) ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey;
+                        stocks.push(`${sName} ${sCount}기`);
                     }
                 }
             }
-            const suppliesText = supplies.length > 0 ? supplies.join(", ") : "없음";
+            const stocksText = stocks.length > 0 ? stocks.join(", ") : (charBase.isHeroUnit ? "전장 직접 강림 (히어로)" : "0기");
+            const refundRateText = charBase.refundRate ? `${Math.round(charBase.refundRate * 100)}%` : "60%";
 
             const statusText = res.isNew 
                 ? `<span style="color:#38bdf8; font-weight:bold;">✨ 신규 영입 지휘관!</span>` 
@@ -774,7 +776,7 @@ function showNextShowcaseItem() {
             specBox.innerHTML = `
                 <div style="margin-bottom: 4px;">${statusText}</div>
                 <div>🏗️ <strong>인가 타워 한도</strong>: ${capsText}</div>
-                <div style="margin-top: 3px;">🎁 <strong>시작 무료 보급</strong>: ${suppliesText}</div>
+                <div style="margin-top: 3px;">🏰 <strong>타워 설치 스톡</strong>: ${stocksText} (환급 ${refundRateText})</div>
                 <div style="margin-top: 3px; color: #a5b4fc;">🔮 <strong>소켓 정보</strong>: ${res.sockets || 1}칸 개방</div>
             `;
         }

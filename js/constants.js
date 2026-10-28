@@ -492,9 +492,6 @@ const CHARACTER_DATA = {
         levelCaps: {
             melee: 1
         },
-        startingTowers: {
-            melee: 2
-        },
         towerStock: {
             melee: 4
         },
@@ -521,10 +518,6 @@ const CHARACTER_DATA = {
         levelCaps: {
             ranged: 2
         },
-        startingTowers: {
-            ranged: 1,
-            base: 2
-        },
         towerStock: {
             ranged: 3
         },
@@ -535,7 +528,7 @@ const CHARACTER_DATA = {
             "원거리의 적은 걱정 마세요. 제 화살은 단 한 번도 빗나가지 않으니까요."
         ],
         skillQuote: "바람이여, 적을 꿰뚫어라! 질풍의 일격!",
-        desc: "먼 거리의 표적도 놓치지 않는 엘프 명사수. 원거리 타워 최대 3기 설치 스톡 및 무료 기반 2개를 제공합니다."
+        desc: "먼 거리의 표적도 놓치지 않는 엘프 명사수. 원거리 타워 최대 3기 설치 스톡을 제공합니다."
     },
     // [v0.26.0 신규 타워 전담 언커먼 지휘관 라인업]
     char_chloe: {
@@ -552,10 +545,6 @@ const CHARACTER_DATA = {
         levelCaps: {
             melee: 2
         },
-        startingTowers: {
-            melee: 2,
-            base: 1
-        },
         towerStock: {
             melee: 3
         },
@@ -566,7 +555,7 @@ const CHARACTER_DATA = {
             "지휘관의 명령이라면 지옥의 한복판이라도 기꺼이 돌격하겠다!"
         ],
         skillQuote: "강철의 의지로 베어 넘긴다! 전열 돌파!",
-        desc: "전열을 용맹하게 돌파하는 강철의 여기사. 근거리 타워 최대 3기 설치 스톡 및 무료 기반 1개를 제공합니다."
+        desc: "전열을 용맹하게 돌파하는 강철의 여기사. 근거리 타워 최대 3기 설치 스톡을 제공합니다."
     },
     char_charlotte: {
         id: "char_charlotte",
@@ -582,10 +571,6 @@ const CHARACTER_DATA = {
         levelCaps: {
             sniper: 2
         },
-        startingTowers: {
-            sniper: 1,
-            base: 1
-        },
         towerStock: {
             sniper: 3
         },
@@ -596,7 +581,7 @@ const CHARACTER_DATA = {
             "사거리 안으로 들어온 사냥감은 절대 제 시야에서 벗어날 수 없어요."
         ],
         skillQuote: "호흡을 멈추고... 표적 확인, 정밀 저격!",
-        desc: "초장거리 정밀 사격에 특화된 냉철한 스나이퍼. 저격 타워 최대 3기 설치 스톡 및 무료 기반 1개를 제공합니다."
+        desc: "초장거리 정밀 사격에 특화된 냉철한 스나이퍼. 저격 타워 최대 3기 설치 스톡을 제공합니다."
     },
     char_cecilia: {
         id: "char_cecilia",
@@ -612,10 +597,6 @@ const CHARACTER_DATA = {
         levelCaps: {
             ice: 2
         },
-        startingTowers: {
-            ice: 1,
-            base: 2
-        },
         towerStock: {
             ice: 3
         },
@@ -626,7 +607,7 @@ const CHARACTER_DATA = {
             "냉기 속에서 잠시 쉬어가시겠어요? 적들은 제가 꽁꽁 얼려둘게요."
         ],
         skillQuote: "영구 동토의 한기여... 모조리 얼어붙어라!",
-        desc: "차가운 서리 결정으로 적의 발을 묶는 빙결 마법사. 얼음 타워 최대 3기 설치 스톡 및 무료 기반 2개를 제공합니다."
+        desc: "차가운 서리 결정으로 적의 발을 묶는 빙결 마법사. 얼음 타워 최대 3기 설치 스톡을 제공합니다."
     },
     char_greta: {
         id: "char_greta",
@@ -642,10 +623,6 @@ const CHARACTER_DATA = {
         levelCaps: {
             bomb: 2
         },
-        startingTowers: {
-            bomb: 1,
-            base: 1
-        },
         towerStock: {
             bomb: 3
         },
@@ -656,7 +633,7 @@ const CHARACTER_DATA = {
             "적들이 몰려온다고? 하하! 오히려 환영이야, 한 방에 날려줄 테니!"
         ],
         skillQuote: "특제 폭약 장전 완료! 흔적도 없이 날아가라, 쾅!",
-        desc: "광역 포격으로 적군을 단숨에 초토화하는 화약 전문가. 폭탄 타워 최대 3기 설치 스톡 및 무료 기반 1개를 제공합니다."
+        desc: "광역 포격으로 적군을 단숨에 초토화하는 화약 전문가. 폭탄 타워 최대 3기 설치 스톡을 제공합니다."
     },
     char_ada: {
         id: "char_ada",
@@ -672,10 +649,6 @@ const CHARACTER_DATA = {
         levelCaps: {
             shock: 2
         },
-        startingTowers: {
-            shock: 1,
-            base: 1
-        },
         towerStock: {
             shock: 3
         },
@@ -686,7 +659,7 @@ const CHARACTER_DATA = {
             "벼락의 정령들이 노래하고 있어. 적들을 초토화할 시간이야."
         ],
         skillQuote: "하늘의 벼락이여! 연쇄 낙뢰여 내리쳐라!",
-        desc: "연쇄 번개로 다수의 적을 감전시키는 전격의 인도자. 전격 타워 최대 3기 설치 스톡 및 무료 기반 1개를 제공합니다."
+        desc: "연쇄 번개로 다수의 적을 감전시키는 전격의 인도자. 전격 타워 최대 3기 설치 스톡을 제공합니다."
     },
     char_freya: {
         id: "char_freya",
@@ -701,10 +674,6 @@ const CHARACTER_DATA = {
         baseSockets: 2,
         levelCaps: {
             ice: 2,
-            bomb: 1
-        },
-        startingTowers: {
-            ice: 1,
             bomb: 1
         },
         towerStock: {
@@ -735,9 +704,6 @@ const CHARACTER_DATA = {
             bomb: 3,
             melee: 1
         },
-        startingTowers: {
-            bomb: 2
-        },
         towerStock: {
             bomb: 2
         },
@@ -767,7 +733,6 @@ const CHARACTER_DATA = {
             ranged: 3,
             sniper: 3
         },
-        startingTowers: {},
         towerStock: {},
         refundRate: 0.6,
         quotes: [
@@ -798,7 +763,6 @@ const CHARACTER_DATA = {
             bomb: 2,
             sniper: 2
         },
-        startingTowers: {},
         towerStock: {},
         refundRate: 0.6,
         quotes: [
@@ -823,10 +787,6 @@ const CHARACTER_DATA = {
         baseSockets: 1,
         levelCaps: {
             ranged: 1
-        },
-        startingTowers: {
-            ranged: 1,
-            base: 1
         },
         towerStock: {
             ranged: 4
@@ -854,12 +814,8 @@ const CHARACTER_DATA = {
         levelCaps: {
             bomb: 1
         },
-        startingTowers: {
-            base: 3
-        },
         towerStock: {
-            bomb: 3,
-            base: 3
+            bomb: 4
         },
         refundRate: 1.0,
         quotes: [
@@ -868,7 +824,7 @@ const CHARACTER_DATA = {
             "방벽 쌓는 일이라면 제게 맡겨주세요! 기반을 튼튼하게 다질게요!"
         ],
         skillQuote: "비전 가루 투척 완료! 반짝이는 불꽃 팡팡!",
-        desc: "실수투성이지만 당차고 밝은 견습 연금술사. 폭탄 타워 3기 및 무료 기반 3개 스톡을 제공하며 철거 시 100% 환급됩니다."
+        desc: "실수투성이지만 당차고 밝은 견습 연금술사. 폭탄 타워 최대 4기 설치 스톡을 제공하며 철거 시 100% 전액 환급됩니다."
     },
     char_valeria: {
         id: "char_valeria",
@@ -883,10 +839,6 @@ const CHARACTER_DATA = {
         baseSockets: 2,
         levelCaps: {
             shock: 2,
-            melee: 1
-        },
-        startingTowers: {
-            shock: 1,
             melee: 1
         },
         towerStock: {
@@ -917,10 +869,6 @@ const CHARACTER_DATA = {
             sniper: 2,
             ranged: 1
         },
-        startingTowers: {
-            sniper: 1,
-            base: 1
-        },
         towerStock: {
             sniper: 1,
             ranged: 1
@@ -948,10 +896,6 @@ const CHARACTER_DATA = {
         levelCaps: {
             bomb: 2,
             melee: 1
-        },
-        startingTowers: {
-            bomb: 1,
-            base: 2
         },
         towerStock: {
             bomb: 1,
@@ -981,10 +925,6 @@ const CHARACTER_DATA = {
             melee: 3,
             sniper: 1
         },
-        startingTowers: {
-            melee: 2,
-            base: 2
-        },
         towerStock: {
             melee: 2
         },
@@ -1010,10 +950,6 @@ const CHARACTER_DATA = {
         baseSockets: 2,
         levelCaps: {
             sniper: 3,
-            ice: 1
-        },
-        startingTowers: {
-            sniper: 1,
             ice: 1
         },
         towerStock: {
@@ -1044,9 +980,6 @@ const CHARACTER_DATA = {
             shock: 3,
             ice: 1
         },
-        startingTowers: {
-            shock: 2
-        },
         towerStock: {
             shock: 2
         },
@@ -1076,7 +1009,6 @@ const CHARACTER_DATA = {
             bomb: 3,
             shock: 2
         },
-        startingTowers: {},
         towerStock: {},
         refundRate: 0.6,
         quotes: [

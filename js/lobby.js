@@ -198,19 +198,17 @@ function createSingleCommanderCard(charId, isDeployedSlot = false, slotIndex = 0
     }
     const capsSummary = capsText.length > 0 ? capsText.join(", ") : "기본";
 
-    // 시작 타워/기반 무료 보급 요약
-    const suppliesText = [];
-    if (baseInfo.startingTowers) {
-        for (const [sKey, sCount] of Object.entries(baseInfo.startingTowers)) {
-            if (sKey === 'base') {
-                suppliesText.push(`기반 ${sCount}개`);
-            } else {
-                const sName = TOWER_DATA[sKey] ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey;
-                suppliesText.push(`${sName} ${sCount}기`);
-            }
+    // 고정 타워 스톡 요약
+    const stocksText = [];
+    if (baseInfo.towerStock && Object.keys(baseInfo.towerStock).length > 0) {
+        for (const [sKey, sCount] of Object.entries(baseInfo.towerStock)) {
+            const sName = TOWER_DATA[sKey] ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey;
+            stocksText.push(`${sName} ${sCount}기`);
         }
     }
-    const suppliesSummary = suppliesText.length > 0 ? suppliesText.join(", ") : "없음";
+    const stocksSummary = stocksText.length > 0 
+        ? stocksText.join(", ") 
+        : (baseInfo.isHeroUnit ? "전장 강림 (히어로)" : "0기");
 
     // 소켓 목록 생성
     const socketsCount = charData.sockets || baseInfo.baseSockets || 1;
@@ -310,7 +308,7 @@ function createSingleCommanderCard(charId, isDeployedSlot = false, slotIndex = 0
 
         <div class="commander-cap-info">
             <div>🛡️ 타워 강화 한도: <strong>${capsSummary}</strong></div>
-            <div style="margin-top: 3px; color: #b45309;">🎁 시작 무료 보급: <strong>${suppliesSummary}</strong></div>
+            <div style="margin-top: 3px; color: #0284c7;">🏰 타워 설치 스톡: <strong>${stocksSummary}</strong></div>
         </div>
 
         <div class="commander-sockets-container">
@@ -389,19 +387,15 @@ function renderCommanderSection() {
         `;
     }
 
-    // B. 시작 무료 보급 요약
-    const suppliesText = [];
-    for (const [sKey, sCount] of Object.entries(deckSupplies)) {
+    // B. 출전 덱 총 타워 스톡 요약
+    const stocksSummaryList = [];
+    for (const [tKey, sCount] of Object.entries(deckStocks)) {
         if (sCount > 0) {
-            if (sKey === 'base') {
-                suppliesText.push(`기반 ${sCount}개`);
-            } else {
-                const sName = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[sKey]) ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey;
-                suppliesText.push(`${sName} ${sCount}기`);
-            }
+            const sName = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[tKey]) ? TOWER_DATA[tKey].name.replace(" 타워", "") : tKey;
+            stocksSummaryList.push(`${sName} ${sCount}기`);
         }
     }
-    const suppliesSummary = suppliesText.length > 0 ? suppliesText.join(", ") : "없음";
+    const totalStocksSummary = stocksSummaryList.length > 0 ? stocksSummaryList.join(", ") : "0기 (전장 강림 결전 덱)";
 
     // C. 대장 오버클럭 보너스 배너
     const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
@@ -459,8 +453,8 @@ function renderCommanderSection() {
             ${towerListHtml}
         </div>
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #475569; display: flex; align-items: center; justify-content: space-between;">
-            <span style="font-weight: 700; color: #d97706;">🎁 시작 무료 보급</span>
-            <span style="font-weight: 600;">${suppliesSummary}</span>
+            <span style="font-weight: 700; color: #0284c7;">🏰 출전 덱 총 타워 스톡</span>
+            <span style="font-weight: 600;">${totalStocksSummary}</span>
         </div>
     `;
 

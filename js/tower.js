@@ -5,6 +5,7 @@ function resetSelection() {
     clearActiveRange();
     hideTowerDetailPanel();
     updateButtonVisuals();
+    if (typeof render === 'function') render();
 }
 
 /**
@@ -21,6 +22,7 @@ function selectBaseBuildMode() {
     interactionMode = 'base';
     selectedTower = null;
     updateButtonVisuals();
+    if (typeof render === 'function') render();
 }
 
 // 하위 호환성 유지
@@ -39,6 +41,7 @@ function selectTower(towerId) {
     interactionMode = 'build';
     selectedTower = towerId;
     updateButtonVisuals();
+    if (typeof render === 'function') render();
 }
 
 function handleCellClick(x, y) {
@@ -75,7 +78,7 @@ function handleCellClick(x, y) {
         const dom = getDomCell(x, y);
         if (dom) dom.classList.add("selected-tower");
 
-        const towerStats = getGameTowerStats(cell.tower);
+        const towerStats = getGameTowerStats(cell);
         if (towerStats) {
             highlightRange(x, y, towerStats.range, "range-active");
             showTowerDetailPanel(cell, towerStats);
@@ -86,83 +89,6 @@ function handleCellClick(x, y) {
     // 빈 땅을 클릭했을 때 기존 선택 타워 하이라이트 및 패널 해제
     clearActiveRange();
     hideTowerDetailPanel();
-
-    // 1-2. 지휘관 스타팅 무료 보급 설치 모드 (v0.25.0 New)
-    if (selectedSupplyType && commanderSupplies && commanderSupplies[selectedSupplyType] > 0) {
-        // A. 무료 기반 보급
-        if (selectedSupplyType === 'base') {
-            if (cell.isStart || cell.isGoal) {
-                alert("입구 및 출구에는 기반을 건설할 수 없습니다.");
-                return;
-            }
-            if (typeof isSafetyZone === 'function' && isSafetyZone(x, y)) {
-                alert("시작 지점 및 골인 지점 인근(보호구역)에는 기반을 건설할 수 없습니다.");
-                return;
-            }
-            if (cell.buildable) {
-                alert("이미 기반이 건설된 타일입니다.");
-                return;
-            }
-            if (typeof canBuildBaseAt === 'function' && !canBuildBaseAt(x, y)) {
-                alert("⚠️ 몬스터의 이동 경로를 완전히 차단할 수 없습니다! (통로를 남겨주세요)");
-                return;
-            }
-
-            // 무료 설치 (골드 차감 없음)
-            cell.buildable = true;
-            builtBaseCount = (builtBaseCount || 0) + 1;
-            commanderSupplies.base--;
-            if (commanderSupplies.base <= 0) {
-                delete commanderSupplies.base;
-                selectedSupplyType = null;
-                interactionMode = 'none';
-            }
-
-            if (typeof recalculateGlobalPath === 'function') recalculateGlobalPath();
-            render();
-            renderStartingSuppliesUI();
-            updateButtonVisuals();
-            showFloatingDamage(x, y, "🏗️ 무료 기반 설치!", "#eab308");
-            return;
-        }
-        // B. 무료 타워 보급
-        else {
-            if (!cell.buildable) {
-                alert("타워는 '기반'이 건설된 영역 위에만 설치할 수 있습니다!");
-                return;
-            }
-            if (cell.tower) {
-                alert("이미 타워가 배치된 기반입니다!");
-                return;
-            }
-            if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === x && leaderPos.y === y) {
-                alert("대장이 서 있는 기반에는 타워를 설치할 수 없습니다! (대장을 이동시켜 주세요)");
-                return;
-            }
-
-            // 무료 설치 (골드 차감 없음, 환불 누적금 0)
-            const towerKey = selectedSupplyType;
-            cell.tower = towerKey;
-            cell.targeting = 'first';
-            cell.inGameLevel = 0;
-            cell.investedGold = 0; // 무료 보급 타워는 환불금 0
-
-            commanderSupplies[towerKey]--;
-            if (commanderSupplies[towerKey] <= 0) {
-                delete commanderSupplies[towerKey];
-                selectedSupplyType = null;
-                interactionMode = 'none';
-                selectedTower = null;
-            }
-
-            clearRangePreview();
-            render();
-            renderStartingSuppliesUI();
-            updateButtonVisuals();
-            showFloatingDamage(x, y, `🎁 무료 ${TOWER_DATA[towerKey] ? TOWER_DATA[towerKey].name : '타워'} 보급!`, "#38bdf8");
-            return;
-        }
-    }
 
     // 2. 기반 건설 모드 (기반은 벽 역할을 하며, 환불 불가)
     if (interactionMode === 'base' || interactionMode === 'unlock') {
@@ -267,6 +193,8 @@ function handleCellClick(x, y) {
         cell.towerOwnerGrade = ownerGrade;
 
         clearRangePreview();
+        clearActiveRange();
+        resetSelection(); // 타워 설치 완료 후 건설 모드 및 잔여 사거리 프리뷰 말끔히 해제
         render(); // 즉시 갱신
         if (typeof updateTowerButtons === 'function') updateTowerButtons();
         if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
@@ -334,7 +262,9 @@ function attackFromTowers() {
                 return false;
             }
 
-            return Math.abs(e.x - cell.x) <= range && Math.abs(e.y - cell.y) <= range;
+            // 원형 유클리드 거리 판정 (하이라이트 표시와 100% 일치)
+            const dist = Math.hypot(e.x - cell.x, e.y - cell.y);
+            return dist <= range + 0.35;
         });
 
         if (inRangeEnemies.length === 0) continue;
@@ -577,10 +507,10 @@ function handleLeaderCombat() {
     const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
     if (!leaderInfo || !leaderInfo.charBase) return;
 
-    // 사거리 2칸 내의 살아있는 적 수집
+    // 사거리 2칸 내의 살아있는 적 수집 (원형 유클리드 거리)
     const range = 2;
     const inRangeEnemies = enemies.filter(e => {
-        return e.alive && Math.abs(e.x - leaderPos.x) <= range && Math.abs(e.y - leaderPos.y) <= range;
+        return e.alive && Math.hypot(e.x - leaderPos.x, e.y - leaderPos.y) <= range + 0.35;
     });
 
     if (inRangeEnemies.length === 0) return;
@@ -1275,73 +1205,14 @@ function castSpellRune(spellItem) {
 }
 
 /**
- * 지휘관 스타팅 무료 보급 인벤토리 UI 렌더링 (v0.25.0 New)
+ * (은퇴) 지휘관 스타팅 무료 보급 인벤토리 UI -> 고정 스톡 체계 전환으로 항상 숨김
  */
 function renderStartingSuppliesUI() {
     const section = document.getElementById("starting-supplies-section");
-    const container = document.getElementById("starting-supplies-controls");
-    if (!section || !container) return;
-
-    if (!commanderSupplies || typeof commanderSupplies !== 'object') {
-        section.style.display = "none";
-        return;
-    }
-
-    // 남아있는 보급품 항목 필터링
-    const activeKeys = Object.keys(commanderSupplies).filter(k => commanderSupplies[k] > 0);
-    if (activeKeys.length === 0) {
-        section.style.display = "none";
-        return;
-    }
-
-    section.style.display = "block";
-    container.innerHTML = "";
-
-    activeKeys.forEach(key => {
-        const count = commanderSupplies[key];
-        const btn = document.createElement("button");
-        btn.className = "speed-btn";
-        btn.style.flex = "1 1 calc(50% - 6px)";
-        btn.style.fontSize = "11px";
-        btn.style.padding = "6px 8px";
-        btn.style.textAlign = "center";
-        btn.style.border = (selectedSupplyType === key) ? "2px solid #eab308" : "1px solid #facc15";
-        btn.style.background = (selectedSupplyType === key) ? "#fef08a" : "#ffffff";
-        btn.style.fontWeight = "bold";
-
-        if (key === 'base') {
-            btn.innerHTML = `🏗️ <strong>무료 기반</strong> (${count}개)`;
-        } else {
-            const tInfo = (typeof TOWER_DATA !== 'undefined' && TOWER_DATA[key]) ? TOWER_DATA[key] : null;
-            const name = tInfo ? tInfo.name : key;
-            const emblem = (typeof TOWER_EMBLEMS !== 'undefined' && TOWER_EMBLEMS[key]) ? TOWER_EMBLEMS[key] : '🏹';
-            btn.innerHTML = `${emblem} <strong>${name}</strong> (${count}기)`;
-        }
-
-        btn.onclick = () => selectStartingSupply(key);
-        container.appendChild(btn);
-    });
+    if (section) section.style.display = "none";
 }
 
-/**
- * 스타팅 보급품 선택 토글
- */
 function selectStartingSupply(type) {
-    if (selectedSupplyType === type) {
-        selectedSupplyType = null;
-        interactionMode = 'none';
-        selectedTower = null;
-    } else {
-        selectedSupplyType = type;
-        if (type === 'base') {
-            interactionMode = 'base';
-            selectedTower = null;
-        } else {
-            interactionMode = 'build';
-            selectedTower = type;
-        }
-    }
-    renderStartingSuppliesUI();
-    if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
+    // 은퇴 처리
 }
 

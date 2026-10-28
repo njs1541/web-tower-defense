@@ -315,35 +315,25 @@ function getLeaderCommanderInfo() {
         }
         bonusDesc = "👑 대장 특권: 관장 타워 최대 강화 한도 +1강 추가!";
     } else if (grade === 'SR') {
-        // SR (스페셜 레어): 관장 타워 한도 +1 추가 및 타워 보급 +1기
+        // SR (스페셜 레어): 관장 타워 한도 +1 추가
         if (charBase.levelCaps) {
             for (const tType of Object.keys(charBase.levelCaps)) {
                 extraCaps[tType] = 1;
             }
         }
-        if (charBase.startingTowers) {
-            for (const [sKey, sVal] of Object.entries(charBase.startingTowers)) {
-                if (sKey !== 'base') {
-                    extraSupplies[sKey] = 1;
-                    break;
-                }
-            }
-        }
-        bonusDesc = "👑 대장 특권: 관장 타워 한도 +1강 & 시작 타워 +1기 추가 보급!";
+        bonusDesc = "👑 대장 특권: 관장 타워 최대 강화 한도 +1강 추가!";
     } else if (grade === 'UR') {
-        // UR (울트라 레어): 관장 타워 한도 +2 추가 및 무료 기반 +2개
+        // UR (울트라 레어): 관장 타워 한도 +2 추가 & 3x3 지휘 오라
         if (charBase.levelCaps) {
             for (const tType of Object.keys(charBase.levelCaps)) {
                 extraCaps[tType] = 2;
             }
         }
-        extraSupplies['base'] = 2;
-        bonusDesc = "👑 대장 특권: 관장 타워 한도 +2강 & 무료 기반 +2개 추가 보급!";
+        bonusDesc = "👑 대장 특권: 관장 타워 한도 +2강 & 전장 직접 강림 결전 오라!";
     } else if (grade === 'U') {
-        // U (유니크): 전 타워 한도 +2 추가 및 전 기본 타워 각 1기 보급
+        // U (유니크): 전 타워 한도 +2 추가 & 창세 결전 오라
         extraCaps = { ranged: 2, melee: 2, ice: 2, bomb: 2, sniper: 2 };
-        extraSupplies = { ranged: 1, melee: 1, ice: 1, bomb: 1, base: 2 };
-        bonusDesc = "👑 대장 특권: 전 타워 한도 +2강 & 전 타워 각 +1기 + 기반 +2개 추가 보급!";
+        bonusDesc = "👑 대장 특권: 전 타워 한도 +2강 & 창세 결전 여신 강림!";
     }
 
     return {
@@ -351,7 +341,7 @@ function getLeaderCommanderInfo() {
         charBase: charBase,
         grade: grade,
         extraCaps: extraCaps,
-        extraSupplies: extraSupplies,
+        extraSupplies: {},
         bonusDesc: bonusDesc
     };
 }
@@ -408,40 +398,11 @@ function calculateDeckTowerCaps() {
 }
 
 /**
- * 현재 출전 덱에 편성된 지휘관들로부터 시작 시 무료 보급 타워/기반 총합 계산 (v0.25.0 / v0.32.0 대장 보너스 / v0.34.0 시너지 반영)
- * @returns {Object} { melee: 2, ranged: 1, base: 2, ... }
+ * (은퇴) 시작 시 무료 보급 타워/기반 총합 계산 -> 고정 스톡 체계 전환으로 빈 객체 반환
+ * @returns {Object} {}
  */
 function calculateDeckStartingSupplies() {
-    const supplies = {};
-    if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return supplies;
-
-    // 1. 기본 보급 합산
-    for (const charId of USER_DATA.characterDeck) {
-        const charInfo = CHARACTER_DATA[charId];
-        if (charInfo && charInfo.startingTowers) {
-            for (const [key, count] of Object.entries(charInfo.startingTowers)) {
-                supplies[key] = (supplies[key] || 0) + count;
-            }
-        }
-    }
-
-    // 2. R 이상 대장 보너스 보급 추가 가산 (v0.32.0 New)
-    const leaderInfo = getLeaderCommanderInfo();
-    if (leaderInfo && leaderInfo.extraSupplies) {
-        for (const [key, count] of Object.entries(leaderInfo.extraSupplies)) {
-            supplies[key] = (supplies[key] || 0) + count;
-        }
-    }
-
-    // 3. 수호자 2셋 시너지 무료 기반 +1개 추가 가산 (v0.34.0 New)
-    if (typeof calculateDeckSynergies === 'function') {
-        const syn = calculateDeckSynergies();
-        if (syn && syn.bonusStats && syn.bonusStats.extraBasePerRound) {
-            supplies.base = (supplies.base || 0) + syn.bonusStats.extraBasePerRound;
-        }
-    }
-
-    return supplies;
+    return {};
 }
 
 /**
@@ -683,10 +644,10 @@ function getAuthorizedTowerTypes() {
             Object.keys(charInfo.levelCaps).forEach(type => authorized.add(type));
         }
 
-        // 2. startingTowers에 등록된 타워 (base 제외)
-        if (charInfo.startingTowers) {
-            Object.keys(charInfo.startingTowers).forEach(type => {
-                if (type !== 'base') authorized.add(type);
+        // 2. towerStock에 등록된 타워 (스톡 1 이상)
+        if (charInfo.towerStock) {
+            Object.keys(charInfo.towerStock).forEach(type => {
+                if (type !== 'base' && charInfo.towerStock[type] > 0) authorized.add(type);
             });
         }
     }

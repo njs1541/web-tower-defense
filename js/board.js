@@ -254,27 +254,36 @@ function recalculateGlobalPath() {
 function handleCellMouseEnter(x, y) {
     clearRangePreview();
 
-    // 1. 타워 건설 모드일 때: 건설 예정 지점 기준 사거리 프리뷰
+    // 1. 타워 건설 모드일 때: 실제로 건설 가능한 기반(벽) 위에 마우스를 올렸을 때만 사거리 프리뷰
     if (interactionMode === 'build' && selectedTower) {
-        const stats = getGameTowerStats(selectedTower);
-        if (stats) {
-            highlightRange(x, y, stats.range, "range-preview");
+        const cell = getCell(x, y);
+        // 기반이 있고 타워가 없는 셀에만 설치 가능
+        if (cell && cell.buildable && !cell.tower) {
+            const stats = getGameTowerStats(selectedTower);
+            if (stats) {
+                highlightRange(x, y, stats.range, "range-preview");
+            }
         }
     }
 }
 
 /**
- * 사거리 하이라이트 표시
+ * 사거리 하이라이트 표시 (유클리드 원형 거리 기준)
  */
 function highlightRange(centerX, centerY, range, className) {
+    // 0.35의 오차 마진을 두어 격자 타일 상에서 자연스러운 원형 형성
+    const maxDist = range + 0.35;
     for (let dx = -range; dx <= range; dx++) {
         for (let dy = -range; dy <= range; dy++) {
-            const tx = centerX + dx;
-            const ty = centerY + dy;
-            if (tx >= 0 && tx < boardSize && ty >= 0 && ty < boardSize) {
-                const dom = getDomCell(tx, ty);
-                if (dom) {
-                    dom.classList.add(className);
+            const dist = Math.hypot(dx, dy);
+            if (dist <= maxDist) {
+                const tx = centerX + dx;
+                const ty = centerY + dy;
+                if (tx >= 0 && tx < boardSize && ty >= 0 && ty < boardSize) {
+                    const dom = getDomCell(tx, ty);
+                    if (dom) {
+                        dom.classList.add(className);
+                    }
                 }
             }
         }

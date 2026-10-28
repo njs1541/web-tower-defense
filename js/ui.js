@@ -6,33 +6,12 @@ const monsterCountDisplay = document.getElementById("monster-count");
 const towerPanel = document.querySelector("#info-panel div");
 
 function render() {
-    // v0.37.0 킬존(Kill Zone) 화망 커버리지 맵 사전 계산 (타워 사거리 중첩)
-    const towerCoverageMap = new Map();
-    for (const cell of board) {
-        if (!cell.tower) continue;
-        const towerStats = (typeof getGameTowerStats === 'function') ? getGameTowerStats(cell) : null;
-        if (!towerStats) continue;
-
-        const r = towerStats.range || 1;
-        for (let dx = -r; dx <= r; dx++) {
-            for (let dy = -r; dy <= r; dy++) {
-                const tx = cell.x + dx;
-                const ty = cell.y + dy;
-                if (tx >= 0 && tx < boardSize && ty >= 0 && ty < boardSize) {
-                    const key = `${tx},${ty}`;
-                    towerCoverageMap.set(key, (towerCoverageMap.get(key) || 0) + 1);
-                }
-            }
-        }
-    }
+    // 타워 건설 모드 여부 확인
+    const isBuildMode = interactionMode === 'build' && selectedTower;
 
     for (const cell of board) {
         const dom = getDomCell(cell.x, cell.y);
         if (!dom) continue;
-
-        // 기존 사거리 하이라이트 여부 임시 보관
-        const isRangePreview = dom.classList.contains("range-preview");
-        const isRangeActive = dom.classList.contains("range-active");
 
         dom.className = "cell";
         dom.innerText = ""; // 내부 텍스트 초기화
@@ -52,12 +31,10 @@ function render() {
         }
         if (cell.buildable) {
             dom.classList.add("buildable");
-        }
-
-        // v0.37.0 킬존(Kill Zone) 화망 하이라이트 (사거리 2기 이상 중첩된 통로)
-        const coverage = towerCoverageMap.get(`${cell.x},${cell.y}`) || 0;
-        if (coverage >= 2 && !cell.buildable && !cell.tower && !cell.isStart && !cell.isGoal) {
-            dom.classList.add(coverage >= 3 ? "killzone-high" : "killzone-cell");
+            // 타워 건설 모드일 때 빈 기반을 '설치 가능'으로 맥동 하이라이트
+            if (isBuildMode && !cell.tower) {
+                dom.classList.add("tower-placeable");
+            }
         }
 
         // 타워 설치 상태
@@ -92,8 +69,14 @@ function render() {
         if (selectedBoardTower && selectedBoardTower.x === cell.x && selectedBoardTower.y === cell.y) {
             dom.classList.add("selected-tower");
         }
-        if (isRangePreview) dom.classList.add("range-preview");
-        if (isRangeActive) dom.classList.add("range-active");
+    }
+
+    // 오직 사용자가 직접 타워를 클릭하여 선택했을 때만 활성 사거리 표시
+    if (selectedBoardTower && selectedBoardTower.tower && typeof highlightRange === 'function') {
+        const stats = (typeof getGameTowerStats === 'function') ? getGameTowerStats(selectedBoardTower) : null;
+        if (stats) {
+            highlightRange(selectedBoardTower.x, selectedBoardTower.y, stats.range, "range-active");
+        }
     }
 
     roundDisplay.innerText = round;
