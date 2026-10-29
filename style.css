@@ -4698,3 +4698,39 @@ button.selected {
   filter: brightness(1.15);
   transform: translateY(-2px);
 }
+
+
+/* ==========================================================================
+   v0.40.2 3종 공통 아바타 소체 & 01~15 분리 파츠 조립 레이어 스타일
+   ========================================================================== */
+.mod-part-layer {
+  position: absolute;
+  pointer-events: none;
+  object-fit: contain;
+}
+.mod-part-layer.part-wings {
+  z-index: 1;
+  width: 96%;
+  height: 85%;
+  top: 6%;
+  animation: modWingsFlap 2.2s ease-in-out infinite;
+}
+.mod-part-layer.part-halo {
+  z-index: 3;
+  width: 48%;
+  height: 26%;
+  top: 0%;
+  animation: modSdIdleFloat 2.6s ease-in-out infinite;
+}
+.mod-part-layer.part-main-weapon {
+  z-index: 4;
+  width: 45%;
+  height: 68%;
+  left: -4%;
+  bottom: 8%;
+  transform-origin: 65% 75%;
+  animation: modSdIdleFloat 2.4s ease-in-out infinite;
+}
+.modular-char-unit.is-attacking .mod-part-layer.part-main-weapon {
+  animation: modSdAttackBurst 0.38s ease-out forwards;
+}

@@ -840,6 +840,32 @@ function buildModularCharacterHtml(charId, options = {}) {
         : `${cBase.name} 전투 아바타 (클릭 시 모션 시연)`;
 
     // [v0.40.1 New] AI 생성 2.5~3등신 SD 스프라이트 & 분리 파츠 하이브리드 렌더링 (인간족 U등급 루미나 등)
+    if (spec.modularParts && (spec.modularParts.frontCore || spec.modularParts.baseBody) && !spec.sdIdleSprite) {
+        const mp = spec.modularParts;
+        const coreSrc = mp.frontCore || mp.baseBody;
+        const wingsHtml = mp.wingsCape ? `<img src="${mp.wingsCape}" class="mod-part-layer part-wings" alt="날개/망토">` : '';
+        const haloHtml  = mp.headgear  ? `<img src="${mp.headgear}" class="mod-part-layer part-halo" alt="헤일로/머리장식">` : '';
+        const mainWHtml = mp.mainWeapon ? `<img src="${mp.mainWeapon}" class="mod-part-layer part-main-weapon" alt="주무기">` : '';
+        const subWHtml  = (mp.subWeapon || mp.orb) ? `<img src="${mp.subWeapon || mp.orb}" class="mod-part-layer mod-sd-floating-orb" alt="보조무기/구체">` : '';
+
+        return `
+            <div class="modular-char-unit has-sd-sprite mode-${mode} grade-${grade} rig-${spec.rigType} ${facing} ${isAttacking ? 'is-attacking' : ''}"
+                 data-char-id="${charId}"
+                 title="${titleText}"
+                 style="--mod-primary:${spec.primaryColor}; --mod-secondary:${spec.secondaryColor}; --mod-weapon:${spec.weaponColor};">
+                <div class="mod-ground-aura"></div>
+                ${isLeader ? '<span class="mod-leader-crown">👑</span>' : ''}
+                <div class="mod-sd-sprite-wrap">
+                    ${wingsHtml}
+                    <img src="${coreSrc}" class="mod-sd-img sd-idle" alt="${cBase.name} 본체">
+                    <img src="${coreSrc}" class="mod-sd-img sd-attack" alt="${cBase.name} 공격본체">
+                    ${haloHtml}
+                    ${mainWHtml}
+                    ${subWHtml}
+                </div>
+            </div>
+        `;
+    }
     if (spec.sdIdleSprite && spec.sdAttackSprite) {
         const orbPartHtml = (spec.modularParts && spec.modularParts.orb)
             ? `<img src="${spec.modularParts.orb}" class="mod-sd-floating-orb" alt="성간 구체">`

@@ -2155,28 +2155,28 @@
                     </div>
                 </div>
 
-                <!-- 🛠️ 에셋 추출 & 설정 시트 생성 옵션 패널 (NEW v0.35.8) -->
+                <!-- 🛠️ 에셋 추출 & 3종 공통 아바타 소체 리깅용 설정 시트 옵션 패널 (v0.40.2) -->
                 <div style="background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(168, 85, 247, 0.35); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 14px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
                         <span style="font-size: 13.5px; font-weight: 800; color: #c084fc; display: flex; align-items: center; gap: 6px;">
-                            <span>⚙️ 에셋 추출 & 설정 시트 생성 모드 옵션 (Asset & Sheet Tools)</span>
-                            <span style="background: #a855f7; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">v0.36.1 NEW</span>
+                            <span>⚙️ 3종 공통 아바타 소체 리깅 & 에셋 추출 설정 옵션 (Rigging & Sheet Tools)</span>
+                            <span style="background: #a855f7; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">v0.40.2 RIG-READY</span>
                         </span>
-                        <span style="font-size: 12px; color: #94a3b8;">인게임 투명 PNG 누끼 추출 및 한글 라벨 삼면도·원본 체형 유지·속옷 상/하의 정밀 분해도(미착용 표기) 지원</span>
+                        <a href="sd_asset_studio.html" target="_blank" style="background: linear-gradient(135deg, #7c3aed, #ec4899); color: #fff; font-size: 12px; font-weight: 800; padding: 5px 12px; border-radius: 6px; text-decoration: none;">🎨 3~4단계: 에셋 투명화 & 자동 파츠 분리 스튜디오 열기 ➔</a>
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
                         <!-- 모드 선택: 일반 일러스트 vs 설정 시트 -->
                         <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px;">
-                            <label style="font-size: 12px; font-weight: 800; color: #e2e8f0; display: block; margin-bottom: 8px;">📑 생성 모드 선택</label>
+                            <label style="font-size: 12px; font-weight: 800; color: #e2e8f0; display: block; margin-bottom: 8px;">📑 진행 단계별 생성 모드 선택</label>
                             <div style="display: flex; gap: 14px; flex-wrap: wrap;">
                                 <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #f1f5f9; cursor: pointer;">
                                     <input type="radio" name="gen-mode" value="illust" checked onchange="updatePrompt()" style="accent-color: #a855f7;">
-                                    <span>✨ 전신 일러스트 (Full Standing)</span>
+                                    <span>1️⃣ 전신 일러스트 생성 (Full Standing)</span>
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #fde047; font-weight: 700; cursor: pointer;">
                                     <input type="radio" name="gen-mode" value="sheet" onchange="updatePrompt()" style="accent-color: #f59e0b;">
-                                    <span>📐 설정 시트 (01~15 표준 넘버링·삼면도·복장 및 속옷 분해도)</span>
+                                    <span>2️⃣ 소체 리깅용 설정 시트 (01~15 표준 파츠 & 미착용 '없음' 자동 표기)</span>
                                 </label>
                             </div>
                         </div>
@@ -2185,13 +2185,55 @@
                         <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
                             <div>
                                 <label for="gen-remove-bg" style="font-size: 12.5px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                    <span>⬜ 배경 제거 / 투명화 에셋 모드 (Clean White BG)</span>
+                                    <span>⬜ 1단계 배경 투명화용 에셋 모드 (Clean White BG)</span>
                                 </label>
                                 <span style="font-size: 11.5px; color: #94a3b8; display: block; margin-top: 3px;">
-                                    복잡한 배경을 배제하고 단색 순백 배경으로 출력하여 1초 만에 누끼/투명 PNG 추출
+                                    단색 순백 배경(#FFFFFF)으로 출력하여 3단계 스튜디오에서 1초 만에 투명 PNG 추출
                                 </span>
                             </div>
-                            <input type="checkbox" id="gen-remove-bg" onchange="updatePrompt()" style="width: 20px; height: 20px; accent-color: #38bdf8; cursor: pointer;">
+                            <input type="checkbox" id="gen-remove-bg" checked onchange="updatePrompt()" style="width: 20px; height: 20px; accent-color: #38bdf8; cursor: pointer;">
+                        </div>
+                    </div>
+
+                    <!-- 🧩 09~15번 리깅 파츠 보유/미착용('없음' 출력) 상세 토글 바 -->
+                    <div style="background: rgba(15, 23, 42, 0.9); border: 1px dashed rgba(245, 158, 11, 0.45); border-radius: 10px; padding: 12px 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+                            <span style="font-size: 12.5px; font-weight: 800; color: #fde047;">
+                                🧩 [09~15 파츠 유무 설정] 캐릭터에게 없는 부위는 체크 해제하세요 ➔ 템플릿과 시트에 <span style="color:#f87171;">'없음 (미착용/미보유)'</span>으로 출력됩니다!
+                            </span>
+                            <span id="rig-avatar-badge" style="background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #7dd3fc; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px;">
+                                적용 아바타 소체: STANDARD (표준형)
+                            </span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 8px;">
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#e2e8f0; cursor:pointer; background:rgba(30,41,59,0.7); padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                                <input type="checkbox" id="slot-active-09" checked onchange="updatePrompt()" style="accent-color:#10b981; width:15px; height:15px;">
+                                <span><b>09. 머리장식/헤일로</b> (해제 시 '없음')</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#e2e8f0; cursor:pointer; background:rgba(30,41,59,0.7); padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                                <input type="checkbox" id="slot-active-10" checked onchange="updatePrompt()" style="accent-color:#10b981; width:15px; height:15px;">
+                                <span><b>10. 복장 : 상의</b> (해제 시 '없음')</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#e2e8f0; cursor:pointer; background:rgba(30,41,59,0.7); padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                                <input type="checkbox" id="slot-active-11" checked onchange="updatePrompt()" style="accent-color:#10b981; width:15px; height:15px;">
+                                <span><b>11. 복장 : 하의</b> (해제 시 '없음')</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#e2e8f0; cursor:pointer; background:rgba(30,41,59,0.7); padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                                <input type="checkbox" id="slot-active-12" checked onchange="updatePrompt()" style="accent-color:#10b981; width:15px; height:15px;">
+                                <span><b>12. 날개 / 망토</b> (해제 시 '없음')</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#e2e8f0; cursor:pointer; background:rgba(30,41,59,0.7); padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                                <input type="checkbox" id="slot-active-13" checked onchange="updatePrompt()" style="accent-color:#10b981; width:15px; height:15px;">
+                                <span><b>13. 주무기 파츠</b> (해제 시 '없음')</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#e2e8f0; cursor:pointer; background:rgba(30,41,59,0.7); padding:6px 10px; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
+                                <input type="checkbox" id="slot-active-14" checked onchange="updatePrompt()" style="accent-color:#10b981; width:15px; height:15px;">
+                                <span><b>14. 보조무기/구체</b> (해제 시 '없음')</span>
+                            </label>
+                            <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#fde047; cursor:pointer; background:rgba(245,158,11,0.12); padding:6px 10px; border-radius:6px; border:1px solid rgba(245,158,11,0.35);">
+                                <input type="checkbox" id="slot-active-15" checked onchange="updatePrompt()" style="accent-color:#f59e0b; width:15px; height:15px;">
+                                <span><b>15. 복장 : 속옷</b> (해제 시 '미착용/없음')</span>
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -2257,11 +2299,49 @@
     </div>
 
     <script>
+        // 🧍‍♀️ 3종 공통 아바타 소체 규격 판별 헬퍼 (TALL / STANDARD / PETITE)
+        function getAvatarRigSpec(race, bodyType) {
+            if (bodyType === 'petite' || (bodyType === 'auto' && (race === 'earth' || race === 'avian'))) {
+                return {
+                    type: 'petite',
+                    label: 'PETITE (단신 숏스택 아바타 소체 - 145~155cm 규격)',
+                    guideLevels: [120 + 95, 120 + 180, 120 + 245, 120 + 320, 120 + 530]
+                };
+            }
+            if (bodyType === 'slender' || (bodyType === 'auto' && race === 'forest')) {
+                return {
+                    type: 'tall',
+                    label: 'TALL (장신 모델 아바타 소체 - 170~175cm 규격)',
+                    guideLevels: [120 + 55, 120 + 145, 120 + 215, 120 + 295, 120 + 530]
+                };
+            }
+            return {
+                type: 'standard',
+                label: 'STANDARD (표준 황금비율 아바타 소체 - 162~167cm 규격)',
+                guideLevels: [120 + 70, 120 + 160, 120 + 230, 120 + 310, 120 + 530]
+            };
+        }
+
+        // 🧩 09~15번 슬롯 활성화(보유/착용) 상태 조회 헬퍼
+        function getSlotActiveStates() {
+            return {
+                s09: document.getElementById('slot-active-09') ? document.getElementById('slot-active-09').checked : true,
+                s10: document.getElementById('slot-active-10') ? document.getElementById('slot-active-10').checked : true,
+                s11: document.getElementById('slot-active-11') ? document.getElementById('slot-active-11').checked : true,
+                s12: document.getElementById('slot-active-12') ? document.getElementById('slot-active-12').checked : true,
+                s13: document.getElementById('slot-active-13') ? document.getElementById('slot-active-13').checked : true,
+                s14: document.getElementById('slot-active-14') ? document.getElementById('slot-active-14').checked : true,
+                s15: document.getElementById('slot-active-15') ? document.getElementById('slot-active-15').checked : true
+            };
+        }
+
         // 📐 종족별 초고해상도(2048x1152) 공식 설정 시트 규격 틀(PNG) 원클릭 생성 & 다운로드 엔진
         function downloadModelSheetTemplate(customRace) {
             const race = customRace || document.getElementById('gen-race')?.value || 'beastkin';
             const grade = document.getElementById('gen-grade')?.value || 'UR';
             const bodyType = document.getElementById('gen-body-type')?.value || 'auto';
+            const rigSpec = getAvatarRigSpec(race, bodyType);
+            const activeSlots = getSlotActiveStates();
             
             const RACE_TITLES = {
                 'earth': '땅의 종족 (EARTH FOLK)',
@@ -2280,16 +2360,14 @@
                 'human': '※ [인간족 영구 신체]: 순수 인간 인체 및 둥근 귀 엄수 (동물귀, 날개, 기계팔 무단 침범 금지)'
             };
 
-            const currentLabels = (typeof RACE_COSTUME_LABELS !== 'undefined' && RACE_COSTUME_LABELS[race]) 
-                ? RACE_COSTUME_LABELS[race] 
-                : {
-                    'head': '09. 복장 : 머리 장식',
-                    'top': '10. 복장 : 상의',
-                    'bottom': '11. 복장 : 하의',
-                    'outer': '12. 복장 : 외투',
-                    'acc1': '13. 장신구 1',
-                    'acc2': '14. 장신구 2'
-                };
+            const currentLabels = {
+                'head': '09. 복장 : 머리 장식',
+                'top': '10. 복장 : 상의',
+                'bottom': '11. 복장 : 하의',
+                'outer': '12. 복장 : 외투 / 날개',
+                'acc1': '13. 주무기 파츠',
+                'acc2': '14. 보조무기 / 구체'
+            };
 
             // 가상 캔버스 생성 (2048 x 1152 고해상도)
             const canvas = document.createElement('canvas');
@@ -2303,48 +2381,57 @@
 
             // 2. 상단 메인 헤더
             ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 36px sans-serif';
+            ctx.font = 'bold 34px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(RACE_TITLES[race] + ' 캐릭터 설정 및 제작 참고 자료', 1024, 60);
+            ctx.fillText(RACE_TITLES[race] + ' 3종 아바타 소체 리깅 & 캐릭터 설정 시트', 1024, 56);
 
-            ctx.fillStyle = '#64748b';
-            ctx.font = 'bold 16px sans-serif';
-            ctx.fillText('CHARACTER REF SHEET & TURNAROUND (OFFICIAL GAME PRODUCTION SPECIFICATION 01~15)', 1024, 92);
+            ctx.fillStyle = '#475569';
+            ctx.font = 'bold 15px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('RIGGING AVATAR SPEC: ' + rigSpec.label + ' (OFFICIAL 01~15 MODULAR SHEET)', 60, 92);
 
             // 종족별 영구 신체 주의사항 라벨 (헤더 우측)
             ctx.fillStyle = '#dc2626';
-            ctx.font = 'bold 15px sans-serif';
+            ctx.font = 'bold 14.5px sans-serif';
             ctx.textAlign = 'right';
             ctx.fillText(RACE_NOTES[race] || '', 2000, 92);
 
-            // 헬퍼: 박스 그리기
-            function drawSlotBox(x, y, w, h, title, sub, isHighlight) {
+            // 헬퍼: 박스 그리기 (isAbsent=true 이면 '없음 / 미착용' 스탬프 표시, 내부 배경은 Flood-Fill 투명화를 위해 순백색 유지)
+            function drawSlotBox(x, y, w, h, title, sub, isHighlight, isAbsent) {
                 ctx.save();
-                ctx.fillStyle = isHighlight ? '#fffbeb' : '#f8fafc';
-                ctx.strokeStyle = isHighlight ? '#f59e0b' : '#cbd5e1';
+                ctx.fillStyle = isAbsent ? '#f1f5f9' : '#ffffff';
+                ctx.strokeStyle = isAbsent ? '#94a3b8' : (isHighlight ? '#f59e0b' : '#cbd5e1');
                 ctx.lineWidth = isHighlight ? 2.5 : 1.5;
                 ctx.fillRect(x, y, w, h);
                 ctx.strokeRect(x, y, w, h);
 
-                // 상단 라벨 바
-                ctx.fillStyle = isHighlight ? '#fef3c7' : '#f1f5f9';
+                // 상단 라벨 바 (높이 38px 고정 -> 스튜디오 자동 크롭 시 정확히 38px 제외)
+                ctx.fillStyle = isAbsent ? '#e2e8f0' : (isHighlight ? '#fef3c7' : '#f1f5f9');
                 ctx.fillRect(x, y, w, 38);
-                ctx.strokeStyle = isHighlight ? '#f59e0b' : '#cbd5e1';
+                ctx.strokeStyle = isAbsent ? '#94a3b8' : (isHighlight ? '#f59e0b' : '#cbd5e1');
                 ctx.beginPath();
                 ctx.moveTo(x, y + 38);
                 ctx.lineTo(x + w, y + 38);
                 ctx.stroke();
 
                 // 텍스트 라벨
-                ctx.fillStyle = isHighlight ? '#b45309' : '#1e293b';
-                ctx.font = 'bold 17px sans-serif';
+                ctx.fillStyle = isAbsent ? '#64748b' : (isHighlight ? '#b45309' : '#1e293b');
+                ctx.font = 'bold 15.5px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(title, x + w / 2, y + 25);
 
-                if (sub) {
-                    ctx.fillStyle = '#94a3b8';
-                    ctx.font = '13px sans-serif';
-                    ctx.fillText(sub, x + w / 2, y + h / 2);
+                if (isAbsent) {
+                    // 미보유/미착용 항목은 중앙에 큼직하게 '없음' 표시
+                    ctx.fillStyle = '#dc2626';
+                    ctx.font = 'bold 20px sans-serif';
+                    ctx.fillText('없음 (NONE)', x + w / 2, y + h / 2 - 8);
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = 'bold 13px sans-serif';
+                    ctx.fillText('[미착용 / 미보유]', x + w / 2, y + h / 2 + 18);
+                } else if (sub) {
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.font = '12px sans-serif';
+                    ctx.fillText(sub, x + w / 2, y + h - 14);
                 }
                 ctx.restore();
             }
@@ -2356,32 +2443,41 @@
             const startX = 60;
             const gap = 38;
 
-            // 눈금 가이드선 (좌측 0~180cm 및 등신선)
-            ctx.save();
-            ctx.strokeStyle = '#fca5a5';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([4, 4]);
-
-            // 머리선, 가슴선, 허리선, 골반선, 발끝선 수평 점선 가이드
-            const guideLevels = [topY + 70, topY + 160, topY + 230, topY + 310, topY + topH - 30];
-            const levelNames = ['정수리 기준선 (Head)', '가슴선 (Chest)', '허리선 (Waist)', '골반선 (Hips)', '발끝 바닥선 (Feet Base)'];
-            guideLevels.forEach((gy, i) => {
-                ctx.beginPath();
-                ctx.moveTo(startX - 20, gy);
-                ctx.lineTo(startX + (slotW + gap) * 4 - gap + 20, gy);
-                ctx.stroke();
-
-                ctx.fillStyle = '#ef4444';
-                ctx.font = 'bold 12px sans-serif';
-                ctx.textAlign = 'right';
-                ctx.fillText(levelNames[i], startX - 25, gy + 4);
-            });
-            ctx.restore();
-
             drawSlotBox(startX + (slotW + gap) * 0, topY, slotW, topH, '01. 정면 (Front View)', '[전신 풀 착장 정면 실측 배치]');
             drawSlotBox(startX + (slotW + gap) * 1, topY, slotW, topH, '02. 측면 (Side View)', '[정면과 1:1 눈금 일치 측면 실측]');
             drawSlotBox(startX + (slotW + gap) * 2, topY, slotW, topH, '03. 후면 (Back View)', '[망토/날개/뒷모습 완전 해체 실측]');
-            drawSlotBox(startX + (slotW + gap) * 3, topY, slotW, topH, '04. 기본 체형 (Base Body Model)', '[의상 완전 탈의 / 순수 스킨톤 베이스 인체 모델]', true);
+            drawSlotBox(startX + (slotW + gap) * 3, topY, slotW, topH, '04. 기본 체형 (Base Body Model)', '[' + rigSpec.type.toUpperCase() + ' 아바타 소체 / 의상 완전 탈의]', true, false);
+
+            // 눈금 가이드선 (캐릭터 내부에 점선 잔상이 남지 않도록 좌측 여백과 박스 사이 간격에만 눈금 마커 표시)
+            ctx.save();
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5;
+
+            const guideLevels = rigSpec.guideLevels;
+            const levelNames = ['Head', 'Chest', 'Waist', 'Hips', 'Base'];
+            guideLevels.forEach((gy, i) => {
+                // 좌측 시작 눈금
+                ctx.beginPath();
+                ctx.moveTo(startX - 14, gy);
+                ctx.lineTo(startX, gy);
+                ctx.stroke();
+
+                // 슬롯과 슬롯 사이 간격(Gap) 눈금
+                for (let s = 0; s < 3; s++) {
+                    const gx1 = startX + slotW * (s + 1) + gap * s + 4;
+                    const gx2 = gx1 + gap - 8;
+                    ctx.beginPath();
+                    ctx.moveTo(gx1, gy);
+                    ctx.lineTo(gx2, gy);
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = '#ef4444';
+                ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText(levelNames[i], startX - 18, gy + 4);
+            });
+            ctx.restore();
 
             // 4. 중앙 세련된 구분선 (Y: 705)
             ctx.save();
@@ -2396,13 +2492,11 @@
             // 5. 하단 좌측: 표정 시트 4종 (X: 60 ~ 820, Y: 730 ~ 1100)
             const expY = 730;
             const expH = 370;
-            const expBoxW = 760;
             
-            // 표정 섹션 타이틀
             ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 20px sans-serif';
+            ctx.font = 'bold 19px sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText('표정 시트 (Facial Expressions 05~08)', startX, expY - 8);
+            ctx.fillText('표정 시트 (Facial Expressions 05~08)', startX, expY - 10);
 
             const subExpW = 175;
             const subExpGap = 20;
@@ -2411,29 +2505,29 @@
             drawSlotBox(startX + (subExpW + subExpGap) * 2, expY, subExpW, expH, '07. 자신감', '[Confident]');
             drawSlotBox(startX + (subExpW + subExpGap) * 3, expY, subExpW, expH, '08. 진지한 결의', '[Serious]');
 
-            // 6. 하단 우측: 복장 및 속옷 분해도 (X: 880 ~ 1988, Y: 730 ~ 1100)
+            // 6. 하단 우측: 소체 리깅용 복장·무기·속옷 분해도 (X: 880 ~ 1988, Y: 730 ~ 1100)
             const costStartX = 880;
             ctx.fillStyle = '#0f172a';
-            ctx.font = 'bold 20px sans-serif';
+            ctx.font = 'bold 19px sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText('복장 및 속옷 분해도 (Exploded Costume & Underwear 09~15)', costStartX, expY - 8);
+            ctx.fillText('리깅 파츠 & 복장·속옷 분해도 (Modular Rig Parts 09~15 : 미보유 항목은 "없음" 표기)', costStartX, expY - 10);
 
             const costSlotW = 145;
             const costGap = 16;
 
-            drawSlotBox(costStartX + (costSlotW + costGap) * 0, expY, costSlotW, expH, currentLabels.head, '[Headpiece]');
-            drawSlotBox(costStartX + (costSlotW + costGap) * 1, expY, costSlotW, expH, currentLabels.top, '[Top / Armor]');
-            drawSlotBox(costStartX + (costSlotW + costGap) * 2, expY, costSlotW, expH, currentLabels.bottom, '[Bottom / Skirt]');
-            drawSlotBox(costStartX + (costSlotW + costGap) * 3, expY, costSlotW, expH, currentLabels.outer, '[Cape / Outer]');
-            drawSlotBox(costStartX + (costSlotW + costGap) * 4, expY, costSlotW, expH, currentLabels.acc1, '[Accessory 1]');
-            drawSlotBox(costStartX + (costSlotW + costGap) * 5, expY, costSlotW, expH, currentLabels.acc2, '[Accessory 2]');
+            drawSlotBox(costStartX + (costSlotW + costGap) * 0, expY, costSlotW, expH, currentLabels.head, '[Headgear / Halo]', false, !activeSlots.s09);
+            drawSlotBox(costStartX + (costSlotW + costGap) * 1, expY, costSlotW, expH, currentLabels.top, '[Top / Armor]', false, !activeSlots.s10);
+            drawSlotBox(costStartX + (costSlotW + costGap) * 2, expY, costSlotW, expH, currentLabels.bottom, '[Bottom / Skirt]', false, !activeSlots.s11);
+            drawSlotBox(costStartX + (costSlotW + costGap) * 3, expY, costSlotW, expH, currentLabels.outer, '[Wings / Cape]', false, !activeSlots.s12);
+            drawSlotBox(costStartX + (costSlotW + costGap) * 4, expY, costSlotW, expH, currentLabels.acc1, '[Primary Weapon]', false, !activeSlots.s13);
+            drawSlotBox(costStartX + (costSlotW + costGap) * 5, expY, costSlotW, expH, currentLabels.acc2, '[Sub-Weapon / Orb]', false, !activeSlots.s14);
             
-            // 15번 속옷 분해도 전용 슬롯 (골드 하이라이트)
-            drawSlotBox(costStartX + (costSlotW + costGap) * 6, expY, costSlotW + 20, expH, '15. 복장 : 속옷', '[속옷 상의 + 속옷 하의 분해도]', true);
+            // 15번 속옷 분해도 전용 슬롯 (골드 하이라이트 또는 미착용 시 '없음')
+            drawSlotBox(costStartX + (costSlotW + costGap) * 6, expY, costSlotW + 20, expH, '15. 복장 : 속옷', '[Underwear / Inner]', true, !activeSlots.s15);
 
             // 7. PNG 다운로드 실행
             const link = document.createElement('a');
-            link.download = race + '_model_sheet_template_2048x1152.png';
+            link.download = race + '_' + rigSpec.type + '_model_sheet_template_2048x1152.png';
             link.href = canvas.toDataURL('image/png');
             document.body.appendChild(link);
             link.click();
@@ -2966,6 +3060,13 @@ const STYLE_PROMPTS = {
             const details = document.getElementById('gen-details').value.trim();
             const isRemoveBg = document.getElementById('gen-remove-bg').checked;
             const genMode = document.querySelector('input[name="gen-mode"]:checked')?.value || 'illust';
+            const rigSpec = getAvatarRigSpec(race, bodyType);
+            const activeSlots = getSlotActiveStates();
+
+            const rigBadgeEl = document.getElementById('rig-avatar-badge');
+            if (rigBadgeEl) {
+                rigBadgeEl.textContent = `적용 아바타 소체: ${rigSpec.label}`;
+            }
 
             // 💃 체형 결정: 'auto'면 종족 기본 스펙, 선택 시 커스텀 체형 스펙 적용
             const selectedBodySpec = (bodyType !== 'auto' && BODY_TYPE_SPECS[bodyType]) 
@@ -2986,18 +3087,7 @@ const STYLE_PROMPTS = {
                     'mutation': "unique mutant anomaly, rare contrasting exotic hybrid features"
                 };
 
-                const GRADE_SHEET_SPECS = {
-                    'C': "apprentice rank uniform, simple neat costume, training gear",
-                    'UC': "junior officer uniform, formal cape, light armor",
-                    'R': "formal knight officer uniform with side-slit and thigh holster snug strap squeeze",
-                    'SR': "elite commander attire with seductive cutouts, leather body harness, garter belt and thigh-high boots, floating magic circle",
-                    'UR': "apex imperial royal costume, ornate gold chain bikini armor, micro high-leg plating, sheer veil, holy halo",
-                    'U': "transcendent cosmic goddess attire, micro slingshot lingerie, delicate diamond body chains, celestial halo"
-                };
-
-                // (RACE_BODY_SPECS moved to top)
-
-                // 🩱 5대 종족 및 등급별 기본 내의(이너 레이어) 상세 명세 (AI 텍스트 안전 필터 우회 아트북 표준)
+                // 🩱 5대 종족 및 등급별 기본 내의(이너 레이어) 상세 명세
                 const INNER_LAYER_SPECS = {
                     'earth': {
                         'C': "활동성 높은 그레이 스포츠 이너탑 & 로우라이즈 코튼 쇼츠 착용 (gray athletic stretch inner top and low-rise cotton undershorts)",
@@ -3041,66 +3131,46 @@ const STYLE_PROMPTS = {
                     }
                 };
 
-                // 🏷️ 종족별 표준 복장 분해도 라벨 명세 (09~14번 가변, 15번 공통 속옷)
-                const RACE_COSTUME_LABELS = {
-                    'earth': {
-                        'head': '09. 복장 : 고글 / 헤어핀',
-                        'top': '10. 복장 : 상의 (작업형 흉갑 상의)',
-                        'bottom': '11. 복장 : 하의 (카고 배틀 하의)',
-                        'outer': '12. 복장 : 외투 (엔지니어 망토 / 코트)',
-                        'acc1': '13. 장신구 1 (레더 하네스 & 공구 벨트)',
-                        'acc2': '14. 장신구 2 (강철 엔지니어 부츠)'
-                    },
-                    'beastkin': {
-                        'head': '09. 복장 : 머리 장식 (야성 헤어핀 / 깃털 리본)',
-                        'top': '10. 복장 : 상의 (가죽 크롭 상의)',
-                        'bottom': '11. 복장 : 하의 (배틀 레더 하의)',
-                        'outer': '12. 복장 : 외투 (털 망토 / 판초 / 케이프)',
-                        'acc1': '13. 장신구 1 (가죽 바디 스트랩)',
-                        'acc2': '14. 장신구 2 (발톱 각반 및 부츠)'
-                    },
-                    'forest': {
-                        'head': '09. 복장 : 잎새 티아라 / 헤어핀',
-                        'top': '10. 복장 : 상의 (실크 로브 상의)',
-                        'bottom': '11. 복장 : 하의 (시스루 슬릿 하의)',
-                        'outer': '12. 복장 : 외투 (오르간자 페어리 실크 망토)',
-                        'acc1': '13. 장신구 1 (에메랄드 바디체인)',
-                        'acc2': '14. 장신구 2 (덩굴 발찌 및 샌들)'
-                    },
-                    'avian': {
-                        'head': '09. 복장 : 성간 나침반 헤일로',
-                        'top': '10. 복장 : 상의 (신성 상의)',
-                        'bottom': '11. 복장 : 하의 (신성 하의)',
-                        'outer': '12. 복장 : 결정체 오로라 날개',
-                        'acc1': '13. 장신구 1 (황금 바디체인)',
-                        'acc2': '14. 장신구 2 (반투명 리본 및 발목 넝쿨)'
-                    },
-                    'human': {
-                        'head': '09. 복장 : 제국 장교모 / 티아라',
-                        'top': '10. 복장 : 상의 (제국 기사 흉갑 상의)',
-                        'bottom': '11. 복장 : 하의 (제국 제복 스커트 하의)',
-                        'outer': '12. 복장 : 의전용 비단 망토',
-                        'acc1': '13. 장신구 1 (홀스터 레더 하네스)',
-                        'acc2': '14. 장신구 2 (기사단 플레이트 부츠)'
-                    }
-                };
-
-                const currentCostumeLabels = RACE_COSTUME_LABELS[race] || {
-                    'head': '09. 복장 : 머리 장식 / 헤일로 / 티아라',
-                    'top': '10. 복장 : 상의 (흉갑 / 상의)',
-                    'bottom': '11. 복장 : 하의 (스커트 / 하의 아머)',
-                    'outer': '12. 복장 : 외투 / 날개 / 망토',
-                    'acc1': '13. 장신구 1 (바디체인 / 하네스 / 벨트)',
-                    'acc2': '14. 장신구 2 (부츠 / 각반 / 발찌)'
+                // 🏷️ 소체 리깅 직결 표준 파츠 분해도 라벨 명세 (09~15번)
+                const currentCostumeLabels = {
+                    'head': '09. 복장 : 머리 장식 (헤일로 / 모자 / 헤어핀)',
+                    'top': '10. 복장 : 상의 (흉갑 / 메인 상의)',
+                    'bottom': '11. 복장 : 하의 (스커트 / 쇼츠 / 하의)',
+                    'outer': '12. 복장 : 외투 / 날개 (망토 / 코트 / 등 장식)',
+                    'acc1': '13. 주무기 파츠 (오른손 메인 무기 단독 분리)',
+                    'acc2': '14. 보조무기 / 구체 (왼손 방패 / 마도서 / 부유 구체)'
                 };
 
                 const currentInnerLayer = (INNER_LAYER_SPECS[race] && INNER_LAYER_SPECS[race][grade]) 
                     ? INNER_LAYER_SPECS[race][grade] 
                     : "appropriate stylized inner base layer matching the costume grade (fitted top and undershorts)";
 
-                // ✨ 실전 골든 프롬프트 분석 기반 기본 체형(04) 묘사:
-                // 점토 마네킹 대신 동일 얼굴/헤어 + 스킨톤 반투명 세컨드스킨 바디슈트로 인체 볼륨과 빛 반사를 유지하며 안전 필터 완벽 회피
-                                // 🧬 5대 종족 고유 신체 특징 명세 (04 기본 체형에도 탈의되지 않고 원본과 100% 동일한 사지 구성 유지)
+                // 🧩 09~15번 부위별 존재/부재('없음' 출력) 지시문 생성
+                const slotInstructions = [
+                    activeSlots.s09
+                        ? `- '09. 복장 : 머리 장식': Extract her headpiece/halo/tiara/hair ornament from Image 1. IF she wears NO headgear or halo in Image 1, DO NOT invent one—leave box 09 empty and print ONLY '없음 (미착용)' in the center.`
+                        : `- '09. 복장 : 머리 장식' [ABSENT / NONE]: The character has NO headgear or halo. DO NOT draw any item in box 09; leave the box blank and print ONLY '없음 (NONE - 미착용)' in the center.`,
+                    activeSlots.s10
+                        ? `- '10. 복장 : 상의': Extract her upper garment/breastplate/bodice from Image 1. IF absent, leave box 10 empty and print ONLY '없음 (미착용)' in the center.`
+                        : `- '10. 복장 : 상의' [ABSENT / NONE]: DO NOT draw any upper garment in box 10; leave the box blank and print ONLY '없음 (NONE - 미착용)' in the center.`,
+                    activeSlots.s11
+                        ? `- '11. 복장 : 하의': Extract her lower garment/skirt/shorts/legwear from Image 1. IF absent, leave box 11 empty and print ONLY '없음 (미착용)' in the center.`
+                        : `- '11. 복장 : 하의' [ABSENT / NONE]: DO NOT draw any lower garment in box 11; leave the box blank and print ONLY '없음 (NONE - 미착용)' in the center.`,
+                    activeSlots.s12
+                        ? `- '12. 복장 : 외투 / 날개': Extract her detachable cape/coat/wings/back-halo from Image 1 (excluding permanent biological wings of Avian folk). IF she has no cape, coat, or detachable wings in Image 1, DO NOT invent one—leave box 12 empty and print ONLY '없음 (미착용)' in the center.`
+                        : `- '12. 복장 : 외투 / 날개' [ABSENT / NONE]: The character has NO cape, coat, or detachable wings. DO NOT draw any item in box 12; leave the box blank and print ONLY '없음 (NONE - 미착용)' in the center.`,
+                    activeSlots.s13
+                        ? `- '13. 주무기 파츠': Extract her primary weapon (sword, staff, bow, rifle, etc.) cleanly isolated for animation rigging. IF she holds no primary weapon in Image 1, leave box 13 empty and print ONLY '없음 (미보유)' in the center.`
+                        : `- '13. 주무기 파츠' [ABSENT / NONE]: The character has NO primary weapon. DO NOT draw any weapon in box 13; leave the box blank and print ONLY '없음 (NONE - 미보유)' in the center.`,
+                    activeSlots.s14
+                        ? `- '14. 보조무기 / 구체': Extract her secondary off-hand equipment (shield, grimoire book, floating elemental orb, sub-weapon) cleanly isolated for rigging. IF she has NO secondary weapon, shield, book, or floating orb in Image 1, DO NOT invent one—leave box 14 empty and print ONLY '없음 (미보유)' in the center.`
+                        : `- '14. 보조무기 / 구체' [ABSENT / NONE]: The character has NO secondary weapon, shield, or orb. DO NOT draw any item in box 14; leave the box blank and print ONLY '없음 (NONE - 미보유)' in the center.`,
+                    activeSlots.s15
+                        ? `- '15. 복장 : 속옷': Detailed isolated breakdown of her inner layer [${currentInnerLayer}]. Clearly illustrate the undergarment top and undershorts. IF the character wears no fabric underwear (e.g. U-grade body chains or unequipped), print '없음 (미착용)' in box 15.`
+                        : `- '15. 복장 : 속옷' [ABSENT / NONE]: The character wears NO underwear (미착용). DO NOT draw any bra, panties, or fabric underwear in box 15; leave box 15 blank and print ONLY the Korean text '없음 (미착용 / NONE)' in the center.`
+                ].join('\n');
+
+                // 🧬 5대 종족 고유 신체 특징 명세 (04 기본 체형에도 탈의되지 않고 원본과 100% 동일한 사지 구성 유지)
                 const RACE_ANATOMICAL_FEATURES = {
                     'earth': "Permanent mechanical prosthetic limbs: BOTH arms (left arm and right arm simultaneously) MUST be mechanical cybernetic prosthetic arms with visible brass gears, mechanical joints, and pneumatic cylinders from shoulders to fingers. Her torso and BOTH legs MUST be 100% natural organic human skin (NEVER turn legs into robotic legs, NEVER depict one arm as organic flesh when the character has dual robotic arms). Mechanical arms are living body parts and must NEVER appear detached in views 09-15.",
                     'beastkin': "Permanent beast anatomy: MUST have a 100% beautiful anime human female face (small cute human nose, expressive eyes, smooth human skin) with fluffy animal ears on top of head and natural expressive animal tail. Both animal ears and tail MUST remain attached on views 01-04 (tail and ears must NEVER be depicted as detached costume props in views 09-15, and MUST NEVER have an animal snout, animal muzzle, or furry face).",
@@ -3110,34 +3180,30 @@ const STYLE_PROMPTS = {
                     'mutation': "Exotic permanent mutant anatomical traits strictly mirroring original image."
                 };
 
-                // ✨ 최초 레퍼런스 시트 표준: 04 기본 체형 (사지 구성 1:1 복제 + 순수 스킨톤 베이스 + 완전한 얼굴/헤어)
-                const baseBodyPrompt = `full-body anatomical base character model of the EXACT SAME character (NOT a blank mannequin, NOT a featureless doll, NOT a faceless silhouette, NOT a bald mannequin):
-- Identical Face & Hair (완전한 얼굴과 헤어스타일): MUST have her complete beautiful expressive anime face (clear eyes, eyelashes, eyebrows, nose, mouth) and full voluminous hairstyle and hair color IDENTICAL to turnaround views 01-03.
+                // ✨ 3종 공통 아바타 소체 규격('04. 기본 체형') 명세
+                const baseBodyPrompt = `full-body anatomical rigging avatar base model (${rigSpec.label}) of the EXACT SAME character (NOT a blank mannequin, NOT a featureless doll, NOT a faceless silhouette, NOT a bald mannequin):
+- Standardized 3-Tier Avatar Rigging Alignment: Strictly align her head, chest, waist, hips, and feet to the horizontal red dotted height guide lines of the '${rigSpec.type.toUpperCase()}' avatar specification in Image 2.
+- Identical Face & Hair (완전한 얼굴과 헤어스타일): MUST have her complete beautiful expressive anime face and full voluminous hairstyle IDENTICAL to turnaround views 01-03.
 - Inherent Bodily Traits (종족 고유 신체 100% 보존): ${RACE_ANATOMICAL_FEATURES[race] || ''}
-- Equipment Stripping (순수 복장/장비 및 속옷 완전 탈의): Stripped of ALL fabric clothing, outer armor, cape, halo, weapons, accessories, and underwear (NO bra, NO panties, NO garter belt on 04 base body model; pure bare seamless skin-toned anatomy model). The underwear layer MUST ONLY be illustrated in the isolated section 15, NOT worn on the 04 base body model. Her biological skin and permanent anatomical parts (earth folk's mechanical arms, beastkin's ears & tail, avian folk's wings, forest folk's elf ears) remain fully attached to her body. Permanent anatomical features are living body parts and must NEVER appear as detached spare parts in the costume breakdown (views 09-15).
-- Body & Proportions: Natural bare female anatomy strictly maintaining her specified build (${selectedBodySpec}) for 3D modeling and rigging reference, seamless smooth natural skin tone with soft studio rim lighting highlighting body silhouette and muscle contours, non-sexual safe-for-work production reference (NO dark bodysuit, NO black tank top, skin-toned smooth seamless surface).
+- Equipment Stripping (순수 복장/장비 및 속옷 완전 탈의): Stripped of ALL fabric clothing, outer armor, cape, halo, weapons, accessories, and underwear (NO bra, NO panties, NO garter belt on 04 base body model; pure bare seamless skin-toned anatomy model).
+- Body & Proportions: Natural bare female anatomy strictly maintaining her specified build (${selectedBodySpec}) for 2D/3D modular avatar rigging reference, seamless smooth natural skin tone, non-sexual safe-for-work production reference.
 - Korean Label: '04. 기본 체형'`;
 
                 prompt = `Based on the TWO attached reference images:
-- [Image 1: Character Design Source]: Faithfully adopt the character's exact face, hair, colors, race traits, and costume design from Image 1.
-- [Image 2: Official Model Sheet Grid Template]: Strictly map and decompose the character into the EXACT standardized bounding grid boxes, height guides, and numbered Korean label positions of Image 2.
-Generate an official game production reference sheet (master model sheet & setting guide) strictly matching the 01~15 section layout:
-[1. Standard Numbered Korean Annotations]: All section titles, part labels, callouts, and explanatory notes MUST strictly follow the exact numbered tags and positions from the Image 2 template:
-- Main Turnaround & Base: '01. 정면', '02. 측면', '03. 후면', '04. 기본 체형'
+- [Image 1: Character Design Source]: Faithfully adopt the character's exact face, hair, colors, race traits, costume, and weapons from Image 1.
+- [Image 2: Official 01~15 Modular Rigging Sheet Grid Template]: Strictly map and decompose the character into the EXACT standardized bounding grid boxes, height guides (${rigSpec.label}), and numbered Korean label positions of Image 2.
+Generate an official game production & modular avatar rigging reference sheet strictly matching the 01~15 section layout:
+[1. Standard Numbered Korean Annotations]: All section titles and part labels MUST strictly follow the exact numbered tags and positions from Image 2:
+- Main Turnaround & Avatar Base: '01. 정면', '02. 측면', '03. 후면', '04. 기본 체형'
 - Expression Sheet: '05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의'
-- Exploded Costume & Accessories (Isolated at the end):
-  '${currentCostumeLabels.head}',
-  '${currentCostumeLabels.top}',
-  '${currentCostumeLabels.bottom}',
-  '${currentCostumeLabels.outer}',
-  '${currentCostumeLabels.acc1}',
-  '${currentCostumeLabels.acc2}',
-  '15. 복장 : 속옷 (속옷 상의, 속옷 하의)'
-[2. Character Natural Base Body Model ('04. 기본 체형')]: ${baseBodyPrompt}.
-[3. Exploded Costume Breakdown (복장 분해도: 09~14)]: isolated equipment display showing: headpiece (${currentCostumeLabels.head}), upper outerwear/armor (${currentCostumeLabels.top}), lower outerwear/skirt (${currentCostumeLabels.bottom}), back accessory/cape/wings (${currentCostumeLabels.outer}), accessory 1 (${currentCostumeLabels.acc1}), accessory 2 (${currentCostumeLabels.acc2}).
-[3-1. Specific Underwear Breakdown ('15. 복장 : 속옷 - 속옷 상의, 속옷 하의')]: Detailed isolated breakdown of the inner foundation layer: [Underwear Spec: ${currentInnerLayer}]. Clearly illustrate both the isolated fitted undergarment top (속옷 상의) and matching undershorts (속옷 하의) as distinct individual clothing items labeled in Korean as '15. 복장 : 속옷 (속옷 상의, 속옷 하의)'. If specified as 'No traditional fabric inner layer', explicitly depict her body wearing no fabric inner layer with only the sacred radiant body-chains or glowing aura on bare skin, labeled in Korean as '15. 복장 : 속옷 (신성 바디체인)'.
-[4. Facial Expression Sheet (표정 시트: 05~08)]: 4 distinct facial expression portraits labeled in Korean ('05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의').
-[5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 3D game modeling, animation rigging, and costume tailoring reference, clean precise lineart, safe for work, character production study, simple solid pure white background, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${selectedBodySpec}, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
+- Modular Rigging Parts & Costume Breakdown (09~15):
+  '09. 복장 : 머리 장식', '10. 복장 : 상의', '11. 복장 : 하의', '12. 복장 : 외투 / 날개', '13. 주무기 파츠', '14. 보조무기 / 구체', '15. 복장 : 속옷'
+[2. Character Natural Avatar Base Body Model ('04. 기본 체형')]: ${baseBodyPrompt}.
+[3. Modular Rigging Parts & Costume Breakdown Rules (09~15 — STRICT "없음 / NONE" DISPLAY FOR ABSENT ITEMS)]:
+CRITICAL RULE: If the character does NOT have a specific item (such as no halo/headgear in 09, no top in 10, no bottom in 11, no wings/cape in 12, no main weapon in 13, no secondary weapon/shield/orb in 14, or no underwear in 15), DO NOT invent or hallucinate fake items! Leave that numbered slot empty and clearly write '없음 (미착용)' or '없음 (미보유)' in Korean in the center of that box:
+${slotInstructions}
+[4. Facial Expression Sheet (표정 시트: 05~08)]: 4 distinct front-facing facial expression head parts for modular head swapping ('05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의').
+[5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 2D/3D modular avatar rigging and part slicing, clean precise lineart, safe for work, simple solid pure white background (#FFFFFF) inside all boxes, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${selectedBodySpec}, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
                 
                 // 🛡️ 실전 검증된 설정 시트 전용 올인원 네거티브 프롬프트 (체형 맞춤형 분기)
                 let sheetBodyNegatives = [];
