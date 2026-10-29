@@ -14,7 +14,37 @@ function render() {
         if (!dom) continue;
 
         dom.className = "cell";
-        dom.innerText = ""; // 내부 텍스트 초기화
+
+        // 현재 셀에 배치된 대장 또는 강림 히어로 식별 (60FPS 모션 유지를 위한 스마트 DOM 보존)
+        let activeUnitCharId = null;
+        let activeUnitIsLeader = false;
+        let activeUnitFacing = 'right';
+        let activeUnitAttacking = false;
+
+        if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
+            const lInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
+            activeUnitCharId = (lInfo && lInfo.charId) ? lInfo.charId : ((typeof USER_DATA !== 'undefined' && USER_DATA.characterDeck) ? USER_DATA.characterDeck[0] : 'char_liana');
+            activeUnitIsLeader = true;
+            activeUnitFacing = (typeof window.leaderFacing === 'string') ? window.leaderFacing : 'right';
+            activeUnitAttacking = (typeof window.leaderAttackAnimUntil === 'number' && Date.now() < window.leaderAttackAnimUntil);
+        } else if (typeof deployedHeroes !== 'undefined') {
+            for (const [hId, hData] of Object.entries(deployedHeroes)) {
+                if (hData && hData.x === cell.x && hData.y === cell.y) {
+                    activeUnitCharId = hId;
+                    activeUnitIsLeader = (typeof USER_DATA !== 'undefined' && USER_DATA.characterDeck && USER_DATA.characterDeck[0] === hId);
+                    activeUnitFacing = hData.facing || 'right';
+                    activeUnitAttacking = (typeof hData.attackAnimUntil === 'number' && Date.now() < hData.attackAnimUntil);
+                    break;
+                }
+            }
+        }
+
+        const existingModUnit = dom.querySelector(".modular-char-unit");
+        if (!activeUnitCharId) {
+            dom.innerText = ""; // 유닛이 없는 일반 타일은 내부 텍스트 초기화
+        } else if (existingModUnit && existingModUnit.getAttribute("data-char-id") !== activeUnitCharId) {
+            dom.innerText = ""; // 다른 지휘관으로 교체된 경우 초기화
+        }
 
         // 시작점 및 골인점 마킹
         if (cell.isStart) {
@@ -55,48 +85,37 @@ function render() {
             dom.innerText = emblem;
         }
 
-        // v0.32.0 대장 지휘관 필드 토큰 렌더링 (원형 프레임, 부유 모션, 회전 오라, 왕관)
-        if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
-            dom.classList.add("has-leader");
-            const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
-            const leaderImg = (leaderInfo && leaderInfo.charBase && leaderInfo.charBase.image)
-                ? `<img src="${leaderInfo.charBase.image}" class="leader-token-img" alt="대장">`
-                : `<span class="leader-token-avatar">${(leaderInfo && leaderInfo.charBase && leaderInfo.charBase.avatar) || '👑'}</span>`;
-
-            dom.innerHTML = `
-                <div class="leader-field-token grade-${(leaderInfo && leaderInfo.grade) || 'R'}" title="👑 대장 ${(leaderInfo && leaderInfo.charBase && leaderInfo.charBase.name) || ''} (수호 결계 발동 중 / 클릭 시 이동 모드)">
-                    <div class="leader-token-aura"></div>
-                    ${leaderImg}
-                    <span class="leader-token-crown">👑</span>
-                </div>
-            `;
-        }
-
-        // v0.39.0 전장 강림 히어로 유닛 및 3x3 지휘 오라 필드 렌더링
+        // v0.39.0 3x3 지휘 오라 필드 착색
         if (typeof deployedHeroes !== 'undefined') {
-            // 1. 3x3 지휘 오라 필드 착색
             for (const [hId, hData] of Object.entries(deployedHeroes)) {
                 if (hData && Math.abs(cell.x - hData.x) <= 1 && Math.abs(cell.y - hData.y) <= 1) {
                     dom.classList.add("hero-aura-tile");
                     break;
                 }
             }
+        }
 
-            // 2. 히어로 필드 토큰 (이후 모듈러 캐릭터 예정 -> 현재는 심플한 원형 토큰)
-            for (const [hId, hData] of Object.entries(deployedHeroes)) {
-                if (hData && hData.x === cell.x && hData.y === cell.y) {
-                    dom.classList.add("has-hero");
-                    const cBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[hId] : null;
-                    const cAvatar = (cBase && cBase.avatar) ? cBase.avatar : '⚡';
-                    const cGrade = (cBase && cBase.grade) ? cBase.grade : 'UR';
-                    const cName = (cBase && cBase.name) ? cBase.name : '히어로';
-                    dom.innerHTML = `
-                        <div class="hero-simple-token grade-${cGrade}" title="⚡ ${cName} (3x3 지휘 오라 전개 중 / 클릭 시 이동)">
-                            <span class="hero-token-core">${cAvatar}</span>
-                        </div>
-                    `;
-                    break;
-                }
+        // v0.40.0 모듈러 캐릭터(Rig & Parts) 필드 렌더링 (대장 & UR/U 강림 히어로 통합)
+        if (activeUnitCharId) {
+            if (activeUnitIsLeader && typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
+                dom.classList.add("has-leader");
+            } else {
+                dom.classList.add("has-hero");
+            }
+
+            const currentUnitEl = dom.querySelector(".modular-char-unit");
+            if (currentUnitEl && currentUnitEl.getAttribute("data-char-id") === activeUnitCharId) {
+                // 이미 렌더링된 모듈러 캐릭터가 있으면 애니메이션이 끊기지 않도록 방향/공격 상태만 업데이트
+                currentUnitEl.classList.toggle("facing-left", activeUnitFacing === 'left');
+                currentUnitEl.classList.toggle("facing-right", activeUnitFacing !== 'left');
+                currentUnitEl.classList.toggle("is-attacking", !!activeUnitAttacking);
+            } else if (typeof buildModularCharacterHtml === 'function') {
+                dom.innerHTML = buildModularCharacterHtml(activeUnitCharId, {
+                    mode: 'field',
+                    facing: activeUnitFacing,
+                    isLeader: activeUnitIsLeader,
+                    isAttacking: activeUnitAttacking
+                });
             }
         }
 
@@ -688,3 +707,203 @@ function closeBattleReport() {
     }
     location.reload();
 }
+
+/**
+ * ============================================================================
+ * v0.40.0 100인+ 확장 대응 모듈러 캐릭터(Rig & Parts) 아바타 렌더러
+ * - 인게임 전장(field) 및 로비 보좌관 쇼케이스(showcase) 공용
+ * ============================================================================
+ */
+function buildModularCharacterHtml(charId, options = {}) {
+    const cBase = (typeof CHARACTER_DATA !== 'undefined' && CHARACTER_DATA[charId]) ? CHARACTER_DATA[charId] : { name: '지휘관', grade: 'C' };
+    const spec = (typeof getCharacterModularSpec === 'function') ? getCharacterModularSpec(charId) : {
+        rigType: "standard", hairColor: "#fde047", eyeColor: "#2563eb",
+        primaryColor: "#eff6ff", secondaryColor: "#f59e0b",
+        backPart: "cape", headGear: "tiara", weaponType: "sword", weaponColor: "#f59e0b"
+    };
+
+    const mode = options.mode || 'field'; // 'field' | 'showcase'
+    const facing = options.facing === 'left' ? 'facing-left' : 'facing-right';
+    const isLeader = !!options.isLeader;
+    const isAttacking = !!options.isAttacking;
+    const grade = cBase.grade || 'C';
+
+    // 1. 등 파츠(Back Part) SVG 조각 생성
+    let backSvg = "";
+    if (spec.backPart === "wings") {
+        backSvg = `
+            <g class="mod-wing-l">
+                <path d="M18,22 C6,12 2,20 6,28 C9,33 15,30 19,27 Z" fill="#ffffff" stroke="${spec.secondaryColor}" stroke-width="1.2"/>
+            </g>
+            <g class="mod-wing-r">
+                <path d="M22,22 C34,12 38,20 34,28 C31,33 25,30 21,27 Z" fill="#ffffff" stroke="${spec.secondaryColor}" stroke-width="1.2"/>
+            </g>
+        `;
+    } else if (spec.backPart === "cosmic_ring") {
+        backSvg = `
+            <g class="mod-cosmic-ring">
+                <circle cx="20" cy="21" r="14" fill="none" stroke="${spec.secondaryColor}" stroke-width="1.5" stroke-dasharray="4 3"/>
+                <circle cx="20" cy="7" r="2.2" fill="#fde047"/>
+                <circle cx="34" cy="21" r="1.8" fill="#38bdf8"/>
+                <circle cx="6" cy="21" r="1.8" fill="#f43f5e"/>
+            </g>
+        `;
+    } else if (spec.backPart === "cape") {
+        backSvg = `
+            <path class="mod-cape" d="M13,20 L8,35 L20,33 L32,35 L27,20 Z" fill="${spec.secondaryColor}" opacity="0.9"/>
+        `;
+    } else if (spec.backPart === "ribbon") {
+        backSvg = `
+            <g class="mod-ribbon">
+                <path d="M15,23 L8,29 L12,33 L18,26 Z" fill="${spec.secondaryColor}"/>
+                <path d="M25,23 L32,29 L28,33 L22,26 Z" fill="${spec.secondaryColor}"/>
+            </g>
+        `;
+    }
+
+    // 2. 헤드기어(HeadGear) SVG 조각 생성
+    let headGearSvg = "";
+    if (spec.headGear === "halo") {
+        headGearSvg = `<ellipse class="mod-halo" cx="20" cy="4.5" rx="7.5" ry="2.2" fill="none" stroke="#fde047" stroke-width="1.8"/>`;
+    } else if (spec.headGear === "witch_hat") {
+        headGearSvg = `
+            <path d="M9,11 Q20,8 31,11 L26,9 L21,2 L15,9 Z" fill="${spec.secondaryColor}" stroke="#1e1b4b" stroke-width="1"/>
+        `;
+    } else if (spec.headGear === "beret") {
+        headGearSvg = `
+            <ellipse cx="21" cy="8.5" rx="8" ry="3.2" fill="${spec.primaryColor}" stroke="${spec.secondaryColor}" stroke-width="1.2"/>
+            <circle cx="20" cy="6.5" r="1.3" fill="#fde047"/>
+        `;
+    } else if (spec.headGear === "knight_crest") {
+        headGearSvg = `
+            <path d="M15,9 L20,4 L25,9 L23,10 L17,10 Z" fill="#fde047" stroke="#b45309" stroke-width="0.9"/>
+        `;
+    } else if (spec.headGear === "goggles") {
+        headGearSvg = `
+            <rect x="13" y="8" width="6" height="3.5" rx="1.5" fill="#38bdf8" stroke="#78350f" stroke-width="1"/>
+            <rect x="21" y="8" width="6" height="3.5" rx="1.5" fill="#38bdf8" stroke="#78350f" stroke-width="1"/>
+        `;
+    } else if (spec.headGear === "tiara") {
+        headGearSvg = `
+            <path d="M15,9.5 L18,6.5 L20,8.5 L22,6.5 L25,9.5 Z" fill="#fde047"/>
+        `;
+    }
+
+    // 3. 무기 파츠(Weapon Part) SVG 조각 생성
+    let weaponSvg = "";
+    if (spec.weaponType === "sword") {
+        weaponSvg = `
+            <g class="mod-weapon-group wtype-sword">
+                <line x1="28" y1="26" x2="37" y2="11" stroke="#e2e8f0" stroke-width="2.6" stroke-linecap="round"/>
+                <line x1="28" y1="26" x2="37" y2="11" stroke="${spec.weaponColor}" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="25" y1="23" x2="31" y2="27" stroke="#fde047" stroke-width="2" stroke-linecap="round"/>
+                <path class="mod-attack-fx" d="M30,8 Q42,18 31,31" fill="none" stroke="${spec.weaponColor}" stroke-width="2.2" stroke-linecap="round"/>
+            </g>
+        `;
+    } else if (spec.weaponType === "bow") {
+        weaponSvg = `
+            <g class="mod-weapon-group wtype-bow">
+                <path d="M29,13 Q37,22 29,31" fill="none" stroke="${spec.weaponColor}" stroke-width="2.2" stroke-linecap="round"/>
+                <line x1="29" y1="13" x2="29" y2="31" stroke="#f8fafc" stroke-width="0.9"/>
+                <line class="mod-attack-fx" x1="27" y1="22" x2="39" y2="22" stroke="#fde047" stroke-width="2" stroke-linecap="round"/>
+            </g>
+        `;
+    } else if (spec.weaponType === "gun" || spec.weaponType === "cannon") {
+        const strokeW = spec.weaponType === "cannon" ? 4.2 : 2.6;
+        weaponSvg = `
+            <g class="mod-weapon-group wtype-gun">
+                <line x1="26" y1="24" x2="38" y2="21" stroke="#334155" stroke-width="${strokeW}" stroke-linecap="round"/>
+                <line x1="27" y1="24" x2="36" y2="21.5" stroke="${spec.weaponColor}" stroke-width="1.3"/>
+                <circle class="mod-attack-fx" cx="38.5" cy="20.5" r="3.5" fill="#fde047"/>
+            </g>
+        `;
+    } else if (spec.weaponType === "orb") {
+        weaponSvg = `
+            <g class="mod-weapon-group wtype-orb">
+                <circle cx="32" cy="19" r="4" fill="${spec.weaponColor}" stroke="#ffffff" stroke-width="1.2"/>
+                <circle class="mod-attack-fx" cx="32" cy="19" r="7" fill="none" stroke="#fde047" stroke-width="1.8" stroke-dasharray="3 2"/>
+            </g>
+        `;
+    } else {
+        // staff 기본
+        weaponSvg = `
+            <g class="mod-weapon-group wtype-staff">
+                <line x1="29" y1="33" x2="33" y2="11" stroke="#b45309" stroke-width="2.2" stroke-linecap="round"/>
+                <circle cx="33.5" cy="10.5" r="3.2" fill="${spec.weaponColor}" stroke="#fde047" stroke-width="1.2"/>
+                <circle class="mod-attack-fx" cx="33.5" cy="10.5" r="6.5" fill="none" stroke="${spec.weaponColor}" stroke-width="1.8"/>
+            </g>
+        `;
+    }
+
+    const titleText = mode === 'field'
+        ? `${isLeader ? '👑 대장 ' : '⚡ '}${cBase.name} (클릭 시 이동 모드)`
+        : `${cBase.name} 전투 아바타 (클릭 시 모션 시연)`;
+
+    // [v0.40.1 New] AI 생성 2.5~3등신 SD 스프라이트 & 분리 파츠 하이브리드 렌더링 (인간족 U등급 루미나 등)
+    if (spec.sdIdleSprite && spec.sdAttackSprite) {
+        const orbPartHtml = (spec.modularParts && spec.modularParts.orb)
+            ? `<img src="${spec.modularParts.orb}" class="mod-sd-floating-orb" alt="성간 구체">`
+            : '';
+        return `
+            <div class="modular-char-unit has-sd-sprite mode-${mode} grade-${grade} rig-${spec.rigType} ${facing} ${isAttacking ? 'is-attacking' : ''}"
+                 data-char-id="${charId}"
+                 title="${titleText}"
+                 style="--mod-primary:${spec.primaryColor}; --mod-secondary:${spec.secondaryColor}; --mod-weapon:${spec.weaponColor};">
+                <div class="mod-ground-aura"></div>
+                ${isLeader ? '<span class="mod-leader-crown">👑</span>' : ''}
+                <div class="mod-sd-sprite-wrap">
+                    <img src="${spec.sdIdleSprite}" class="mod-sd-img sd-idle" alt="${cBase.name} 대기">
+                    <img src="${spec.sdAttackSprite}" class="mod-sd-img sd-attack" alt="${cBase.name} 공격">
+                    ${orbPartHtml}
+                </div>
+            </div>
+        `;
+    }
+
+    return `
+        <div class="modular-char-unit mode-${mode} grade-${grade} rig-${spec.rigType} ${facing} ${isAttacking ? 'is-attacking' : ''}"
+             data-char-id="${charId}"
+             title="${titleText}"
+             style="--mod-primary:${spec.primaryColor}; --mod-secondary:${spec.secondaryColor}; --mod-weapon:${spec.weaponColor};">
+            <div class="mod-ground-aura"></div>
+            ${isLeader ? '<span class="mod-leader-crown">👑</span>' : ''}
+            <svg class="mod-char-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                <!-- 1. 등 파츠 (날개/망토/성간 링) -->
+                ${backSvg}
+
+                <!-- 2. 뒷머리 -->
+                <g class="mod-upper-body">
+                    <path d="M12,15 C10,22 11,29 14,31 L26,31 C29,29 30,22 28,15 Z" fill="${spec.hairColor}"/>
+
+                    <!-- 3. 몸통 & 의상 (갑주/드레스) -->
+                    <path d="M14,22 L11,34 L29,34 L26,22 Z" fill="${spec.primaryColor}" stroke="${spec.secondaryColor}" stroke-width="1.3" stroke-linejoin="round"/>
+                    <path d="M17,22 L20,33 L23,22 Z" fill="${spec.secondaryColor}"/>
+                    <!-- 다리/부츠 -->
+                    <line x1="17" y1="34" x2="17" y2="38" stroke="#1e293b" stroke-width="2.4" stroke-linecap="round"/>
+                    <line x1="23" y1="34" x2="23" y2="38" stroke="#1e293b" stroke-width="2.4" stroke-linecap="round"/>
+
+                    <!-- 4. 얼굴 & 앞머리 & 눈동자 -->
+                    <g class="mod-head-group">
+                        <circle cx="20" cy="15.5" r="6.8" fill="#ffedd5" stroke="#fdba74" stroke-width="0.8"/>
+                        <!-- 앞머리/옆머리 -->
+                        <path d="M12.5,15 C12.5,9 27.5,9 27.5,15 C26,12 23,12.5 20,13.5 C17,12.5 14,12 12.5,15 Z" fill="${spec.hairColor}"/>
+                        <!-- 눈동자 (우측 응시 기준, 좌측은 SVG 반전으로 처리) -->
+                        <ellipse cx="18.2" cy="16.2" rx="1.2" ry="1.6" fill="${spec.eyeColor}"/>
+                        <ellipse cx="22.8" cy="16.2" rx="1.2" ry="1.6" fill="${spec.eyeColor}"/>
+                        <circle cx="18.5" cy="15.6" r="0.5" fill="#ffffff"/>
+                        <circle cx="23.1" cy="15.6" r="0.5" fill="#ffffff"/>
+                        <!-- 볼터치 -->
+                        <ellipse cx="16.2" cy="17.8" rx="1.1" ry="0.6" fill="#fda4af" opacity="0.75"/>
+                        <ellipse cx="24.2" cy="17.8" rx="1.1" ry="0.6" fill="#fda4af" opacity="0.75"/>
+                        <!-- 헤드기어 -->
+                        ${headGearSvg}
+                    </g>
+
+                    <!-- 5. 오른손 & 무기 파츠 -->
+                    ${weaponSvg}
+                </g>
+            </svg>
+        </div>
+    `;
+}
+

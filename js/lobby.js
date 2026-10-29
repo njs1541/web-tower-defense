@@ -708,21 +708,57 @@ function switchLobbyTab(tabName) {
 /**
  * 지휘관 일러스트 확대 뷰어 모달 열기 (v0.27.1 New)
  */
-function viewCommanderIllustration(charId) {
+function viewCommanderIllustration(charId, initialTabKey = 'main') {
     const modal = document.getElementById("illustration-viewer-modal");
     if (!modal) return;
 
     const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
     if (!charBase) return;
 
+    const spec = (typeof getCharacterModularSpec === 'function') ? getCharacterModularSpec(charId) : null;
+
     const imgEl = document.getElementById("viewer-img");
     const gradeBadge = document.getElementById("viewer-grade-badge");
     const nameEl = document.getElementById("viewer-name");
     const titleEl = document.getElementById("viewer-title");
+    const tabsEl = document.getElementById("viewer-asset-tabs");
+
+    const assetTabs = [
+        { key: 'main', label: '🖼️ 스탠딩 원화', src: charBase.image || '' }
+    ];
+    if (spec && spec.refSheet) {
+        assetTabs.push({ key: 'ref', label: '📐 캐릭터 설정 시트', src: spec.refSheet });
+    }
+    if (spec && spec.sdPartsSheet) {
+        assetTabs.push({ key: 'parts', label: '🧩 SD 모듈러 파츠 시트', src: spec.sdPartsSheet });
+    }
+    if (spec && spec.sdIdleSprite) {
+        assetTabs.push({ key: 'idle', label: '✨ SD 대기 스프라이트', src: spec.sdIdleSprite });
+    }
+    if (spec && spec.sdAttackSprite) {
+        assetTabs.push({ key: 'attack', label: '⚡ SD 공격 스프라이트', src: spec.sdAttackSprite });
+    }
+
+    const activeTab = assetTabs.find(t => t.key === initialTabKey) || assetTabs[0];
 
     if (imgEl) {
-        imgEl.src = charBase.image || "";
+        imgEl.src = activeTab.src;
         imgEl.alt = charBase.name;
+    }
+
+    if (tabsEl) {
+        if (assetTabs.length > 1) {
+            tabsEl.style.display = "flex";
+            tabsEl.innerHTML = assetTabs.map(t => `
+                <button class="btn-viewer-tab ${t.key === activeTab.key ? 'active' : ''}"
+                        onclick="switchViewerAssetTab('${t.src}', this)">
+                    ${t.label}
+                </button>
+            `).join('');
+        } else {
+            tabsEl.style.display = "none";
+            tabsEl.innerHTML = "";
+        }
     }
 
     if (gradeBadge) {
@@ -739,6 +775,21 @@ function viewCommanderIllustration(charId) {
     if (titleEl) titleEl.textContent = charBase.title;
 
     modal.style.display = "flex";
+}
+
+/**
+ * 일러스트 뷰어 모달 내 에셋 탭 전환 핸들러
+ */
+function switchViewerAssetTab(src, btnEl) {
+    const imgEl = document.getElementById("viewer-img");
+    if (imgEl && src) {
+        imgEl.src = src;
+    }
+    const tabsEl = document.getElementById("viewer-asset-tabs");
+    if (tabsEl && btnEl) {
+        tabsEl.querySelectorAll(".btn-viewer-tab").forEach(b => b.classList.remove("active"));
+        btnEl.classList.add("active");
+    }
 }
 
 /**
@@ -794,6 +845,15 @@ function renderAdjutantSection() {
         ? charBase.quotes[0] 
         : (charBase.desc || "오늘도 영지의 평화를 지켜내겠습니다, 지휘관님!");
 
+    // v0.40.0 로비 보좌관 모듈러 전투 아바타 프리뷰 생성
+    const modularPreviewHtml = (typeof buildModularCharacterHtml === 'function')
+        ? buildModularCharacterHtml(adjutantId, { mode: 'showcase', facing: 'left', isLeader: true })
+        : '';
+    const modSpec = (typeof getCharacterModularSpec === 'function') ? getCharacterModularSpec(adjutantId) : null;
+    const partsSheetBtnHtml = (modSpec && modSpec.sdPartsSheet)
+        ? `<button class="btn-adjutant-parts-sheet" onclick="event.stopPropagation(); viewCommanderIllustration('${adjutantId}', 'parts');">🧩 파츠·설정 시트</button>`
+        : `<span class="adjutant-modular-hint">클릭 시 공격 모션</span>`;
+
     banner.style.display = "flex";
     banner.innerHTML = `
         <div class="adjutant-portrait-box" id="adjutant-portrait" onclick="interactWithAdjutant('${adjutantId}')" ondblclick="viewCommanderIllustration('${adjutantId}')" title="클릭하여 대화하기 / 더블클릭하여 일러스트 확대">
@@ -816,11 +876,18 @@ function renderAdjutantSection() {
                 "${defaultQuote}"
             </div>
         </div>
+        <div class="adjutant-modular-stage" onclick="interactWithAdjutant('${adjutantId}')" title="클릭하여 보좌관 전투 아바타 모션 시연">
+            <div class="adjutant-modular-label">⚔️ SD 전장 아바타</div>
+            <div class="adjutant-modular-canvas" id="adjutant-modular-canvas">
+                ${modularPreviewHtml}
+            </div>
+            ${partsSheetBtnHtml}
+        </div>
     `;
 }
 
 /**
- * 대표 지휘관 터치 인터랙션 (랜덤 대사 출력 및 바운스 모션)
+ * 대표 지휘관 터치 인터랙션 (랜덤 대사 출력, 바운스 모션 및 모듈러 아바타 공격 모션 시연)
  */
 function interactWithAdjutant(charId) {
     const charBase = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
@@ -833,6 +900,17 @@ function interactWithAdjutant(charId) {
         // reflow 트리거
         void portrait.offsetWidth;
         portrait.classList.add("adjutant-tap-bounce");
+    }
+
+    // 1-2. v0.40.0 로비 모듈러 아바타 무기 공격 모션 트리거
+    const modCanvas = document.getElementById("adjutant-modular-canvas");
+    if (modCanvas) {
+        const modUnit = modCanvas.querySelector(".modular-char-unit");
+        if (modUnit) {
+            modUnit.classList.remove("is-attacking");
+            void modUnit.offsetWidth;
+            modUnit.classList.add("is-attacking");
+        }
     }
 
     // 2. 랜덤 대사 선정 및 말풍선 갱신

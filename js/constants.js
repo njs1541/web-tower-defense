@@ -1239,4 +1239,188 @@ const RUNE_GACHA_CONFIG = {
     ]
 };
 
+/**
+ * ============================================================================
+ * v0.40.0 100인+ 확장 대응 모듈러 캐릭터(Rig & Parts) 스펙 레지스트리
+ * - rigType: 'petite' (단신) | 'standard' (표준) | 'tall' (장신)
+ * - backPart: 'none' | 'cape' | 'wings' | 'cosmic_ring' | 'ribbon'
+ * - headGear: 'none' | 'tiara' | 'witch_hat' | 'beret' | 'halo' | 'goggles' | 'knight_crest'
+ * - weaponType: 'sword' | 'bow' | 'gun' | 'staff' | 'cannon' | 'orb'
+ * ============================================================================
+ */
+const MODULAR_CHARACTER_SPECS = {
+    // [C 등급]
+    char_liana: {
+        rigType: "standard", hairColor: "#fde047", eyeColor: "#2563eb",
+        primaryColor: "#eff6ff", secondaryColor: "#f59e0b",
+        backPart: "cape", headGear: "knight_crest", weaponType: "sword", weaponColor: "#f59e0b"
+    },
+    char_mia: {
+        rigType: "petite", hairColor: "#86efac", eyeColor: "#16a34a",
+        primaryColor: "#dcfce7", secondaryColor: "#15803d",
+        backPart: "ribbon", headGear: "beret", weaponType: "bow", weaponColor: "#22c55e"
+    },
+    char_hana: {
+        rigType: "petite", hairColor: "#fda4af", eyeColor: "#e11d48",
+        primaryColor: "#ffe4e6", secondaryColor: "#f97316",
+        backPart: "ribbon", headGear: "goggles", weaponType: "cannon", weaponColor: "#f97316"
+    },
+    // [UC 등급]
+    char_elena: {
+        rigType: "standard", hairColor: "#bbf7d0", eyeColor: "#0ea5e9",
+        primaryColor: "#e0f2fe", secondaryColor: "#0284c7",
+        backPart: "cape", headGear: "tiara", weaponType: "bow", weaponColor: "#38bdf8"
+    },
+    char_chloe: {
+        rigType: "standard", hairColor: "#f87171", eyeColor: "#dc2626",
+        primaryColor: "#fee2e2", secondaryColor: "#991b1b",
+        backPart: "cape", headGear: "knight_crest", weaponType: "sword", weaponColor: "#ef4444"
+    },
+    char_charlotte: {
+        rigType: "standard", hairColor: "#c084fc", eyeColor: "#eab308",
+        primaryColor: "#f3e8ff", secondaryColor: "#6b21a8",
+        backPart: "cape", headGear: "beret", weaponType: "gun", weaponColor: "#a855f7"
+    },
+    char_cecilia: {
+        rigType: "standard", hairColor: "#bae6fd", eyeColor: "#0284c7",
+        primaryColor: "#e0f2fe", secondaryColor: "#0369a1",
+        backPart: "ribbon", headGear: "witch_hat", weaponType: "staff", weaponColor: "#38bdf8"
+    },
+    char_greta: {
+        rigType: "petite", hairColor: "#fb923c", eyeColor: "#dc2626",
+        primaryColor: "#ffedd5", secondaryColor: "#c2410c",
+        backPart: "none", headGear: "goggles", weaponType: "cannon", weaponColor: "#ea580c"
+    },
+    char_ada: {
+        rigType: "petite", hairColor: "#fef08a", eyeColor: "#ca8a04",
+        primaryColor: "#fef9c3", secondaryColor: "#a16207",
+        backPart: "ribbon", headGear: "tiara", weaponType: "staff", weaponColor: "#eab308"
+    },
+    // [R 등급]
+    char_freya: {
+        rigType: "tall", hairColor: "#e0f2fe", eyeColor: "#0284c7",
+        primaryColor: "#bae6fd", secondaryColor: "#1d4ed8",
+        backPart: "cape", headGear: "witch_hat", weaponType: "staff", weaponColor: "#0ea5e9"
+    },
+    char_valeria: {
+        rigType: "tall", hairColor: "#fde047", eyeColor: "#9333ea",
+        primaryColor: "#fef3c7", secondaryColor: "#7e22ce",
+        backPart: "cape", headGear: "knight_crest", weaponType: "sword", weaponColor: "#f59e0b"
+    },
+    char_sylvia: {
+        rigType: "standard", hairColor: "#fef9c3", eyeColor: "#0ea5e9",
+        primaryColor: "#ffffff", secondaryColor: "#eab308",
+        backPart: "wings", headGear: "halo", weaponType: "bow", weaponColor: "#fde047"
+    },
+    char_camilla: {
+        rigType: "tall", hairColor: "#cbd5e1", eyeColor: "#dc2626",
+        primaryColor: "#f1f5f9", secondaryColor: "#b91c1c",
+        backPart: "cape", headGear: "beret", weaponType: "gun", weaponColor: "#ef4444"
+    },
+    // [SR 등급]
+    char_scarlet: {
+        rigType: "standard", hairColor: "#f43f5e", eyeColor: "#f59e0b",
+        primaryColor: "#ffe4e6", secondaryColor: "#be123c",
+        backPart: "cape", headGear: "witch_hat", weaponType: "cannon", weaponColor: "#f43f5e"
+    },
+    char_aurelia: {
+        rigType: "tall", hairColor: "#facc15", eyeColor: "#ea580c",
+        primaryColor: "#fef9c3", secondaryColor: "#d97706",
+        backPart: "wings", headGear: "knight_crest", weaponType: "sword", weaponColor: "#f59e0b"
+    },
+    char_selena: {
+        rigType: "standard", hairColor: "#7dd3fc", eyeColor: "#1d4ed8",
+        primaryColor: "#e0f2fe", secondaryColor: "#1e40af",
+        backPart: "cape", headGear: "tiara", weaponType: "gun", weaponColor: "#38bdf8"
+    },
+    char_eleanor: {
+        rigType: "tall", hairColor: "#d8b4fe", eyeColor: "#eab308",
+        primaryColor: "#f3e8ff", secondaryColor: "#581c87",
+        backPart: "cosmic_ring", headGear: "witch_hat", weaponType: "staff", weaponColor: "#c084fc"
+    },
+    // [UR / U 결전 히어로 등급]
+    char_seraphina: {
+        rigType: "tall", hairColor: "#fef08a", eyeColor: "#38bdf8",
+        primaryColor: "#ffffff", secondaryColor: "#f59e0b",
+        backPart: "wings", headGear: "halo", weaponType: "staff", weaponColor: "#fbbf24"
+    },
+    char_veronica: {
+        rigType: "tall", hairColor: "#fb7185", eyeColor: "#facc15",
+        primaryColor: "#881337", secondaryColor: "#f59e0b",
+        backPart: "cape", headGear: "beret", weaponType: "sword", weaponColor: "#f43f5e"
+    },
+    char_lumina: {
+        rigType: "tall", hairColor: "#f472b6", eyeColor: "#a855f7",
+        primaryColor: "#818cf8", secondaryColor: "#c084fc",
+        backPart: "wings", headGear: "halo", weaponType: "staff", weaponColor: "#c084fc",
+        sdIdleSprite: "assets/sd_lumina_idle.png",
+        sdAttackSprite: "assets/sd_lumina_attack.png",
+        sdPartsSheet: "assets/sd_lumina_parts_sheet.jpg",
+        refSheet: "assets/ref_lumina_sheet.jpg",
+        modularParts: {
+            body: "assets/parts/lumina_base_body.png",
+            wingsHalo: "assets/parts/lumina_wings_halo.png",
+            dress: "assets/parts/lumina_dress.png",
+            staff: "assets/parts/lumina_staff.png",
+            grimoire: "assets/parts/lumina_grimoire.png",
+            orb: "assets/parts/lumina_orb.png"
+        }
+    }
+};
+
+/**
+ * 지휘관 ID로 모듈러 캐릭터 조립 스펙을 반환 (미등록 신규 지휘관도 100인+ 자동 추론 지원)
+ */
+function getCharacterModularSpec(charId) {
+    if (MODULAR_CHARACTER_SPECS[charId]) {
+        return MODULAR_CHARACTER_SPECS[charId];
+    }
+
+    const cInfo = (typeof CHARACTER_DATA !== 'undefined' && CHARACTER_DATA[charId]) ? CHARACTER_DATA[charId] : {};
+    const elem = cInfo.element || 'holy';
+    const role = cInfo.role || 'guardian';
+    const grade = cInfo.grade || 'C';
+
+    // 원소별 기본 컬러 팔레트
+    const elemPalette = {
+        holy: { hair: "#fef08a", primary: "#fef9c3", secondary: "#f59e0b", eye: "#2563eb", weapon: "#fbbf24" },
+        fire: { hair: "#fca5a5", primary: "#fee2e2", secondary: "#dc2626", eye: "#ea580c", weapon: "#ef4444" },
+        frost: { hair: "#bae6fd", primary: "#e0f2fe", secondary: "#0284c7", eye: "#1d4ed8", weapon: "#38bdf8" },
+        shock: { hair: "#e9d5ff", primary: "#f3e8ff", secondary: "#7e22ce", eye: "#ca8a04", weapon: "#eab308" },
+        void: { hair: "#ddd6fe", primary: "#312e81", secondary: "#c084fc", eye: "#fde047", weapon: "#a855f7" }
+    };
+    const pal = elemPalette[elem] || elemPalette.holy;
+
+    // 역할군별 기본 무기 및 헤드기어 추론
+    const roleWeaponMap = { guardian: "sword", ranger: "bow", mage: "staff", tactician: "cannon" };
+    const roleHeadMap = { guardian: "knight_crest", ranger: "tiara", mage: "witch_hat", tactician: "beret" };
+
+    // 등급별 등 파츠 및 체형 추론
+    let backPart = "cape";
+    let rigType = "standard";
+    if (grade === "U") {
+        backPart = "cosmic_ring";
+        rigType = "tall";
+    } else if (grade === "UR" || grade === "SR") {
+        backPart = (elem === "holy") ? "wings" : "cape";
+        rigType = "tall";
+    } else if (grade === "C") {
+        backPart = "ribbon";
+        rigType = "petite";
+    }
+
+    return {
+        rigType: rigType,
+        hairColor: pal.hair,
+        eyeColor: pal.eye,
+        primaryColor: pal.primary,
+        secondaryColor: pal.secondary,
+        backPart: backPart,
+        headGear: (grade === "U" || grade === "UR") ? "halo" : (roleHeadMap[role] || "tiara"),
+        weaponType: (grade === "U") ? "orb" : (roleWeaponMap[role] || "sword"),
+        weaponColor: pal.weapon
+    };
+}
+
+
 

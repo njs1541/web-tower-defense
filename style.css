@@ -3972,6 +3972,389 @@ button.selected {
 }
 
 /* ==========================================================================
+   v0.40.0 100인+ 확장 대응 모듈러 캐릭터(Rig & Parts) & 모션 파이프라인 스타일
+   ========================================================================== */
+
+.modular-char-unit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  transform: translate(-50%, -54%);
+  z-index: 6;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+
+.modular-char-unit.rig-petite {
+  transform: translate(-50%, -50%) scale(0.92);
+}
+.modular-char-unit.rig-standard {
+  transform: translate(-50%, -54%) scale(1.0);
+}
+.modular-char-unit.rig-tall {
+  transform: translate(-50%, -58%) scale(1.08);
+}
+
+.modular-char-unit:hover {
+  filter: brightness(1.12) drop-shadow(0 0 6px var(--mod-weapon, #f59e0b));
+}
+
+/* 로비 쇼케이스 모드 */
+.modular-char-unit.mode-showcase {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 78px;
+  height: 78px;
+  transform: scale(1) !important;
+}
+
+.modular-char-unit .mod-char-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 2px 3px rgba(15, 23, 42, 0.45));
+  transition: transform 0.15s ease;
+}
+
+/* 좌우 시선 방향 전환 (좌측 응시 시 수평 반전) */
+.modular-char-unit.facing-left .mod-char-svg {
+  transform: scaleX(-1);
+}
+.modular-char-unit.facing-right .mod-char-svg {
+  transform: scaleX(1);
+}
+
+/* 발밑 등급 오라 링 */
+.modular-char-unit .mod-ground-aura {
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  width: 26px;
+  height: 10px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  border: 1.5px solid var(--mod-secondary, #f59e0b);
+  background: radial-gradient(ellipse at center, rgba(251, 191, 36, 0.38) 0%, transparent 75%);
+  box-shadow: 0 0 8px var(--mod-secondary, #f59e0b);
+  z-index: -1;
+  animation: modGroundPulse 1.6s infinite alternate ease-in-out;
+}
+
+.modular-char-unit.mode-showcase .mod-ground-aura {
+  width: 56px;
+  height: 18px;
+  bottom: 4px;
+  border-width: 2px;
+}
+
+.modular-char-unit.grade-UR .mod-ground-aura {
+  border-color: #f43f5e;
+  box-shadow: 0 0 11px rgba(244, 63, 94, 0.85);
+}
+
+.modular-char-unit.grade-U .mod-ground-aura {
+  border-color: #fbbf24;
+  box-shadow: 0 0 14px rgba(192, 132, 252, 0.95);
+}
+
+/* 대장 왕관 뱃지 */
+.modular-char-unit .mod-leader-crown {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  font-size: 11px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.65));
+  animation: crownBob 1.5s infinite ease-in-out;
+  z-index: 8;
+}
+
+.modular-char-unit.mode-showcase .mod-leader-crown {
+  top: -6px;
+  right: 2px;
+  font-size: 16px;
+}
+
+/* 관절 애니메이션: 1) 상체 호흡 & 부유 */
+.modular-char-unit .mod-upper-body {
+  transform-origin: 20px 30px;
+  animation: modBreathe 1.8s infinite ease-in-out;
+}
+
+/* 관절 애니메이션: 2) 천사 날개 퍼덕임 & 성간 링 회전 */
+.modular-char-unit .mod-wing-l {
+  transform-origin: 18px 23px;
+  animation: modWingFlapL 1.1s infinite alternate ease-in-out;
+}
+.modular-char-unit .mod-wing-r {
+  transform-origin: 22px 23px;
+  animation: modWingFlapR 1.1s infinite alternate ease-in-out;
+}
+.modular-char-unit .mod-cosmic-ring {
+  transform-origin: 20px 21px;
+  animation: leaderAuraSpin 7s linear infinite;
+}
+
+/* 관절 애니메이션: 3) 무기 파츠 대기 및 공격 리타게팅 모션 */
+.modular-char-unit .mod-weapon-group {
+  transform-origin: 27px 24px;
+  transition: transform 0.12s ease;
+}
+
+.modular-char-unit .mod-attack-fx {
+  opacity: 0;
+  transform-origin: 33px 20px;
+}
+
+/* 공격 트리거 시 무기군별 모션 및 이펙트 발동 */
+.modular-char-unit.is-attacking .mod-weapon-group.wtype-sword {
+  animation: modAttackSword 0.34s ease-out;
+}
+.modular-char-unit.is-attacking .mod-weapon-group.wtype-staff,
+.modular-char-unit.is-attacking .mod-weapon-group.wtype-orb {
+  animation: modAttackCast 0.34s ease-out;
+}
+.modular-char-unit.is-attacking .mod-weapon-group.wtype-bow,
+.modular-char-unit.is-attacking .mod-weapon-group.wtype-gun {
+  animation: modAttackRecoil 0.32s ease-out;
+}
+.modular-char-unit.is-attacking .mod-attack-fx {
+  animation: modAttackFxFlash 0.34s ease-out;
+}
+
+@keyframes modBreathe {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-2.2px); }
+}
+
+@keyframes modGroundPulse {
+  0% { transform: translateX(-50%) scale(0.92); opacity: 0.75; }
+  100% { transform: translateX(-50%) scale(1.08); opacity: 1; }
+}
+
+@keyframes modWingFlapL {
+  0% { transform: rotate(-6deg); }
+  100% { transform: rotate(10deg); }
+}
+
+@keyframes modWingFlapR {
+  0% { transform: rotate(6deg); }
+  100% { transform: rotate(-10deg); }
+}
+
+@keyframes modAttackSword {
+  0% { transform: rotate(-28deg); }
+  45% { transform: rotate(65deg) scale(1.15); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes modAttackCast {
+  0% { transform: translateY(0) rotate(0deg); }
+  45% { transform: translateY(-4px) rotate(-18deg) scale(1.15); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes modAttackRecoil {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(-3.5px) rotate(-8deg); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes modAttackFxFlash {
+  0% { opacity: 0; transform: scale(0.5); }
+  40% { opacity: 1; transform: scale(1.25); }
+  100% { opacity: 0; transform: scale(1.4); }
+}
+
+/* 로비 전속 보좌관 우측 모듈러 아바타 디오라마 스테이지 */
+.adjutant-modular-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 115px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: radial-gradient(circle at center, rgba(30, 27, 75, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1.5px solid rgba(192, 132, 252, 0.45);
+  box-shadow: inset 0 0 12px rgba(168, 85, 247, 0.25);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.adjutant-modular-stage:hover {
+  border-color: #fbbf24;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3), inset 0 0 15px rgba(251, 191, 36, 0.25);
+}
+
+.adjutant-modular-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #fde047;
+  letter-spacing: 0.3px;
+  margin-bottom: 2px;
+}
+
+.adjutant-modular-canvas {
+  width: 80px;
+  height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.adjutant-modular-hint {
+  font-size: 9.5px;
+  color: #cbd5e1;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* [v0.40.1 New] AI 생성 2.5~3등신 SD 스프라이트 & 모듈러 파츠 하이브리드 스타일 */
+.modular-char-unit.has-sd-sprite.mode-field {
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -58%) !important;
+}
+
+.modular-char-unit.has-sd-sprite.mode-showcase {
+  width: 84px;
+  height: 84px;
+}
+
+.mod-sd-sprite-wrap {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: modBreathe 1.8s infinite ease-in-out;
+  transition: transform 0.15s ease;
+}
+
+.modular-char-unit.facing-left .mod-sd-sprite-wrap {
+  transform: scaleX(-1);
+}
+.modular-char-unit.facing-right .mod-sd-sprite-wrap {
+  transform: scaleX(1);
+}
+
+.mod-sd-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.55));
+  transition: opacity 0.08s ease, transform 0.12s ease;
+  pointer-events: none;
+}
+
+.mod-sd-img.sd-idle {
+  opacity: 1;
+}
+
+.mod-sd-img.sd-attack {
+  opacity: 0;
+}
+
+.modular-char-unit.is-attacking .mod-sd-img.sd-idle {
+  opacity: 0;
+}
+
+.modular-char-unit.is-attacking .mod-sd-img.sd-attack {
+  opacity: 1;
+  animation: modSdAttackBurst 0.36s ease-out;
+}
+
+.mod-sd-floating-orb {
+  position: absolute;
+  right: -4px;
+  bottom: 6px;
+  width: 32%;
+  height: 32%;
+  object-fit: contain;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(192, 132, 252, 0.85));
+  animation: modOrbFloat 1.4s infinite alternate ease-in-out;
+}
+
+@keyframes modSdAttackBurst {
+  0% { transform: scale(0.95) translateY(0); }
+  45% { transform: scale(1.16) translateY(-3px); filter: brightness(1.2) drop-shadow(0 0 8px #c084fc); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+@keyframes modOrbFloat {
+  0% { transform: translateY(0px) rotate(-6deg); }
+  100% { transform: translateY(-4px) rotate(8deg); }
+}
+
+.btn-adjutant-parts-sheet {
+  margin-top: 3px;
+  padding: 2px 7px;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #fde047;
+  background: rgba(126, 34, 206, 0.45);
+  border: 1px solid #c084fc;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-adjutant-parts-sheet:hover {
+  background: #7e22ce;
+  color: #ffffff;
+  border-color: #fde047;
+}
+
+/* 일러스트 뷰어 에셋 전환 탭 바 */
+.viewer-asset-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 10px;
+  padding-right: 28px;
+}
+
+.btn-viewer-tab {
+  background: rgba(30, 41, 59, 0.85);
+  color: #cbd5e1;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-viewer-tab:hover {
+  background: #334155;
+  color: #ffffff;
+}
+
+.btn-viewer-tab.active {
+  background: linear-gradient(135deg, #9333ea 0%, #6b21a8 100%);
+  color: #fde047;
+  border-color: #c084fc;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+/* ==========================================================================
    v0.34.0 지휘관 듀얼 태그 (원소 + 역할군) 및 덱 시너지 시스템 스타일
    ========================================================================== */
 

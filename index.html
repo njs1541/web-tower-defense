@@ -23,7 +23,7 @@
           <div class="op-start-sub">CLICK ANYWHERE TO START</div>
         </div>
 
-        <div class="op-footer-version">v0.39.0</div>
+        <div class="op-footer-version">v0.40.0</div>
       </div>
     </div>
 
@@ -34,7 +34,7 @@
         <button onclick="returnToOpScreen()"
           style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">◀
           타이틀 화면</button>
-        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.39.0</span>
+        <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.40.0</span>
       </div>
       <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card & Commander</h1>
 
@@ -362,11 +362,12 @@
     </div>
   </div>
 
-  <!-- 2. 지휘관 일러스트 확대 뷰어 모달 (v0.27.1 New) -->
+  <!-- 2. 지휘관 일러스트 확대 뷰어 모달 (v0.27.1 / v0.40.1 에셋 탭 확장) -->
   <div id="illustration-viewer-modal" style="display: none;" class="viewer-modal-overlay"
     onclick="closeIllustrationViewer()">
     <div class="viewer-modal-box" onclick="event.stopPropagation()">
       <button class="viewer-close-btn" onclick="closeIllustrationViewer()">×</button>
+      <div id="viewer-asset-tabs" class="viewer-asset-tabs" style="display: none;"></div>
       <div class="viewer-img-wrap">
         <img id="viewer-img" src="" alt="Commander Illustration" class="viewer-full-img">
       </div>

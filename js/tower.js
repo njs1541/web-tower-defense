@@ -594,6 +594,10 @@ function handleLeaderCombat() {
     const targetEnemy = inRangeEnemies.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
     if (!targetEnemy) return;
 
+    // v0.40.0 모듈러 캐릭터 좌우 방향 전환 및 무기 공격 모션 트리거
+    window.leaderFacing = (targetEnemy.x < leaderPos.x) ? 'left' : 'right';
+    window.leaderAttackAnimUntil = Date.now() + 360;
+
     // 대장 등급별 스탯 및 투사체 색상 (R:25, SR:40, UR:65, U:100)
     const gradeDmgMap = { R: 25, SR: 40, UR: 65, U: 100 };
     const gradeColorMap = { R: "#38bdf8", SR: "#c084fc", UR: "#f43f5e", U: "#fbbf24" };
@@ -610,18 +614,36 @@ function handleLeaderCombat() {
     }
     finalDamage = Math.max(1, Math.round(finalDamage));
 
-    // 투사체 발사 시각 효과
+    // 투사체 발사 시각 효과 및 모듈러 캐릭터 공격 모션 적용
     const startDom = getDomCell(leaderPos.x, leaderPos.y);
     const targetDom = targetEnemy.element;
-    if (startDom && targetDom) {
-        createProjectile(startDom, targetDom, isCrit ? "#ef4444" : attackColor);
+    if (startDom) {
+        const modEl = startDom.querySelector(".modular-char-unit");
+        if (modEl) {
+            modEl.classList.toggle("facing-left", window.leaderFacing === 'left');
+            modEl.classList.toggle("facing-right", window.leaderFacing !== 'left');
+            modEl.classList.remove("is-attacking");
+            void modEl.offsetWidth;
+            modEl.classList.add("is-attacking");
+        }
+        if (targetDom) {
+            createProjectile(startDom, targetDom, isCrit ? "#ef4444" : attackColor);
+        }
     }
 
     // 피격 처리
     const hitDelay = Math.max(50, Math.floor(180 / (gameSpeed || 1)));
     setTimeout(() => {
         if (!targetEnemy.alive) return;
+        const effectiveDmg = Math.min(targetEnemy.hp, finalDamage);
         targetEnemy.hp -= finalDamage;
+
+        if (typeof battleStats !== 'undefined' && battleStats && leaderInfo.charId) {
+            if (!battleStats.commanders) battleStats.commanders = {};
+            battleStats.commanders[leaderInfo.charId] = (battleStats.commanders[leaderInfo.charId] || 0) + effectiveDmg;
+            battleStats.totalDamage = (battleStats.totalDamage || 0) + effectiveDmg;
+        }
+
         onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : attackColor, isCrit);
     }, hitDelay);
 
@@ -1464,6 +1486,10 @@ function handleHeroAttacks() {
             // 사격 실행 (공격 쿨다운 4틱 = 0.8초)
             hero.attackCooldown = 4;
 
+            // v0.40.0 모듈러 캐릭터 좌우 시선 전환 및 무기 공격 모션 트리거
+            hero.facing = (target.x < hero.x) ? 'left' : 'right';
+            hero.attackAnimUntil = Date.now() + 360;
+
             // 룬 패시브 및 치명타 반영
             let finalDamage = baseDamage * (1 + (passives.bonusDamageRatio || 0));
             let isCrit = false;
@@ -1476,11 +1502,21 @@ function handleHeroAttacks() {
             const beamColor = isGradeU ? "#c084fc" : "#fbbf24";
             const hitColor = isCrit ? "#ef4444" : (isGradeU ? "#a855f7" : "#f59e0b");
 
-            // 투사체 시각 효과 발사
+            // 투사체 시각 효과 발사 및 모듈러 캐릭터 공격 모션 적용
             const startDom = getDomCell(hero.x, hero.y);
             const targetDom = target.element;
-            if (startDom && targetDom && typeof createProjectile === 'function') {
-                createProjectile(startDom, targetDom, isCrit ? "#ef4444" : beamColor);
+            if (startDom) {
+                const modEl = startDom.querySelector(".modular-char-unit");
+                if (modEl) {
+                    modEl.classList.toggle("facing-left", hero.facing === 'left');
+                    modEl.classList.toggle("facing-right", hero.facing !== 'left');
+                    modEl.classList.remove("is-attacking");
+                    void modEl.offsetWidth;
+                    modEl.classList.add("is-attacking");
+                }
+                if (targetDom && typeof createProjectile === 'function') {
+                    createProjectile(startDom, targetDom, isCrit ? "#ef4444" : beamColor);
+                }
             }
 
             // 투사체 도달 딜레이 후 데미지 및 통계 처리
