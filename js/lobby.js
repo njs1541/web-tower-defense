@@ -850,8 +850,9 @@ function renderAdjutantSection() {
         ? buildModularCharacterHtml(adjutantId, { mode: 'showcase', facing: 'left', isLeader: true })
         : '';
     const modSpec = (typeof getCharacterModularSpec === 'function') ? getCharacterModularSpec(adjutantId) : null;
-    const partsSheetBtnHtml = (modSpec && modSpec.sdPartsSheet)
-        ? `<button class="btn-adjutant-parts-sheet" onclick="event.stopPropagation(); viewCommanderIllustration('${adjutantId}', 'parts');">🧩 파츠·설정 시트</button>`
+    const sheetTabMode = (modSpec && modSpec.sdPartsSheet) ? 'parts' : 'ref';
+    const partsSheetBtnHtml = (modSpec && (modSpec.sdPartsSheet || modSpec.refSheet))
+        ? `<button class="btn-adjutant-parts-sheet" onclick="event.stopPropagation(); viewCommanderIllustration('${adjutantId}', '${sheetTabMode}');">🧩 파츠·설정 시트</button>`
         : `<span class="adjutant-modular-hint">클릭 시 공격 모션</span>`;
 
     banner.style.display = "flex";

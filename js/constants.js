@@ -1018,6 +1018,36 @@ const CHARACTER_DATA = {
         ],
         skillQuote: "홍련의 기함이여, 주포 최대 출력 전탄 발사! 인페르노 밤바드!",
         desc: "불꽃의 함대를 이끄는 카리스마 넘치는 홍련의 제독. 타워를 설치하지 않고 전장에 직접 강림하여 3x3 아군 타워에 홍련 지휘 오라를 부여합니다."
+    },
+    char_titania: {
+        id: "char_titania",
+        name: "티타니아",
+        title: "창세의 생명신",
+        grade: "U",
+        element: "void",
+        role: "mage",
+        avatar: "🌿",
+        image: "assets/char_titania.png",
+        maxSockets: 6,
+        baseSockets: 4,
+        isHeroUnit: true,
+        heroType: "hero",
+        levelCaps: {
+            ranged: 2,
+            ice: 2,
+            shock: 2,
+            sniper: 2,
+            melee: 2
+        },
+        towerStock: {},
+        refundRate: 0.7,
+        quotes: [
+            "창세의 세계수 위그드라실의 숨결이 이 대지와 당신을 영원히 수호할 것입니다.",
+            "생명과 성운의 근원은 하나... 숲의 속삭임에 귀를 기울여 보세요, 지휘관님.",
+            "타락한 심연의 그림자조차 찬란한 생명의 등불 앞에서는 정화될 뿐입니다."
+        ],
+        skillQuote: "세계수의 신성한 빛이여, 만물을 정화하라! 제네시스 실바나!",
+        desc: "창세의 세계수 위그드라실과 공명하는 숲의 종족 신화(U) 등급 여신. 전장에 직접 강림하여 전 필드 아군 타워의 잠재력을 개방하고 세계수 생명 오라를 부여합니다."
     }
 };
 
@@ -1215,7 +1245,8 @@ const COMMANDER_GACHA_CONFIG = {
         { grade: "UR", charId: "char_seraphina", weight: 2.0 },
         { grade: "UR", charId: "char_veronica", weight: 2.0 },
         // U 등급 (총 2%)
-        { grade: "U", charId: "char_lumina", weight: 2.0 }
+        { grade: "U", charId: "char_lumina", weight: 1.0 },
+        { grade: "U", charId: "char_titania", weight: 1.0 }
     ]
 };
 
@@ -1364,6 +1395,27 @@ const MODULAR_CHARACTER_SPECS = {
             staff: "assets/parts/lumina_staff.png",
             grimoire: "assets/parts/lumina_grimoire.png",
             orb: "assets/parts/lumina_orb.png"
+        }
+    },
+    char_titania: {
+        rigType: "tall", hairColor: "#d9f99d", eyeColor: "#f59e0b",
+        primaryColor: "#10b981", secondaryColor: "#facc15",
+        backPart: "wings", headGear: "tiara", weaponType: "staff", weaponColor: "#10b981",
+        refSheet: "assets/ref_titania_sheet.jpg",
+        modularParts: {
+            useBaseBody: true,
+            mirrorWings: true,
+            frontCore: "assets/parts/titania_front_core.png",
+            baseBody: "assets/parts/titania_base_body.png",
+            exprNeutral: "assets/parts/titania_expr_neutral.png",
+            exprSerious: "assets/parts/titania_expr_serious.png",
+            headgear: "assets/parts/titania_headgear.png",
+            topDress: "assets/parts/titania_top_dress.png",
+            bottomSkirt: "assets/parts/titania_bottom_skirt.png",
+            wingsCape: "assets/parts/titania_wings_cape.png",
+            mainWeapon: "assets/parts/titania_main_weapon.png",
+            subWeapon: null,
+            underwear: null
         }
     }
 };
