@@ -2176,7 +2176,7 @@
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #fde047; font-weight: 700; cursor: pointer;">
                                     <input type="radio" name="gen-mode" value="sheet" onchange="updatePrompt()" style="accent-color: #f59e0b;">
-                                    <span>2️⃣ 소체 리깅용 설정 시트 (01~15 표준 파츠 & 미착용 '없음' 자동 표기)</span>
+                                    <span>2️⃣ 2.5~3등신 SD 소체 리깅용 설정 시트 (01~15 SD 파츠 & 미착용 '없음' 자동 표기)</span>
                                 </label>
                             </div>
                         </div>
@@ -2299,26 +2299,32 @@
     </div>
 
     <script>
-        // 🧍‍♀️ 3종 공통 아바타 소체 규격 판별 헬퍼 (TALL / STANDARD / PETITE)
+        // 🧍‍♀️ 3종 공통 SD 아바타 소체 규격 판별 헬퍼 (TALL SD 3.0등신 / STANDARD SD 2.5등신 / PETITE SD 2.0등신)
         function getAvatarRigSpec(race, bodyType) {
             if (bodyType === 'petite' || (bodyType === 'auto' && (race === 'earth' || race === 'avian'))) {
                 return {
                     type: 'petite',
-                    label: 'PETITE (단신 숏스택 아바타 소체 - 145~155cm 규격)',
-                    guideLevels: [120 + 95, 120 + 180, 120 + 245, 120 + 320, 120 + 530]
+                    label: 'PETITE SD (2.0등신 단신 숏스택 SD 아바타 소체 규격)',
+                    sdRatioText: '2.0 to 2.2 heads tall cute Chibi SD proportions',
+                    sdPrompt: '2.0 to 2.2 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, large adorable chibi head (45% of total height) with big expressive eyes, compact curvy shortstack chibi torso, cute stubby chibi arms and legs, Blue Archive / Princess Connect / Spine 2D SD character asset style',
+                    guideLevels: [120 + 95, 120 + 285, 120 + 360, 120 + 415, 120 + 530]
                 };
             }
             if (bodyType === 'slender' || (bodyType === 'auto' && race === 'forest')) {
                 return {
                     type: 'tall',
-                    label: 'TALL (장신 모델 아바타 소체 - 170~175cm 규격)',
-                    guideLevels: [120 + 55, 120 + 145, 120 + 215, 120 + 295, 120 + 530]
+                    label: 'TALL SD (3.0등신 장신 모델 SD 아바타 소체 규격)',
+                    sdRatioText: '2.8 to 3.0 heads tall Chibi SD proportions',
+                    sdPrompt: '2.8 to 3.0 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, oversized expressive anime chibi head (35% of total height), compact alluring chibi hourglass torso, cute stylized short SD legs and arms, Blue Archive / Princess Connect / Spine 2D SD character asset style',
+                    guideLevels: [120 + 65, 120 + 235, 120 + 320, 120 + 385, 120 + 530]
                 };
             }
             return {
                 type: 'standard',
-                label: 'STANDARD (표준 황금비율 아바타 소체 - 162~167cm 규격)',
-                guideLevels: [120 + 70, 120 + 160, 120 + 230, 120 + 310, 120 + 530]
+                label: 'STANDARD SD (2.5등신 표준 황금비율 SD 아바타 소체 규격)',
+                sdRatioText: '2.5 heads tall standard Chibi SD proportions',
+                sdPrompt: '2.5 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, large expressive anime chibi head (40% of total height), compact balanced curvy chibi torso, cute short SD arms and legs, Blue Archive / Princess Connect / Spine 2D SD character asset style',
+                guideLevels: [120 + 80, 120 + 260, 120 + 340, 120 + 400, 120 + 530]
             };
         }
 
@@ -2383,12 +2389,12 @@
             ctx.fillStyle = '#0f172a';
             ctx.font = 'bold 34px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(RACE_TITLES[race] + ' 3종 아바타 소체 리깅 & 캐릭터 설정 시트', 1024, 56);
+            ctx.fillText(RACE_TITLES[race] + ' 3종 SD 아바타 소체 리깅 & 파츠 설정 시트 (2.0~3.0등신 SD 규격)', 1024, 56);
 
             ctx.fillStyle = '#475569';
             ctx.font = 'bold 15px sans-serif';
             ctx.textAlign = 'left';
-            ctx.fillText('RIGGING AVATAR SPEC: ' + rigSpec.label + ' (OFFICIAL 01~15 MODULAR SHEET)', 60, 92);
+            ctx.fillText('SD RIGGING AVATAR SPEC: ' + rigSpec.label + ' (' + rigSpec.sdRatioText + ')', 60, 92);
 
             // 종족별 영구 신체 주의사항 라벨 (헤더 우측)
             ctx.fillStyle = '#dc2626';
@@ -2443,10 +2449,10 @@
             const startX = 60;
             const gap = 38;
 
-            drawSlotBox(startX + (slotW + gap) * 0, topY, slotW, topH, '01. 정면 (Front View)', '[전신 풀 착장 정면 실측 배치]');
-            drawSlotBox(startX + (slotW + gap) * 1, topY, slotW, topH, '02. 측면 (Side View)', '[정면과 1:1 눈금 일치 측면 실측]');
-            drawSlotBox(startX + (slotW + gap) * 2, topY, slotW, topH, '03. 후면 (Back View)', '[망토/날개/뒷모습 완전 해체 실측]');
-            drawSlotBox(startX + (slotW + gap) * 3, topY, slotW, topH, '04. 기본 체형 (Base Body Model)', '[' + rigSpec.type.toUpperCase() + ' 아바타 소체 / 의상 완전 탈의]', true, false);
+            drawSlotBox(startX + (slotW + gap) * 0, topY, slotW, topH, '01. 정면 (SD Front)', '[2.5~3등신 SD 전신 풀 착장 정면]');
+            drawSlotBox(startX + (slotW + gap) * 1, topY, slotW, topH, '02. 측면 (SD Side)', '[SD 정면과 1:1 눈금 일치 측면]');
+            drawSlotBox(startX + (slotW + gap) * 2, topY, slotW, topH, '03. 후면 (SD Back)', '[SD 망토/날개/뒷모습 실측]');
+            drawSlotBox(startX + (slotW + gap) * 3, topY, slotW, topH, '04. 기본 체형 (SD Base Body)', '[' + rigSpec.type.toUpperCase() + ' SD 소체 / 의상 완전 탈의]', true, false);
 
             // 눈금 가이드선 (캐릭터 내부에 점선 잔상이 남지 않도록 좌측 여백과 박스 사이 간격에만 눈금 마커 표시)
             ctx.save();
@@ -2454,7 +2460,7 @@
             ctx.lineWidth = 1.5;
 
             const guideLevels = rigSpec.guideLevels;
-            const levelNames = ['Head', 'Chest', 'Waist', 'Hips', 'Base'];
+            const levelNames = ['Head', 'Chin', 'Waist', 'Hips', 'Base'];
             guideLevels.forEach((gy, i) => {
                 // 좌측 시작 눈금
                 ctx.beginPath();
@@ -3180,44 +3186,37 @@ const STYLE_PROMPTS = {
                     'mutation': "Exotic permanent mutant anatomical traits strictly mirroring original image."
                 };
 
-                // ✨ 3종 공통 아바타 소체 규격('04. 기본 체형') 명세
-                const baseBodyPrompt = `full-body anatomical rigging avatar base model (${rigSpec.label}) of the EXACT SAME character (NOT a blank mannequin, NOT a featureless doll, NOT a faceless silhouette, NOT a bald mannequin):
-- Standardized 3-Tier Avatar Rigging Alignment: Strictly align her head, chest, waist, hips, and feet to the horizontal red dotted height guide lines of the '${rigSpec.type.toUpperCase()}' avatar specification in Image 2.
-- Identical Face & Hair (완전한 얼굴과 헤어스타일): MUST have her complete beautiful expressive anime face and full voluminous hairstyle IDENTICAL to turnaround views 01-03.
+                // ✨ 3종 공통 SD 아바타 소체 규격('04. 기본 체형') 명세 (2.0~3.0등신 Chibi SD 비율 강제)
+                const baseBodyPrompt = `full-body 2D game Super-Deformed (SD / Chibi) anatomical rigging avatar base model (${rigSpec.label} — ${rigSpec.sdRatioText}) of the EXACT SAME character (NOT a tall 7-8 heads realistic body, NOT a blank mannequin, NOT a faceless doll):
+- MANDATORY SD / CHIBI PROPORTION CONVERSION: Convert the tall standing character from Image 1 into ${rigSpec.sdPrompt}. Strictly align her oversized SD head (Head-to-Chin), compact SD waist, SD hips, and SD feet to the red height guide markers of '${rigSpec.type.toUpperCase()} SD' in Image 2.
+- Identical SD Face & Hair (완전한 SD 얼굴과 헤어스타일): MUST have her complete expressive chibi anime face and full voluminous hairstyle IDENTICAL in scale and position to SD turnaround views 01-03.
 - Inherent Bodily Traits (종족 고유 신체 100% 보존): ${RACE_ANATOMICAL_FEATURES[race] || ''}
-- Equipment Stripping (순수 복장/장비 및 속옷 완전 탈의): Stripped of ALL fabric clothing, outer armor, cape, halo, weapons, accessories, and underwear (NO bra, NO panties, NO garter belt on 04 base body model; pure bare seamless skin-toned anatomy model).
-- Body & Proportions: Natural bare female anatomy strictly maintaining her specified build (${selectedBodySpec}) for 2D/3D modular avatar rigging reference, seamless smooth natural skin tone, non-sexual safe-for-work production reference.
+- Equipment Stripping (순수 복장/장비 및 속옷 완전 탈의): Stripped of ALL fabric clothing, outer armor, cape, halo, weapons, accessories, and underwear (NO bra, NO panties, NO garter belt on 04 SD base body model; pure bare seamless skin-toned SD chibi anatomy model ready for paper-doll clothing overlay).
 - Korean Label: '04. 기본 체형'`;
 
                 prompt = `Based on the TWO attached reference images:
-- [Image 1: Character Design Source]: Faithfully adopt the character's exact face, hair, colors, race traits, costume, and weapons from Image 1.
-- [Image 2: Official 01~15 Modular Rigging Sheet Grid Template]: Strictly map and decompose the character into the EXACT standardized bounding grid boxes, height guides (${rigSpec.label}), and numbered Korean label positions of Image 2.
-Generate an official game production & modular avatar rigging reference sheet strictly matching the 01~15 section layout:
-[1. Standard Numbered Korean Annotations]: All section titles and part labels MUST strictly follow the exact numbered tags and positions from Image 2:
-- Main Turnaround & Avatar Base: '01. 정면', '02. 측면', '03. 후면', '04. 기본 체형'
-- Expression Sheet: '05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의'
-- Modular Rigging Parts & Costume Breakdown (09~15):
+- [Image 1: Character Design Source (Standing Illustration)]: Faithfully adopt the character's exact face, hair, colors, race traits, costume design, and weapons from Image 1, and DEFORM / CONVERT her into a **${rigSpec.sdRatioText} Super-Deformed (SD / Chibi) 2D Game Battle Avatar**!
+- [Image 2: Official 01~15 SD Modular Rigging Sheet Grid Template]: Strictly map and decompose the SD-converted character into the EXACT standardized bounding grid boxes, SD height guides (${rigSpec.label}), and numbered Korean label positions of Image 2.
+Generate an official **2.0~3.0 Heads Tall Chibi SD Modular Avatar Rigging & Parts Breakdown Sheet** strictly matching the 01~15 section layout:
+[1. Mandatory SD / Chibi Proportions Across All Views (01~04)]:
+- CRITICAL: Views '01. 정면', '02. 측면', '03. 후면', and '04. 기본 체형' MUST ALL be drawn in **${rigSpec.sdPrompt}** (NOT 7~8 heads tall realistic proportions!). Her head must be large and cute (approx. 1/3 to 2/5 of total body height) with a compact chibi body and short cute SD limbs for 2D Spine/Paper-Doll in-game animation.
+[2. Standard Numbered Korean Annotations]: All section titles and part labels MUST strictly follow the exact numbered tags and positions from Image 2:
+- Main SD Turnaround & SD Avatar Base: '01. 정면', '02. 측면', '03. 후면', '04. 기본 체형'
+- SD Expression Sheet: '05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의'
+- SD Modular Rigging Parts & Costume Breakdown (09~15):
   '09. 복장 : 머리 장식', '10. 복장 : 상의', '11. 복장 : 하의', '12. 복장 : 외투 / 날개', '13. 주무기 파츠', '14. 보조무기 / 구체', '15. 복장 : 속옷'
-[2. Character Natural Avatar Base Body Model ('04. 기본 체형')]: ${baseBodyPrompt}.
-[3. Modular Rigging Parts & Costume Breakdown Rules (09~15 — STRICT "없음 / NONE" DISPLAY FOR ABSENT ITEMS)]:
-CRITICAL RULE: If the character does NOT have a specific item (such as no halo/headgear in 09, no top in 10, no bottom in 11, no wings/cape in 12, no main weapon in 13, no secondary weapon/shield/orb in 14, or no underwear in 15), DO NOT invent or hallucinate fake items! Leave that numbered slot empty and clearly write '없음 (미착용)' or '없음 (미보유)' in Korean in the center of that box:
+[3. Character Natural SD Avatar Base Body Model ('04. 기본 체형')]: ${baseBodyPrompt}.
+[4. SD Modular Rigging Parts & Costume Breakdown Rules (09~15 — PROPORTIONED FOR SD BODY & STRICT "없음 / NONE" DISPLAY FOR ABSENT ITEMS)]:
+- Every extracted clothing and weapon part in slots 09~15 MUST be proportioned to fit directly onto the compact **${rigSpec.sdRatioText} SD base body ('04. 기본 체형')**!
+- CRITICAL RULE: If the character does NOT have a specific item (such as no halo/headgear in 09, no top in 10, no bottom in 11, no wings/cape in 12, no main weapon in 13, no secondary weapon/shield/orb in 14, or no underwear in 15), DO NOT invent or hallucinate fake items! Leave that numbered slot empty and clearly write '없음 (미착용)' or '없음 (미보유)' in Korean in the center of that box:
 ${slotInstructions}
-[4. Facial Expression Sheet (표정 시트: 05~08)]: 4 distinct front-facing facial expression head parts for modular head swapping ('05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의').
-[5. Safety & Production Context]: Strictly non-sexual, professional concept art bible for 2D/3D modular avatar rigging and part slicing, clean precise lineart, safe for work, simple solid pure white background (#FFFFFF) inside all boxes, no cut off, entire body visible from head to toe, master quality anime illustration, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${selectedBodySpec}, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
+[5. SD Facial Expression Sheet (표정 시트: 05~08)]: 4 distinct front-facing **SD Chibi facial expression head parts** matching the exact head size of '04. 기본 체형' ('05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의').
+[6. Safety & Production Context]: Strictly non-sexual, professional 2D game SD character rigging asset sheet, clean bold lineart, vibrant cel-shading, safe for work, simple solid pure white background (#FFFFFF) inside all boxes, no cut off, entire SD body visible from head to toe, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
                 
-                // 🛡️ 실전 검증된 설정 시트 전용 올인원 네거티브 프롬프트 (체형 맞춤형 분기)
-                let sheetBodyNegatives = [];
-                if (bodyType === 'slender' || bodyType === 'petite') {
-                    sheetBodyNegatives.push("huge breasts, large breasts, heavy cleavage, voluptuous, thick thighs, wide hips, plump");
-                } else if (bodyType === 'mega_glamour') {
-                    sheetBodyNegatives.push("flat chest, small breasts, skinny, slender, modest bust");
-                } else if (bodyType === 'standard') {
-                    sheetBodyNegatives.push("huge breasts, gigantic breasts, flat chest, extreme curves");
-                }
+                // 🛡️ 실전 검증된 SD 설정 시트 전용 올인원 네거티브 프롬프트 (7~8등신 장신 실사 비율 원천 차단)
+                const baseSheetNegative = "7 heads tall, 8 heads tall, tall realistic body proportions, long realistic legs, tall model build, realistic adult height, elongated torso, long limbs, detached animal tail in costume breakdown, animal ears headband in costume section, missing tail on 04 base body, missing animal ears on 04 base body, furry, anthro, animal snout, muzzle, animal nose, animal face, beast face, cat face, snout, four ears on beastkin, human ears on beastkin, missing elf ears on forest folk, short round ears on forest folk, detached elf ears in costume breakdown, missing wings on avian folk, detached feathered wings in costume breakdown, prosthetic leg replacing organic leg, converting organic legs into robotic legs, cybernetic leg when original has human legs, single robotic arm when original has dual robotic arms, one organic arm when both arms are mechanical, normal flesh arm on mechanical arm side, human arm replacing mechanical arm, asymmetric flesh arm, one robotic arm and one flesh arm, detached mechanical arm in costume breakdown, mechanical limbs in exploded costume section, black bodysuit on 04 base body, dark leotard on 04 base body, dark swimsuit on 04 base body, ball-jointed doll, joint doll, doll joints, featureless head, bald, faceless, blank face, no eyes, mannequin, wooden mannequin, plastic doll, organic arm replacing prosthetic arm on earth folk, missing mechanical arm, clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, underwear on 04 base body, bra on 04 base body, panties on 04 base body, garter straps on 04 base body, lingerie on 04 base body, different hairstyle on 04 base body, short hair on 04 base body, different face, different character, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username";
 
-                const baseSheetNegative = "detached animal tail in costume breakdown, animal ears headband in costume section, missing tail on 04 base body, missing animal ears on 04 base body, furry, anthro, animal snout, muzzle, animal nose, animal face, beast face, cat face, snout, four ears on beastkin, human ears on beastkin, missing elf ears on forest folk, short round ears on forest folk, detached elf ears in costume breakdown, missing wings on avian folk, detached feathered wings in costume breakdown, prosthetic leg replacing organic leg, converting organic legs into robotic legs, cybernetic leg when original has human legs, single robotic arm when original has dual robotic arms, one organic arm when both arms are mechanical, normal flesh arm on mechanical arm side, human arm replacing mechanical arm, asymmetric flesh arm, one robotic arm and one flesh arm, detached mechanical arm in costume breakdown, mechanical limbs in exploded costume section, black bodysuit on 04 base body, dark leotard on 04 base body, dark swimsuit on 04 base body, ball-jointed doll, joint doll, doll joints, featureless head, bald, faceless, blank face, no eyes, mannequin, wooden mannequin, plastic doll, organic arm replacing prosthetic arm on earth folk, missing mechanical arm, clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, underwear on 04 base body, bra on 04 base body, panties on 04 base body, garter straps on 04 base body, lingerie on 04 base body, different hairstyle on 04 base body, short hair on 04 base body, different face, different character, changed body type, altered proportions, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, cropped, out of frame, cut off head, cut off feet, cut off legs, cut off shoes, close-up, portrait, bust shot, upper body only, medium shot, zoom in, extra arms, extra legs, extra limbs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, child, kid, underage, loli, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry";
-
-                negativePrompt = sheetBodyNegatives.concat([baseSheetNegative]).join(", ");
+                negativePrompt = baseSheetNegative;
 
                 // UI 안내 문구 업데이트 (템플릿 다운로드 박스 활성화)
                 const tBox = document.getElementById('template-download-box');

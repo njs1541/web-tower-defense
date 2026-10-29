@@ -24,12 +24,12 @@ $mutedBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromA
 $redBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(220, 38, 38))
 $goldTextBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(180, 83, 9))
 
-$g.DrawString("숲의 종족 (FOREST FOLK) 3종 아바타 소체 리깅 & 캐릭터 설정 시트", $fontTitle, $darkBrush, 1024, 42, $sfCenter)
-$g.DrawString("RIGGING AVATAR SPEC: TALL (장신 모델 아바타 소체 - 170~175cm 규격) (OFFICIAL 01~15 MODULAR SHEET)", $fontSub, $mutedBrush, 60, 78)
-$g.DrawString("※ [숲의 종족 영구 신체]: 결정체 엘프 뾰족귀는 01~04 뷰에 영구 결합 유지 (둥근 인간 귀 변형 금지)", $fontSub, $redBrush, 1220, 78)
+$g.DrawString("숲의 종족 (FOREST FOLK) 3종 SD 아바타 소체 리깅 & 파츠 설정 시트 (2.5~3.0등신 SD 규격)", $fontTitle, $darkBrush, 1024, 42, $sfCenter)
+$g.DrawString("SD RIGGING AVATAR SPEC: TALL SD (3.0등신 장신 SD 아바타 소체 규격 - 2.8~3.0 Heads Tall Chibi SD)", $fontSub, $mutedBrush, 60, 78)
+$g.DrawString("※ [숲의 종족 영구 신체]: 결정체 엘프 뾰족귀는 01~04 SD 뷰에 영구 결합 유지 (둥근 인간 귀 변형 금지)", $fontSub, $redBrush, 1200, 78)
 
 function Draw-SlotBox($x, $y, $w, $h, $title, $sub, $isHighlight, $isAbsent) {
-    $bgCol = if ($isAbsent) { [System.Drawing.Color]::FromArgb(241, 245, 249) } elseif ($isHighlight) { [System.Drawing.Color]::FromArgb(255, 251, 235) } else { [System.Drawing.Color]::FromArgb(255, 255, 255) }
+    $bgCol = if ($isAbsent) { [System.Drawing.Color]::FromArgb(241, 245, 249) } else { [System.Drawing.Color]::FromArgb(255, 255, 255) }
     $borderCol = if ($isAbsent) { [System.Drawing.Color]::FromArgb(148, 163, 184) } elseif ($isHighlight) { [System.Drawing.Color]::FromArgb(245, 158, 11) } else { [System.Drawing.Color]::FromArgb(203, 213, 225) }
     $headerCol = if ($isAbsent) { [System.Drawing.Color]::FromArgb(226, 232, 240) } elseif ($isHighlight) { [System.Drawing.Color]::FromArgb(254, 243, 199) } else { [System.Drawing.Color]::FromArgb(241, 245, 249) }
 
@@ -52,23 +52,31 @@ function Draw-SlotBox($x, $y, $w, $h, $title, $sub, $isHighlight, $isAbsent) {
         $g.DrawString("없음 (NONE)", $fontAbsent, $redBrush, $rectCenter1, $sfCenter)
         $g.DrawString("[미착용 / 미보유]", $fontSlotSub, $mutedBrush, $rectCenter2, $sfCenter)
     } elseif ($sub -ne "") {
-        $rectSub = New-Object System.Drawing.RectangleF($x, ($y + $h - 28), $w, 22)
+        $rectSub = New-Object System.Drawing.RectangleF($x, ($y + $h - 24), $w, 20)
         $g.DrawString($sub, $fontSlotSub, $mutedBrush, $rectSub, $sfCenter)
     }
 }
 
 $topY = 120; $topH = 560; $slotW = 445; $startX = 60; $gap = 38
-Draw-SlotBox ($startX + ($slotW + $gap) * 0) $topY $slotW $topH "01. 정면 (Front View)" "[전신 풀 착장 정면 실측 배치]" $false $false
-Draw-SlotBox ($startX + ($slotW + $gap) * 1) $topY $slotW $topH "02. 측면 (Side View)" "[정면과 1:1 눈금 일치 측면 실측]" $false $false
-Draw-SlotBox ($startX + ($slotW + $gap) * 2) $topY $slotW $topH "03. 후면 (Back View)" "[망토/날개/뒷모습 완전 해체 실측]" $false $false
-Draw-SlotBox ($startX + ($slotW + $gap) * 3) $topY $slotW $topH "04. 기본 체형 (Base Body Model)" "[TALL 아바타 소체 / 의상 완전 탈의]" $true $false
+Draw-SlotBox ($startX + ($slotW + $gap) * 0) $topY $slotW $topH "01. 정면 (SD Front)" "[2.8~3등신 SD 전신 풀 착장 정면]" $false $false
+Draw-SlotBox ($startX + ($slotW + $gap) * 1) $topY $slotW $topH "02. 측면 (SD Side)" "[SD 정면과 1:1 눈금 일치 측면]" $false $false
+Draw-SlotBox ($startX + ($slotW + $gap) * 2) $topY $slotW $topH "03. 후면 (SD Back)" "[SD 망토/날개/뒷모습 실측]" $false $false
+Draw-SlotBox ($startX + ($slotW + $gap) * 3) $topY $slotW $topH "04. 기본 체형 (SD Base Body)" "[TALL SD 소체 / 의상 완전 탈의]" $true $false
 
-# TALL 아바타 기준 수평 가이드 점선
-$dashPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(140, 248, 113, 113), 1.2)
-$dashPen.DashStyle = [System.Drawing.Drawing2D.DashStyle]::Dash
-$guideYs = @(175, 265, 335, 415, 650)
-foreach ($gy in $guideYs) {
-    $g.DrawLine($dashPen, 50, $gy, 1995, $gy)
+# TALL SD (3.0등신 Chibi) 기준 눈금 마커 (박스 바깥 여백 및 슬롯 간격에만 표시하여 파츠 오염 방지)
+$tickPen = New-Object System.Drawing.Pen([System.Drawing.Color]::FromArgb(220, 239, 68, 68), 2.0)
+$fontTick = New-Object System.Drawing.Font("Malgun Gothic", 8.5, [System.Drawing.FontStyle]::Bold)
+$guideYs = @(185, 355, 440, 505, 650)
+$guideNames = @("Head", "Chin", "Waist", "Hips", "Base")
+for ($gi = 0; $gi -lt $guideYs.Count; $gi++) {
+    $gy = $guideYs[$gi]
+    $g.DrawLine($tickPen, ($startX - 14), $gy, $startX, $gy)
+    $g.DrawString($guideNames[$gi], $fontTick, $redBrush, ($startX - 52), ($gy - 7))
+    for ($s = 0; $s -lt 3; $s++) {
+        $gx1 = $startX + $slotW * ($s + 1) + $gap * $s + 4
+        $gx2 = $gx1 + $gap - 8
+        $g.DrawLine($tickPen, $gx1, $gy, $gx2, $gy)
+    }
 }
 
 $expY = 730; $expH = 370; $subExpW = 175; $subExpGap = 20
