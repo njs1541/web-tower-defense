@@ -456,15 +456,19 @@
       transform: scale(-0.92, 0.88);
     }
 
+    /* 발밑 오라/그림자: 360도 프로펠러 회전을 제거하고 바닥 고정 수평 타원 맥동(Pulse)으로 수정 */
     .rig-ground-aura {
       position: absolute;
       bottom: 6px;
-      width: 76%;
-      height: 20%;
+      left: 50%;
+      width: 74%;
+      height: 16%;
+      transform: translateX(-50%);
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(250, 204, 21, 0.55) 0%, rgba(168, 85, 247, 0.25) 60%, transparent 75%);
-      border: 1.5px dashed rgba(253, 224, 71, 0.85);
-      animation: studioAuraSpin 6s linear infinite;
+      background: radial-gradient(ellipse at center, rgba(250, 204, 21, 0.48) 0%, rgba(168, 85, 247, 0.22) 60%, transparent 78%);
+      border: 1.5px solid rgba(253, 224, 71, 0.75);
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.35);
+      animation: studioAuraPulse 2.4s ease-in-out infinite;
       pointer-events: none;
     }
 
@@ -472,115 +476,234 @@
       position: absolute;
       pointer-events: none;
       object-fit: contain;
-      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.65));
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
     }
 
-    /* 12. 등 날개/망토 레이어 (본체 뒤) */
-    .rig-layer.layer-wings {
+    /* 12. 등 날개/망토 레이어 (좌/우 대칭 장착 및 단일 장착 모두 지원) */
+    .rig-layer.layer-wings-single {
       z-index: 1;
       width: 95%;
       height: 85%;
       top: 6%;
-      animation: rigWingsFlap 2.2s ease-in-out infinite;
+      left: 2.5%;
+      transform-origin: 50% 45%;
+      animation: rigWingsFlap 2.4s ease-in-out infinite;
+    }
+    .rig-layer.layer-wings-left {
+      z-index: 1;
+      width: 44%;
+      height: 68%;
+      top: 8%;
+      left: 8%;
+      transform-origin: 82% 48%;
+      animation: rigWingLeftFlap 2.4s ease-in-out infinite;
+    }
+    .rig-layer.layer-wings-right {
+      z-index: 1;
+      width: 44%;
+      height: 68%;
+      top: 8%;
+      left: 48%;
+      transform-origin: 18% 48%;
+      animation: rigWingRightFlap 2.4s ease-in-out infinite;
     }
 
-    /* 01/04. 본체 코어 레이어 */
+    /*
+     * 🧍 신체 & 의상 & 표정 & 머리장식 일체형 동기화 그룹 (.rig-body-sync-group)
+     * 04.체형소체 + 15.속옷 + 11.하의 + 10.상의 + 05/08.표정 + 09.머리장식이
+     * 하나의 부모 컨테이너 안에서 호흡 및 공격 돌진 모션을 수행하여 단 1px도 따로 놀지 않음!
+     */
+    .rig-body-sync-group {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      transform-origin: 50% 85%;
+      animation: rigBodyBreathe 2.4s ease-in-out infinite;
+    }
+
+    /* 04. 체형 소체 (또는 01. 정면 본체) 레이어 */
     .rig-layer.layer-core {
       z-index: 2;
       width: 88%;
       height: 92%;
-      bottom: 4%;
-      animation: rigBodyBreathe 2.4s ease-in-out infinite;
+      left: 6%;
+      top: 4%;
     }
 
-    /* 09. 머리장식/헤일로 레이어 */
-    .rig-layer.layer-halo {
+    /* 15. 복장 : 속옷 레이어 (소체 위, 상/하의 아래) */
+    .rig-layer.layer-underwear {
       z-index: 3;
-      width: 48%;
-      height: 26%;
-      top: 0%;
-      animation: rigHaloFloat 2.8s ease-in-out infinite;
+      width: 26%;
+      height: 44%;
+      left: 37%;
+      top: 20%;
     }
 
-    /* 13. 오른손 주무기 레이어 */
-    .rig-layer.layer-weapon {
+    /* 11. 복장 : 하의 (스커트/바지 - 골반~발목 장착) */
+    .rig-layer.layer-bottom {
       z-index: 4;
-      width: 45%;
+      width: 38%;
+      height: 54%;
+      left: 31%;
+      top: 40%;
+      transform-origin: 50% 10%;
+      animation: rigSkirtSway 2.4s ease-in-out infinite;
+    }
+
+    /* 10. 복장 : 상의 (보디스/갑주 - 가슴~상체 장착) */
+    .rig-layer.layer-top {
+      z-index: 5;
+      width: 24%;
+      height: 31%;
+      left: 38%;
+      top: 19.5%;
+    }
+
+    /* 05. 기본 표정 & 08. 전투결의 표정 레이어 (소체 얼굴 눈썹·눈·코·입 위치 정밀 마스킹 오버레이) */
+    .rig-layer.layer-expr {
+      z-index: 6;
+      width: 13.6%;
+      height: 13.5%;
+      left: 43.2%;
+      top: 11.4%;
+      clip-path: ellipse(22% 14% at 50% 47%);
+      filter: none;
+    }
+    .rig-layer.layer-expr.expr-serious {
+      opacity: 0;
+    }
+
+    /* 09. 머리장식/헤일로 레이어 (.rig-body-sync-group 내부에서 머리에 고정되어 함께 움직임) */
+    .rig-layer.layer-halo {
+      z-index: 7;
+      width: 27%;
+      height: 23%;
+      left: 36.5%;
+      top: 0.5%;
+      transform-origin: 50% 85%;
+    }
+
+    /* 13. 오른손 주무기 레이어 (캐릭터 좌측 외곽에 배치, 바깥쪽 적 방향으로 휘두름) */
+    .rig-layer.layer-weapon {
+      z-index: 8;
+      width: 36%;
       height: 68%;
-      left: -4%;
-      bottom: 10%;
-      transform-origin: 65% 75%;
+      left: 2%;
+      top: 18%;
+      transform-origin: 72% 78%;
       animation: rigWeaponIdle 2.4s ease-in-out infinite;
     }
 
     /* 14. 왼손 보조무기/구체 레이어 */
     .rig-layer.layer-sub {
-      z-index: 5;
-      width: 34%;
-      height: 34%;
+      z-index: 9;
+      width: 32%;
+      height: 32%;
       right: -2%;
       top: 24%;
-      animation: rigSubOrbit 2.2s ease-in-out infinite;
+      animation: rigSubOrbit 2.4s ease-in-out infinite;
     }
 
-    /* 공격 모션 활성화 시 */
-    .avatar-rig-stage.is-attacking .layer-core {
+    /* 공격 모션 활성화 시:
+     * 1) 신체 동기화 그룹(소체+속옷+하의+상의+표정+머리장식) 전체가 일체형으로 전방 체중 이동
+     * 2) 표정이 05.무표정 -> 08.전투결의 표정으로 즉시 전환
+     * 3) 주무기는 캐릭터 반대편(바깥쪽 좌측 적 방향)을 향해 시원하게 스윙!
+     */
+    .avatar-rig-stage.is-attacking .rig-body-sync-group {
       animation: rigCoreAttackLunge 0.42s ease-out forwards;
     }
+    .avatar-rig-stage.is-attacking .layer-expr.expr-neutral {
+      opacity: 0;
+    }
+    .avatar-rig-stage.is-attacking .layer-expr.expr-serious {
+      opacity: 1;
+    }
     .avatar-rig-stage.is-attacking .layer-weapon {
-      animation: rigWeaponSwing 0.42s ease-out forwards;
+      animation: rigWeaponSwingOutward 0.42s ease-out forwards;
     }
     .avatar-rig-stage.is-attacking .layer-sub {
       animation: rigSubCast 0.42s ease-out forwards;
     }
-    .avatar-rig-stage.is-attacking .layer-wings {
+    .avatar-rig-stage.is-attacking .layer-wings-single {
       animation: rigWingsBurst 0.42s ease-out forwards;
     }
+    .avatar-rig-stage.is-attacking .layer-wings-left {
+      animation: rigWingLeftBurst 0.42s ease-out forwards;
+    }
+    .avatar-rig-stage.is-attacking .layer-wings-right {
+      animation: rigWingRightBurst 0.42s ease-out forwards;
+    }
 
-    @keyframes studioAuraSpin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    @keyframes studioAuraPulse {
+      0%, 100% { transform: translateX(-50%) scale(0.95, 0.95); opacity: 0.75; }
+      50% { transform: translateX(-50%) scale(1.06, 1.04); opacity: 1; }
     }
     @keyframes rigBodyBreathe {
       0%, 100% { transform: translateY(0px) scaleY(1); }
-      50% { transform: translateY(-3px) scaleY(1.02); }
+      50% { transform: translateY(-3px) scaleY(1.015); }
+    }
+    @keyframes rigSkirtSway {
+      0%, 100% { transform: rotate(0deg) scaleX(1); }
+      50% { transform: rotate(-0.8deg) scaleX(1.02); }
     }
     @keyframes rigWingsFlap {
-      0%, 100% { transform: scaleX(1) translateY(0px); }
-      50% { transform: scaleX(1.08) translateY(-3px); }
+      0%, 100% { transform: translateY(0px) scaleX(1); }
+      50% { transform: translateY(-3px) scaleX(1.07); }
     }
-    @keyframes rigHaloFloat {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-4px) scale(1.05); }
+    @keyframes rigWingLeftFlap {
+      0%, 100% { transform: translateY(0px) scaleX(1) rotate(0deg); }
+      50% { transform: translateY(-3px) scaleX(1.08) rotate(-5deg); }
+    }
+    @keyframes rigWingRightFlap {
+      0%, 100% { transform: translateY(0px) scaleX(1) rotate(0deg); }
+      50% { transform: translateY(-3px) scaleX(1.08) rotate(5deg); }
     }
     @keyframes rigWeaponIdle {
-      0%, 100% { transform: rotate(-4deg) translateY(0px); }
-      50% { transform: rotate(4deg) translateY(-3px); }
+      0%, 100% { transform: translateY(0px) rotate(-4deg); }
+      50% { transform: translateY(-3px) rotate(-10deg); }
     }
     @keyframes rigSubOrbit {
       0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
-      50% { transform: translate(3px, -5px) rotate(10deg); }
+      50% { transform: translate(2px, -4px) rotate(8deg); }
     }
+    /* 공격 시 신체+의상+표정+머리장식 일체형 그룹 모션 */
     @keyframes rigCoreAttackLunge {
-      0% { transform: scale(1) translateX(0); }
-      35% { transform: scale(1.1) translateX(5px) translateY(-3px); filter: drop-shadow(0 0 10px #fde047); }
-      100% { transform: scale(1) translateX(0); }
+      0% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
+      25% { transform: translate(3px, -2px) rotate(2deg) scale(1.03); }
+      60% { transform: translate(-6px, -3px) rotate(-3deg) scale(1.08); filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.65)); }
+      100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
     }
-    @keyframes rigWeaponSwing {
-      0% { transform: rotate(0deg); }
-      30% { transform: rotate(-28deg) translateY(-6px) scale(1.15); }
-      65% { transform: rotate(35deg) translateX(8px) scale(1.18); filter: drop-shadow(0 0 10px #f43f5e); }
-      100% { transform: rotate(0deg); }
+    /* 주무기 스윙: 캐릭터를 때리지 않고 반대편(바깥쪽 좌측 전방, -deg)을 향해 시원하게 내려침! */
+    @keyframes rigWeaponSwingOutward {
+      0% { transform: rotate(-4deg) translate(0px, 0px) scale(1); }
+      25% { transform: rotate(14deg) translate(2px, -6px) scale(1.08); }
+      60% { transform: rotate(-58deg) translate(-12px, 4px) scale(1.22); filter: drop-shadow(0 0 12px #f43f5e); }
+      100% { transform: rotate(-4deg) translate(0px, 0px) scale(1); }
     }
     @keyframes rigSubCast {
-      0% { transform: scale(1); }
-      45% { transform: translate(8px, -8px) scale(1.35) rotate(25deg); filter: drop-shadow(0 0 12px #38bdf8); }
-      100% { transform: scale(1); }
+      0% { transform: translate(0px, 0px) scale(1); }
+      25% { transform: translate(2px, -3px) scale(1.05); }
+      60% { transform: translate(8px, -8px) scale(1.3) rotate(18deg); filter: drop-shadow(0 0 12px #38bdf8); }
+      100% { transform: translate(0px, 0px) scale(1); }
     }
     @keyframes rigWingsBurst {
-      0% { transform: scale(1); }
-      40% { transform: scale(1.18, 1.12); filter: drop-shadow(0 0 10px #c084fc); }
-      100% { transform: scale(1); }
+      0% { transform: translate(0px, 0px) scale(1); }
+      25% { transform: translate(3px, -2px) scale(0.96, 1.02); }
+      60% { transform: translate(-5px, -3px) scale(1.18, 1.12); filter: drop-shadow(0 0 10px #c084fc); }
+      100% { transform: translate(0px, 0px) scale(1); }
+    }
+    @keyframes rigWingLeftBurst {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(0.92, 1.02) rotate(6deg); }
+      60% { transform: scale(1.22, 1.12) rotate(-12deg); filter: drop-shadow(0 0 10px #4ade80); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    @keyframes rigWingRightBurst {
+      0% { transform: scale(1) rotate(0deg); }
+      25% { transform: scale(0.92, 1.02) rotate(-6deg); }
+      60% { transform: scale(1.22, 1.12) rotate(12deg); filter: drop-shadow(0 0 10px #4ade80); }
+      100% { transform: scale(1) rotate(0deg); }
     }
 
     /* STEP 4. 01~15 고정 좌표 파츠 슬라이서 그리드 */
@@ -808,9 +931,10 @@
       <!-- 우측: 3종 공통 아바타 소체 실시간 파츠 리깅 시뮬레이터 -->
       <div class="panel-box">
         <div class="panel-header">
-          <h2>⚔️ 3종 아바타 소체 & 분리 파츠 실시간 리깅 시뮬레이터</h2>
+          <h2>⚔️ 3종 아바타 소체 & 전 파츠(소체·표정·상의·하의·헤일로·날개·무기) 리깅 시뮬레이터</h2>
           <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <button class="btn" onclick="toggleCoreSource()" id="btn-core-source" title="시뮬레이터 중심 본체를 01.정면(착장본체) 또는 04.기본소체로 전환">🧍 본체: 01.정면 코어</button>
+            <button class="btn btn-gold" onclick="toggleCoreSource()" id="btn-core-source" title="04.체형소체 위에 상의·하의·속옷·표정·머리장식을 입히는 전 파츠 조립 모드와 01.정면본체 모드를 전환합니다">🧩 모드: 04.소체+전파츠 조립</button>
+            <button class="btn" onclick="toggleWingMirrorMode()" id="btn-wing-mirror" title="12번 날개 파츠가 1짝일 때 좌우 대칭(2장)으로 달지, 단일(1장)로 달지 전환합니다">🦋 날개: 좌우대칭(2장)</button>
             <button class="btn" onclick="toggleSimFacing()">↔ 좌/우 반전</button>
             <button class="btn btn-primary" onclick="triggerSimAttack()">⚔️ 공격 모션</button>
             <button class="btn" id="btn-auto-loop" onclick="toggleAutoAttackLoop()">🔁 자동공격: OFF</button>
@@ -818,24 +942,36 @@
         </div>
 
         <div style="font-size: 12px; color: #94a3b8; line-height: 1.45;">
-          💡 설정 시트에서 분리된 <strong>본체 코어(01/04) + 머리장식/헤일로(09) + 날개/망토(12) + 주무기(13) + 보조무기/구체(14)</strong>가 3종 아바타 체형 규격(<code>Tall / Standard / Petite</code>)에 맞춰 실시간 관절 모션으로 조립됩니다. <strong>'없음(미착용/미보유)'</strong> 처리된 파츠는 시뮬레이터에서도 즉시 제외됩니다!
+          💡 설정 시트에서 분리된 <strong>체형소체(04) + 속옷(15) + 하의(11) + 상의(10) + 표정(05 대기 / 08 공격전환) + 머리장식(09) + 날개/망토(12) + 주무기(13) + 보조무기(14)</strong> 전 파츠가 다층 레이어로 실시간 조립됩니다! 아래 STEP 4에서 상의·하의·머리장식 등을 <strong><code>[🚫 없음]</code></strong>으로 바꾸면 리깅 뷰에서도 즉시 탈의/해제됩니다.
         </div>
 
         <div class="simulator-stages-wrap">
           <!-- 로비 보좌관 쇼케이스 뷰 -->
           <div class="sim-stage-card">
             <div class="sim-stage-label">👑 로비 보좌관 아바타 리깅 뷰</div>
-            <div class="sim-showcase-box" onclick="triggerSimAttack()" title="클릭하여 파츠 리깅 공격 모션 테스트">
-              <div class="avatar-rig-stage rig-standard" id="sim-rig-showcase">
+            <div class="sim-showcase-box" onclick="triggerSimAttack()" title="클릭하여 전 파츠 리깅 공격 모션 & 표정 전환 테스트">
+              <div class="avatar-rig-stage rig-tall" id="sim-rig-showcase">
                 <div class="rig-ground-aura"></div>
-                <img id="sim-show-wings" class="rig-layer layer-wings" src="" alt="12 Wings" />
-                <img id="sim-show-core" class="rig-layer layer-core" src="" alt="01 Core" />
-                <img id="sim-show-halo" class="rig-layer layer-halo" src="" alt="09 Halo" />
+                <!-- 12. 등 날개/망토 (좌우 대칭 2장 또는 단일 1장) -->
+                <img id="sim-show-wings-left" class="rig-layer layer-wings-left" src="" alt="12 Wings L" />
+                <img id="sim-show-wings-right" class="rig-layer layer-wings-right" src="" alt="12 Wings R" />
+                <img id="sim-show-wings-single" class="rig-layer layer-wings-single" src="" alt="12 Wings Single" style="display:none;" />
+                <!-- 신체·의상·표정·머리장식 일체형 모션 그룹 (호흡 및 공격 돌진 시 100% 한 몸으로 이동) -->
+                <div class="rig-body-sync-group">
+                  <img id="sim-show-core" class="rig-layer layer-core" src="" alt="04 Base Body" />
+                  <img id="sim-show-underwear" class="rig-layer layer-underwear" src="" alt="15 Underwear" />
+                  <img id="sim-show-bottom" class="rig-layer layer-bottom" src="" alt="11 Bottom Skirt" />
+                  <img id="sim-show-top" class="rig-layer layer-top" src="" alt="10 Top Dress" />
+                  <img id="sim-show-expr-neutral" class="rig-layer layer-expr expr-neutral" src="" alt="05 Expr Neutral" />
+                  <img id="sim-show-expr-serious" class="rig-layer layer-expr expr-serious" src="" alt="08 Expr Serious" />
+                  <img id="sim-show-halo" class="rig-layer layer-halo" src="" alt="09 Headgear" />
+                </div>
+                <!-- 13. 주무기 & 14. 보조무기 -->
                 <img id="sim-show-weapon" class="rig-layer layer-weapon" src="" alt="13 Weapon" />
                 <img id="sim-show-sub" class="rig-layer layer-sub" src="" alt="14 Sub" />
               </div>
             </div>
-            <div style="font-size: 11px; color: #94a3b8;" id="sim-active-parts-summary">조립 파츠: 본체 + 헤일로 + 날개 + 주무기 + 보조무기</div>
+            <div style="font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.4;" id="sim-active-parts-summary">조립 파츠: 04.체형소체 + 05/08.표정 + 09.머리장식 + 10.상의 + 11.하의 + 12.날개 + 13.주무기</div>
           </div>
 
           <!-- 인게임 3x3 지휘 오라 타일 뷰 -->
@@ -847,11 +983,20 @@
               <div class="sim-grid-cell">❄️</div>
               <div class="sim-grid-cell"></div>
               <div class="sim-grid-cell center-base">
-                <div class="avatar-rig-stage in-tile rig-standard" id="sim-rig-tile">
+                <div class="avatar-rig-stage in-tile rig-tall" id="sim-rig-tile">
                   <div class="rig-ground-aura"></div>
-                  <img id="sim-tile-wings" class="rig-layer layer-wings" src="" alt="12 Wings" />
-                  <img id="sim-tile-core" class="rig-layer layer-core" src="" alt="01 Core" />
-                  <img id="sim-tile-halo" class="rig-layer layer-halo" src="" alt="09 Halo" />
+                  <img id="sim-tile-wings-left" class="rig-layer layer-wings-left" src="" alt="12 Wings L" />
+                  <img id="sim-tile-wings-right" class="rig-layer layer-wings-right" src="" alt="12 Wings R" />
+                  <img id="sim-tile-wings-single" class="rig-layer layer-wings-single" src="" alt="12 Wings Single" style="display:none;" />
+                  <div class="rig-body-sync-group">
+                    <img id="sim-tile-core" class="rig-layer layer-core" src="" alt="04 Base Body" />
+                    <img id="sim-tile-underwear" class="rig-layer layer-underwear" src="" alt="15 Underwear" />
+                    <img id="sim-tile-bottom" class="rig-layer layer-bottom" src="" alt="11 Bottom Skirt" />
+                    <img id="sim-tile-top" class="rig-layer layer-top" src="" alt="10 Top Dress" />
+                    <img id="sim-tile-expr-neutral" class="rig-layer layer-expr expr-neutral" src="" alt="05 Expr Neutral" />
+                    <img id="sim-tile-expr-serious" class="rig-layer layer-expr expr-serious" src="" alt="08 Expr Serious" />
+                    <img id="sim-tile-halo" class="rig-layer layer-halo" src="" alt="09 Headgear" />
+                  </div>
                   <img id="sim-tile-weapon" class="rig-layer layer-weapon" src="" alt="13 Weapon" />
                   <img id="sim-tile-sub" class="rig-layer layer-sub" src="" alt="14 Sub" />
                 </div>
@@ -861,7 +1006,7 @@
               <div class="sim-grid-cell"></div>
               <div class="sim-grid-cell">⚡</div>
             </div>
-            <div style="font-size: 11px; color: #94a3b8;">클릭 시 주무기 스윙 & 보조무기/날개 연동 모션 발동</div>
+            <div style="font-size: 11px; color: #94a3b8;">클릭 시 표정 변화(05→08) & 주무기 외곽 스윙 모션 발동</div>
           </div>
         </div>
       </div>
@@ -942,7 +1087,8 @@
     let simFacing = 'right';
     let autoLoopInterval = null;
     let selectedPartIndex = 0;
-    let useBaseBodyAsCore = false; // false: 01.정면 착장본체 사용, true: 04.기본소체 사용
+    let useBaseBodyAsCore = true; // true(기본): 04.체형소체 위에 상의·하의·속옷·표정·머리장식·날개·무기 전 파츠 조립! / false: 01.정면 코어 사용
+    let mirrorWingsMode = true;   // true: 12번 날개 파츠를 좌우 대칭(2장)으로 장착 / false: 단일(1장) 장착
 
     /**
      * visual_style_guide.html 의 2048 x 1152 공식 템플릿 픽셀 좌표에 1:1 매칭되는
@@ -968,17 +1114,17 @@
 
     let sliceSpecs = JSON.parse(JSON.stringify(OFFICIAL_2048_SLICE_SPECS));
 
-    // 지휘관 프리셋 (파일 슬러그, 아바타 소체 타입, 기본 미보유 파츠 설정, 샘플 원화 경로)
+    // 지휘관 프리셋 (파일 슬러그, 아바타 소체 타입, 날개 대칭 여부, 기본 미보유 파츠 설정, 샘플 원화 경로)
     const characterPresets = {
-      char_titania:   { slug: 'titania',   rigType: 'tall',     absentIds: ['14', '15'], sampleStanding: 'assets/char_titania.jpg', sampleSheet: 'assets/ref_titania_sheet.jpg' },
-      char_lumina:    { slug: 'lumina',    rigType: 'standard', absentIds: [],           sampleStanding: 'assets/char_lumina.jpg',  sampleSheet: 'assets/ref_lumina_sheet.jpg' },
-      char_seraphina: { slug: 'seraphina', rigType: 'standard', absentIds: ['14'] },
-      char_veronica:  { slug: 'veronica',  rigType: 'standard', absentIds: [] },
-      char_aurelia:   { slug: 'aurelia',   rigType: 'standard', absentIds: [] },
-      char_selena:    { slug: 'selena',    rigType: 'standard', absentIds: ['14'] },
-      char_eleanor:   { slug: 'eleanor',   rigType: 'standard', absentIds: ['14'] },
-      char_scarlet:   { slug: 'scarlet',   rigType: 'standard', absentIds: ['09', '12'] },
-      char_liana:     { slug: 'liana',     rigType: 'standard', absentIds: ['09'] }
+      char_titania:   { slug: 'titania',   rigType: 'tall',     mirrorWings: true,  useBaseBody: true,  absentIds: ['14', '15'], sampleStanding: 'assets/char_titania.jpg', sampleSheet: 'assets/ref_titania_sheet.jpg' },
+      char_lumina:    { slug: 'lumina',    rigType: 'standard', mirrorWings: false, useBaseBody: false, absentIds: [],           sampleStanding: 'assets/char_lumina.jpg',  sampleSheet: 'assets/ref_lumina_sheet.jpg' },
+      char_seraphina: { slug: 'seraphina', rigType: 'standard', mirrorWings: true,  useBaseBody: true,  absentIds: ['14'] },
+      char_veronica:  { slug: 'veronica',  rigType: 'standard', mirrorWings: false, useBaseBody: true,  absentIds: [] },
+      char_aurelia:   { slug: 'aurelia',   rigType: 'standard', mirrorWings: false, useBaseBody: true,  absentIds: [] },
+      char_selena:    { slug: 'selena',    rigType: 'standard', mirrorWings: false, useBaseBody: true,  absentIds: ['14'] },
+      char_eleanor:   { slug: 'eleanor',   rigType: 'standard', mirrorWings: false, useBaseBody: true,  absentIds: ['14'] },
+      char_scarlet:   { slug: 'scarlet',   rigType: 'standard', mirrorWings: false, useBaseBody: true,  absentIds: ['09', '12'] },
+      char_liana:     { slug: 'liana',     rigType: 'standard', mirrorWings: false, useBaseBody: true,  absentIds: ['09'] }
     };
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -1147,6 +1293,18 @@
           const ratio = (threshold - minC) / feather;
           const alpha = Math.max(0, Math.min(255, Math.round(ratio * 255)));
           data[idx + 3] = Math.min(data[idx + 3], alpha);
+        }
+      }
+
+      // 2차 보정: 다리 사이나 팔과 몸통 사이, 헤일로 안쪽처럼 막힌 순백/크림색 배경 구멍(Enclosed Holes) 투명화 (피부색 R-G >= 14 는 완벽 보존)
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] > 0) {
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          if (r >= 244 && g >= 240 && b >= 218 && Math.abs(r - g) <= 6) {
+            data[i + 3] = 0;
+          }
         }
       }
 
@@ -1371,7 +1529,8 @@
     }
 
     /**
-     * 분리된 파츠들을 우측 3종 아바타 소체 리깅 시뮬레이터에 실시간 바인딩
+     * 분리된 전 파츠(04.체형소체, 05/08.표정, 09.머리장식, 10.상의, 11.하의, 12.날개, 13.주무기, 14.보조무기, 15.속옷)를
+     * 우측 3종 아바타 소체 리깅 시뮬레이터에 실시간 다층 조립 바인딩!
      * ('없음(absent)' 상태인 파츠는 즉시 숨김 처리)
      */
     function updateRigSimulatorLayers() {
@@ -1390,11 +1549,16 @@
       };
 
       const coreId = useBaseBodyAsCore ? '04' : '01';
-      const coreUrl = getPartDataUrl(coreId);
-      const haloUrl = getPartDataUrl('09');
-      const wingsUrl = getPartDataUrl('12');
-      const weaponUrl = getPartDataUrl('13');
-      const subUrl = getPartDataUrl('14');
+      const coreUrl        = getPartDataUrl(coreId);
+      const exprNeutralUrl = useBaseBodyAsCore ? getPartDataUrl('05') : null;
+      const exprSeriousUrl = useBaseBodyAsCore ? getPartDataUrl('08') : null;
+      const haloUrl        = getPartDataUrl('09');
+      const topUrl         = useBaseBodyAsCore ? getPartDataUrl('10') : null;
+      const bottomUrl      = useBaseBodyAsCore ? getPartDataUrl('11') : null;
+      const wingsUrl       = getPartDataUrl('12');
+      const weaponUrl      = getPartDataUrl('13');
+      const subUrl         = getPartDataUrl('14');
+      const underwearUrl   = useBaseBodyAsCore ? getPartDataUrl('15') : null;
 
       const bindLayer = (elId, url) => {
         const el = document.getElementById(elId);
@@ -1407,15 +1571,70 @@
         }
       };
 
+      // 1) 04.체형소체 (또는 01.정면본체)
       bindLayer('sim-show-core', coreUrl);
       bindLayer('sim-tile-core', coreUrl);
 
+      // 2) 15.속옷, 11.하의, 10.상의 (04.체형소체 조립 모드일 때 소체 위에 입힘)
+      bindLayer('sim-show-underwear', underwearUrl);
+      bindLayer('sim-tile-underwear', underwearUrl);
+
+      bindLayer('sim-show-bottom', bottomUrl);
+      bindLayer('sim-tile-bottom', bottomUrl);
+
+      bindLayer('sim-show-top', topUrl);
+      bindLayer('sim-tile-top', topUrl);
+
+      // 3) 05.기본표정 & 08.공격표정 (공격 모션 시 05 -> 08 실시간 표정 전환!)
+      bindLayer('sim-show-expr-neutral', exprNeutralUrl);
+      bindLayer('sim-tile-expr-neutral', exprNeutralUrl);
+
+      bindLayer('sim-show-expr-serious', exprSeriousUrl);
+      bindLayer('sim-tile-expr-serious', exprSeriousUrl);
+
+      // 4) 09.머리장식/헤일로
       bindLayer('sim-show-halo', haloUrl);
       bindLayer('sim-tile-halo', haloUrl);
 
-      bindLayer('sim-show-wings', wingsUrl);
-      bindLayer('sim-tile-wings', wingsUrl);
+      // 5) 12.날개/망토 (좌우 대칭 2장 모드 vs 단일 1장 모드)
+      // 좌측 날개는 캔버스에서 수평 반전(FlipX)한 DataURL을 직접 생성하여 축 이동 없이 100% 좌우 대칭 보장!
+      const getFlippedPartDataUrl = (id) => {
+        const idx = sliceSpecs.findIndex(s => s.id === id);
+        if (idx < 0 || sliceSpecs[idx].absent) return null;
+        const c = document.getElementById(`canvas-part-${idx}`);
+        if (!c || !c.width || !c.height) return null;
+        try {
+          const off = document.createElement('canvas');
+          off.width = c.width;
+          off.height = c.height;
+          const oCtx = off.getContext('2d');
+          oCtx.translate(c.width, 0);
+          oCtx.scale(-1, 1);
+          oCtx.drawImage(c, 0, 0);
+          return off.toDataURL('image/png');
+        } catch (e) {
+          return null;
+        }
+      };
 
+      if (wingsUrl && mirrorWingsMode) {
+        const wingsLeftFlippedUrl = getFlippedPartDataUrl('12') || wingsUrl;
+        bindLayer('sim-show-wings-left', wingsLeftFlippedUrl);
+        bindLayer('sim-show-wings-right', wingsUrl);
+        bindLayer('sim-show-wings-single', null);
+        bindLayer('sim-tile-wings-left', wingsLeftFlippedUrl);
+        bindLayer('sim-tile-wings-right', wingsUrl);
+        bindLayer('sim-tile-wings-single', null);
+      } else {
+        bindLayer('sim-show-wings-left', null);
+        bindLayer('sim-show-wings-right', null);
+        bindLayer('sim-show-wings-single', wingsUrl);
+        bindLayer('sim-tile-wings-left', null);
+        bindLayer('sim-tile-wings-right', null);
+        bindLayer('sim-tile-wings-single', wingsUrl);
+      }
+
+      // 6) 13.주무기 & 14.보조무기
       bindLayer('sim-show-weapon', weaponUrl);
       bindLayer('sim-tile-weapon', weaponUrl);
 
@@ -1424,21 +1643,52 @@
 
       // 활성/없음 파츠 상태 요약 표시
       const summaryParts = [];
-      summaryParts.push(useBaseBodyAsCore ? '04.기본소체' : '01.정면본체');
-      summaryParts.push(haloUrl ? '09.헤일로(ON)' : '09.헤일로(없음)');
-      summaryParts.push(wingsUrl ? '12.날개/망토(ON)' : '12.날개/망토(없음)');
-      summaryParts.push(weaponUrl ? '13.주무기(ON)' : '13.주무기(없음)');
-      summaryParts.push(subUrl ? '14.보조무기(ON)' : '14.보조무기(없음)');
+      if (useBaseBodyAsCore) {
+        summaryParts.push('04.체형소체');
+        summaryParts.push('05/08.표정(ON)');
+        summaryParts.push(haloUrl ? '09.머리장식(ON)' : '09.머리장식(없음)');
+        summaryParts.push(topUrl ? '10.상의(ON)' : '10.상의(없음)');
+        summaryParts.push(bottomUrl ? '11.하의(ON)' : '11.하의(없음)');
+        summaryParts.push(wingsUrl ? '12.날개(ON)' : '12.날개(없음)');
+        summaryParts.push(weaponUrl ? '13.주무기(ON)' : '13.주무기(없음)');
+        summaryParts.push(subUrl ? '14.보조무기(ON)' : '14.보조무기(없음)');
+        summaryParts.push(underwearUrl ? '15.속옷(ON)' : '15.속옷(없음)');
+      } else {
+        summaryParts.push('01.정면통짜코어');
+        summaryParts.push(haloUrl ? '09.머리장식(ON)' : '09.머리장식(없음)');
+        summaryParts.push(wingsUrl ? '12.날개(ON)' : '12.날개(없음)');
+        summaryParts.push(weaponUrl ? '13.주무기(ON)' : '13.주무기(없음)');
+        summaryParts.push(subUrl ? '14.보조무기(ON)' : '14.보조무기(없음)');
+      }
       const sumEl = document.getElementById('sim-active-parts-summary');
       if (sumEl) sumEl.innerText = summaryParts.join(' · ');
     }
 
+    function syncRigModeButtons() {
+      const coreBtn = document.getElementById('btn-core-source');
+      if (coreBtn) {
+        coreBtn.innerText = useBaseBodyAsCore
+          ? '🧩 모드: 04.소체+전파츠 조립'
+          : '🧍 모드: 01.정면 통짜코어';
+        coreBtn.className = useBaseBodyAsCore ? 'btn btn-gold' : 'btn';
+      }
+      const wingBtn = document.getElementById('btn-wing-mirror');
+      if (wingBtn) {
+        wingBtn.innerText = mirrorWingsMode
+          ? '🦋 날개: 좌우대칭(2장)'
+          : '🦋 날개: 단일(1장)';
+      }
+    }
+
     function toggleCoreSource() {
       useBaseBodyAsCore = !useBaseBodyAsCore;
-      const btn = document.getElementById('btn-core-source');
-      if (btn) {
-        btn.innerText = useBaseBodyAsCore ? '🧍 본체: 04.기본 소체' : '🧍 본체: 01.정면 코어';
-      }
+      syncRigModeButtons();
+      updateRigSimulatorLayers();
+    }
+
+    function toggleWingMirrorMode() {
+      mirrorWingsMode = !mirrorWingsMode;
+      syncRigModeButtons();
       updateRigSimulatorLayers();
     }
 
@@ -1498,6 +1748,13 @@
       if (preset) {
         document.getElementById('asset-slug-input').value = preset.slug;
         document.getElementById('sel-avatar-rig').value = preset.rigType;
+        if (typeof preset.useBaseBody === 'boolean') {
+          useBaseBodyAsCore = preset.useBaseBody;
+        }
+        if (typeof preset.mirrorWings === 'boolean') {
+          mirrorWingsMode = preset.mirrorWings;
+        }
+        syncRigModeButtons();
         sliceSpecs.forEach(sp => {
           if (sp.canBeAbsent) {
             sp.absent = preset.absentIds.includes(sp.id);
@@ -1530,15 +1787,17 @@
         standingArt: "assets/char_${slug}.png",
         referenceSheet: "assets/ref_${slug}_sheet.png",
         modularParts: {
-            frontCore:  "assets/parts/${slug}_front_core.png",   // 01. 정면 본체 코어
-            baseBody:   "assets/parts/${slug}_base_body.png",    // 04. 3종 아바타 소체
-            headgear:   ${partPathOrNull('09', 'headgear')}
-            topDress:   ${partPathOrNull('10', 'top_dress')}
-            bottomSkirt:${partPathOrNull('11', 'bottom_skirt')}
-            wingsCape:  ${partPathOrNull('12', 'wings_cape')}
-            mainWeapon: ${partPathOrNull('13', 'main_weapon')}
-            subWeapon:  ${partPathOrNull('14', 'sub_weapon')}
-            underwear:  ${partPathOrNull('15', 'underwear')}
+            frontCore:   "assets/parts/${slug}_front_core.png",   // 01. 정면 본체 코어
+            baseBody:    "assets/parts/${slug}_base_body.png",    // 04. 3종 아바타 체형 소체
+            exprNeutral: "assets/parts/${slug}_expr_neutral.png", // 05. 표정: 기본 무표정
+            exprSerious: "assets/parts/${slug}_expr_serious.png", // 08. 표정: 공격 전투결의
+            headgear:    ${partPathOrNull('09', 'headgear')}
+            topDress:    ${partPathOrNull('10', 'top_dress')}
+            bottomSkirt: ${partPathOrNull('11', 'bottom_skirt')}
+            wingsCape:   ${partPathOrNull('12', 'wings_cape')}
+            mainWeapon:  ${partPathOrNull('13', 'main_weapon')}
+            subWeapon:   ${partPathOrNull('14', 'sub_weapon')}
+            underwear:   ${partPathOrNull('15', 'underwear')}
         }
     },`;
       document.getElementById('code-output-area').value = code;

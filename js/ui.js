@@ -840,11 +840,33 @@ function buildModularCharacterHtml(charId, options = {}) {
         : `${cBase.name} 전투 아바타 (클릭 시 모션 시연)`;
 
     // [v0.40.1 New] AI 생성 2.5~3등신 SD 스프라이트 & 분리 파츠 하이브리드 렌더링 (인간족 U등급 루미나 등)
-    if (spec.modularParts && (spec.modularParts.frontCore || spec.modularParts.baseBody) && !spec.sdIdleSprite) {
+    if (spec.modularParts && (spec.modularParts.baseBody || spec.modularParts.frontCore) && !spec.sdIdleSprite) {
         const mp = spec.modularParts;
-        const coreSrc = mp.frontCore || mp.baseBody;
-        const wingsHtml = mp.wingsCape ? `<img src="${mp.wingsCape}" class="mod-part-layer part-wings" alt="날개/망토">` : '';
-        const haloHtml  = mp.headgear  ? `<img src="${mp.headgear}" class="mod-part-layer part-halo" alt="헤일로/머리장식">` : '';
+        const useBase = !!mp.baseBody && (spec.useBaseBody !== false);
+        const coreSrc = useBase ? mp.baseBody : (mp.frontCore || mp.baseBody);
+
+        // 12. 날개/망토 (좌우 대칭 2장 모드 또는 단일 1장 모드)
+        let wingsHtml = '';
+        if (mp.wingsCape) {
+            if (spec.mirrorWings) {
+                wingsHtml = `
+                    <div class="mod-part-layer part-wings-left"><img src="${mp.wingsCape}" class="wing-flip-img" alt="좌측 날개"></div>
+                    <img src="${mp.wingsCape}" class="mod-part-layer part-wings-right" alt="우측 날개">
+                `;
+            } else {
+                wingsHtml = `<img src="${mp.wingsCape}" class="mod-part-layer part-wings" alt="날개/망토">`;
+            }
+        }
+
+        // 15. 속옷 / 11. 하의 / 10. 상의 / 05·08. 표정 / 09. 머리장식 (04.체형소체 위에 다층 레이어로 입힘)
+        const underwearHtml   = (useBase && mp.underwear)   ? `<img src="${mp.underwear}" class="mod-part-layer part-underwear" alt="속옷">` : '';
+        const bottomSkirtHtml = (useBase && mp.bottomSkirt) ? `<img src="${mp.bottomSkirt}" class="mod-part-layer part-bottom" alt="하의">` : '';
+        const topDressHtml    = (useBase && mp.topDress)    ? `<img src="${mp.topDress}" class="mod-part-layer part-top" alt="상의">` : '';
+        const exprNeutralHtml = (useBase && mp.exprNeutral) ? `<img src="${mp.exprNeutral}" class="mod-part-layer part-expr expr-neutral" alt="기본표정">` : '';
+        const exprSeriousHtml = (useBase && mp.exprSerious) ? `<img src="${mp.exprSerious}" class="mod-part-layer part-expr expr-serious" alt="공격표정">` : '';
+        const haloHtml        = mp.headgear                 ? `<img src="${mp.headgear}" class="mod-part-layer part-halo" alt="헤일로/머리장식">` : '';
+
+        // 13. 주무기 & 14. 보조무기
         const mainWHtml = mp.mainWeapon ? `<img src="${mp.mainWeapon}" class="mod-part-layer part-main-weapon" alt="주무기">` : '';
         const subWHtml  = (mp.subWeapon || mp.orb) ? `<img src="${mp.subWeapon || mp.orb}" class="mod-part-layer mod-sd-floating-orb" alt="보조무기/구체">` : '';
 
@@ -857,9 +879,15 @@ function buildModularCharacterHtml(charId, options = {}) {
                 ${isLeader ? '<span class="mod-leader-crown">👑</span>' : ''}
                 <div class="mod-sd-sprite-wrap">
                     ${wingsHtml}
-                    <img src="${coreSrc}" class="mod-sd-img sd-idle" alt="${cBase.name} 본체">
-                    <img src="${coreSrc}" class="mod-sd-img sd-attack" alt="${cBase.name} 공격본체">
-                    ${haloHtml}
+                    <div class="mod-body-sync-group">
+                        <img src="${coreSrc}" class="mod-part-layer part-core" alt="${cBase.name} 체형소체">
+                        ${underwearHtml}
+                        ${bottomSkirtHtml}
+                        ${topDressHtml}
+                        ${exprNeutralHtml}
+                        ${exprSeriousHtml}
+                        ${haloHtml}
+                    </div>
                     ${mainWHtml}
                     ${subWHtml}
                 </div>

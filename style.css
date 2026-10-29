@@ -4701,7 +4701,7 @@ button.selected {
 
 
 /* ==========================================================================
-   v0.40.2 3종 공통 아바타 소체 & 01~15 분리 파츠 조립 레이어 스타일
+   v0.40.2 3종 공통 아바타 소체 & 01~15 분리 파츠(소체·속옷·하의·상의·표정·헤일로·날개·무기) 조립 레이어 스타일
    ========================================================================== */
 .mod-part-layer {
   position: absolute;
@@ -4710,27 +4710,175 @@ button.selected {
 }
 .mod-part-layer.part-wings {
   z-index: 1;
-  width: 96%;
+  width: 95%;
   height: 85%;
   top: 6%;
-  animation: modWingsFlap 2.2s ease-in-out infinite;
+  left: 2.5%;
+  transform-origin: 50% 45%;
+  animation: modPartWingsBreathe 1.8s ease-in-out infinite;
+}
+.mod-part-layer.part-wings-left {
+  z-index: 1;
+  width: 44%;
+  height: 68%;
+  top: 8%;
+  left: 8%;
+  transform-origin: 82% 48%;
+  animation: modPartWingLeftFlap 1.8s ease-in-out infinite;
+}
+.mod-part-layer.part-wings-left .wing-flip-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: scaleX(-1);
+}
+.mod-part-layer.part-wings-right {
+  z-index: 1;
+  width: 44%;
+  height: 68%;
+  top: 8%;
+  left: 48%;
+  transform-origin: 18% 48%;
+  animation: modPartWingRightFlap 1.8s ease-in-out infinite;
+}
+
+/* 신체·의상·표정·머리장식 일체형 동기화 그룹 (호흡 및 공격 돌진 시 100% 한 몸으로 움직임) */
+.mod-body-sync-group {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  transform-origin: 50% 85%;
+}
+.mod-part-layer.part-core {
+  z-index: 2;
+  width: 88%;
+  height: 92%;
+  left: 6%;
+  top: 4%;
+  filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.55));
+}
+.mod-part-layer.part-underwear {
+  z-index: 3;
+  width: 26%;
+  height: 44%;
+  left: 37%;
+  top: 20%;
+}
+.mod-part-layer.part-bottom {
+  z-index: 4;
+  width: 38%;
+  height: 54%;
+  left: 31%;
+  top: 40%;
+}
+.mod-part-layer.part-top {
+  z-index: 5;
+  width: 24%;
+  height: 31%;
+  left: 38%;
+  top: 19.5%;
+}
+.mod-part-layer.part-expr {
+  z-index: 6;
+  width: 13.6%;
+  height: 13.5%;
+  left: 43.2%;
+  top: 11.4%;
+  clip-path: ellipse(22% 14% at 50% 47%);
+}
+.mod-part-layer.part-expr.expr-serious {
+  opacity: 0;
 }
 .mod-part-layer.part-halo {
-  z-index: 3;
-  width: 48%;
-  height: 26%;
-  top: 0%;
-  animation: modSdIdleFloat 2.6s ease-in-out infinite;
+  z-index: 7;
+  width: 27%;
+  height: 23%;
+  left: 36.5%;
+  top: 0.5%;
+  transform-origin: 50% 85%;
 }
 .mod-part-layer.part-main-weapon {
-  z-index: 4;
-  width: 45%;
+  z-index: 8;
+  width: 36%;
   height: 68%;
-  left: -4%;
-  bottom: 8%;
-  transform-origin: 65% 75%;
-  animation: modSdIdleFloat 2.4s ease-in-out infinite;
+  left: 2%;
+  top: 18%;
+  transform-origin: 72% 78%;
+  animation: modPartWeaponIdle 1.8s ease-in-out infinite;
+}
+
+/* 공격 모션 시:
+ * 1) 신체 동기화 그룹(소체+속옷+하의+상의+표정+머리장식) 전체가 일체형으로 전방 체중 이동
+ * 2) 표정이 05.무표정 -> 08.전투결의 표정으로 전환
+ * 3) 주무기는 캐릭터 반대편(바깥쪽 좌측 적 방향)을 향해 시원하게 스윙!
+ */
+.modular-char-unit.is-attacking .mod-sd-img.sd-attack,
+.modular-char-unit.is-attacking .mod-body-sync-group {
+  animation: modPartBodyHaloAttackLunge 0.38s ease-out forwards;
+}
+.modular-char-unit.is-attacking .mod-part-layer.part-expr.expr-neutral {
+  opacity: 0;
+}
+.modular-char-unit.is-attacking .mod-part-layer.part-expr.expr-serious {
+  opacity: 1;
+}
+.modular-char-unit.is-attacking .mod-part-layer.part-wings {
+  animation: modPartWingsAttackBurst 0.38s ease-out forwards;
+}
+.modular-char-unit.is-attacking .mod-part-layer.part-wings-left {
+  animation: modPartWingLeftBurst 0.38s ease-out forwards;
+}
+.modular-char-unit.is-attacking .mod-part-layer.part-wings-right {
+  animation: modPartWingRightBurst 0.38s ease-out forwards;
 }
 .modular-char-unit.is-attacking .mod-part-layer.part-main-weapon {
-  animation: modSdAttackBurst 0.38s ease-out forwards;
+  animation: modPartWeaponSwingOutward 0.38s ease-out forwards;
+}
+
+@keyframes modPartWingsBreathe {
+  0%, 100% { transform: scaleX(1); }
+  50% { transform: scaleX(1.06); }
+}
+@keyframes modPartWingLeftFlap {
+  0%, 100% { transform: scaleX(1) rotate(0deg); }
+  50% { transform: scaleX(1.08) rotate(-5deg); }
+}
+@keyframes modPartWingRightFlap {
+  0%, 100% { transform: scaleX(1) rotate(0deg); }
+  50% { transform: scaleX(1.08) rotate(5deg); }
+}
+@keyframes modPartWeaponIdle {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(-10deg) translateY(-1.5px); }
+}
+@keyframes modPartBodyHaloAttackLunge {
+  0% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
+  25% { transform: translate(2px, -1.5px) rotate(2deg) scale(1.03); }
+  60% { transform: translate(-4px, -3px) rotate(-3deg) scale(1.08); filter: brightness(1.12) drop-shadow(0 0 8px #fde047); }
+  100% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
+}
+@keyframes modPartWingsAttackBurst {
+  0% { transform: translate(0px, 0px) scale(1); }
+  25% { transform: translate(2px, -1px) scale(0.96, 1.02); }
+  60% { transform: translate(-4px, -3px) scale(1.18, 1.12); filter: drop-shadow(0 0 8px #c084fc); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes modPartWingLeftBurst {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(0.92, 1.02) rotate(6deg); }
+  60% { transform: scale(1.2, 1.12) rotate(-12deg); filter: drop-shadow(0 0 8px #4ade80); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes modPartWingRightBurst {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(0.92, 1.02) rotate(-6deg); }
+  60% { transform: scale(1.2, 1.12) rotate(12deg); filter: drop-shadow(0 0 8px #4ade80); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes modPartWeaponSwingOutward {
+  0% { transform: rotate(-4deg) translate(0px, 0px) scale(1); }
+  25% { transform: rotate(14deg) translate(2px, -4px) scale(1.08); }
+  60% { transform: rotate(-58deg) translate(-9px, 3px) scale(1.22); filter: drop-shadow(0 0 10px #f43f5e); }
+  100% { transform: rotate(-4deg) translate(0px, 0px) scale(1); }
 }
