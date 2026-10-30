@@ -2080,11 +2080,11 @@
       { id: '08', key: 'expr_serious', name: '08. 표정: 전투결의', x: 31.8, y: 67.2, w: 8.0, h: 25.0, color: '#f87171', absent: false, canBeAbsent: false },
       { id: '09', key: 'headgear', name: '09. 머리장식 / 헤일로', x: 43.3, y: 67.2, w: 6.5, h: 25.0, color: '#c084fc', absent: false, canBeAbsent: true },
       { id: '10', key: 'top_dress', name: '10. 복장 : 상의', x: 51.1, y: 67.2, w: 6.5, h: 25.0, color: '#f472b6', absent: false, canBeAbsent: true },
-      { id: '11', key: 'bottom_skirt', name: '11. 복장 : 하의', x: 59.0, y: 67.2, w: 6.5, h: 25.0, color: '#fb7185', absent: false, canBeAbsent: true },
+      { id: '11', key: 'bottom_skirt', name: '11. 복장 : 하의 앞면 (앞치마)', x: 59.0, y: 67.2, w: 6.5, h: 25.0, color: '#fb7185', absent: false, canBeAbsent: true },
       { id: '12', key: 'wings_cape', name: '12. 외투 / 날개 / 망토', x: 66.8, y: 67.2, w: 6.5, h: 25.0, color: '#818cf8', absent: false, canBeAbsent: true },
       { id: '13', key: 'main_weapon', name: '13. 주무기 파츠', x: 74.7, y: 67.2, w: 6.5, h: 25.0, color: '#facc15', absent: false, canBeAbsent: true },
       { id: '14', key: 'sub_weapon', name: '14. 보조무기 / 구체', x: 82.6, y: 67.2, w: 6.5, h: 25.0, color: '#4ade80', absent: false, canBeAbsent: true },
-      { id: '15', key: 'underwear', name: '15. 복장 : 속옷', x: 90.4, y: 67.2, w: 7.4, h: 25.0, color: '#f43f5e', absent: false, canBeAbsent: true }
+      { id: '15', key: 'bottom_skirt_back', name: '15. 복장 : 하의 뒷면 (뒷치마)', x: 90.4, y: 67.2, w: 7.4, h: 25.0, color: '#f43f5e', absent: false, canBeAbsent: true }
     ];
 
     /**
@@ -2138,17 +2138,16 @@
         rigType: 'tall',
         mirrorWings: true,
         useBaseBody: true,
-        absentIds: ['15'],
+        absentIds: [], // 11 앞치마, 15 뒷치마 모두 기본 착용!
         motionType: 'sword', // 대방패 가디언 수호 모션
         sampleStanding: 'assets/char_sylvana.jpg',
-        sampleSheetA: 'assets/ref_sylvana_sheet_a.jpg',
-        sampleSheetB: 'assets/ref_sylvana_sheet_b.jpg',
+        sampleSheet: 'assets/ref_sylvana_sheet.jpg',
         customFit: {
-          expr: { scale: 98, x: -1.0, y: 1.0, clip: 44, mask: true, flipX: false },
-          top: { scale: 108, x: -2.0, y: 0.5, flipX: false },
-          bottom: { scale: 106, x: -2.0, y: -2.0, flipX: false },
-          halo: { scale: 100, x: 0, y: -4.0, flipX: false },
-          wings: { scale: 102, x: 0, y: -3.0, flipX: false },
+          expr: { scale: 100, x: 0, y: 0, clip: 44, mask: true, flipX: false },
+          top: { scale: 104, x: -1.0, y: 0.5, flipX: false },
+          bottom: { scale: 102, x: 0, y: -1.0, flipX: false },
+          halo: { scale: 100, x: 0, y: -2.0, flipX: false },
+          wings: { scale: 100, x: 0, y: -2.0, flipX: false },
           weapon: { scale: 100, x: 2.0, y: 0, flipX: false },
           sub: { scale: 100, x: -2.0, y: 0, flipX: false }
         }
@@ -2962,10 +2961,11 @@ char_ranger: {
       const haloUrl = getPartDataUrl('09');
       const topUrl = useBaseBodyAsCore ? getPartDataUrl('10') : null;
       const bottomUrl = useBaseBodyAsCore ? getPartDataUrl('11') : null;
+      const bottomBackUrl = useBaseBodyAsCore ? (getPartDataUrl('15') || bottomUrl) : null;
       const wingsUrl = getPartDataUrl('12');
       const weaponUrl = getPartDataUrl('13');
       const subUrl = getPartDataUrl('14');
-      const underwearUrl = useBaseBodyAsCore ? getPartDataUrl('15') : null;
+      const underwearUrl = null; // 15번 슬롯은 Live2D 입체 '뒷치마(Back Skirt)' 전용 슬롯으로 승격
 
       const bindLayer = (elId, url) => {
         const el = document.getElementById(elId);
@@ -2982,13 +2982,10 @@ char_ranger: {
       bindLayer('sim-show-core', coreUrl);
       bindLayer('sim-tile-core', coreUrl);
 
-      // 2) 15.속옷, 11-A/B.샌드위치 하의, 10.상의 (04.체형소체 조립 모드일 때 소체에 3D 입체 장착)
-      bindLayer('sim-show-underwear', underwearUrl);
-      bindLayer('sim-tile-underwear', underwearUrl);
-
-      // 👗 11-B 뒷치마는 소체 다리 뒤편(Z:1.8), 11-A 앞치마는 소체 다리 앞(Z:4)에 샌드위치로 감싸 입체감 구현!
-      bindLayer('sim-show-bottom-back', bottomUrl);
-      bindLayer('sim-tile-bottom-back', bottomUrl);
+      // 2) 15.뒷치마, 11.앞치마, 10.상의 (04.체형소체 조립 모드일 때 소체에 3D 입체 샌드위치 장착)
+      // 👗 15번 뒷치마는 소체 다리 뒤편(Z:1.8), 11번 앞치마는 소체 다리 앞(Z:4)에 샌드위치로 감싸 입체감 구현!
+      bindLayer('sim-show-bottom-back', bottomBackUrl);
+      bindLayer('sim-tile-bottom-back', bottomBackUrl);
       bindLayer('sim-show-bottom', bottomUrl);
       bindLayer('sim-tile-bottom', bottomUrl);
 
@@ -3208,11 +3205,12 @@ char_ranger: {
             exprSerious: "assets/parts/${slug}_expr_serious.png", // 08. 표정: 공격 전투결의
             headgear:    ${partPathOrNull('09', 'headgear')}
             topDress:    ${partPathOrNull('10', 'top_dress')}
-            bottomSkirt: ${partPathOrNull('11', 'bottom_skirt')}
-            wingsCape:   ${partPathOrNull('12', 'wings_cape')}
-            mainWeapon:  ${partPathOrNull('13', 'main_weapon')}
-            subWeapon:   ${partPathOrNull('14', 'sub_weapon')}
-            underwear:   ${partPathOrNull('15', 'underwear')}
+            bottomSkirt:     ${partPathOrNull('11', 'bottom_skirt')}
+            bottomSkirtBack: ${partPathOrNull('15', 'bottom_skirt_back')}
+            wingsCape:       ${partPathOrNull('12', 'wings_cape')}
+            mainWeapon:      ${partPathOrNull('13', 'main_weapon')}
+            subWeapon:       ${partPathOrNull('14', 'sub_weapon')}
+            underwear:       null // 15번은 뒷치마(Back Skirt)로 승격
         }
     },`;
       document.getElementById('code-output-area').value = code;

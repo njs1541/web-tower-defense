@@ -1454,6 +1454,7 @@ const MODULAR_CHARACTER_SPECS = {
         primaryColor: "#10b981", secondaryColor: "#f59e0b",
         backPart: "wings", headGear: "tiara", weaponType: "shield", weaponColor: "#10b981",
         standingIllust: "assets/char_sylvana.jpg",
+        sheet: "assets/ref_sylvana_sheet.jpg",
         sheetA: "assets/ref_sylvana_sheet_a.jpg",
         sheetB: "assets/ref_sylvana_sheet_b.jpg",
         modularParts: {

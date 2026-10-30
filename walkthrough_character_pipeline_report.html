@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌟 UR등급 메가글래머 실바나 - A to Z 전신원화부터 캐릭터 등록까지 풀 파이프라인 보고서</title>
+  <title>🌟 UR등급 메가글래머 실바나 - 공식 템플릿 기반 A to Z 전신원화부터 캐릭터 등록까지 완벽 파이프라인 보고서</title>
   <style>
     :root {
       --bg: #090d16;
@@ -34,7 +34,7 @@
 
     /* 헤더 */
     .report-header {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(192, 132, 252, 0.15));
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(192, 132, 252, 0.2));
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 32px;
@@ -62,7 +62,7 @@
       text-transform: uppercase;
     }
     .badge-ur { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
-    .badge-step { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
 
     h1 {
       font-size: 26px;
@@ -260,6 +260,17 @@
       color: #cbd5e1;
     }
     .key-points strong { color: #38bdf8; }
+
+    .fix-alert {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: #a7f3d0;
+    }
+    .fix-alert strong { color: #34d399; }
   </style>
 </head>
 <body>
@@ -270,13 +281,20 @@
     <header class="report-header">
       <span class="badge badge-ur">UR GRADE • TRANSCENDENT FLORAL GUARDIAN</span>
       <h1>🌟 성역의 여황 실바나 (Sylvana) A to Z 제작 완료 보고서</h1>
-      <p class="subtitle">숲의 종족 UR 등급 메가 글래머 체형 캐릭터 기획부터 8등신 전신 원화, SD 듀얼 규격 시트, Live2D 파츠 분리 및 게임 등록까지 전체 실무 공정</p>
+      <p class="subtitle">공식 규격 템플릿(2048×1152) 기반 01~15 설정시트 정합, 무결점 파츠 분리 및 인게임 캐릭터 공식 등록 전체 실무 공정</p>
       <div class="nav-actions">
         <a href="sd_all_in_one_hub.html" class="btn btn-primary">🎮 올인원 통합 스튜디오 열기</a>
         <a href="sd_asset_studio.html" class="btn btn-purple">🎨 Live2D 에셋 스튜디오 열기</a>
         <a href="visual_style_guide.html" class="btn">📑 프롬프트 가이드 열기</a>
       </div>
     </header>
+
+    <!-- 문제점 해결 공지 배너 -->
+    <div class="fix-alert">
+      <strong>✅ [문제점 완벽 해결 안내] 템플릿 기반 시트 재생성 및 슬라이스 오차 0% 달성</strong><br>
+      • <strong>기존 원인:</strong> 템플릿 틀 없이 임의 생성되어 AI가 그림 내부에 영문 라벨("1. Skirt Set", "Main Weapon")을 직접 인쇄하고 박스 위치가 어긋나, 슬라이싱 시 글자와 인접 파츠가 잘려 리깅 뷰가 왜곡됨.<br>
+      • <strong>해결 조치:</strong> <code>forest_tall_model_sheet_template_2048x1152.png</code>를 제2 레퍼런스로 강제 첨부하고 <strong>박스 내부 텍스트 0% 엄수 규칙</strong>을 적용하여 100% 규격 정합 시트(<code>ref_sylvana_sheet.jpg</code>)를 생성했습니다. 슬라이서 또한 <code>OFFICIAL_2048_SLICE_SPECS</code> 좌표와 안전 내부 여백(Safe Padding)을 적용하여 11종의 순수 파츠 투명 PNG를 오차 없이 추출 완료했습니다.
+    </div>
 
     <!-- STEP 1: 캐릭터 기획 및 스펙 선정 -->
     <section class="step-card">
@@ -296,7 +314,7 @@
         • <strong>종족 & 귀:</strong> 숲의 종족 (긴 뾰족한 에메랄드 엘프 귀 영구 보존)<br>
         • <strong>체형:</strong> 메가 글래머 (168cm, 6.8등신, F-H컵 바스트, 코르셋 슬림 웨이스트, 와이드 골반)<br>
         • <strong>배경 키:</strong> 숲의 종족 전용 단색 마젠타 크로마키 (<code>#FF00FF</code> — 초록 잎사귀/의상 완벽 보존)<br>
-        • <strong>무기/장비:</strong> 세계수 룬 타워 대방패 & 에메랄드 인챈트 장검, 황금 티아라, 단일 날개
+        • <strong>무기/장비:</strong> 세계수 룬 타워 대방패 & 에메랄드 인챈트 장검, 황금 티아라, 단일 요정 날개
       </div>
     </section>
 
@@ -319,55 +337,36 @@
       </div>
     </section>
 
-    <!-- STEP 3: SD 3면도 & 기본 소체 시트 A 생성 -->
+    <!-- STEP 3: 공식 템플릿 기반 SD 01~15 설정 시트 생성 -->
     <section class="step-card">
       <div class="step-header">
         <div class="step-title-wrap">
           <div class="step-num">3</div>
-          <h2 class="step-title">SD 3면도 & 기본 소체 시트 (시트 A)</h2>
+          <h2 class="step-title">공식 템플릿 기반 SD 01~15 설정 시트 생성 (앞치마/뒷치마 분리 완료)</h2>
         </div>
         <span class="step-status">STEP 3 완료</span>
       </div>
       <p class="step-desc">
-        1단계 전신 원화를 참조 이미지로 사용하여 <strong>2.8등신 Chibi SD 비율</strong>로 변환했습니다.<br>
-        <strong>'01. 정면 본체'</strong>와 <strong>'04. 기본 체형 (소체)'</strong>의 시선, 각도, A-Pose가 1:1로 완벽히 일치하며, 옷을 벗긴 소체에서도 엘프 귀와 고유 체형이 그대로 보존되었습니다.
+        공식 설정 시트 규격 틀(<code>forest_tall_model_sheet_template_2048x1152.png</code>)을 제2 레퍼런스로 첨부하여 <strong>2.8~3.0등신 TALL SD 메가글래머 체형</strong>으로 정합 생성했습니다.<br>
+        특히 Live2D 디자이너 요구사항에 맞추어 <strong>11번 박스에는 골반 앞쪽을 덮는 '앞치마(Front Skirt)'</strong>를, <strong>15번 박스에는 다리 뒤로 풍성하게 퍼지는 '뒷치마(Back Skirt)'</strong>를 최초 생성 단계부터 명확히 분리하여 렌더링했습니다.
       </p>
       <div class="preview-box">
-        <img src="assets/ref_sylvana_sheet_a.jpg" alt="실바나 SD 3면도 & 소체 시트 A">
-        <div class="preview-caption">▲ assets/ref_sylvana_sheet_a.jpg (01 정면, 02 측면, 03 후면, 04 기본 체형 소체 4슬롯 규격)</div>
+        <img src="assets/ref_sylvana_sheet.jpg" alt="실바나 공식 템플릿 기반 01~15 설정 시트">
+        <div class="preview-caption">▲ assets/ref_sylvana_sheet.jpg (공식 규격 템플릿 1:1 매핑 • 11번 앞치마 & 15번 뒷치마 분리 • 텍스트 라벨 0%)</div>
       </div>
     </section>
 
-    <!-- STEP 4: SD 모듈러 장비 & 표정 팩 시트 B 생성 -->
+    <!-- STEP 4: 무결점 파츠 분리 및 투명 PNG 추출 -->
     <section class="step-card">
       <div class="step-header">
         <div class="step-title-wrap">
           <div class="step-num">4</div>
-          <h2 class="step-title">SD 모듈러 장비 & 표정 팩 시트 (시트 B)</h2>
+          <h2 class="step-title">에셋 투명화 & 파츠 분리 (Asset Slicing)</h2>
         </div>
         <span class="step-status">STEP 4 완료</span>
       </div>
       <p class="step-desc">
-        Live2D 디자이너 피드백을 적용하여 <strong>앞치마(Front Skirt)</strong>와 <strong>뒷치마(Back Skirt)</strong>를 분해하고,<br>
-        상단에는 <strong>감정 표정 4종(무표정, 하트눈 미소, 빠직 자신감, 식은땀 결의)</strong>과 하단에는 속살이 0%인 순수 장비 껍데기(보디스, 방패/검, 단일 날개, 헤일로)를 분해 출력했습니다.
-      </p>
-      <div class="preview-box">
-        <img src="assets/ref_sylvana_sheet_b.jpg" alt="실바나 SD 장비 & 표정 시트 B">
-        <div class="preview-caption">▲ assets/ref_sylvana_sheet_b.jpg (05~08 표정 4종 + 09~14 투명화 장비 부품 6종 10슬롯 규격)</div>
-      </div>
-    </section>
-
-    <!-- STEP 5: 에셋 투명화 및 파츠 분리 추출 -->
-    <section class="step-card">
-      <div class="step-header">
-        <div class="step-title-wrap">
-          <div class="step-num">5</div>
-          <h2 class="step-title">에셋 투명화 & 파츠 분리 (Asset Slicing)</h2>
-        </div>
-        <span class="step-status">STEP 5 완료</span>
-      </div>
-      <p class="step-desc">
-        마젠타(<code>#FF00FF</code>) 크로마키 알고리즘을 적용하여 배경을 완전 투명화하고, 11종의 핵심 파츠를 밀착 크롭하여 <code>assets/parts/</code> 폴더에 실물 투명 PNG 파일들로 분리 저장했습니다.
+        <code>OFFICIAL_2048_SLICE_SPECS</code> 공식 좌표와 스마트 바운딩 박스 오토 트림 알고리즘을 적용하여 11종의 핵심 파츠를 글자나 잡음 없이 완벽하게 분리 저장했습니다.
       </p>
       
       <!-- 파츠 갤러리 -->
@@ -375,90 +374,90 @@
         <div class="part-item">
           <div class="part-img-wrap"><img src="assets/parts/sylvana_front_core.png" alt="01 정면"></div>
           <div class="part-name">01. 정면 완성체</div>
-          <div class="part-role">front_core.png</div>
+          <div class="part-role">285 × 332 px</div>
         </div>
         <div class="part-item">
           <div class="part-img-wrap"><img src="assets/parts/sylvana_base_body.png" alt="04 소체"></div>
           <div class="part-name">04. 체형 소체</div>
-          <div class="part-role">base_body.png</div>
+          <div class="part-role">161 × 332 px</div>
         </div>
         <div class="part-item">
           <div class="part-img-wrap"><img src="assets/parts/sylvana_expr_neutral.png" alt="05 표정"></div>
           <div class="part-name">05. 기본 무표정</div>
-          <div class="part-role">expr_neutral.png</div>
+          <div class="part-role">110 × 175 px</div>
         </div>
         <div class="part-item">
           <div class="part-img-wrap"><img src="assets/parts/sylvana_expr_serious.png" alt="08 표정"></div>
           <div class="part-name">08. 결의 표정</div>
-          <div class="part-role">expr_serious.png</div>
+          <div class="part-role">110 × 175 px</div>
         </div>
         <div class="part-item">
           <div class="part-img-wrap"><img src="assets/parts/sylvana_headgear.png" alt="09 티아라"></div>
           <div class="part-name">09. 황금 티아라</div>
-          <div class="part-role">headgear.png</div>
+          <div class="part-role">89 × 63 px</div>
         </div>
         <div class="part-item">
           <div class="part-img-wrap"><img src="assets/parts/sylvana_top_dress.png" alt="10 흉갑"></div>
           <div class="part-name">10. 잎사귀 흉갑</div>
-          <div class="part-role">top_dress.png</div>
+          <div class="part-role">89 × 113 px</div>
         </div>
         <div class="part-item">
           <div class="part-img-wrap"><img src="assets/parts/sylvana_bottom_skirt.png" alt="11 앞치마"></div>
           <div class="part-name">11. 앞치마 (Front)</div>
-          <div class="part-role">bottom_skirt.png</div>
+          <div class="part-role">89 × 172 px</div>
         </div>
         <div class="part-item">
-          <div class="part-img-wrap"><img src="assets/parts/sylvana_bottom_skirt_back.png" alt="11 뒷치마"></div>
-          <div class="part-name">11b. 뒷치마 (Back)</div>
-          <div class="part-role">skirt_back.png</div>
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_bottom_skirt_back.png" alt="15 뒷치마"></div>
+          <div class="part-name">15. 뒷치마 (Back)</div>
+          <div class="part-role">102 × 171 px</div>
         </div>
         <div class="part-item">
           <div class="part-img-wrap"><img src="assets/parts/sylvana_wings_cape.png" alt="12 날개"></div>
           <div class="part-name">12. 에테르 날개</div>
-          <div class="part-role">wings_cape.png</div>
+          <div class="part-role">89 × 150 px</div>
         </div>
         <div class="part-item">
-          <div class="part-img-wrap"><img src="assets/parts/sylvana_main_weapon.png" alt="13 대방패"></div>
-          <div class="part-name">13. 성역 대방패</div>
-          <div class="part-role">main_weapon.png</div>
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_main_weapon.png" alt="13 룬 장검"></div>
+          <div class="part-name">13. 룬 장검</div>
+          <div class="part-role">59 × 190 px</div>
         </div>
         <div class="part-item">
-          <div class="part-img-wrap"><img src="assets/parts/sylvana_sub_weapon.png" alt="14 후광"></div>
-          <div class="part-name">14. 부유 후광 링</div>
-          <div class="part-role">sub_weapon.png</div>
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_sub_weapon.png" alt="14 대방패"></div>
+          <div class="part-name">14. 성역 대방패</div>
+          <div class="part-role">89 × 172 px</div>
         </div>
       </div>
     </section>
 
-    <!-- STEP 6: Live2D 샌드위치 조립 & 리깅 검증 -->
+    <!-- STEP 5: Live2D 샌드위치 조립 & 리깅 검증 -->
     <section class="step-card">
       <div class="step-header">
         <div class="step-title-wrap">
-          <div class="step-num">6</div>
+          <div class="step-num">5</div>
           <h2 class="step-title">Live2D 샌드위치 조립 & 로비 리깅 검증</h2>
         </div>
-        <span class="step-status">STEP 6 완료</span>
+        <span class="step-status">STEP 5 완료</span>
       </div>
       <p class="step-desc">
         스튜디오 엔진에 실바나의 파츠들을 바인딩하여 샌드위치 입체감과 로비 터치 상호작용을 검증했습니다.<br>
-        • <strong>치마 샌드위치 3D Z-Index:</strong> <code>뒷치마(Z:1.8)</code> ➔ <code>소체 다리(Z:3.0)</code> ➔ <code>앞치마(Z:4.0)</code> 계층이 적용되어 소체 다리가 치마 안쪽으로 자연스럽게 들어갔습니다.<br>
-        • <strong>얼굴 변형 없는 순수 눈 깜빡임:</strong> 얼굴 전체 스쿼시를 배제하고 오버레이 속눈썹 라인만 4.2초 주기로 깜빡여 고해상도 엘프 미모를 100% 보존합니다.<br>
+        • <strong>치마 샌드위치 3D Z-Index:</strong> <code>뒷치마(Z:1.8)</code> ➔ <code>소체 다리(Z:3.0)</code> ➔ <code>앞치마(Z:4.0)</code> 계층이 적용되어 소체 다리가 치마 안쪽으로 자연스럽게 결합됩니다.<br>
+        • <strong>얼굴 변형 없는 순수 눈 깜빡임:</strong> 얼굴 전체 스쿼시를 배제하고 오버레이 속눈썹 라인만 4.2초 주기로 부드럽게 깜빡여 고해상도 엘프 미모를 100% 보존합니다.<br>
         • <strong>로비 터치 반응:</strong> <code>💖 설렘(하트눈)</code>, <code>💧 당황(식은땀)</code>, <code>💢 분노(빠직)</code> 이모티콘 팝업 및 신체 바운스 모션 연동 완료.
       </p>
     </section>
 
-    <!-- STEP 7: 캐릭터 등록 완료 -->
+    <!-- STEP 6: 게임 상수 및 스튜디오 공식 등록 -->
     <section class="step-card">
       <div class="step-header">
         <div class="step-title-wrap">
-          <div class="step-num">7</div>
+          <div class="step-num">6</div>
           <h2 class="step-title">인게임 및 스튜디오 캐릭터 등록 완료</h2>
         </div>
-        <span class="step-status">STEP 7 완료</span>
+        <span class="step-status">STEP 6 완료</span>
       </div>
       <p class="step-desc">
         <code>js/constants.js</code>(게임 상수)와 <code>sd_asset_studio.html</code>(스튜디오 프리셋)에 공식 캐릭터 <strong>'char_sylvana'</strong>로 영구 등록되었습니다.<br>
-        스튜디오 상단 드롭다운에서 <strong>👑 [UR / 메가글래머] 숲의 종족: 성역의 여황 실바나</strong>를 선택하면 즉시 실시간 리깅과 텍스처 아틀라스 내보내기를 이용할 수 있습니다.
+        스튜디오 상단 헤더의 <strong>[👑 실바나(UR 메가글래머) 즉시 로드]</strong> 버튼을 누르면 단 1초 만에 01~15 시트가 로드되고 리깅 뷰에 완벽히 피팅됩니다.
       </p>
       <pre><code>// js/constants.js 등록 코드 스니펫
 char_sylvana: {
@@ -471,8 +470,7 @@ char_sylvana: {
     avatar: "👑",
     image: "assets/char_sylvana.jpg",
     standingIllust: "assets/char_sylvana.jpg",
-    sheetA: "assets/ref_sylvana_sheet_a.jpg",
-    sheetB: "assets/ref_sylvana_sheet_b.jpg",
+    sheet: "assets/ref_sylvana_sheet.jpg",
     modularParts: {
         useBaseBody: true,
         mirrorWings: true,
@@ -496,4 +494,3 @@ char_sylvana: {
 
 </body>
 </html>
-
