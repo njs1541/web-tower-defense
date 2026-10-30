@@ -862,8 +862,18 @@ function buildModularCharacterHtml(charId, options = {}) {
         const underwearHtml   = (useBase && mp.underwear)   ? `<img src="${mp.underwear}" class="mod-part-layer part-underwear" alt="속옷">` : '';
         const bottomSkirtHtml = (useBase && mp.bottomSkirt) ? `<img src="${mp.bottomSkirt}" class="mod-part-layer part-bottom" alt="하의">` : '';
         const topDressHtml    = (useBase && mp.topDress)    ? `<img src="${mp.topDress}" class="mod-part-layer part-top" alt="상의">` : '';
-        const exprNeutralHtml = (useBase && mp.exprNeutral) ? `<img src="${mp.exprNeutral}" class="mod-part-layer part-expr expr-neutral" alt="기본표정">` : '';
-        const exprSeriousHtml = (useBase && mp.exprSerious) ? `<img src="${mp.exprSerious}" class="mod-part-layer part-expr expr-serious" alt="공격표정">` : '';
+        
+        let exprCustomStyle = '';
+        if (mp.exprScale || mp.exprOffsetY || mp.exprOffsetX || mp.exprClipRx) {
+            const sc = mp.exprScale || 1.0;
+            const ox = mp.exprOffsetX || '0%';
+            const oy = mp.exprOffsetY || '0%';
+            const rx = mp.exprClipRx || '44%';
+            const ry = mp.exprClipRy || '40%';
+            exprCustomStyle = `style="width: calc(31% * ${sc}); height: calc(25.5% * ${sc}); left: calc(34.5% + ${ox}); top: calc(11% + ${oy}); clip-path: ellipse(${rx} ${ry} at 50% 48%);"`;
+        }
+        const exprNeutralHtml = (useBase && mp.exprNeutral) ? `<img src="${mp.exprNeutral}" class="mod-part-layer part-expr expr-neutral" ${exprCustomStyle} alt="기본표정">` : '';
+        const exprSeriousHtml = (useBase && mp.exprSerious) ? `<img src="${mp.exprSerious}" class="mod-part-layer part-expr expr-serious" ${exprCustomStyle} alt="공격표정">` : '';
         const haloHtml        = mp.headgear                 ? `<img src="${mp.headgear}" class="mod-part-layer part-halo" alt="헤일로/머리장식">` : '';
 
         // 13. 주무기 & 14. 보조무기

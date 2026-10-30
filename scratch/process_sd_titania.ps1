@@ -32,7 +32,7 @@ $sheetBmp.Save($sdSheetOutPath, [System.Drawing.Imaging.ImageFormat]::Jpeg)
 Write-Output "Saved cleaned SD sheet to $refOutPath"
 
 # 배경 제거 및 내부 갇힌 순백색 구멍(머리카락-목-팔 사이 흰색 여백) 투명화 함수
-function Extract-CleanPart($srcBmp, $rx, $ry, $rw, $rh, $outFile, $removeInnerWhitePockets = $true, $strictWingMode = $false) {
+function Extract-CleanPart($srcBmp, $rx, $ry, $rw, $rh, $outFile, $removeInnerWhitePockets = $true, $strictWingMode = $false, $isCostumePart = $false) {
     $cropX = $rx + 6
     $cropY = $ry + 42
     $cropW = $rw - 12
@@ -105,7 +105,9 @@ function Extract-CleanPart($srcBmp, $rx, $ry, $rw, $rh, $outFile, $removeInnerWh
                 if ($col.A -eq 0) { continue }
                 $max = [Math]::Max($col.R, [Math]::Max($col.G, $col.B))
                 $min = [Math]::Min($col.R, [Math]::Min($col.G, $col.B))
-                if ($min -ge 242 -and ($max - $min) -le 10) {
+                $pMinThresh = if ($isCostumePart) { 215 } else { 242 }
+                $pSatThresh = if ($isCostumePart) { 26 } else { 10 }
+                if ($min -ge $pMinThresh -and ($max - $min) -le $pSatThresh) {
                     # 연결된 순백색 컴포넌트 수집
                     $compPts = New-Object System.Collections.Generic.List[System.Drawing.Point]
                     $q2 = New-Object System.Collections.Generic.Queue[System.Drawing.Point]
@@ -125,7 +127,7 @@ function Extract-CleanPart($srcBmp, $rx, $ry, $rw, $rh, $outFile, $removeInnerWh
                                 if ($nc.A -gt 0) {
                                     $nmax = [Math]::Max($nc.R, [Math]::Max($nc.G, $nc.B))
                                     $nmin = [Math]::Min($nc.R, [Math]::Min($nc.G, $nc.B))
-                                    if ($nmin -ge 238 -and ($nmax - $nmin) -le 14) {
+                                    if ($nmin -ge ($pMinThresh - 8) -and ($nmax - $nmin) -le ($pSatThresh + 4)) {
                                         $compVisited[$nx, $ny] = $true
                                         $q2.Enqueue((New-Object System.Drawing.Point($nx, $ny)))
                                     }
@@ -133,10 +135,11 @@ function Extract-CleanPart($srcBmp, $rx, $ry, $rw, $rh, $outFile, $removeInnerWh
                             }
                         }
                     }
-                    # 눈동자 영역(상단 얼굴 중앙의 작은 흰자위/하이라이트) 및 하체 다리 피부 하이라이트(y > cropH*0.72) 보호
-                    $isEyeRegion = ($minY -ge ($cropH * 0.16) -and $maxY -le ($cropH * 0.44) -and $compPts.Count -lt 140)
-                    $isLowerLeg = ($minY -ge ($cropH * 0.70))
-                    if (-not $isEyeRegion -and -not $isLowerLeg -and $compPts.Count -ge 35) {
+                    # 의상/장신구 파츠(isCostumePart=true)는 눈동자가 없으므로 상의 홀터넥 안쪽 흰색 구멍 등을 100% 제거!
+                    $isEyeRegion = (-not $isCostumePart) -and ($minY -ge ($cropH * 0.16) -and $maxY -le ($cropH * 0.44) -and $compPts.Count -lt 140)
+                    $isLowerLeg = (-not $isCostumePart) -and ($minY -ge ($cropH * 0.70))
+                    $minPocketSize = if ($isCostumePart) { 5 } else { 35 }
+                    if (-not $isEyeRegion -and -not $isLowerLeg -and $compPts.Count -ge $minPocketSize) {
                         foreach ($pt in $compPts) {
                             $partBmp.SetPixel($pt.X, $pt.Y, [System.Drawing.Color]::FromArgb(0, 0, 0, 0))
                         }
@@ -191,11 +194,11 @@ Extract-CleanPart $sheetBmp 255  730 175 370 "$partsDir\titania_expr_smile.png" 
 Extract-CleanPart $sheetBmp 450  730 175 370 "$partsDir\titania_expr_confident.png" $true
 Extract-CleanPart $sheetBmp 645  730 175 370 "$partsDir\titania_expr_serious.png"   $true
 
-Extract-CleanPart $sheetBmp 880  730 145 370 "$partsDir\titania_headgear.png"     $true
-Extract-CleanPart $sheetBmp 1041 730 145 370 "$partsDir\titania_top_dress.png"    $true
-Extract-CleanPart $sheetBmp 1202 730 145 370 "$partsDir\titania_bottom_skirt.png" $true
-Extract-CleanPart $sheetBmp 1363 730 145 370 "$partsDir\titania_wings_cape.png"   $false $true
-Extract-CleanPart $sheetBmp 1524 730 145 370 "$partsDir\titania_main_weapon.png"  $true
+Extract-CleanPart $sheetBmp 880  730 145 370 "$partsDir\titania_headgear.png"     $true  $false $true
+Extract-CleanPart $sheetBmp 1041 730 145 370 "$partsDir\titania_top_dress.png"    $true  $false $true
+Extract-CleanPart $sheetBmp 1202 730 145 370 "$partsDir\titania_bottom_skirt.png" $true  $false $true
+Extract-CleanPart $sheetBmp 1363 730 145 370 "$partsDir\titania_wings_cape.png"   $false $true  $false
+Extract-CleanPart $sheetBmp 1524 730 145 370 "$partsDir\titania_main_weapon.png"  $true  $false $true
 
 $sheetBmp.Dispose()
 

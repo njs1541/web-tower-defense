@@ -4774,18 +4774,18 @@ button.selected {
 }
 .mod-part-layer.part-top {
   z-index: 5;
-  width: 19%;
-  height: 16.5%;
-  left: 40.5%;
-  top: 40.5%;
+  width: 21%;
+  height: 18%;
+  left: 39.5%;
+  top: 39.5%;
 }
 .mod-part-layer.part-expr {
   z-index: 6;
-  width: 54%;
-  height: 44.5%;
-  left: 23%;
-  top: 6%;
-  clip-path: ellipse(31% 27% at 50% 47%);
+  width: 31%;
+  height: 25.5%;
+  left: 34.5%;
+  top: 11%;
+  clip-path: ellipse(44% 40% at 50% 48%);
 }
 .mod-part-layer.part-expr.expr-serious {
   opacity: 0;
