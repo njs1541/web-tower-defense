@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌟 UR등급 메가글래머 실바나 - A to Z 전신원화부터 캐릭터 등록까지 풀 파이프라인 보고서</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #0f172a;
+      --border: rgba(255, 255, 255, 0.1);
+      --accent-purple: #c084fc;
+      --accent-emerald: #10b981;
+      --accent-sky: #38bdf8;
+      --accent-pink: #ec4899;
+      --accent-gold: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Pretendard', sans-serif;
+      line-height: 1.6;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    /* 헤더 */
+    .report-header {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(192, 132, 252, 0.15));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    .report-header::after {
+      content: "UR GENESIS";
+      position: absolute;
+      right: 20px;
+      bottom: -15px;
+      font-size: 80px;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.03);
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+    .badge-ur { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+    .badge-step { background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 14.5px;
+      margin-bottom: 18px;
+    }
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border: none;
+      color: #fff;
+    }
+    .btn-purple {
+      background: linear-gradient(135deg, #7c3aed, #c084fc);
+      border: none;
+      color: #fff;
+    }
+
+    /* 순차적 스텝 카드 */
+    .step-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 26px 30px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    .step-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .step-num {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #000;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+    .step-status {
+      font-size: 12px;
+      font-weight: 700;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: 9999px;
+    }
+
+    .step-desc {
+      font-size: 13.5px;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+
+    /* 이미지 프리뷰 그리드 */
+    .preview-box {
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+    .preview-box img {
+      max-width: 100%;
+      max-height: 480px;
+      border-radius: 8px;
+      object-fit: contain;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .preview-caption {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 10px;
+    }
+
+    /* 파츠 갤러리 */
+    .parts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .part-item {
+      background: #090d16;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      transition: transform 0.15s ease;
+    }
+    .part-item:hover {
+      transform: translateY(-2px);
+      border-color: #38bdf8;
+    }
+    .part-img-wrap {
+      width: 100%;
+      height: 110px;
+      background-image: linear-gradient(45deg, #1e293b 25%, transparent 25%), linear-gradient(-45deg, #1e293b 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1e293b 75%), linear-gradient(-45deg, transparent 75%, #1e293b 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    .part-img-wrap img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+    .part-name {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 2px;
+    }
+    .part-role {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+
+    /* 코드 블록 */
+    pre {
+      background: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 12px;
+      color: #a7f3d0;
+      overflow-x: auto;
+      font-family: Consolas, monospace;
+      margin-top: 10px;
+    }
+
+    .key-points {
+      background: rgba(56, 189, 248, 0.06);
+      border-left: 3px solid #38bdf8;
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    .key-points strong { color: #38bdf8; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- 상단 대시보드 헤더 -->
+    <header class="report-header">
+      <span class="badge badge-ur">UR GRADE • TRANSCENDENT FLORAL GUARDIAN</span>
+      <h1>🌟 성역의 여황 실바나 (Sylvana) A to Z 제작 완료 보고서</h1>
+      <p class="subtitle">숲의 종족 UR 등급 메가 글래머 체형 캐릭터 기획부터 8등신 전신 원화, SD 듀얼 규격 시트, Live2D 파츠 분리 및 게임 등록까지 전체 실무 공정</p>
+      <div class="nav-actions">
+        <a href="sd_all_in_one_hub.html" class="btn btn-primary">🎮 올인원 통합 스튜디오 열기</a>
+        <a href="sd_asset_studio.html" class="btn btn-purple">🎨 Live2D 에셋 스튜디오 열기</a>
+        <a href="visual_style_guide.html" class="btn">📑 프롬프트 가이드 열기</a>
+      </div>
+    </header>
+
+    <!-- STEP 1: 캐릭터 기획 및 스펙 선정 -->
+    <section class="step-card">
+      <div class="step-header">
+        <div class="step-title-wrap">
+          <div class="step-num">1</div>
+          <h2 class="step-title">캐릭터 기획 & 프롬프트 엔지니어링</h2>
+        </div>
+        <span class="step-status">STEP 1 완료</span>
+      </div>
+      <p class="step-desc">
+        타워디펜스 수호자 역할을 수행할 <strong>숲의 종족(Forest Folk) UR 등급</strong> 가디언 캐릭터로 기획되었습니다.<br>
+        상용 AI 안전 정책(Safety Filter)을 100% 준수하면서도 극적인 <strong>메가 글래머(Mega Glamour, F-H컵 / 6.8등신 황금비)</strong> 체형과 황금 잎사귀 갑주, 신목의 대방패를 갖추도록 정밀 설계되었습니다.
+      </p>
+      <div class="key-points">
+        <strong>🎨 핵심 스펙 명세:</strong><br>
+        • <strong>종족 & 귀:</strong> 숲의 종족 (긴 뾰족한 에메랄드 엘프 귀 영구 보존)<br>
+        • <strong>체형:</strong> 메가 글래머 (168cm, 6.8등신, F-H컵 바스트, 코르셋 슬림 웨이스트, 와이드 골반)<br>
+        • <strong>배경 키:</strong> 숲의 종족 전용 단색 마젠타 크로마키 (<code>#FF00FF</code> — 초록 잎사귀/의상 완벽 보존)<br>
+        • <strong>무기/장비:</strong> 세계수 룬 타워 대방패 & 에메랄드 인챈트 장검, 황금 티아라, 단일 날개
+      </div>
+    </section>
+
+    <!-- STEP 2: 8등신 전신 원화 생성 -->
+    <section class="step-card">
+      <div class="step-header">
+        <div class="step-title-wrap">
+          <div class="step-num">2</div>
+          <h2 class="step-title">8등신 전신 원화 (Full Standing) 생성</h2>
+        </div>
+        <span class="step-status">STEP 2 완료</span>
+      </div>
+      <p class="step-desc">
+        생성형 AI를 통해 머리부터 발끝(힐 샌들)까지 잘림 없이 온전히 프레임 안에 들어온 8등신 원화를 산출했습니다.<br>
+        단색 <code>#FF00FF</code> 마젠타 배경으로 렌더링되어 초록빛 에메랄드와 황금 장신구의 외곽선이 100% 선명하게 보존되었습니다.
+      </p>
+      <div class="preview-box">
+        <img src="assets/char_sylvana.jpg" alt="성역의 여황 실바나 8등신 전신 원화">
+        <div class="preview-caption">▲ assets/char_sylvana.jpg (UR 등급 메가글래머 전신 원화 • 마젠타 크로마키)</div>
+      </div>
+    </section>
+
+    <!-- STEP 3: SD 3면도 & 기본 소체 시트 A 생성 -->
+    <section class="step-card">
+      <div class="step-header">
+        <div class="step-title-wrap">
+          <div class="step-num">3</div>
+          <h2 class="step-title">SD 3면도 & 기본 소체 시트 (시트 A)</h2>
+        </div>
+        <span class="step-status">STEP 3 완료</span>
+      </div>
+      <p class="step-desc">
+        1단계 전신 원화를 참조 이미지로 사용하여 <strong>2.8등신 Chibi SD 비율</strong>로 변환했습니다.<br>
+        <strong>'01. 정면 본체'</strong>와 <strong>'04. 기본 체형 (소체)'</strong>의 시선, 각도, A-Pose가 1:1로 완벽히 일치하며, 옷을 벗긴 소체에서도 엘프 귀와 고유 체형이 그대로 보존되었습니다.
+      </p>
+      <div class="preview-box">
+        <img src="assets/ref_sylvana_sheet_a.jpg" alt="실바나 SD 3면도 & 소체 시트 A">
+        <div class="preview-caption">▲ assets/ref_sylvana_sheet_a.jpg (01 정면, 02 측면, 03 후면, 04 기본 체형 소체 4슬롯 규격)</div>
+      </div>
+    </section>
+
+    <!-- STEP 4: SD 모듈러 장비 & 표정 팩 시트 B 생성 -->
+    <section class="step-card">
+      <div class="step-header">
+        <div class="step-title-wrap">
+          <div class="step-num">4</div>
+          <h2 class="step-title">SD 모듈러 장비 & 표정 팩 시트 (시트 B)</h2>
+        </div>
+        <span class="step-status">STEP 4 완료</span>
+      </div>
+      <p class="step-desc">
+        Live2D 디자이너 피드백을 적용하여 <strong>앞치마(Front Skirt)</strong>와 <strong>뒷치마(Back Skirt)</strong>를 분해하고,<br>
+        상단에는 <strong>감정 표정 4종(무표정, 하트눈 미소, 빠직 자신감, 식은땀 결의)</strong>과 하단에는 속살이 0%인 순수 장비 껍데기(보디스, 방패/검, 단일 날개, 헤일로)를 분해 출력했습니다.
+      </p>
+      <div class="preview-box">
+        <img src="assets/ref_sylvana_sheet_b.jpg" alt="실바나 SD 장비 & 표정 시트 B">
+        <div class="preview-caption">▲ assets/ref_sylvana_sheet_b.jpg (05~08 표정 4종 + 09~14 투명화 장비 부품 6종 10슬롯 규격)</div>
+      </div>
+    </section>
+
+    <!-- STEP 5: 에셋 투명화 및 파츠 분리 추출 -->
+    <section class="step-card">
+      <div class="step-header">
+        <div class="step-title-wrap">
+          <div class="step-num">5</div>
+          <h2 class="step-title">에셋 투명화 & 파츠 분리 (Asset Slicing)</h2>
+        </div>
+        <span class="step-status">STEP 5 완료</span>
+      </div>
+      <p class="step-desc">
+        마젠타(<code>#FF00FF</code>) 크로마키 알고리즘을 적용하여 배경을 완전 투명화하고, 11종의 핵심 파츠를 밀착 크롭하여 <code>assets/parts/</code> 폴더에 실물 투명 PNG 파일들로 분리 저장했습니다.
+      </p>
+      
+      <!-- 파츠 갤러리 -->
+      <div class="parts-grid">
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_front_core.png" alt="01 정면"></div>
+          <div class="part-name">01. 정면 완성체</div>
+          <div class="part-role">front_core.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_base_body.png" alt="04 소체"></div>
+          <div class="part-name">04. 체형 소체</div>
+          <div class="part-role">base_body.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_expr_neutral.png" alt="05 표정"></div>
+          <div class="part-name">05. 기본 무표정</div>
+          <div class="part-role">expr_neutral.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_expr_serious.png" alt="08 표정"></div>
+          <div class="part-name">08. 결의 표정</div>
+          <div class="part-role">expr_serious.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_headgear.png" alt="09 티아라"></div>
+          <div class="part-name">09. 황금 티아라</div>
+          <div class="part-role">headgear.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_top_dress.png" alt="10 흉갑"></div>
+          <div class="part-name">10. 잎사귀 흉갑</div>
+          <div class="part-role">top_dress.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_bottom_skirt.png" alt="11 앞치마"></div>
+          <div class="part-name">11. 앞치마 (Front)</div>
+          <div class="part-role">bottom_skirt.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_bottom_skirt_back.png" alt="11 뒷치마"></div>
+          <div class="part-name">11b. 뒷치마 (Back)</div>
+          <div class="part-role">skirt_back.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_wings_cape.png" alt="12 날개"></div>
+          <div class="part-name">12. 에테르 날개</div>
+          <div class="part-role">wings_cape.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_main_weapon.png" alt="13 대방패"></div>
+          <div class="part-name">13. 성역 대방패</div>
+          <div class="part-role">main_weapon.png</div>
+        </div>
+        <div class="part-item">
+          <div class="part-img-wrap"><img src="assets/parts/sylvana_sub_weapon.png" alt="14 후광"></div>
+          <div class="part-name">14. 부유 후광 링</div>
+          <div class="part-role">sub_weapon.png</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 6: Live2D 샌드위치 조립 & 리깅 검증 -->
+    <section class="step-card">
+      <div class="step-header">
+        <div class="step-title-wrap">
+          <div class="step-num">6</div>
+          <h2 class="step-title">Live2D 샌드위치 조립 & 로비 리깅 검증</h2>
+        </div>
+        <span class="step-status">STEP 6 완료</span>
+      </div>
+      <p class="step-desc">
+        스튜디오 엔진에 실바나의 파츠들을 바인딩하여 샌드위치 입체감과 로비 터치 상호작용을 검증했습니다.<br>
+        • <strong>치마 샌드위치 3D Z-Index:</strong> <code>뒷치마(Z:1.8)</code> ➔ <code>소체 다리(Z:3.0)</code> ➔ <code>앞치마(Z:4.0)</code> 계층이 적용되어 소체 다리가 치마 안쪽으로 자연스럽게 들어갔습니다.<br>
+        • <strong>얼굴 변형 없는 순수 눈 깜빡임:</strong> 얼굴 전체 스쿼시를 배제하고 오버레이 속눈썹 라인만 4.2초 주기로 깜빡여 고해상도 엘프 미모를 100% 보존합니다.<br>
+        • <strong>로비 터치 반응:</strong> <code>💖 설렘(하트눈)</code>, <code>💧 당황(식은땀)</code>, <code>💢 분노(빠직)</code> 이모티콘 팝업 및 신체 바운스 모션 연동 완료.
+      </p>
+    </section>
+
+    <!-- STEP 7: 캐릭터 등록 완료 -->
+    <section class="step-card">
+      <div class="step-header">
+        <div class="step-title-wrap">
+          <div class="step-num">7</div>
+          <h2 class="step-title">인게임 및 스튜디오 캐릭터 등록 완료</h2>
+        </div>
+        <span class="step-status">STEP 7 완료</span>
+      </div>
+      <p class="step-desc">
+        <code>js/constants.js</code>(게임 상수)와 <code>sd_asset_studio.html</code>(스튜디오 프리셋)에 공식 캐릭터 <strong>'char_sylvana'</strong>로 영구 등록되었습니다.<br>
+        스튜디오 상단 드롭다운에서 <strong>👑 [UR / 메가글래머] 숲의 종족: 성역의 여황 실바나</strong>를 선택하면 즉시 실시간 리깅과 텍스처 아틀라스 내보내기를 이용할 수 있습니다.
+      </p>
+      <pre><code>// js/constants.js 등록 코드 스니펫
+char_sylvana: {
+    id: "char_sylvana",
+    name: "실바나",
+    title: "성역의 여황 (신록의 성소)",
+    grade: "UR",
+    element: "nature",
+    role: "guardian",
+    avatar: "👑",
+    image: "assets/char_sylvana.jpg",
+    standingIllust: "assets/char_sylvana.jpg",
+    sheetA: "assets/ref_sylvana_sheet_a.jpg",
+    sheetB: "assets/ref_sylvana_sheet_b.jpg",
+    modularParts: {
+        useBaseBody: true,
+        mirrorWings: true,
+        frontCore: "assets/parts/sylvana_front_core.png",
+        baseBody: "assets/parts/sylvana_base_body.png",
+        exprNeutral: "assets/parts/sylvana_expr_neutral.png",
+        exprSerious: "assets/parts/sylvana_expr_serious.png",
+        headgear: "assets/parts/sylvana_headgear.png",
+        topDress: "assets/parts/sylvana_top_dress.png",
+        bottomSkirt: "assets/parts/sylvana_bottom_skirt.png",
+        bottomSkirtBack: "assets/parts/sylvana_bottom_skirt_back.png", // Live2D 샌드위치 뒷치마
+        wingsCape: "assets/parts/sylvana_wings_cape.png",
+        mainWeapon: "assets/parts/sylvana_main_weapon.png",
+        subWeapon: "assets/parts/sylvana_sub_weapon.png",
+        underwear: null
+    }
+}</code></pre>
+    </section>
+
+  </div>
+
+</body>
+</html>
+

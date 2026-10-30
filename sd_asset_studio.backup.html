@@ -1,0 +1,3102 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎨 3종 아바타 소체 리깅 & 01~15 설정시트 파츠 스튜디오 — Tower Defense</title>
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-panel: #151c2c;
+      --bg-card: #1e293b;
+      --border-col: #334155;
+      --accent-purple: #a855f7;
+      --accent-gold: #eab308;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+
+      /* 🎯 05/08 표정 파츠 캘리브레이션 핏 변수 (표준 2.5~3.0등신 SD 소체 1:1 밀착 피팅) */
+      --expr-scale: 1.0;
+      --expr-offset-x: 0%;
+      --expr-offset-y: 0%;
+      --expr-clip-rx: 44%;
+      --expr-clip-ry: 40%;
+      --expr-clip-path: ellipse(var(--expr-clip-rx) var(--expr-clip-ry) at 50% 48%);
+      --expr-flip: 1;
+
+      /* 🎯 09~14 모듈러 장비/의상/무기 실시간 1:1 피팅 오프셋 및 좌우 반전 변수 */
+      --top-scale: 1.0;
+      --top-x: 0%;
+      --top-y: 0%;
+      --top-flip: 1;
+
+      --bottom-scale: 1.0;
+      --bottom-x: 0%;
+      --bottom-y: 0%;
+      --bottom-flip: 1;
+
+      --halo-scale: 1.0;
+      --halo-x: 0%;
+      --halo-y: 0%;
+      --halo-flip: 1;
+
+      --wings-scale: 1.0;
+      --wings-x: 0%;
+      --wings-y: 0%;
+      --wings-flip: 1;
+
+      --weapon-scale: 1.0;
+      --weapon-x: 0%;
+      --weapon-y: 0%;
+      --weapon-flip: 1;
+
+      --sub-scale: 1.0;
+      --sub-x: 0%;
+      --sub-y: 0%;
+      --sub-flip: 1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* 상단 헤더 */
+    .studio-header {
+      background: linear-gradient(90deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      border-bottom: 1px solid #334155;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .studio-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .studio-badge {
+      background: linear-gradient(135deg, #10b981, #3b82f6);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 4px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.5px;
+    }
+
+    .studio-header h1 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 900;
+      color: #f8fafc;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: #334155;
+      border-color: #94a3b8;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      border-color: #a855f7;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #6d28d9, #4f46e5);
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, #d97706, #eab308);
+      border-color: #fde047;
+      color: #0f172a;
+      font-weight: 900;
+    }
+
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #b45309, #ca8a04);
+      color: #fff;
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #059669, #10b981);
+      border-color: #34d399;
+      color: #ffffff;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #fca5a5;
+    }
+
+    /* 메인 레이아웃 */
+    .studio-container {
+      max-width: 1560px;
+      margin: 0 auto;
+      padding: 18px 22px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* 4단계 파이프라인 안내 배너 */
+    .pipeline-steps-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 1024px) {
+      .pipeline-steps-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .step-pill {
+      background: #151c2c;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .step-pill.active-step {
+      border-color: #38bdf8;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(168, 85, 247, 0.12));
+    }
+
+    .step-pill-title {
+      font-size: 12.5px;
+      font-weight: 900;
+      color: #fde047;
+    }
+
+    .step-pill-desc {
+      font-size: 11.5px;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+
+    /* 상단 설정 컨트롤 바 */
+    .control-bar {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-col);
+      border-radius: 14px;
+      padding: 12px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .control-group label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    select,
+    input[type="text"],
+    input[type="number"] {
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      accent-color: #a855f7;
+      cursor: pointer;
+      width: 105px;
+    }
+
+    /* 2단 그리드 */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 1180px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-col);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .panel-header h2 {
+      margin: 0;
+      font-size: 15.5px;
+      font-weight: 800;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 2대 메인 이미지 업로드 슬롯 (1. 전신 일러스트 / 2. 01~15 설정시트) */
+    .upload-slots-2col {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .upload-slots-2col {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .slot-card {
+      background: var(--bg-card);
+      border: 2px dashed #475569;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .slot-card.dragover {
+      border-color: #fde047;
+      background: rgba(168, 85, 247, 0.15);
+    }
+
+    .slot-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #e2e8f0;
+    }
+
+    .slot-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    /* 체커보드 투명 프리뷰 박스 */
+    .checkerboard-box {
+      width: 100%;
+      height: 225px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      background-color: #1e293b;
+      background-image:
+        linear-gradient(45deg, #0f172a 25%, transparent 25%),
+        linear-gradient(-45deg, #0f172a 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #0f172a 75%),
+        linear-gradient(-45deg, transparent 75%, #0f172a 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .checkerboard-box canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .slot-actions {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .slot-actions .btn {
+      flex: 1;
+      justify-content: center;
+      padding: 6px 8px;
+      font-size: 11.5px;
+    }
+
+    /* 실시간 3종 아바타 소체 리깅 시뮬레이터 */
+    .simulator-stages-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .sim-stage-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sim-stage-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #cbd5e1;
+    }
+
+    .sim-showcase-box {
+      width: 165px;
+      height: 165px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 50% 65%, rgba(168, 85, 247, 0.35), rgba(15, 23, 42, 0.95));
+      border: 2px solid #a855f7;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .sim-ingame-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 50px);
+      grid-template-rows: repeat(3, 50px);
+      gap: 3px;
+      background: #475569;
+      padding: 6px;
+      border-radius: 10px;
+      border: 2px solid #64748b;
+      cursor: pointer;
+    }
+
+    .sim-grid-cell {
+      width: 50px;
+      height: 50px;
+      background: rgba(254, 240, 138, 0.22);
+      box-shadow: inset 0 0 8px rgba(234, 179, 8, 0.3);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-size: 18px;
+    }
+
+    .sim-grid-cell.center-base {
+      background: linear-gradient(135deg, #fde047, #ca8a04);
+      border: 1.5px solid #fef08a;
+    }
+
+    /* 3종 공통 아바타 소체 리깅 컨테이너 (Tall / Standard / Petite 스케일 & 레이어 모션) */
+    .avatar-rig-stage {
+      position: relative;
+      width: 130px;
+      height: 145px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .avatar-rig-stage.in-tile {
+      width: 48px;
+      height: 48px;
+    }
+
+    /* 3종 아바타 체형별 비율 스케일 */
+    .avatar-rig-stage.rig-tall {
+      transform: scale(1.06, 1.10);
+    }
+
+    .avatar-rig-stage.rig-standard {
+      transform: scale(1.0, 1.0);
+    }
+
+    .avatar-rig-stage.rig-petite {
+      transform: scale(0.92, 0.88);
+    }
+
+    .avatar-rig-stage.facing-left {
+      transform: scaleX(-1);
+    }
+
+    .avatar-rig-stage.facing-left.rig-tall {
+      transform: scale(-1.06, 1.10);
+    }
+
+    .avatar-rig-stage.facing-left.rig-petite {
+      transform: scale(-0.92, 0.88);
+    }
+
+    /* 발밑 오라/그림자: 360도 프로펠러 회전을 제거하고 바닥 고정 수평 타원 맥동(Pulse)으로 수정 */
+    .rig-ground-aura {
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      width: 74%;
+      height: 16%;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(250, 204, 21, 0.48) 0%, rgba(168, 85, 247, 0.22) 60%, transparent 78%);
+      border: 1.5px solid rgba(253, 224, 71, 0.75);
+      box-shadow: 0 0 10px rgba(250, 204, 21, 0.35);
+      animation: studioAuraPulse 2.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .rig-layer {
+      position: absolute;
+      pointer-events: none;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.55));
+    }
+
+    /* 12. 등 날개/망토 레이어 (좌/우 대칭 장착 및 단일 장착 모두 지원) */
+    .rig-layer.layer-wings-single {
+      z-index: 1;
+      width: calc(95% * var(--wings-scale, 1.0));
+      height: calc(85% * var(--wings-scale, 1.0));
+      top: calc(6% + var(--wings-y, 0%));
+      left: calc(2.5% + var(--wings-x, 0%));
+      transform-origin: 50% 45%;
+      animation: rigWingsFlap 2.4s ease-in-out infinite;
+    }
+
+    .rig-layer.layer-wings-left {
+      z-index: 1;
+      width: calc(46% * var(--wings-scale, 1.0));
+      height: calc(64% * var(--wings-scale, 1.0));
+      top: calc(10% + var(--wings-y, 0%));
+      left: calc(2% + var(--wings-x, 0%));
+      transform-origin: 84% 48%;
+      animation: rigWingLeftFlap 2.4s ease-in-out infinite;
+    }
+
+    .rig-layer.layer-wings-right {
+      z-index: 1;
+      width: calc(46% * var(--wings-scale, 1.0));
+      height: calc(64% * var(--wings-scale, 1.0));
+      top: calc(10% + var(--wings-y, 0%));
+      left: calc(52% - var(--wings-x, 0%));
+      transform-origin: 16% 48%;
+      animation: rigWingRightFlap 2.4s ease-in-out infinite;
+    }
+
+    /*
+     * 🧍 신체 & 의상 & 표정 & 머리장식 일체형 동기화 그룹 (.rig-body-sync-group)
+     * 04.체형소체 + 15.속옷 + 11.하의 + 10.상의 + 05/08.표정 + 09.머리장식이
+     * 하나의 부모 컨테이너 안에서 호흡 및 공격 돌진 모션을 수행하여 단 1px도 따로 놀지 않음!
+     */
+    .rig-body-sync-group {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      transform-origin: 50% 85%;
+      animation: rigBodyBreathe 2.4s ease-in-out infinite;
+    }
+
+    /* 04. SD 체형 소체 (또는 01. SD 정면 본체) 레이어 */
+    .rig-layer.layer-core {
+      z-index: 2;
+      width: 84%;
+      height: 88%;
+      left: 8%;
+      top: 6%;
+    }
+
+    /* 15. 복장 : 속옷 레이어 (SD 소체 위, 상/하의 아래) */
+    .rig-layer.layer-underwear {
+      z-index: 3;
+      width: 22%;
+      height: 34%;
+      left: 39%;
+      top: 41%;
+    }
+
+    /* 11. 복장 : 하의 (SD 스커트/바지 - 골반~발목 장착) */
+    .rig-layer.layer-bottom {
+      z-index: 4;
+      width: calc(31% * var(--bottom-scale, 1.0));
+      height: calc(37.5% * var(--bottom-scale, 1.0));
+      left: calc(34.5% + var(--bottom-x, 0%));
+      top: calc(54.5% + var(--bottom-y, 0%));
+      transform-origin: 50% 10%;
+      transform: scaleX(var(--bottom-flip, 1));
+      animation: rigSkirtSway 2.4s ease-in-out infinite;
+    }
+
+    /* 10. 복장 : 상의 (SD 보디스/갑주 - 가슴~상체 장착) */
+    .rig-layer.layer-top {
+      z-index: 5;
+      width: calc(21% * var(--top-scale, 1.0));
+      height: calc(18% * var(--top-scale, 1.0));
+      left: calc(39.5% + var(--top-x, 0%));
+      top: calc(39.5% + var(--top-y, 0%));
+      transform: scaleX(var(--top-flip, 1));
+      transform-origin: 50% 50%;
+    }
+
+    /* 05. 기본 표정 & 08. 전투결의 표정 레이어 (SD 소체 얼굴 눈썹·눈·코·입 위치 정밀 마스킹 오버레이) */
+    .rig-layer.layer-expr {
+      z-index: 6;
+      width: calc(31% * var(--expr-scale, 1.0));
+      height: calc(25.5% * var(--expr-scale, 1.0));
+      left: calc(34.5% + var(--expr-offset-x, 0%));
+      top: calc(11% + var(--expr-offset-y, 0%));
+      clip-path: var(--expr-clip-path, ellipse(44% 40% at 50% 48%));
+      transform: scaleX(var(--expr-flip, 1));
+      transform-origin: 50% 50%;
+      filter: none;
+      transition: opacity 0.18s ease;
+    }
+
+    .rig-layer.layer-expr.mask-disabled {
+      clip-path: none !important;
+    }
+
+    .rig-layer.layer-expr.expr-serious {
+      opacity: 0;
+    }
+
+    /* 09. 머리장식/헤일로 레이어 (.rig-body-sync-group 내부에서 SD 머리에 고정되어 함께 움직임) */
+    .rig-layer.layer-halo {
+      z-index: 7;
+      width: calc(44% * var(--halo-scale, 1.0));
+      height: calc(24% * var(--halo-scale, 1.0));
+      left: calc(28% + var(--halo-x, 0%));
+      top: calc(1.5% + var(--halo-y, 0%));
+      transform: scaleX(var(--halo-flip, 1));
+      transform-origin: 50% 85%;
+    }
+
+    /* 13. 오른손 주무기 레이어 (캐릭터 좌측 외곽에 기본 배치) */
+    .rig-layer.layer-weapon {
+      z-index: 8;
+      width: calc(32% * var(--weapon-scale, 1.0));
+      height: calc(62% * var(--weapon-scale, 1.0));
+      left: calc(3% + var(--weapon-x, 0%));
+      top: calc(24% + var(--weapon-y, 0%));
+      transform-origin: 68% 72%;
+      animation: rigWeaponIdle 2.4s ease-in-out infinite;
+    }
+
+    /* 🏹 활(Bow) 전용 대기 및 조준 핏 */
+    .avatar-rig-stage.motion-bow .layer-weapon {
+      left: calc(6% + var(--weapon-x, 0%));
+      top: calc(22% + var(--weapon-y, 0%));
+      transform-origin: 50% 50%;
+      animation: rigWeaponBowIdle 2.4s ease-in-out infinite;
+    }
+
+    /* 🔫 석궁(Crossbow) 전용 대기 핏 */
+    .avatar-rig-stage.motion-crossbow .layer-weapon {
+      left: calc(5% + var(--weapon-x, 0%));
+      top: calc(24% + var(--weapon-y, 0%));
+      transform-origin: 50% 60%;
+      animation: rigWeaponCrossbowIdle 2.4s ease-in-out infinite;
+    }
+
+    /* 🪄 마법 지팡이(Staff/Orb) 전용 대기 핏 */
+    .avatar-rig-stage.motion-magic .layer-weapon {
+      animation: rigWeaponStaffIdle 2.4s ease-in-out infinite;
+    }
+
+    /* 14. 왼손 보조무기/구체 레이어 */
+    .rig-layer.layer-sub {
+      z-index: 9;
+      width: calc(32% * var(--sub-scale, 1.0));
+      height: calc(32% * var(--sub-scale, 1.0));
+      right: calc(-2% - var(--sub-x, 0%));
+      top: calc(24% + var(--sub-y, 0%));
+      animation: rigSubOrbit 2.4s ease-in-out infinite;
+    }
+
+    /* 공격 모션 활성화 시:
+     * 1) 신체 동기화 그룹(소체+속옷+하의+상의+표정+머리장식) 전체가 일체형으로 전방 체중 이동
+     * 2) 표정이 05.무표정 -> 08.전투결의 표정으로 즉시 전환
+     * 3) 주무기는 무기 타입(활, 석궁, 검, 마법)에 따라 전용 사격/베기 모션 실행!
+     */
+    .avatar-rig-stage.is-attacking .rig-body-sync-group {
+      animation: rigCoreAttackLunge 0.42s ease-out forwards;
+    }
+
+    .avatar-rig-stage.is-attacking .layer-expr.expr-neutral {
+      opacity: 0;
+    }
+
+    .avatar-rig-stage.is-attacking .layer-expr.expr-serious {
+      opacity: 1;
+    }
+
+    /* ⚔️ 근접 무기: 호쾌한 아웃워드 스윙 베기 */
+    .avatar-rig-stage.motion-sword.is-attacking .layer-weapon,
+    .avatar-rig-stage:not([class*="motion-"]).is-attacking .layer-weapon {
+      animation: rigWeaponSwingOutward 0.42s ease-out forwards;
+    }
+
+    /* 🏹 활(Bow): 전방 조준 ➡️ 시위 팽팽하게 인장 ➡️ 탕! 화살 발사 순간 강렬한 반동 & 섬광 */
+    .avatar-rig-stage.motion-bow.is-attacking .layer-weapon {
+      animation: rigWeaponBowShoot 0.48s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+    }
+
+    /* 🔫 석궁/총기: 신속한 조준 후 격발(Recoil Shot!) 반동 */
+    .avatar-rig-stage.motion-crossbow.is-attacking .layer-weapon {
+      animation: rigWeaponCrossbowShoot 0.38s ease-out forwards;
+    }
+
+    /* 🪄 마법 지팡이: 상공 영창 ➡️ 전방 마력 방출 */
+    .avatar-rig-stage.motion-magic.is-attacking .layer-weapon {
+      animation: rigWeaponMagicCast 0.46s ease-out forwards;
+    }
+
+    .avatar-rig-stage.is-attacking .layer-sub {
+      animation: rigSubCast 0.42s ease-out forwards;
+    }
+    }
+
+    .avatar-rig-stage.is-attacking .layer-wings-single {
+      animation: rigWingsBurst 0.42s ease-out forwards;
+    }
+
+    .avatar-rig-stage.is-attacking .layer-wings-left {
+      animation: rigWingLeftBurst 0.42s ease-out forwards;
+    }
+
+    .avatar-rig-stage.is-attacking .layer-wings-right {
+      animation: rigWingRightBurst 0.42s ease-out forwards;
+    }
+
+    @keyframes studioAuraPulse {
+
+      0%,
+      100% {
+        transform: translateX(-50%) scale(0.95, 0.95);
+        opacity: 0.75;
+      }
+
+      50% {
+        transform: translateX(-50%) scale(1.06, 1.04);
+        opacity: 1;
+      }
+    }
+
+    @keyframes rigBodyBreathe {
+
+      0%,
+      100% {
+        transform: translateY(0px) scaleY(1);
+      }
+
+      50% {
+        transform: translateY(-3px) scaleY(1.015);
+      }
+    }
+
+    @keyframes rigSkirtSway {
+      0%,
+      100% {
+        transform: scaleX(var(--bottom-flip, 1)) rotate(0deg);
+      }
+
+      50% {
+        transform: scaleX(calc(var(--bottom-flip, 1) * 1.02)) rotate(-0.8deg);
+      }
+    }
+
+    @keyframes rigWingsFlap {
+
+      0%,
+      100% {
+        transform: translateY(0px) scaleX(1);
+      }
+
+      50% {
+        transform: translateY(-3px) scaleX(1.07);
+      }
+    }
+
+    @keyframes rigWingLeftFlap {
+
+      0%,
+      100% {
+        transform: translateY(0px) scaleX(1) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-3px) scaleX(1.08) rotate(-5deg);
+      }
+    }
+
+    @keyframes rigWingRightFlap {
+
+      0%,
+      100% {
+        transform: translateY(0px) scaleX(1) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-3px) scaleX(1.08) rotate(5deg);
+      }
+    }
+
+    /* ⚔️ 근접 무기 대기 */
+    @keyframes rigWeaponIdle {
+      0%,
+      100% {
+        transform: scaleX(var(--weapon-flip, 1)) translateY(0px) rotate(-4deg);
+      }
+
+      50% {
+        transform: scaleX(var(--weapon-flip, 1)) translateY(-3px) rotate(-10deg);
+      }
+    }
+
+    /* 🏹 활(Bow) 전용 대기 애니메이션 */
+    @keyframes rigWeaponBowIdle {
+      0%, 100% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-6deg) translateY(0);
+      }
+      50% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-10deg) translateY(-2px);
+      }
+    }
+
+    /* 🔫 석궁(Crossbow) 전용 대기 애니메이션 */
+    @keyframes rigWeaponCrossbowIdle {
+      0%, 100% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-4deg) translateY(0);
+      }
+      50% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-8deg) translateY(-2px);
+      }
+    }
+
+    /* 🪄 마법 지팡이(Staff/Orb) 전용 대기 애니메이션 */
+    @keyframes rigWeaponStaffIdle {
+      0%, 100% {
+        transform: scaleX(var(--weapon-flip, 1)) translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: scaleX(var(--weapon-flip, 1)) translateY(-4px) rotate(4deg);
+      }
+    }
+
+    @keyframes rigSubOrbit {
+      0%,
+      100% {
+        transform: scaleX(var(--sub-flip, 1)) translate(0px, 0px) rotate(0deg);
+      }
+
+      50% {
+        transform: scaleX(var(--sub-flip, 1)) translate(2px, -4px) rotate(8deg);
+      }
+    }
+
+    /* 공격 시 신체+의상+표정+머리장식 일체형 그룹 모션 */
+    @keyframes rigCoreAttackLunge {
+      0% {
+        transform: translate(0px, 0px) rotate(0deg) scale(1);
+      }
+
+      25% {
+        transform: translate(3px, -2px) rotate(2deg) scale(1.03);
+      }
+
+      60% {
+        transform: translate(-6px, -3px) rotate(-3deg) scale(1.08);
+        filter: drop-shadow(0 0 8px rgba(253, 224, 71, 0.65));
+      }
+
+      100% {
+        transform: translate(0px, 0px) rotate(0deg) scale(1);
+      }
+    }
+
+    /* ⚔️ 주무기 베기: 캐릭터 반대편(바깥쪽 좌측 전방)을 향해 시원하게 내려침! */
+    @keyframes rigWeaponSwingOutward {
+      0% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-4deg) translate(0px, 0px) scale(1);
+      }
+
+      25% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(14deg) translate(2px, -6px) scale(1.08);
+      }
+
+      60% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-58deg) translate(-12px, 4px) scale(1.22);
+        filter: drop-shadow(0 0 12px #f43f5e);
+      }
+
+      100% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-4deg) translate(0px, 0px) scale(1);
+      }
+    }
+
+    /* 🏹 활(Bow) 전용 조준 & 사격 애니메이션 */
+    @keyframes rigWeaponBowShoot {
+      0% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-6deg) translate(0, 0) scale(1);
+      }
+      25% {
+        /* 시위를 뒤로 당기며 조준 (Aim & Tension) */
+        transform: scaleX(var(--weapon-flip, 1)) rotate(10deg) translate(-4px, -3px) scale(1.08);
+        filter: drop-shadow(0 0 8px #38bdf8);
+      }
+      50% {
+        /* 팽팽한 최대 인장 상태 */
+        transform: scaleX(var(--weapon-flip, 1)) rotate(16deg) translate(-6px, -5px) scale(1.12);
+        filter: drop-shadow(0 0 14px #60a5fa);
+      }
+      65% {
+        /* 🏹 화살 발사! (Release Snap & Recoil Flash!) */
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-28deg) translate(12px, 4px) scale(1.24);
+        filter: drop-shadow(0 0 20px #fde047) brightness(1.25);
+      }
+      85% {
+        /* 반동 흡수 */
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-12deg) translate(2px, 1px) scale(1.03);
+      }
+      100% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-6deg) translate(0, 0) scale(1);
+      }
+    }
+
+    /* 🔫 석궁(Crossbow) 전용 격발 & 반동 애니메이션 */
+    @keyframes rigWeaponCrossbowShoot {
+      0% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-4deg) translate(0, 0);
+      }
+      20% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-2deg) translate(-2px, -2px);
+      }
+      45% {
+        /* 탕! 격발 반동으로 총구가 위로 튀어오름 */
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-28deg) translate(-4px, -6px) scale(1.16);
+        filter: drop-shadow(0 0 16px #f59e0b) brightness(1.25);
+      }
+      75% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-10deg) translate(1px, -1px);
+      }
+      100% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-4deg) translate(0, 0);
+      }
+    }
+
+    /* 🪄 마법 지팡이 전용 집중 영창 & 방출 애니메이션 */
+    @keyframes rigWeaponMagicCast {
+      0% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(0deg) translate(0, 0);
+      }
+      35% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(24deg) translate(-4px, -12px) scale(1.15);
+        filter: drop-shadow(0 0 16px #a855f7);
+      }
+      65% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(-35deg) translate(8px, 6px) scale(1.25);
+        filter: drop-shadow(0 0 24px #38bdf8) brightness(1.3);
+      }
+      100% {
+        transform: scaleX(var(--weapon-flip, 1)) rotate(0deg) translate(0, 0);
+      }
+    }
+
+    @keyframes rigSubCast {
+      0% {
+        transform: scaleX(var(--sub-flip, 1)) translate(0px, 0px) scale(1);
+      }
+
+      25% {
+        transform: scaleX(var(--sub-flip, 1)) translate(2px, -3px) scale(1.05);
+      }
+
+      60% {
+        transform: scaleX(var(--sub-flip, 1)) translate(8px, -8px) scale(1.3) rotate(18deg);
+        filter: drop-shadow(0 0 12px #38bdf8);
+      }
+
+      100% {
+        transform: scaleX(var(--sub-flip, 1)) translate(0px, 0px) scale(1);
+      }
+    }
+
+    @keyframes rigWingsBurst {
+      0% {
+        transform: translate(0px, 0px) scale(1);
+      }
+
+      25% {
+        transform: translate(3px, -2px) scale(0.96, 1.02);
+      }
+
+      60% {
+        transform: translate(-5px, -3px) scale(1.18, 1.12);
+        filter: drop-shadow(0 0 10px #c084fc);
+      }
+
+      100% {
+        transform: translate(0px, 0px) scale(1);
+      }
+    }
+
+    @keyframes rigWingLeftBurst {
+      0% {
+        transform: scale(1) rotate(0deg);
+      }
+
+      25% {
+        transform: scale(0.92, 1.02) rotate(6deg);
+      }
+
+      60% {
+        transform: scale(1.22, 1.12) rotate(-12deg);
+        filter: drop-shadow(0 0 10px #4ade80);
+      }
+
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    @keyframes rigWingRightBurst {
+      0% {
+        transform: scale(1) rotate(0deg);
+      }
+
+      25% {
+        transform: scale(0.92, 1.02) rotate(-6deg);
+      }
+
+      60% {
+        transform: scale(1.22, 1.12) rotate(12deg);
+        filter: drop-shadow(0 0 10px #4ade80);
+      }
+
+      100% {
+        transform: scale(1) rotate(0deg);
+      }
+    }
+
+    /* STEP 4. 01~15 고정 좌표 파츠 슬라이서 그리드 */
+    .slicer-layout {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 1180px) {
+      .slicer-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .parts-preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 10px;
+      max-height: 540px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .part-slice-card {
+      background: #0f172a;
+      border: 1.5px solid #334155;
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .part-slice-card.active {
+      border-color: #fde047;
+      box-shadow: 0 0 12px rgba(250, 204, 21, 0.25);
+    }
+
+    /* 미보유/미착용 ('없음') 상태 스타일 */
+    .part-slice-card.is-absent {
+      border-color: #475569;
+      background: rgba(15, 23, 42, 0.55);
+    }
+
+    .part-slice-thumb {
+      width: 100%;
+      height: 92px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .part-slice-thumb canvas {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .absent-overlay-badge {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.86);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: #f87171;
+      font-weight: 900;
+      font-size: 13px;
+      text-align: center;
+      border: 1px dashed rgba(248, 113, 113, 0.5);
+      border-radius: 6px;
+    }
+
+    .part-slice-card.is-absent .absent-overlay-badge {
+      display: flex;
+    }
+
+    .code-area {
+      width: 100%;
+      min-height: 180px;
+      background: #090d16;
+      color: #a5f3fc;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- 상단 헤더 -->
+  <header class="studio-header">
+    <div class="studio-title-group">
+      <span class="studio-badge">v0.40.2 RIGGING PIPELINE</span>
+      <h1>🎨 3종 공통 아바타 소체 리깅 & 01~15 설정시트 파츠 스튜디오</h1>
+    </div>
+    <div class="header-actions">
+      <a href="visual_style_guide.html#generator" class="btn btn-green">📐 1~2단계: 전신 원화 & 설정시트 프롬프트 생성기</a>
+      <button class="btn btn-gold" onclick="loadSampleCharacter('char_titania')">🌲 티타니아(숲 U · '없음' 테스트) 샘플 로드</button>
+      <button class="btn btn-primary" onclick="loadSampleCharacter('char_lumina')">🌌 루미나(인간 U · 전체보유) 샘플 로드</button>
+      <a href="index.html" class="btn">🏰 게임 본편으로 이동</a>
+    </div>
+  </header>
+
+  <main class="studio-container">
+
+    <!-- 4단계 표준 진행 플로우 안내 바 -->
+    <section class="pipeline-steps-bar">
+      <div class="step-pill">
+        <span class="step-pill-title">STEP 1. 캐릭터 전신 일러스트 생성</span>
+        <span class="step-pill-desc"><code>visual_style_guide.html</code>에서 [⬜ 배경 제거 에셋 모드]로 순백 배경 전신 일러스트 생성</span>
+      </div>
+      <div class="step-pill">
+        <span class="step-pill-title">STEP 2. 소체 리깅용 설정 시트 생성</span>
+        <span class="step-pill-desc"><code>model_sheet_template(2048×1152)</code> + 1번 전신 일러스트를 첨부해 01~15 설정 시트 출력 (없는
+          파츠는 '없음' 표기)</span>
+      </div>
+      <div class="step-pill active-step">
+        <span class="step-pill-title">STEP 3. 전신 & 설정시트 배경 자동 투명화</span>
+        <span class="step-pill-desc">아래 좌측 슬롯에 1번 전신 원화와 2번 설정 시트를 넣으면 테두리선/라벨바 제거 + 배경 자동 투명화</span>
+      </div>
+      <div class="step-pill active-step">
+        <span class="step-pill-title">STEP 4. 파츠 자동 분리 & 미착용('없음') 처리</span>
+        <span class="step-pill-desc">01~15번 슬롯 고정 좌표로 자동 슬라이싱하며, 없는 파츠(보조무기/속옷/헤일로 등)는 '없음'으로 자동/수동 표시</span>
+      </div>
+    </section>
+
+    <!-- 캐릭터 식별자 & 3종 아바타 소체 규격 & 투명화 컨트롤 바 -->
+    <section class="control-bar">
+      <div class="control-group">
+        <label>대상 지휘관 프리셋:</label>
+        <select id="preset-char-select" onchange="onSelectCharacterPreset()">
+          <option value="char_ranger" selected>🏹 핑크 레인저 (UR - 인간족 / 활&석궁 듀얼 시트 2-A/2-B)</option>
+          <option value="char_titania">🌲 티타니아 (U - 숲의 종족 / 창세 생명신 · TALL 소체 · 보조무기/속옷 '없음' 테스트)</option>
+          <option value="char_lumina">🌌 루미나 (U - 인간족 / 성간의 지배자 · STANDARD 소체)</option>
+          <option value="char_seraphina">✨ 세라피나 (UR - 인간족 / 성스러운 대사제)</option>
+          <option value="char_veronica">👑 베로니카 (UR - 인간족 / 홍련의 총사령관)</option>
+          <option value="char_aurelia">🛡️ 아우렐리아 (SR - 인간족 / 태양의 성기사장)</option>
+          <option value="char_selena">❄️ 셀레나 (SR - 인간족 / 빙하의 저격공주)</option>
+          <option value="char_eleanor">⚡ 엘레노어 (SR - 인간족 / 폭풍의 대마도사)</option>
+          <option value="char_scarlet">💣 스칼렛 (SR - 인간족 / 비전 폭파술사)</option>
+          <option value="char_liana">🛡️ 리아나 (C - 인간족 / 견습 성기사)</option>
+          <option value="custom">➕ 직접 입력 (신규 캐릭터)</option>
+        </select>
+
+        <label>파일 식별자(Slug):</label>
+        <input type="text" id="asset-slug-input" value="titania" style="width: 105px;"
+          oninput="updateGeneratedCode()" />
+
+        <label>3종 공통 아바타 소체:</label>
+        <select id="sel-avatar-rig" onchange="onChangeAvatarRigType()">
+          <option value="tall" selected>TALL (장신 아바타 소체 - 숲/슬렌더)</option>
+          <option value="standard">STANDARD (표준 아바타 소체 - 인간/수인)</option>
+          <option value="petite">PETITE (단신 아바타 소체 - 땅/비행)</option>
+        </select>
+      </div>
+
+      <div class="control-group"
+        style="width: 100%; border-top: 1px solid #1e293b; padding-top: 10px; justify-content: space-between;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label title="크로마키(#00FF00/#FF00FF/#0000FF) 또는 순백색(#FFFFFF) 배경 분리 방식">🎨 배경 제거 엔진:</label>
+          <select id="sel-chroma-mode" onchange="onChromaModeChange()">
+            <option value="auto" selected>⚡ 자동 감지 (크로마키 #00FF00·#FF00FF·#0000FF & 순백색 하이브리드)</option>
+            <option value="green">🟩 네온 그린 (#00FF00 — 유클리드 전역 색차 + 그린 스필 억제)</option>
+            <option value="magenta">🟪 마젠타 (#FF00FF — 숲의 종족/초록 의상 보호 전용)</option>
+            <option value="blue">🟦 네온 블루 (#0000FF — 유클리드 전역 색차)</option>
+            <option value="white">⬜ 순백색 (#FFFFFF — 외곽 Flood-Fill + 의상 내부 구멍 제거)</option>
+            <option value="custom">🎯 수동 듀얼 크로마키 (주 색상 1 + 보조 색상 2 직접 지정)</option>
+          </select>
+
+          <span id="custom-chroma-pickers"
+            style="display: none; align-items: center; gap: 6px; background: #0f172a; padding: 3px 8px; border-radius: 6px; border: 1px solid #334155;">
+            <label style="font-size: 11.5px;">키1:</label>
+            <input type="color" id="inp-chroma-key1" value="#00ff00" onchange="reprocessAll()"
+              style="width: 26px; height: 22px; border: none; background: none; cursor: pointer;" />
+            <label style="font-size: 11.5px; display: inline-flex; align-items: center; gap: 3px; cursor: pointer;">
+              <input type="checkbox" id="chk-chroma-key2" onchange="reprocessAll()" />키2:
+            </label>
+            <input type="color" id="inp-chroma-key2" value="#559954" onchange="reprocessAll()"
+              style="width: 26px; height: 22px; border: none; background: none; cursor: pointer;" />
+          </span>
+
+          <label title="크로마키 유클리드 색차 허용 반경 (기본 70)">크로마키 허용치(Tol): <span id="lbl-chroma-tol"
+              style="color:#4ade80;">70</span></label>
+          <input type="range" id="rng-chroma-tol" min="15" max="150" value="70" oninput="onAlphaParamChange()"
+            style="width: 85px; accent-color: #10b981;" />
+
+          <label title="순백색 배경 모드일 때 밝기 임계값">화이트 임계값: <span id="lbl-threshold" style="color:#fde047;">234</span></label>
+          <input type="range" id="rng-threshold" min="180" max="252" value="234" oninput="onAlphaParamChange()"
+            style="width: 80px;" />
+
+          <label title="테두리 계단 현상을 부드럽게 다듬는 안티앨리어싱 강도">페더링: <span id="lbl-feather"
+              style="color:#fde047;">20</span></label>
+          <input type="range" id="rng-feather" min="0" max="60" value="20" oninput="onAlphaParamChange()"
+            style="width: 75px;" />
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <label
+            style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #86efac; cursor: pointer;"
+            title="외곽선 픽셀에 반사된 초록/마젠타/블루 색 번짐(Spill)을 자동으로 중화합니다">
+            <input type="checkbox" id="chk-despill" checked onchange="reprocessAll()" style="accent-color: #10b981;" />✨
+            색 번짐 억제(Despill)
+          </label>
+          <label
+            style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #93c5fd; cursor: pointer;"
+            title="AI 생성 이미지 우측 하단(65x28) 워터마크를 자동 제거합니다">
+            <input type="checkbox" id="chk-watermark" checked onchange="reprocessAll()"
+              style="accent-color: #38bdf8;" />🧹 우측하단 워터마크 제거
+          </label>
+          <select id="sel-preview-bg" onchange="onChangePreviewBg()" title="누끼 테두리 잔상을 검수하기 위한 슬롯 배경색 전환">
+            <option value="checker" selected>🏁 검수배경: 투명 격자</option>
+            <option value="dark">🌑 검수배경: 다크 (#0f172a)</option>
+            <option value="light">🌕 검수배경: 라이트 (#f8fafc)</option>
+            <option value="green">🟩 검수배경: 네온그린</option>
+          </select>
+          <button class="btn btn-primary" onclick="reprocessAll()">✨ 투명화 & 파츠 분리 재실행</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 상단 메인 그리드: 좌측 STEP 3 업로드/투명화 & 우측 3종 아바타 소체 리깅 시뮬레이터 -->
+    <div class="main-grid">
+
+      <!-- 좌측: 1번 전신 일러스트 + 2번 01~15 설정시트 업로드 및 자동 투명화 -->
+      <div class="panel-box">
+        <div class="panel-header">
+          <h2>🖼️ STEP 3. 전신 일러스트(1번) & 설정 시트(2번) 넣기 & 배경 자동 투명화</h2>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-gold" onclick="downloadStandingAndSheetPng()">📦 전신 + 설정시트 투명 PNG 저장</button>
+          </div>
+        </div>
+        <div style="font-size: 12px; color: #94a3b8; line-height: 1.45;">
+          💡 <strong>① 전신 일러스트</strong>와 <strong>② 01~15 설정 시트</strong>를 드래그 앤 드롭하세요. 설정 시트는
+          <code>model_sheet_template</code>의 회색 테두리선과 상단 한글 라벨 바(38px)를 자동으로 도려낸 뒤 각 슬롯 내부 배경을 개별 투명화합니다!
+        </div>
+
+        <div style="font-size: 12px; color: #94a3b8; line-height: 1.45; margin-bottom: 10px;">
+          💡 <strong>[듀얼 시트 모드 지원]</strong> 15개 슬롯을 한 장에 넣는 기존 방식뿐만 아니라, 해상도와 품질을 2.5배 높이고 팔다리 침범을 방지하는 <strong>[시트 A: 소체 4슬롯] + [시트 B: 장비 10슬롯]</strong> 분할 생성을 완벽 지원합니다!
+        </div>
+
+        <!-- 듀얼 시트 vs 단일 시트 선택 탭 바 -->
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+          <button type="button" id="tab-btn-dual-sheet" class="btn btn-gold" style="font-weight: 800; font-size: 12px; padding: 6px 14px;" onclick="switchSheetUploadMode('dual')">
+            ⭐ 듀얼 시트 모드 (시트 A: 소체 + 시트 B: 장비 권장)
+          </button>
+          <button type="button" id="tab-btn-single-sheet" class="btn" style="font-size: 12px; padding: 6px 14px;" onclick="switchSheetUploadMode('single')">
+            📑 단일 시트 모드 (기존 01~15 슬롯 1장 통합)
+          </button>
+        </div>
+
+        <!-- 1) 듀얼 시트 업로드 컨테이너 -->
+        <div id="container-upload-dual" class="upload-slots-2col" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+          <!-- 슬롯 1: 1단계 전신 일러스트 -->
+          <div class="slot-card" id="drop-standing" ondragover="handleDragOver(event, 'standing')"
+            ondragleave="handleDragLeave(event, 'standing')" ondrop="handleDrop(event, 'standing')">
+            <div class="slot-title">① 전신 원화 (1단계)</div>
+            <div class="slot-sub">외곽 배경 자동 투명화 (<code>char_이름.png</code>)</div>
+            <div class="checkerboard-box" onclick="triggerFileSelect('standing')" style="height: 140px;" title="클릭하여 1단계 전신 일러스트 선택">
+              <canvas id="canvas-standing" width="600" height="800"></canvas>
+            </div>
+            <input type="file" id="file-standing" accept="image/*" style="display:none"
+              onchange="handleFileInput(event, 'standing')" />
+            <div class="slot-actions">
+              <button class="btn" onclick="triggerFileSelect('standing')">📂 원화 선택</button>
+              <button class="btn btn-primary" onclick="downloadSlotPng('standing')">📥 원화 저장</button>
+            </div>
+          </div>
+
+          <!-- 슬롯 2-A: 시트 A (SD 3면도 & 기본 소체 4슬롯 초대형 뷰) -->
+          <div class="slot-card" id="drop-sheet-a" ondragover="handleDragOver(event, 'sheetA')"
+            ondragleave="handleDragLeave(event, 'sheetA')" ondrop="handleDrop(event, 'sheetA')">
+            <div class="slot-title" style="color: #38bdf8;">②-A. 소체 시트 A (4슬롯)</div>
+            <div class="slot-sub">01.정면 + 04.기본소체 (초고해상도 2.5배)</div>
+            <div class="checkerboard-box" onclick="triggerFileSelect('sheetA')" style="height: 140px;" title="클릭하여 시트 A 선택">
+              <canvas id="canvas-sheet-a" width="1024" height="576"></canvas>
+            </div>
+            <input type="file" id="file-sheetA" accept="image/*" style="display:none"
+              onchange="handleFileInput(event, 'sheetA')" />
+            <div class="slot-actions">
+              <button class="btn" onclick="triggerFileSelect('sheetA')">📂 시트 A 선택</button>
+              <button class="btn btn-primary" onclick="downloadSlotPng('sheetA')">📥 시트 A 저장</button>
+            </div>
+          </div>
+
+          <!-- 슬롯 2-B: 시트 B (모듈러 장비 & 표정 10슬롯 와이드 뷰) -->
+          <div class="slot-card" id="drop-sheet-b" ondragover="handleDragOver(event, 'sheetB')"
+            ondragleave="handleDragLeave(event, 'sheetB')" ondrop="handleDrop(event, 'sheetB')">
+            <div class="slot-title" style="color: #ec4899;">②-B. 장비 시트 B (10슬롯)</div>
+            <div class="slot-sub">05~08 표정 + 09~14 투명의상/1짝날개/무기</div>
+            <div class="checkerboard-box" onclick="triggerFileSelect('sheetB')" style="height: 140px;" title="클릭하여 시트 B 선택">
+              <canvas id="canvas-sheet-b" width="1024" height="576"></canvas>
+            </div>
+            <input type="file" id="file-sheetB" accept="image/*" style="display:none"
+              onchange="handleFileInput(event, 'sheetB')" />
+            <div class="slot-actions">
+              <button class="btn" onclick="triggerFileSelect('sheetB')">📂 시트 B 선택</button>
+              <button class="btn btn-primary" onclick="downloadSlotPng('sheetB')">📥 시트 B 저장</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2) 단일 시트 업로드 컨테이너 (기존 15슬롯 호환용) -->
+        <div id="container-upload-single" class="upload-slots-2col" style="display: none;">
+          <div class="slot-card" id="drop-standing-legacy" ondragover="handleDragOver(event, 'standing')"
+            ondragleave="handleDragLeave(event, 'standing')" ondrop="handleDrop(event, 'standing')">
+            <div class="slot-title">① 캐릭터 전신 일러스트 (1단계 출력물)</div>
+            <div class="slot-sub">외곽 순백 배경 자동 투명화 (<code>char_이름.png</code>)</div>
+            <div class="checkerboard-box" onclick="triggerFileSelect('standing')" title="클릭하여 1단계 전신 일러스트 선택">
+              <canvas id="canvas-standing-legacy" width="600" height="800"></canvas>
+            </div>
+            <div class="slot-actions">
+              <button class="btn" onclick="triggerFileSelect('standing')">📂 전신 원화 선택</button>
+              <button class="btn btn-primary" onclick="downloadSlotPng('standing')">📥 투명 PNG 저장</button>
+            </div>
+          </div>
+
+          <div class="slot-card" id="drop-sheet" ondragover="handleDragOver(event, 'sheet')"
+            ondragleave="handleDragLeave(event, 'sheet')" ondrop="handleDrop(event, 'sheet')">
+            <div class="slot-title">② 소체 리깅용 01~15 설정 시트 (2단계 출력물)</div>
+            <div class="slot-sub">2048×1152 규격 틀 기반 15개 슬롯 자동 크롭 & 배경 투명화</div>
+            <div class="checkerboard-box" onclick="triggerFileSelect('sheet')" title="클릭하여 2단계 설정 시트 선택">
+              <canvas id="canvas-sheet" width="1024" height="576"></canvas>
+            </div>
+            <input type="file" id="file-sheet" accept="image/*" style="display:none"
+              onchange="handleFileInput(event, 'sheet')" />
+            <div class="slot-actions">
+              <button class="btn" onclick="triggerFileSelect('sheet')">📂 설정 시트 선택</button>
+              <button class="btn btn-primary" onclick="downloadSlotPng('sheet')">📥 시트 PNG 저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측: 3종 공통 아바타 소체 실시간 파츠 리깅 시뮬레이터 -->
+      <div class="panel-box">
+        <div class="panel-header">
+          <h2>⚔️ 3종 아바타 소체 & 전 파츠(소체·표정·상의·하의·헤일로·날개·무기) 리깅 시뮬레이터</h2>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+            <button class="btn btn-gold" onclick="toggleCoreSource()" id="btn-core-source"
+              title="04.체형소체 위에 상의·하의·속옷·표정·머리장식을 입히는 전 파츠 조립 모드와 01.정면본체 모드를 전환합니다">🧩 모드: 04.소체+전파츠 조립</button>
+            <button class="btn" onclick="toggleWingMirrorMode()" id="btn-wing-mirror"
+              title="12번 날개 파츠가 1짝일 때 좌우 대칭(2장)으로 달지, 단일(1장)로 달지 전환합니다">🦋 날개: 좌우대칭(2장)</button>
+            <button class="btn" onclick="toggleSimFacing()">↔ 전신 좌우반전</button>
+            <div style="display: inline-flex; align-items: center; gap: 4px; background: rgba(30, 41, 59, 0.9); padding: 3px 8px; border-radius: 6px; border: 1px solid #0284c7;">
+              <span style="font-size: 11px; color: #7dd3fc; font-weight: 700;">🏹 모션:</span>
+              <select id="sel-attack-motion-type" onchange="onChangeAttackMotionType()"
+                style="background: #0f172a; color: #fde047; font-weight: 800; border: 1px solid #38bdf8; border-radius: 4px; padding: 2px 6px; font-size: 11px; cursor: pointer;">
+                <option value="bow" selected>🏹 활 조준 사격 (Bow Sniping)</option>
+                <option value="crossbow">🔫 석궁 반동 격발 (Crossbow Kick)</option>
+                <option value="sword">⚔️ 근접 무기 베기 (Melee Slash)</option>
+                <option value="magic">🪄 마법 영창 방출 (Magic Cast)</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="triggerSimAttack()">⚔️ 공격 모션</button>
+            <button class="btn" id="btn-auto-loop" onclick="toggleAutoAttackLoop()">🔁 자동공격: OFF</button>
+          </div>
+        </div>
+
+        <div style="font-size: 12px; color: #94a3b8; line-height: 1.45;">
+          💡 설정 시트에서 분리된 <strong>체형소체(04) + 속옷(15) + 하의(11) + 상의(10) + 표정(05 대기 / 08 공격전환) + 머리장식(09) + 날개/망토(12) +
+            주무기(13) + 보조무기(14)</strong> 전 파츠가 다층 레이어로 실시간 조립됩니다! 아래 STEP 4에서 상의·하의·머리장식 등을
+          <strong><code>[🚫 없음]</code></strong>으로 바꾸면 리깅 뷰에서도 즉시 탈의/해제됩니다.
+        </div>
+
+        <!-- 🎯 전 파츠(표정·상의·하의·헤일로·날개·무기) 실시간 1:1 피팅 튜닝 패널 -->
+        <div class="part-tuning-panel"
+          style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(59, 130, 246, 0.45); border-radius: 8px; padding: 10px 14px; margin-top: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+          <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-weight: 800; font-size: 13px; color: #60a5fa;">🎯 파츠 피팅 조절기:</span>
+              <select id="sel-tuning-target" class="gen-select" onchange="onSwitchTuningTarget()"
+                style="background: #1e293b; color: #fde047; font-weight: 800; border: 1px solid #3b82f6; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer;">
+                <option value="expr" selected>05/08. 표정 파츠 (Facial Expression)</option>
+                <option value="top">10. 복장 : 상의 (Top Chestplate)</option>
+                <option value="bottom">11. 복장 : 하의 (Bottom Skirt / Panties)</option>
+                <option value="halo">09. 머리장식 / 헤일로 (Headgear / Halo)</option>
+                <option value="wings">12. 날개 / 망토 (Wings / Cape)</option>
+                <option value="weapon">13. 주무기 (Main Weapon)</option>
+                <option value="sub">14. 보조무기 (Sub Weapon / Crossbow)</option>
+              </select>
+              <span id="badge-part-status"
+                style="font-size: 10px; background: #1e3a8a; color: #93c5fd; padding: 2px 6px; border-radius: 4px;">표준 핏</span>
+            </div>
+            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+              <div id="wrap-target-flip-chk" style="display: inline-flex; align-items: center; background: rgba(30, 41, 59, 0.8); padding: 2px 8px; border-radius: 4px; border: 1px solid #475569;">
+                <label style="font-size: 11px; color: #fde047; display: flex; align-items: center; gap: 4px; cursor: pointer; font-weight: 700;">
+                  <input type="checkbox" id="chk-target-flip" onchange="onTargetFlipToggle(this.checked)">
+                  ↔️ 파츠 좌우 반전
+                </label>
+              </div>
+              <div id="wrap-expr-mask-chk" style="display: inline-flex; align-items: center;">
+                <label style="font-size: 11px; color: #cbd5e1; display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                  <input type="checkbox" id="chk-expr-mask" checked onchange="onExprMaskToggle(this.checked)">
+                  타원 마스크
+                </label>
+              </div>
+              <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="resetCurrentTargetTuning()">🔄 현재 파츠 초기화</button>
+              <button class="btn" style="padding: 2px 8px; font-size: 11px;" onclick="resetAllPartTuning()">⚡ 전체 초기화</button>
+              <button class="btn btn-gold" style="padding: 2px 8px; font-size: 11px;" onclick="copyAllPartFitParams()">📋 전체 핏 코드 복사</button>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; font-size: 11px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span>🔍 크기(스케일)</span>
+                <span id="val-target-scale" style="color: #38bdf8; font-weight: 600;">100%</span>
+              </div>
+              <input type="range" id="rng-target-scale" min="50" max="180" value="100" step="1"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span>↔️ 좌/우 수평(X)</span>
+                <span id="val-target-x" style="color: #38bdf8; font-weight: 600;">0%</span>
+              </div>
+              <input type="range" id="rng-target-x" min="-25" max="25" value="0" step="0.5"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span>↕️ 상/하 수직(Y)</span>
+                <span id="val-target-y" style="color: #38bdf8; font-weight: 600;">0%</span>
+              </div>
+              <input type="range" id="rng-target-y" min="-25" max="25" value="0" step="0.5"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+            <div id="wrap-target-extra">
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span id="lbl-target-extra">✂️ 마스크 반경</span>
+                <span id="val-target-extra" style="color: #38bdf8; font-weight: 600;">44%</span>
+              </div>
+              <input type="range" id="rng-target-extra" min="20" max="65" value="44" step="1"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+          </div>
+        </div>
+
+        <div class="simulator-stages-wrap">
+          <!-- 로비 보좌관 쇼케이스 뷰 -->
+          <div class="sim-stage-card">
+            <div class="sim-stage-label">👑 로비 보좌관 아바타 리깅 뷰</div>
+            <div class="sim-showcase-box" onclick="triggerSimAttack()" title="클릭하여 전 파츠 리깅 공격 모션 & 표정 전환 테스트">
+              <div class="avatar-rig-stage rig-tall" id="sim-rig-showcase">
+                <div class="rig-ground-aura"></div>
+                <!-- 12. 등 날개/망토 (좌우 대칭 2장 또는 단일 1장) -->
+                <img id="sim-show-wings-left" class="rig-layer layer-wings-left" src="" alt="12 Wings L" />
+                <img id="sim-show-wings-right" class="rig-layer layer-wings-right" src="" alt="12 Wings R" />
+                <img id="sim-show-wings-single" class="rig-layer layer-wings-single" src="" alt="12 Wings Single"
+                  style="display:none;" />
+                <!-- 신체·의상·표정·머리장식 일체형 모션 그룹 (호흡 및 공격 돌진 시 100% 한 몸으로 이동) -->
+                <div class="rig-body-sync-group">
+                  <img id="sim-show-core" class="rig-layer layer-core" src="" alt="04 Base Body" />
+                  <img id="sim-show-underwear" class="rig-layer layer-underwear" src="" alt="15 Underwear" />
+                  <img id="sim-show-bottom" class="rig-layer layer-bottom" src="" alt="11 Bottom Skirt" />
+                  <img id="sim-show-top" class="rig-layer layer-top" src="" alt="10 Top Dress" />
+                  <img id="sim-show-expr-neutral" class="rig-layer layer-expr expr-neutral" src=""
+                    alt="05 Expr Neutral" />
+                  <img id="sim-show-expr-serious" class="rig-layer layer-expr expr-serious" src=""
+                    alt="08 Expr Serious" />
+                  <img id="sim-show-halo" class="rig-layer layer-halo" src="" alt="09 Headgear" />
+                </div>
+                <!-- 13. 주무기 & 14. 보조무기 -->
+                <img id="sim-show-weapon" class="rig-layer layer-weapon" src="" alt="13 Weapon" />
+                <img id="sim-show-sub" class="rig-layer layer-sub" src="" alt="14 Sub" />
+              </div>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; text-align: center; line-height: 1.4;"
+              id="sim-active-parts-summary">조립 파츠: 04.체형소체 + 05/08.표정 + 09.머리장식 + 10.상의 + 11.하의 + 12.날개 + 13.주무기</div>
+          </div>
+
+          <!-- 인게임 3x3 지휘 오라 타일 뷰 -->
+          <div class="sim-stage-card">
+            <div class="sim-stage-label">🏰 인게임 3x3 지휘 오라 타일 (48x48)</div>
+            <div class="sim-ingame-grid" onclick="triggerSimAttack()" title="클릭하여 인게임 타일 공격 모션 테스트">
+              <div class="sim-grid-cell">🏹</div>
+              <div class="sim-grid-cell"></div>
+              <div class="sim-grid-cell">❄️</div>
+              <div class="sim-grid-cell"></div>
+              <div class="sim-grid-cell center-base">
+                <div class="avatar-rig-stage in-tile rig-tall" id="sim-rig-tile">
+                  <div class="rig-ground-aura"></div>
+                  <img id="sim-tile-wings-left" class="rig-layer layer-wings-left" src="" alt="12 Wings L" />
+                  <img id="sim-tile-wings-right" class="rig-layer layer-wings-right" src="" alt="12 Wings R" />
+                  <img id="sim-tile-wings-single" class="rig-layer layer-wings-single" src="" alt="12 Wings Single"
+                    style="display:none;" />
+                  <div class="rig-body-sync-group">
+                    <img id="sim-tile-core" class="rig-layer layer-core" src="" alt="04 Base Body" />
+                    <img id="sim-tile-underwear" class="rig-layer layer-underwear" src="" alt="15 Underwear" />
+                    <img id="sim-tile-bottom" class="rig-layer layer-bottom" src="" alt="11 Bottom Skirt" />
+                    <img id="sim-tile-top" class="rig-layer layer-top" src="" alt="10 Top Dress" />
+                    <img id="sim-tile-expr-neutral" class="rig-layer layer-expr expr-neutral" src=""
+                      alt="05 Expr Neutral" />
+                    <img id="sim-tile-expr-serious" class="rig-layer layer-expr expr-serious" src=""
+                      alt="08 Expr Serious" />
+                    <img id="sim-tile-halo" class="rig-layer layer-halo" src="" alt="09 Headgear" />
+                  </div>
+                  <img id="sim-tile-weapon" class="rig-layer layer-weapon" src="" alt="13 Weapon" />
+                  <img id="sim-tile-sub" class="rig-layer layer-sub" src="" alt="14 Sub" />
+                </div>
+              </div>
+              <div class="sim-grid-cell"></div>
+              <div class="sim-grid-cell">💣</div>
+              <div class="sim-grid-cell"></div>
+              <div class="sim-grid-cell">⚡</div>
+            </div>
+            <div style="font-size: 11px; color: #94a3b8;">클릭 시 표정 변화(05→08) & 주무기 외곽 스윙 모션 발동</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- STEP 4. 01~15 설정시트 고정 좌표 자동 분리 & 미착용/미보유('없음') 관리 패널 -->
+    <section class="panel-box">
+      <div class="panel-header">
+        <h2>🧩 STEP 4. 설정시트(01~15) 부위별 자동 분리 & 미보유/미착용('없음') 설정</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn" style="border-color:#38bdf8; color:#38bdf8; font-weight:700;" onclick="flipBaseBodyPart()" title="04번 체형 소체의 좌우 방향을 즉시 반전시킵니다">↔️ 04.소체 좌우 반전</button>
+          <button class="btn btn-primary" onclick="autoTrimAllSlicedParts()" title="슬롯 내 크로마키/투명 여백을 자동으로 제거하고 실제 파츠 픽셀만 딱 맞게 밀착 크롭합니다">✂️ 알맹이 픽셀 자동 밀착 (Auto-Trim)</button>
+          <button class="btn" onclick="autoDetectAbsentParts()">🔍 빈 슬롯('없음') 자동 감지</button>
+          <button class="btn" onclick="resetSlicePresets()">🔄 01~15 공식 템플릿 좌표 초기화</button>
+          <button class="btn btn-gold" onclick="downloadAllActiveParts()">📥 보유 파츠('없음' 제외) 일괄 다운로드</button>
+        </div>
+      </div>
+
+      <div style="font-size: 12px; color: #94a3b8; line-height: 1.5;">
+        💡 <code>visual_style_guide.html</code>의 <strong>2048×1152 공식 템플릿 좌표</strong>가 기본 내장되어 있어 상단 제목 바(38px)와 테두리선을
+        제외한 알맹이만 자동 추출됩니다.<br>
+        👉 <strong>캐릭터에게 없는 파츠(보조무기, 속옷, 헤일로, 상/하의, 날개/망토 등)</strong>는 각 카드 상단의
+        <strong><code>[✅ 보유] ↔ [🚫 없음]</code></strong> 버튼을 눌러 <strong>'없음(미착용/미보유)'</strong> 상태로 지정할 수 있습니다!
+      </div>
+
+      <div class="slicer-layout">
+        <!-- 좌측: 설정 시트 위 01~15 크롭 가이드 오버레이 및 미세 조정 -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="checkerboard-box" style="height: 390px;">
+            <canvas id="canvas-slicer-guide" width="1024" height="576"></canvas>
+          </div>
+          <!-- 선택된 부위 영역 미세 조절 바 -->
+          <div
+            style="background:#0f172a; border:1px solid #334155; border-radius:10px; padding:10px 14px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <strong id="selected-part-title" style="color:#fde047; font-size:13px;">선택 슬롯: 01. 정면 본체</strong>
+              <button class="btn" id="btn-toggle-selected-absent" onclick="togglePartAbsent(selectedPartIndex)"
+                style="padding:4px 10px; font-size:11.5px;">
+                ✅ 현재 상태: 보유/착용 (클릭 시 '없음' 전환)
+              </button>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <label style="font-size:11.5px;">X(%): <input type="number" id="slice-x" min="0" max="98" step="0.5"
+                  value="3.1" style="width:60px;" oninput="onSliceRectInput()" /></label>
+              <label style="font-size:11.5px;">Y(%): <input type="number" id="slice-y" min="0" max="98" step="0.5"
+                  value="14.0" style="width:60px;" oninput="onSliceRectInput()" /></label>
+              <label style="font-size:11.5px;">W(%): <input type="number" id="slice-w" min="2" max="100" step="0.5"
+                  value="21.3" style="width:60px;" oninput="onSliceRectInput()" /></label>
+              <label style="font-size:11.5px;">H(%): <input type="number" id="slice-h" min="2" max="100" step="0.5"
+                  value="44.8" style="width:60px;" oninput="onSliceRectInput()" /></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 우측: 추출된 파츠 카드 그리드 (01 본체, 04 소체, 05~08 표정, 09~15 복장/무기/속옷) -->
+        <div class="parts-preview-grid" id="parts-preview-container">
+          <!-- JS로 동적 생성 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 하단: js/constants.js 자동 연동 코드 스니펫 ('없음' 파츠는 null 처리) -->
+    <section class="panel-box">
+      <div class="panel-header">
+        <h2>💻 js/constants.js 3종 아바타 소체 & 파츠 자동 연동 코드 ('없음' 항목은 <code>null</code> 자동 표기)</h2>
+        <button class="btn btn-primary" onclick="copyTextById('code-output-area')">📋 연동 코드 복사</button>
+      </div>
+      <div style="font-size: 12px; color: #94a3b8;">
+        다운로드한 파일들을 <code>assets/</code> 및 <code>assets/parts/</code> 폴더에 넣은 뒤 아래 코드를
+        <code>MODULAR_CHARACTER_SPECS</code>에 붙여넣으세요. <strong>'없음(미착용/미보유)'</strong>으로 설정된 부위는 자동으로
+        <code>null // 없음(미착용/미보유)</code>로 출력됩니다.
+      </div>
+      <textarea id="code-output-area" class="code-area" readonly></textarea>
+    </section>
+
+  </main>
+
+  <script>
+    /**
+     * ========================================================================
+     * 3종 공통 아바타 소체 리깅 & 01~15 설정시트 자동 파츠 분리 코어 스크립트
+     * ========================================================================
+     */
+    const rawImages = {
+      standing: null,
+      sheet: null,
+      sheetA: null,
+      sheetB: null
+    };
+
+    let sheetUploadMode = 'dual'; // 'dual': 시트 A(소체) + 시트 B(장비) 분할 모드 / 'single': 기존 15슬롯 1장 통합 모드
+    let simFacing = 'right';
+    let autoLoopInterval = null;
+    let selectedPartIndex = 0;
+    let useBaseBodyAsCore = true; // true(기본): 04.체형소체 위에 상의·하의·속옷·표정·머리장식·날개·무기 전 파츠 조립! / false: 01.정면 코어 사용
+    let mirrorWingsMode = true;   // true: 12번 날개 파츠를 좌우 대칭(2장)으로 장착 / false: 단일(1장) 장착
+
+    /**
+     * visual_style_guide.html 의 2048 x 1152 공식 템플릿 픽셀 좌표에 1:1 매칭되는
+     * 내부 알맹이(상단 38px 라벨 바 및 하단 25px 영문 부연설명 라벨 안쪽) 퍼센트(%) 좌표!
+     */
+    const OFFICIAL_2048_SLICE_SPECS = [
+      { id: '01', key: 'front_core', name: '01. 정면 본체 (Core)', x: 3.2, y: 14.1, w: 21.1, h: 43.2, color: '#38bdf8', absent: false, canBeAbsent: false },
+      { id: '04', key: 'base_body', name: '04. 기본 체형 (소체)', x: 74.0, y: 14.1, w: 21.1, h: 43.2, color: '#fbbf24', absent: false, canBeAbsent: false },
+      { id: '05', key: 'expr_neutral', name: '05. 표정: 무표정', x: 3.2, y: 67.2, w: 8.0, h: 25.0, color: '#94a3b8', absent: false, canBeAbsent: false },
+      { id: '08', key: 'expr_serious', name: '08. 표정: 전투결의', x: 31.8, y: 67.2, w: 8.0, h: 25.0, color: '#f87171', absent: false, canBeAbsent: false },
+      { id: '09', key: 'headgear', name: '09. 머리장식 / 헤일로', x: 43.3, y: 67.2, w: 6.5, h: 25.0, color: '#c084fc', absent: false, canBeAbsent: true },
+      { id: '10', key: 'top_dress', name: '10. 복장 : 상의', x: 51.1, y: 67.2, w: 6.5, h: 25.0, color: '#f472b6', absent: false, canBeAbsent: true },
+      { id: '11', key: 'bottom_skirt', name: '11. 복장 : 하의', x: 59.0, y: 67.2, w: 6.5, h: 25.0, color: '#fb7185', absent: false, canBeAbsent: true },
+      { id: '12', key: 'wings_cape', name: '12. 외투 / 날개 / 망토', x: 66.8, y: 67.2, w: 6.5, h: 25.0, color: '#818cf8', absent: false, canBeAbsent: true },
+      { id: '13', key: 'main_weapon', name: '13. 주무기 파츠', x: 74.7, y: 67.2, w: 6.5, h: 25.0, color: '#facc15', absent: false, canBeAbsent: true },
+      { id: '14', key: 'sub_weapon', name: '14. 보조무기 / 구체', x: 82.6, y: 67.2, w: 6.5, h: 25.0, color: '#4ade80', absent: false, canBeAbsent: true },
+      { id: '15', key: 'underwear', name: '15. 복장 : 속옷', x: 90.4, y: 67.2, w: 7.4, h: 25.0, color: '#f43f5e', absent: false, canBeAbsent: true }
+    ];
+
+    /**
+     * ⭐ [시트 A] SD 3면도 & 기본 소체 4슬롯 초대형 뷰 (해상도 2.5배)
+     */
+    const OFFICIAL_SHEET_A_SPECS = {
+      '01': { x: 3.2, y: 13.8, w: 21.6, h: 81.5 },
+      '04': { x: 75.2, y: 13.8, w: 21.6, h: 81.5 }
+    };
+
+    /**
+     * ⭐ [시트 B] SD 장비 & 표정 팩 10슬롯 와이드 뷰
+     */
+    const OFFICIAL_SHEET_B_SPECS = {
+      '05': { x: 3.2, y: 13.8, w: 21.6, h: 35.5 },
+      '08': { x: 75.2, y: 13.8, w: 21.6, h: 35.5 },
+      '09': { x: 3.2, y: 57.2, w: 14.2, h: 39.0 },
+      '10': { x: 19.1, y: 57.2, w: 14.2, h: 39.0 },
+      '11': { x: 35.0, y: 57.2, w: 14.2, h: 39.0 },
+      '12': { x: 50.8, y: 57.2, w: 14.2, h: 39.0 },
+      '13': { x: 66.7, y: 57.2, w: 14.2, h: 39.0 },
+      '14': { x: 82.6, y: 57.2, w: 14.2, h: 39.0 }
+    };
+
+    let sliceSpecs = JSON.parse(JSON.stringify(OFFICIAL_2048_SLICE_SPECS));
+
+    function switchSheetUploadMode(mode) {
+      sheetUploadMode = mode;
+      const dualBtn = document.getElementById('tab-btn-dual-sheet');
+      const singleBtn = document.getElementById('tab-btn-single-sheet');
+      const dualBox = document.getElementById('container-upload-dual');
+      const singleBox = document.getElementById('container-upload-single');
+
+      if (mode === 'dual') {
+        if (dualBtn) { dualBtn.className = 'btn btn-gold'; dualBtn.style.fontWeight = '800'; }
+        if (singleBtn) { singleBtn.className = 'btn'; singleBtn.style.fontWeight = 'normal'; }
+        if (dualBox) dualBox.style.display = 'grid';
+        if (singleBox) singleBox.style.display = 'none';
+      } else {
+        if (dualBtn) { dualBtn.className = 'btn'; dualBtn.style.fontWeight = 'normal'; }
+        if (singleBtn) { singleBtn.className = 'btn btn-gold'; singleBtn.style.fontWeight = '800'; }
+        if (dualBox) dualBox.style.display = 'none';
+        if (singleBox) singleBox.style.display = 'grid';
+      }
+    }
+
+    // 지휘관 프리셋 (파일 슬러그, 아바타 소체 타입, 날개 대칭 여부, 기본 미보유 파츠 설정, 샘플 원화 경로, 공격 모션)
+    const characterPresets = {
+      char_ranger: {
+        slug: 'ranger',
+        rigType: 'standard',
+        mirrorWings: true,
+        useBaseBody: true,
+        absentIds: ['15'],
+        motionType: 'bow', // 🏹 활 조준 사격 모션 (Bow Sniping)
+        sampleStanding: 'assets/ref_ranger_sheet_b.jpg',
+        sampleSheetA: 'assets/ref_ranger_sheet_a.jpg',
+        sampleSheetB: 'assets/ref_ranger_sheet_b.jpg',
+        customFit: {
+          expr: { scale: 96, x: -1.5, y: 1.0, clip: 44, mask: true, flipX: false },
+          top: { scale: 112, x: -3.2, y: 0.5, flipX: true },    // 🎯 상의 좌우 반전 (소체의 좌측 반측면 가슴 & 어깨 견갑 완벽 일치!)
+          bottom: { scale: 108, x: -2.8, y: -2.5, flipX: true }, // 🎯 하의 좌우 반전 (골반 각도 & 스커트 트임 완벽 일치!)
+          halo: { scale: 95, x: 1.5, y: -6.0, flipX: false },
+          wings: { scale: 96, x: 0, y: -4.0, flipX: false },
+          weapon: { scale: 95, x: 2.0, y: 0, flipX: false },
+          sub: { scale: 95, x: -2.0, y: 0, flipX: false }
+        }
+      },
+      char_titania: { slug: 'titania', rigType: 'tall', mirrorWings: true, useBaseBody: true, absentIds: ['14', '15'], motionType: 'sword', sampleStanding: 'assets/char_titania.jpg?v=sd3', sampleSheet: 'assets/ref_titania_sheet.jpg?v=sd3' },
+      char_lumina: { slug: 'lumina', rigType: 'standard', mirrorWings: false, useBaseBody: false, absentIds: [], motionType: 'magic', sampleStanding: 'assets/char_lumina.jpg', sampleSheet: 'assets/ref_lumina_sheet.jpg' },
+      char_seraphina: { slug: 'seraphina', rigType: 'standard', mirrorWings: true, useBaseBody: true, absentIds: ['14'], motionType: 'sword' },
+      char_veronica: { slug: 'veronica', rigType: 'standard', mirrorWings: false, useBaseBody: true, absentIds: [], motionType: 'crossbow' },
+      char_aurelia: { slug: 'aurelia', rigType: 'standard', mirrorWings: false, useBaseBody: true, absentIds: [], motionType: 'sword' },
+      char_selena: { slug: 'selena', rigType: 'standard', mirrorWings: false, useBaseBody: true, absentIds: ['14'] },
+      char_eleanor: { slug: 'eleanor', rigType: 'standard', mirrorWings: false, useBaseBody: true, absentIds: ['14'] },
+      char_scarlet: { slug: 'scarlet', rigType: 'standard', mirrorWings: false, useBaseBody: true, absentIds: ['09', '12'] },
+      char_liana: { slug: 'liana', rigType: 'standard', mirrorWings: false, useBaseBody: true, absentIds: ['09'] }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initPartPreviewCards();
+      onSelectCharacterPreset();
+      loadSampleCharacter('char_titania');
+    });
+
+    /**
+     * 샘플 지휘관(티타니아 또는 루미나) 전신 일러스트 + 01~15 설정 시트 원클릭 로드
+     */
+    function loadSampleCharacter(presetKey = 'char_titania') {
+      const selEl = document.getElementById('preset-char-select');
+      if (selEl && characterPresets[presetKey]) {
+        selEl.value = presetKey;
+        onSelectCharacterPreset();
+      }
+      const preset = characterPresets[presetKey] || characterPresets.char_titania;
+      const sampleMap = {
+        standing: preset.sampleStanding || 'assets/char_titania.jpg'
+      };
+
+      if (preset.sampleSheetA && preset.sampleSheetB) {
+        switchSheetUploadMode('dual');
+        sampleMap.sheetA = preset.sampleSheetA;
+        sampleMap.sheetB = preset.sampleSheetB;
+      } else {
+        sampleMap.sheet = preset.sampleSheet || 'assets/ref_titania_sheet.jpg';
+      }
+
+      Object.entries(sampleMap).forEach(([slotKey, url]) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          rawImages[slotKey] = img;
+          if (slotKey === 'standing') {
+            processStandingImage();
+          } else if (slotKey === 'sheetA' || slotKey === 'sheetB') {
+            processDualSheetSlices();
+          } else {
+            processSheetAndSliceAll();
+          }
+        };
+        img.src = url;
+      });
+    }
+
+    /**
+     * 드래그 앤 드롭 및 파일 입력 핸들러
+     */
+    function triggerFileSelect(slotKey) {
+      document.getElementById(`file-${slotKey}`).click();
+    }
+
+    function handleFileInput(e, slotKey) {
+      const file = e.target.files && e.target.files[0];
+      if (file) loadFileIntoSlot(file, slotKey);
+    }
+
+    function handleDragOver(e, slotKey) {
+      e.preventDefault();
+      document.getElementById(`drop-${slotKey}`).classList.add('dragover');
+    }
+
+    function handleDragLeave(e, slotKey) {
+      document.getElementById(`drop-${slotKey}`).classList.remove('dragover');
+    }
+
+    function handleDrop(e, slotKey) {
+      e.preventDefault();
+      document.getElementById(`drop-${slotKey}`).classList.remove('dragover');
+      const file = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) loadFileIntoSlot(file, slotKey);
+    }
+
+    function loadFileIntoSlot(file, slotKey) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          rawImages[slotKey] = img;
+          if (slotKey === 'standing') {
+            processStandingImage();
+          } else if (slotKey === 'sheetA' || slotKey === 'sheetB') {
+            processDualSheetSlices();
+          } else {
+            processSheetAndSliceAll();
+          }
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function onAlphaParamChange() {
+      const tolEl = document.getElementById('rng-chroma-tol');
+      if (tolEl && document.getElementById('lbl-chroma-tol')) {
+        document.getElementById('lbl-chroma-tol').innerText = tolEl.value;
+      }
+      document.getElementById('lbl-threshold').innerText = document.getElementById('rng-threshold').value;
+      document.getElementById('lbl-feather').innerText = document.getElementById('rng-feather').value;
+    }
+
+    function onChromaModeChange() {
+      const mode = document.getElementById('sel-chroma-mode')?.value || 'auto';
+      const customBox = document.getElementById('custom-chroma-pickers');
+      if (customBox) {
+        customBox.style.display = (mode === 'custom') ? 'inline-flex' : 'none';
+      }
+      reprocessAll();
+    }
+
+    function onChangePreviewBg() {
+      const bgMode = document.getElementById('sel-preview-bg')?.value || 'checker';
+      document.querySelectorAll('.checkerboard-box').forEach(el => {
+        if (bgMode === 'checker') {
+          el.style.backgroundImage = 'linear-gradient(45deg, #0f172a 25%, transparent 25%), linear-gradient(-45deg, #0f172a 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #0f172a 75%), linear-gradient(-45deg, transparent 75%, #0f172a 75%)';
+          el.style.backgroundColor = '#1e293b';
+        } else if (bgMode === 'dark') {
+          el.style.backgroundImage = 'none';
+          el.style.backgroundColor = '#0f172a';
+        } else if (bgMode === 'light') {
+          el.style.backgroundImage = 'none';
+          el.style.backgroundColor = '#f8fafc';
+        } else if (bgMode === 'green') {
+          el.style.backgroundImage = 'none';
+          el.style.backgroundColor = '#00ff00';
+        }
+      });
+    }
+
+    function hexToRgbObj(hex) {
+      const clean = (hex || '#00ff00').replace('#', '');
+      return {
+        r: parseInt(clean.substring(0, 2), 16) || 0,
+        g: parseInt(clean.substring(2, 4), 16) || 0,
+        b: parseInt(clean.substring(4, 6), 16) || 0
+      };
+    }
+
+    function reprocessAll() {
+      if (rawImages.standing) processStandingImage();
+      if (rawImages.sheet) processSheetAndSliceAll();
+    }
+
+    /**
+     * 캔버스 4개 모서리 픽셀을 샘플링하여 크로마키(그린/마젠타/블루) 배경인지 순백색 배경인지 자동 판별
+     */
+    function detectCanvasChromaMode(data, w, h) {
+      const samplePoints = [
+        [2, 2], [Math.max(0, w - 3), 2],
+        [2, Math.max(0, h - 3)], [Math.max(0, w - 3), Math.max(0, h - 3)],
+        [Math.floor(w / 2), 2]
+      ];
+      let greenVotes = 0, magentaVotes = 0, blueVotes = 0;
+      for (const [sx, sy] of samplePoints) {
+        if (sx < 0 || sy < 0 || sx >= w || sy >= h) continue;
+        const i = (sy * w + sx) * 4;
+        const r = data[i], g = data[i + 1], b = data[i + 2];
+        if (g > 150 && g - r > 55 && g - b > 55) greenVotes++;
+        else if (r > 150 && b > 150 && r - g > 55 && b - g > 55) magentaVotes++;
+        else if (b > 150 && b - r > 55 && b - g > 55) blueVotes++;
+      }
+      if (greenVotes >= 2) return 'green';
+      if (magentaVotes >= 2) return 'magenta';
+      if (blueVotes >= 2) return 'blue';
+      return 'white';
+    }
+
+    /**
+     * 공통 유틸: 크로마키 전역 유클리드 색차(Euclidean Distance) + 듀얼 크로마키 + 색 번짐 억제(Despill)
+     * 및 순백색 외곽 BFS Flood-Fill + 의상 내부 막힌 구멍(Enclosed Holes) 통합 투명화 엔진
+     */
+    function applyEdgeFloodFillTransparency(canvas, slotId = '', isFullSheetOrStanding = false) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const ctx = canvas.getContext('2d');
+      let imgData;
+      try {
+        imgData = ctx.getImageData(0, 0, w, h);
+      } catch (e) {
+        return false;
+      }
+
+      const data = imgData.data;
+      const isWingSlot = (slotId === '12');
+      const isCostumeOrWeaponSlot = ['09', '10', '11', '13', '14', '15'].includes(slotId);
+      const threshold = isWingSlot ? 248 : (parseInt(document.getElementById('rng-threshold').value, 10) || 234);
+      const feather = isWingSlot ? 6 : (parseInt(document.getElementById('rng-feather').value, 10) || 20);
+      const chromaTol = parseInt(document.getElementById('rng-chroma-tol')?.value, 10) || 70;
+      const enableDespill = document.getElementById('chk-despill') ? document.getElementById('chk-despill').checked : true;
+      const enableWatermarkRemove = document.getElementById('chk-watermark') ? document.getElementById('chk-watermark').checked : true;
+      const userChromaMode = document.getElementById('sel-chroma-mode')?.value || 'auto';
+
+      // 0) 우측 하단 AI 생성 워터마크 자동 제거 (전신 일러스트 원화 대상, 65x28 영역)
+      if (isFullSheetOrStanding && enableWatermarkRemove && w >= 400 && h >= 400) {
+        const wmW = Math.min(68, Math.round(w * 0.065));
+        const wmH = Math.min(32, Math.round(h * 0.035));
+        for (let wy = h - wmH; wy < h; wy++) {
+          for (let wx = w - wmW; wx < w; wx++) {
+            const wi = (wy * w + wx) * 4;
+            data[wi + 3] = 0;
+          }
+        }
+      }
+
+      // 1) 배경 모드 결정 (auto일 경우 4모서리 샘플링으로 크로마키 vs 화이트 자동 감지)
+      const resolvedMode = (userChromaMode === 'auto')
+        ? detectCanvasChromaMode(data, w, h)
+        : userChromaMode;
+
+      // 2) 크로마키 모드 (green / magenta / blue / custom): 전역 유클리드 색차(Euclidean Distance) + 듀얼 키 + Despill 수행
+      if (resolvedMode !== 'white') {
+        let key1 = { r: 0, g: 255, b: 0 };
+        let key2 = null;
+        if (resolvedMode === 'green') {
+          key1 = { r: 0, g: 255, b: 0 };
+        } else if (resolvedMode === 'magenta') {
+          key1 = { r: 255, g: 0, b: 255 };
+        } else if (resolvedMode === 'blue') {
+          key1 = { r: 0, g: 0, b: 255 };
+        } else if (resolvedMode === 'custom') {
+          key1 = hexToRgbObj(document.getElementById('inp-chroma-key1')?.value || '#00ff00');
+          if (document.getElementById('chk-chroma-key2')?.checked) {
+            key2 = hexToRgbObj(document.getElementById('inp-chroma-key2')?.value || '#559954');
+          }
+        }
+
+        const softTol = chromaTol + Math.max(8, feather);
+        for (let i = 0; i < data.length; i += 4) {
+          if (data[i + 3] === 0) continue;
+          const r = data[i], g = data[i + 1], b = data[i + 2];
+          const dr1 = r - key1.r, dg1 = g - key1.g, db1 = b - key1.b;
+          let minDist = Math.sqrt(dr1 * dr1 + dg1 * dg1 + db1 * db1);
+
+          if (key2) {
+            const dr2 = r - key2.r, dg2 = g - key2.g, db2 = b - key2.b;
+            const dist2 = Math.sqrt(dr2 * dr2 + dg2 * dg2 + db2 * db2);
+            if (dist2 < minDist) minDist = dist2;
+          }
+
+          if (minDist < chromaTol) {
+            data[i + 3] = 0;
+          } else if (minDist < softTol) {
+            const ratio = (minDist - chromaTol) / Math.max(1, softTol - chromaTol);
+            data[i + 3] = Math.min(data[i + 3], Math.round(ratio * 255));
+          }
+
+          // 색 번짐 억제 (Despill: 크로마키 배경 반사광이 외곽선에 남는 현상 중화)
+          if (enableDespill && data[i + 3] > 0) {
+            if (resolvedMode === 'green' || (resolvedMode === 'custom' && key1.g > key1.r && key1.g > key1.b)) {
+              if (g > r && g > b) {
+                data[i + 1] = Math.max(r, b);
+              }
+            } else if (resolvedMode === 'magenta' || (resolvedMode === 'custom' && key1.r > key1.g && key1.b > key1.g)) {
+              if (r > g + 18 && b > g + 18) {
+                data[i] = Math.min(r, g + 18);
+                data[i + 2] = Math.min(b, g + 18);
+              }
+            } else if (resolvedMode === 'blue' || (resolvedMode === 'custom' && key1.b > key1.r && key1.b > key1.g)) {
+              if (b > r && b > g) {
+                data[i + 2] = Math.max(r, g);
+              }
+            }
+          }
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+        return true;
+      }
+
+      // 3) 순백색(#FFFFFF) 배경 모드: 4면 외곽 BFS Flood-Fill + 의상/장비 내부 닫힌 흰색 포켓 제거
+      const softMin = Math.max(150, threshold - feather);
+
+      const visited = new Uint8Array(w * h);
+      const queue = new Int32Array(w * h);
+      let head = 0;
+      let tail = 0;
+
+      for (let x = 0; x < w; x++) {
+        queue[tail++] = x; visited[x] = 1;
+        const bot = (h - 1) * w + x;
+        if (!visited[bot]) { queue[tail++] = bot; visited[bot] = 1; }
+      }
+      for (let y = 0; y < h; y++) {
+        const left = y * w;
+        if (!visited[left]) { queue[tail++] = left; visited[left] = 1; }
+        const right = y * w + (w - 1);
+        if (!visited[right]) { queue[tail++] = right; visited[right] = 1; }
+      }
+
+      const dx = [1, -1, 0, 0];
+      const dy = [0, 0, 1, -1];
+
+      while (head < tail) {
+        const cur = queue[head++];
+        const cx = cur % w;
+        const cy = (cur / w) | 0;
+        const idx = cur * 4;
+
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+
+        const minC = Math.min(r, g, b);
+        const maxC = Math.max(r, g, b);
+        // 피부색(R-G >= 14)이나 분홍 머리카락은 보호하고, 순백색(#ffffff)·연회색(#f8fafc)·04번 연노란 슬롯 배경(#fffbeb)만 배경으로 판별
+        const satLimit = isWingSlot ? 7 : 22;
+        const isPureBg = (minC >= threshold && (maxC - minC) <= satLimit && Math.abs(r - g) <= 7);
+        const isCreamBg = (!isWingSlot && r >= 248 && g >= 244 && b >= 225 && (r - g) <= 7);
+        const isEdgeDashBridge = (!isWingSlot && (cx < 18 || cx > w - 18) && r >= 230 && g >= 195 && b >= 180 && (r - b) <= 65);
+        const isLightBg = isPureBg || isCreamBg || isEdgeDashBridge;
+
+        if (isLightBg) {
+          data[idx + 3] = 0;
+          for (let d = 0; d < 4; d++) {
+            const nx = cx + dx[d];
+            const ny = cy + dy[d];
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              const nPos = ny * w + nx;
+              if (!visited[nPos]) {
+                visited[nPos] = 1;
+                queue[tail++] = nPos;
+              }
+            }
+          }
+        } else if (feather > 0 && minC >= softMin && (maxC - minC) <= 34) {
+          const ratio = (threshold - minC) / feather;
+          const alpha = Math.max(0, Math.min(255, Math.round(ratio * 255)));
+          data[idx + 3] = Math.min(data[idx + 3], alpha);
+        }
+      }
+
+      // 2차 보정: 상의 홀터넥 안쪽 구멍, 티아라 안쪽, 머리카락·팔 사이에 갇힌 흰색 배경 포켓(Enclosed Holes) 투명화
+      if (!isWingSlot) {
+        const innerMinLimit = isCostumeOrWeaponSlot ? 215 : 244;
+        const innerSatLimit = isCostumeOrWeaponSlot ? 26 : 8;
+        for (let y = 0; y < h; y++) {
+          // 본체(01/04)나 표정(05/08)의 눈동자 흰자위 영역 보호
+          const isEyeBand = (!isCostumeOrWeaponSlot && y >= h * 0.16 && y <= h * 0.44);
+          const isLegBand = (!isCostumeOrWeaponSlot && y >= h * 0.70);
+          if (isEyeBand || isLegBand) continue;
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4;
+            if (data[i + 3] > 0) {
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              const maxC2 = Math.max(r, g, b);
+              const minC2 = Math.min(r, g, b);
+              if (minC2 >= innerMinLimit && (maxC2 - minC2) <= innerSatLimit && (r - g) <= 10) {
+                data[i + 3] = 0;
+              }
+            }
+          }
+        }
+      }
+
+      ctx.putImageData(imgData, 0, 0);
+      return true;
+    }
+
+    /**
+     * 투명화된 파츠 캔버스에서 상하좌우 빈 투명 여백을 자동으로 타이트하게 트리밍(Auto-Trim)하여
+     * 리깅 레이어(object-fit: contain)에 올렸을 때 파츠 크기가 축소되거나 위치가 어긋나지 않도록 정렬!
+     */
+    function autoTrimCanvasToContent(canvas, pad = 4) {
+      const w = canvas.width;
+      const h = canvas.height;
+      if (w <= 0 || h <= 0) return;
+      const ctx = canvas.getContext('2d');
+      let imgData;
+      try {
+        imgData = ctx.getImageData(0, 0, w, h);
+      } catch (e) {
+        return;
+      }
+      const data = imgData.data;
+      let bx1 = w, by1 = h, bx2 = -1, by2 = -1;
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const a = data[(y * w + x) * 4 + 3];
+          if (a > 24) {
+            if (x < bx1) bx1 = x;
+            if (x > bx2) bx2 = x;
+            if (y < by1) by1 = y;
+            if (y > by2) by2 = y;
+          }
+        }
+      }
+      if (bx2 <= bx1 || by2 <= by1) return;
+
+      const fx1 = Math.max(0, bx1 - pad);
+      const fy1 = Math.max(0, by1 - pad);
+      const fx2 = Math.min(w - 1, bx2 + pad);
+      const fy2 = Math.min(h - 1, by2 + pad);
+      const fw = fx2 - fx1 + 1;
+      const fh = fy2 - fy1 + 1;
+
+      const trimmed = ctx.getImageData(fx1, fy1, fw, fh);
+      canvas.width = fw;
+      canvas.height = fh;
+      ctx.putImageData(trimmed, 0, 0);
+    }
+
+    /**
+     * 1번 슬롯: 전신 일러스트 외곽 배경 투명화 (크로마키 또는 화이트 자동 감지 + 우측하단 워터마크 제거)
+     */
+    function processStandingImage() {
+      const srcImg = rawImages.standing;
+      if (!srcImg) return;
+      const canvas = document.getElementById('canvas-standing');
+      canvas.width = srcImg.width;
+      canvas.height = srcImg.height;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(srcImg, 0, 0);
+      applyEdgeFloodFillTransparency(canvas, 'standing', true);
+    }
+
+    /**
+     * 2번 슬롯: 01~15 설정 시트 로드 & 11개 핵심 슬롯 개별 크롭 + 개별 배경 투명화
+     */
+    function processSheetAndSliceAll() {
+      const srcImg = rawImages.sheet;
+      if (!srcImg) return;
+
+      const sheetCanvas = document.getElementById('canvas-sheet');
+      if (sheetCanvas) {
+        sheetCanvas.width = srcImg.width;
+        sheetCanvas.height = srcImg.height;
+        const sCtx = sheetCanvas.getContext('2d');
+        sCtx.clearRect(0, 0, sheetCanvas.width, sheetCanvas.height);
+        sCtx.drawImage(srcImg, 0, 0);
+      }
+
+      renderPartsSlicer();
+    }
+
+    /**
+     * ⭐ [듀얼 시트 전용] 시트 A(소체) 및 시트 B(장비) 개별 로드 & 파츠 슬라이스 엔진
+     */
+    function processDualSheetSlices() {
+      if (rawImages.sheetA) {
+        const cA = document.getElementById('canvas-sheet-a');
+        if (cA) {
+          cA.width = rawImages.sheetA.width;
+          cA.height = rawImages.sheetA.height;
+          const ctxA = cA.getContext('2d');
+          ctxA.clearRect(0, 0, cA.width, cA.height);
+          ctxA.drawImage(rawImages.sheetA, 0, 0);
+        }
+      }
+      if (rawImages.sheetB) {
+        const cB = document.getElementById('canvas-sheet-b');
+        if (cB) {
+          cB.width = rawImages.sheetB.width;
+          cB.height = rawImages.sheetB.height;
+          const ctxB = cB.getContext('2d');
+          ctxB.clearRect(0, 0, cB.width, cB.height);
+          ctxB.drawImage(rawImages.sheetB, 0, 0);
+        }
+      }
+      renderPartsSlicer();
+    }
+
+    /**
+     * ✂️ 슬롯 내부 크로마키/투명 여백 자동 스마트 트림 (Auto-Trim Margin)
+     * 버튼 한 번으로 모든 파츠의 남는 빈 여백을 픽셀 단위로 측정하여 알맹이에 딱 맞게 자동 정돈합니다.
+     */
+    function autoTrimAllSlicedParts() {
+      let trimmedCount = 0;
+      sliceSpecs.forEach((sp, idx) => {
+        if (!sp.absent) {
+          const pCanvas = document.getElementById(`canvas-part-${idx}`);
+          if (pCanvas && pCanvas.width > 0 && pCanvas.height > 0) {
+            autoTrimCanvasToContent(pCanvas, 3);
+            trimmedCount++;
+          }
+        }
+      });
+      updateRigSimulatorLayers();
+      alert(`✂️ 총 ${trimmedCount}개 보유 파츠의 여백을 알맹이에 맞게 스마트 트림(Auto-Trim) 완료했습니다!`);
+    }
+
+    /**
+     * STEP 4. 01~15 파츠 슬라이서 렌더링 및 개별 파츠 투명화 추출
+     */
+    function initPartPreviewCards() {
+      const container = document.getElementById('parts-preview-container');
+      container.innerHTML = sliceSpecs.map((sp, idx) => `
+        <div class="part-slice-card ${idx === selectedPartIndex ? 'active' : ''} ${sp.absent ? 'is-absent' : ''}" id="part-card-${idx}" onclick="selectPartForEdit(${idx})">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; gap:4px;">
+            <span style="font-size:11.5px; font-weight:800; color:${sp.color}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${sp.name}</span>
+            ${sp.canBeAbsent ? `
+              <button class="btn" id="btn-absent-card-${idx}" style="padding:2px 6px; font-size:10px; ${sp.absent ? 'background:#dc2626; border-color:#f87171;' : 'background:#059669; border-color:#34d399;'}" onclick="event.stopPropagation(); togglePartAbsent(${idx})" title="클릭하여 보유/미보유('없음') 상태 전환">
+                ${sp.absent ? '🚫 없음' : '✅ 보유'}
+              </button>
+            ` : ''}
+          </div>
+          <div class="part-slice-thumb checkerboard-box" style="height:92px;">
+            <canvas id="canvas-part-${idx}" width="180" height="180"></canvas>
+            <div class="absent-overlay-badge">
+              <span>🚫 없음 (NONE)</span>
+              <span style="font-size:10.5px; color:#94a3b8; font-weight:600;">[미착용 / 미보유]</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:4px; width:100%; margin-top:2px;">
+            <button class="btn" style="flex:1; justify-content:center; padding:4px 2px; font-size:11px; background:#1e293b; border-color:#38bdf8; color:#7dd3fc; font-weight:700;" onclick="event.stopPropagation(); flipSlicedPartCanvas(${idx})" title="이 파츠의 좌/우 방향을 즉시 반전시킵니다">
+              ↔️ 반전
+            </button>
+            <button class="btn" style="flex:1.4; justify-content:center; padding:4px 2px; font-size:11px;" onclick="event.stopPropagation(); downloadSingleSlicedPart(${idx})" title="이 파츠를 투명 PNG로 저장">
+              📥 ${sp.key}.png
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    /**
+     * 특정 파츠 슬라이스 캔버스를 수평(좌우) 반전 (Flip X)하고 리깅 시뮬레이터에 즉시 반영
+     */
+    function flipSlicedPartCanvas(idx) {
+      const pCanvas = document.getElementById(`canvas-part-${idx}`);
+      if (!pCanvas || pCanvas.width <= 0 || pCanvas.height <= 0) return;
+      const w = pCanvas.width;
+      const h = pCanvas.height;
+
+      // 1) 임시 오프스크린 캔버스에 복사
+      const temp = document.createElement('canvas');
+      temp.width = w;
+      temp.height = h;
+      const tCtx = temp.getContext('2d');
+      tCtx.drawImage(pCanvas, 0, 0);
+
+      // 2) 원본 캔버스 클리어 후 수평 반전 렌더링
+      const pCtx = pCanvas.getContext('2d');
+      pCtx.clearRect(0, 0, w, h);
+      pCtx.save();
+      pCtx.translate(w, 0);
+      pCtx.scale(-1, 1);
+      pCtx.drawImage(temp, 0, 0);
+      pCtx.restore();
+
+      // 3) 파츠 스펙에 반전 플래그 기록
+      const sp = sliceSpecs[idx];
+      if (sp) {
+        sp.isFlipped = !sp.isFlipped;
+      }
+
+      // 4) 리깅 시뮬레이터에 실시간 재바인딩
+      updateRigSimulatorLayers();
+    }
+
+    /**
+     * 04번 기본 체형 소체 캔버스 즉시 좌우 반전
+     */
+    function flipBaseBodyPart() {
+      const bodyIdx = sliceSpecs.findIndex(s => s.id === '04');
+      if (bodyIdx >= 0) {
+        flipSlicedPartCanvas(bodyIdx);
+      }
+    }
+
+    function selectPartForEdit(idx) {
+      selectedPartIndex = idx;
+      document.querySelectorAll('.part-slice-card').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+      const sp = sliceSpecs[idx];
+      document.getElementById('selected-part-title').innerText = `선택 슬롯: ${sp.name}`;
+      document.getElementById('slice-x').value = sp.x;
+      document.getElementById('slice-y').value = sp.y;
+      document.getElementById('slice-w').value = sp.w;
+      document.getElementById('slice-h').value = sp.h;
+
+      const toggleBtn = document.getElementById('btn-toggle-selected-absent');
+      if (toggleBtn) {
+        if (!sp.canBeAbsent) {
+          toggleBtn.style.display = 'none';
+        } else {
+          toggleBtn.style.display = 'inline-flex';
+          toggleBtn.innerText = sp.absent
+            ? '🚫 현재 상태: 없음(미착용/미보유) — 클릭 시 보유로 전환'
+            : '✅ 현재 상태: 보유/착용 — 클릭 시 "없음"으로 전환';
+          toggleBtn.className = sp.absent ? 'btn btn-danger' : 'btn btn-green';
+        }
+      }
+      renderPartsSlicer();
+    }
+
+    /**
+     * 특정 파츠(09 헤일로, 10 상의, 11 하의, 12 날개/망토, 13 주무기, 14 보조무기, 15 속옷)를
+     * '없음(미착용/미보유)' 상태로 전환하거나 해제
+     */
+    function togglePartAbsent(idx) {
+      const sp = sliceSpecs[idx];
+      if (!sp || !sp.canBeAbsent) return;
+      sp.absent = !sp.absent;
+      syncAbsentUiStates();
+      updateRigSimulatorLayers();
+      updateGeneratedCode();
+    }
+
+    function syncAbsentUiStates() {
+      sliceSpecs.forEach((sp, idx) => {
+        const card = document.getElementById(`part-card-${idx}`);
+        if (card) card.classList.toggle('is-absent', !!sp.absent);
+        const cardBtn = document.getElementById(`btn-absent-card-${idx}`);
+        if (cardBtn) {
+          cardBtn.innerText = sp.absent ? '🚫 없음' : '✅ 보유';
+          cardBtn.style.background = sp.absent ? '#dc2626' : '#059669';
+          cardBtn.style.borderColor = sp.absent ? '#f87171' : '#34d399';
+        }
+      });
+      const curSp = sliceSpecs[selectedPartIndex];
+      const toggleBtn = document.getElementById('btn-toggle-selected-absent');
+      if (toggleBtn && curSp && curSp.canBeAbsent) {
+        toggleBtn.innerText = curSp.absent
+          ? '🚫 현재 상태: 없음(미착용/미보유) — 클릭 시 보유로 전환'
+          : '✅ 현재 상태: 보유/착용 — 클릭 시 "없음"으로 전환';
+        toggleBtn.className = curSp.absent ? 'btn btn-danger' : 'btn btn-green';
+      }
+    }
+
+    /**
+     * 슬롯 내부의 유효 불투명 픽셀 비율을 검사하여 비어있거나 '없음' 텍스트만 있는 슬롯을 자동으로 '없음(absent)' 처리
+     */
+    function autoDetectAbsentParts() {
+      sliceSpecs.forEach((sp, idx) => {
+        if (!sp.canBeAbsent) return;
+        const pCanvas = document.getElementById(`canvas-part-${idx}`);
+        if (!pCanvas) return;
+        const ctx = pCanvas.getContext('2d');
+        try {
+          const imgData = ctx.getImageData(0, 0, pCanvas.width, pCanvas.height).data;
+          let nonEmptyPixels = 0;
+          const totalPixels = pCanvas.width * pCanvas.height;
+          for (let i = 3; i < imgData.length; i += 4) {
+            if (imgData[i] > 35) nonEmptyPixels++;
+          }
+          const fillRatio = nonEmptyPixels / Math.max(1, totalPixels);
+          // 유효 픽셀이 3.5% 미만이면 빈 슬롯 또는 '없음' 텍스트만 있는 슬롯으로 판단
+          sp.absent = (fillRatio < 0.035);
+        } catch (e) { }
+      });
+      syncAbsentUiStates();
+      updateRigSimulatorLayers();
+      updateGeneratedCode();
+    }
+
+    function onSliceRectInput() {
+      const sp = sliceSpecs[selectedPartIndex];
+      sp.x = parseFloat(document.getElementById('slice-x').value) || 0;
+      sp.y = parseFloat(document.getElementById('slice-y').value) || 0;
+      sp.w = parseFloat(document.getElementById('slice-w').value) || 5;
+      sp.h = parseFloat(document.getElementById('slice-h').value) || 5;
+      renderPartsSlicer();
+    }
+
+    function resetSlicePresets() {
+      sliceSpecs = JSON.parse(JSON.stringify(OFFICIAL_2048_SLICE_SPECS));
+      initPartPreviewCards();
+      selectPartForEdit(selectedPartIndex);
+    }
+
+    function renderPartsSlicer() {
+      const isDual = (sheetUploadMode === 'dual');
+      const srcSheetSingle = rawImages.sheet;
+      const srcSheetA = rawImages.sheetA;
+      const srcSheetB = rawImages.sheetB;
+
+      // 단일 시트 모드에서 이미지가 없으면 리턴
+      if (!isDual && !srcSheetSingle) return;
+      // 듀얼 시트 모드에서 유효한 시트 이미지가 하나도 없으면 리턴
+      if (isDual && !srcSheetA && !srcSheetB && !srcSheetSingle) return;
+
+      const guideCanvas = document.getElementById('canvas-slicer-guide');
+      const mainGuideImg = isDual ? (srcSheetB || srcSheetA || srcSheetSingle) : srcSheetSingle;
+      if (mainGuideImg && guideCanvas) {
+        guideCanvas.width = mainGuideImg.width;
+        guideCanvas.height = mainGuideImg.height;
+        const gCtx = guideCanvas.getContext('2d');
+        gCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
+        gCtx.drawImage(mainGuideImg, 0, 0);
+      }
+
+      sliceSpecs.forEach((sp, idx) => {
+        let targetImg = srcSheetSingle;
+        let coords = { x: sp.x, y: sp.y, w: sp.w, h: sp.h };
+
+        if (isDual) {
+          if (['01', '04'].includes(sp.id)) {
+            targetImg = srcSheetA || srcSheetSingle;
+            if (srcSheetA && OFFICIAL_SHEET_A_SPECS[sp.id]) {
+              coords = OFFICIAL_SHEET_A_SPECS[sp.id];
+            }
+          } else {
+            targetImg = srcSheetB || srcSheetSingle;
+            if (srcSheetB && OFFICIAL_SHEET_B_SPECS[sp.id]) {
+              coords = OFFICIAL_SHEET_B_SPECS[sp.id];
+            }
+          }
+        }
+
+        if (!targetImg) return;
+
+        const sw = targetImg.width;
+        const sh = targetImg.height;
+        const rx = Math.round((coords.x / 100) * sw);
+        const ry = Math.round((coords.y / 100) * sh);
+        const rw = Math.max(1, Math.round((coords.w / 100) * sw));
+        const rh = Math.max(1, Math.round((coords.h / 100) * sh));
+
+        // 가이드 캔버스에 크롭 영역 표시
+        if (guideCanvas && targetImg === mainGuideImg) {
+          const gCtx = guideCanvas.getContext('2d');
+          gCtx.save();
+          gCtx.strokeStyle = sp.absent ? '#ef4444' : sp.color;
+          gCtx.lineWidth = (idx === selectedPartIndex) ? 5 : 2.5;
+          if (sp.absent) {
+            gCtx.setLineDash([8, 6]);
+            gCtx.fillStyle = 'rgba(15, 23, 42, 0.55)';
+            gCtx.fillRect(rx, ry, rw, rh);
+          } else if (idx !== selectedPartIndex) {
+            gCtx.setLineDash([5, 4]);
+          }
+          gCtx.strokeRect(rx, ry, rw, rh);
+          gCtx.fillStyle = sp.absent ? '#f87171' : sp.color;
+          gCtx.font = 'bold 18px sans-serif';
+          gCtx.fillText(sp.absent ? `${sp.id}. [없음]` : sp.name, rx + 6, Math.max(22, ry + 22));
+          gCtx.restore();
+        }
+
+        // 2) 개별 파츠 캔버스에 잘라내고 개별 Edge Flood-Fill 투명화 + 타이트 바운딩 박스 Auto-Trim 수행!
+        const pCanvas = document.getElementById(`canvas-part-${idx}`);
+        if (pCanvas) {
+          pCanvas.width = rw;
+          pCanvas.height = rh;
+          const pCtx = pCanvas.getContext('2d');
+          pCtx.clearRect(0, 0, rw, rh);
+          pCtx.drawImage(targetImg, rx, ry, rw, rh, 0, 0, rw, rh);
+          applyEdgeFloodFillTransparency(pCanvas, sp.id);
+          if (!sp.absent) {
+            autoTrimCanvasToContent(pCanvas, 4);
+          }
+        }
+      });
+
+      updateRigSimulatorLayers();
+      updateGeneratedCode();
+    }
+
+    /**
+     * 분리된 전 파츠(04.체형소체, 05/08.표정, 09.머리장식, 10.상의, 11.하의, 12.날개, 13.주무기, 14.보조무기, 15.속옷)를
+     * 우측 3종 아바타 소체 리깅 시뮬레이터에 실시간 다층 조립 바인딩!
+     * ('없음(absent)' 상태인 파츠는 즉시 숨김 처리)
+     */
+    function updateRigSimulatorLayers() {
+      const getPartDataUrl = (id) => {
+        const idx = sliceSpecs.findIndex(s => s.id === id);
+        if (idx < 0) return null;
+        const sp = sliceSpecs[idx];
+        if (sp.absent) return null;
+        const c = document.getElementById(`canvas-part-${idx}`);
+        if (!c) return null;
+        try {
+          return c.toDataURL('image/png');
+        } catch (e) {
+          return null;
+        }
+      };
+
+      const coreId = useBaseBodyAsCore ? '04' : '01';
+      const coreUrl = getPartDataUrl(coreId);
+      const exprNeutralUrl = useBaseBodyAsCore ? getPartDataUrl('05') : null;
+      const exprSeriousUrl = useBaseBodyAsCore ? getPartDataUrl('08') : null;
+      const haloUrl = getPartDataUrl('09');
+      const topUrl = useBaseBodyAsCore ? getPartDataUrl('10') : null;
+      const bottomUrl = useBaseBodyAsCore ? getPartDataUrl('11') : null;
+      const wingsUrl = getPartDataUrl('12');
+      const weaponUrl = getPartDataUrl('13');
+      const subUrl = getPartDataUrl('14');
+      const underwearUrl = useBaseBodyAsCore ? getPartDataUrl('15') : null;
+
+      const bindLayer = (elId, url) => {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        if (url) {
+          el.src = url;
+          el.style.display = 'block';
+        } else {
+          el.style.display = 'none';
+        }
+      };
+
+      // 1) 04.체형소체 (또는 01.정면본체)
+      bindLayer('sim-show-core', coreUrl);
+      bindLayer('sim-tile-core', coreUrl);
+
+      // 2) 15.속옷, 11.하의, 10.상의 (04.체형소체 조립 모드일 때 소체 위에 입힘)
+      bindLayer('sim-show-underwear', underwearUrl);
+      bindLayer('sim-tile-underwear', underwearUrl);
+
+      bindLayer('sim-show-bottom', bottomUrl);
+      bindLayer('sim-tile-bottom', bottomUrl);
+
+      bindLayer('sim-show-top', topUrl);
+      bindLayer('sim-tile-top', topUrl);
+
+      // 3) 05.기본표정 & 08.공격표정 (공격 모션 시 05 -> 08 실시간 표정 전환!)
+      bindLayer('sim-show-expr-neutral', exprNeutralUrl);
+      bindLayer('sim-tile-expr-neutral', exprNeutralUrl);
+
+      bindLayer('sim-show-expr-serious', exprSeriousUrl);
+      bindLayer('sim-tile-expr-serious', exprSeriousUrl);
+
+      // 4) 09.머리장식/헤일로
+      bindLayer('sim-show-halo', haloUrl);
+      bindLayer('sim-tile-halo', haloUrl);
+
+      // 5) 12.날개/망토 (좌우 대칭 2장 모드 vs 단일 1장 모드)
+      // 좌측 날개는 캔버스에서 수평 반전(FlipX)한 DataURL을 직접 생성하여 축 이동 없이 100% 좌우 대칭 보장!
+      const getFlippedPartDataUrl = (id) => {
+        const idx = sliceSpecs.findIndex(s => s.id === id);
+        if (idx < 0 || sliceSpecs[idx].absent) return null;
+        const c = document.getElementById(`canvas-part-${idx}`);
+        if (!c || !c.width || !c.height) return null;
+        try {
+          const off = document.createElement('canvas');
+          off.width = c.width;
+          off.height = c.height;
+          const oCtx = off.getContext('2d');
+          oCtx.translate(c.width, 0);
+          oCtx.scale(-1, 1);
+          oCtx.drawImage(c, 0, 0);
+          return off.toDataURL('image/png');
+        } catch (e) {
+          return null;
+        }
+      };
+
+      if (wingsUrl && mirrorWingsMode) {
+        const wingsLeftFlippedUrl = getFlippedPartDataUrl('12') || wingsUrl;
+        bindLayer('sim-show-wings-left', wingsLeftFlippedUrl);
+        bindLayer('sim-show-wings-right', wingsUrl);
+        bindLayer('sim-show-wings-single', null);
+        bindLayer('sim-tile-wings-left', wingsLeftFlippedUrl);
+        bindLayer('sim-tile-wings-right', wingsUrl);
+        bindLayer('sim-tile-wings-single', null);
+      } else {
+        bindLayer('sim-show-wings-left', null);
+        bindLayer('sim-show-wings-right', null);
+        bindLayer('sim-show-wings-single', wingsUrl);
+        bindLayer('sim-tile-wings-left', null);
+        bindLayer('sim-tile-wings-right', null);
+        bindLayer('sim-tile-wings-single', wingsUrl);
+      }
+
+      // 6) 13.주무기 & 14.보조무기
+      bindLayer('sim-show-weapon', weaponUrl);
+      bindLayer('sim-tile-weapon', weaponUrl);
+
+      bindLayer('sim-show-sub', subUrl);
+      bindLayer('sim-tile-sub', subUrl);
+
+      // 활성/없음 파츠 상태 요약 표시
+      const summaryParts = [];
+      if (useBaseBodyAsCore) {
+        summaryParts.push('04.체형소체');
+        summaryParts.push('05/08.표정(ON)');
+        summaryParts.push(haloUrl ? '09.머리장식(ON)' : '09.머리장식(없음)');
+        summaryParts.push(topUrl ? '10.상의(ON)' : '10.상의(없음)');
+        summaryParts.push(bottomUrl ? '11.하의(ON)' : '11.하의(없음)');
+        summaryParts.push(wingsUrl ? '12.날개(ON)' : '12.날개(없음)');
+        summaryParts.push(weaponUrl ? '13.주무기(ON)' : '13.주무기(없음)');
+        summaryParts.push(subUrl ? '14.보조무기(ON)' : '14.보조무기(없음)');
+        summaryParts.push(underwearUrl ? '15.속옷(ON)' : '15.속옷(없음)');
+      } else {
+        summaryParts.push('01.정면통짜코어');
+        summaryParts.push(haloUrl ? '09.머리장식(ON)' : '09.머리장식(없음)');
+        summaryParts.push(wingsUrl ? '12.날개(ON)' : '12.날개(없음)');
+        summaryParts.push(weaponUrl ? '13.주무기(ON)' : '13.주무기(없음)');
+        summaryParts.push(subUrl ? '14.보조무기(ON)' : '14.보조무기(없음)');
+      }
+      const sumEl = document.getElementById('sim-active-parts-summary');
+      if (sumEl) sumEl.innerText = summaryParts.join(' · ');
+    }
+
+    function syncRigModeButtons() {
+      const coreBtn = document.getElementById('btn-core-source');
+      if (coreBtn) {
+        coreBtn.innerText = useBaseBodyAsCore
+          ? '🧩 모드: 04.소체+전파츠 조립'
+          : '🧍 모드: 01.정면 통짜코어';
+        coreBtn.className = useBaseBodyAsCore ? 'btn btn-gold' : 'btn';
+      }
+      const wingBtn = document.getElementById('btn-wing-mirror');
+      if (wingBtn) {
+        wingBtn.innerText = mirrorWingsMode
+          ? '🦋 날개: 좌우대칭(2장)'
+          : '🦋 날개: 단일(1장)';
+      }
+    }
+
+    function toggleCoreSource() {
+      useBaseBodyAsCore = !useBaseBodyAsCore;
+      syncRigModeButtons();
+      updateRigSimulatorLayers();
+    }
+
+    function toggleWingMirrorMode() {
+      mirrorWingsMode = !mirrorWingsMode;
+      syncRigModeButtons();
+      updateRigSimulatorLayers();
+    }
+
+    function onChangeAvatarRigType() {
+      const rigType = document.getElementById('sel-avatar-rig').value; // 'tall' | 'standard' | 'petite'
+      ['sim-rig-showcase', 'sim-rig-tile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('rig-tall', 'rig-standard', 'rig-petite');
+        el.classList.add(`rig-${rigType}`);
+      });
+      updateGeneratedCode();
+    }
+
+    function toggleSimFacing() {
+      simFacing = (simFacing === 'right') ? 'left' : 'right';
+      ['sim-rig-showcase', 'sim-rig-tile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('facing-left', simFacing === 'left');
+      });
+    }
+
+    function triggerSimAttack() {
+      ['sim-rig-showcase', 'sim-rig-tile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('is-attacking');
+        void el.offsetWidth;
+        el.classList.add('is-attacking');
+        setTimeout(() => {
+          el.classList.remove('is-attacking');
+        }, 440);
+      });
+    }
+
+    function toggleAutoAttackLoop() {
+      const btn = document.getElementById('btn-auto-loop');
+      if (autoLoopInterval) {
+        clearInterval(autoLoopInterval);
+        autoLoopInterval = null;
+        btn.innerText = '🔁 자동공격: OFF';
+        btn.classList.remove('btn-primary');
+      } else {
+        triggerSimAttack();
+        autoLoopInterval = setInterval(triggerSimAttack, 1150);
+        btn.innerText = '🔁 자동공격: ON';
+        btn.classList.add('btn-primary');
+      }
+    }
+
+    /**
+     * 프리셋 변경 및 코드 스니펫 생성 ('없음' 항목은 null 표기)
+     */
+    function onSelectCharacterPreset() {
+      const sel = document.getElementById('preset-char-select').value;
+      const preset = characterPresets[sel];
+      if (preset) {
+        document.getElementById('asset-slug-input').value = preset.slug;
+        document.getElementById('sel-avatar-rig').value = preset.rigType;
+        if (typeof preset.useBaseBody === 'boolean') {
+          useBaseBodyAsCore = preset.useBaseBody;
+        }
+        if (typeof preset.mirrorWings === 'boolean') {
+          mirrorWingsMode = preset.mirrorWings;
+        }
+        syncRigModeButtons();
+        sliceSpecs.forEach(sp => {
+          if (sp.canBeAbsent) {
+            sp.absent = preset.absentIds.includes(sp.id);
+          }
+        });
+        syncAbsentUiStates();
+        onChangeAvatarRigType();
+        updateRigSimulatorLayers();
+      }
+      updateGeneratedCode();
+    }
+
+    function getSlug() {
+      return (document.getElementById('asset-slug-input').value || 'character').trim().toLowerCase();
+    }
+
+    function updateGeneratedCode() {
+      const slug = getSlug();
+      const rigType = document.getElementById('sel-avatar-rig').value;
+      const partPathOrNull = (id, key) => {
+        const sp = sliceSpecs.find(s => s.id === id);
+        if (!sp || sp.absent) {
+          return `null, // 🚫 없음 (미착용 / 미보유)`;
+        }
+        return `"assets/parts/${slug}_${key}.png",`;
+      };
+
+      const code = `    char_${slug}: {
+        rigType: "${rigType}", // 3종 공통 아바타 소체 규격 ('tall' | 'standard' | 'petite')
+        standingArt: "assets/char_${slug}.png",
+        referenceSheet: "assets/ref_${slug}_sheet.png",
+        modularParts: {
+            frontCore:   "assets/parts/${slug}_front_core.png",   // 01. 정면 본체 코어
+            baseBody:    "assets/parts/${slug}_base_body.png",    // 04. 3종 아바타 체형 소체
+            exprNeutral: "assets/parts/${slug}_expr_neutral.png", // 05. 표정: 기본 무표정
+            exprSerious: "assets/parts/${slug}_expr_serious.png", // 08. 표정: 공격 전투결의
+            headgear:    ${partPathOrNull('09', 'headgear')}
+            topDress:    ${partPathOrNull('10', 'top_dress')}
+            bottomSkirt: ${partPathOrNull('11', 'bottom_skirt')}
+            wingsCape:   ${partPathOrNull('12', 'wings_cape')}
+            mainWeapon:  ${partPathOrNull('13', 'main_weapon')}
+            subWeapon:   ${partPathOrNull('14', 'sub_weapon')}
+            underwear:   ${partPathOrNull('15', 'underwear')}
+        }
+    },`;
+      document.getElementById('code-output-area').value = code;
+    }
+
+    /**
+     * PNG 다운로드 유틸리티
+     */
+    function downloadCanvasAsPng(canvas, filename) {
+      try {
+        const link = document.createElement('a');
+        link.download = filename;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (err) {
+        alert('로컬 보안 제한이 걸린 경우 [📂 파일 선택] 또는 드래그 앤 드롭으로 이미지를 직접 넣은 뒤 저장해 주세요!');
+      }
+    }
+
+    function downloadSlotPng(slotKey) {
+      const slug = getSlug();
+      if (slotKey === 'standing') {
+        const c = document.getElementById('canvas-standing') || document.getElementById('canvas-standing-legacy');
+        downloadCanvasAsPng(c, `char_${slug}.png`);
+      } else if (slotKey === 'sheetA') {
+        downloadCanvasAsPng(document.getElementById('canvas-sheet-a'), `ref_${slug}_sheet_A_body.png`);
+      } else if (slotKey === 'sheetB') {
+        downloadCanvasAsPng(document.getElementById('canvas-sheet-b'), `ref_${slug}_sheet_B_gear.png`);
+      } else {
+        downloadCanvasAsPng(document.getElementById('canvas-sheet'), `ref_${slug}_sheet.png`);
+      }
+    }
+
+    function downloadStandingAndSheetPng() {
+      downloadSlotPng('standing');
+      setTimeout(() => downloadSlotPng('sheet'), 250);
+    }
+
+    function downloadSingleSlicedPart(idx) {
+      const slug = getSlug();
+      const sp = sliceSpecs[idx];
+      if (sp.absent) {
+        alert(`[${sp.name}] 항목은 현재 '없음(미착용/미보유)' 상태입니다. 저장하려면 먼저 [🚫 없음] 버튼을 눌러 보유 상태로 전환하세요.`);
+        return;
+      }
+      const pCanvas = document.getElementById(`canvas-part-${idx}`);
+      downloadCanvasAsPng(pCanvas, `${slug}_${sp.key}.png`);
+    }
+
+    function downloadAllActiveParts() {
+      let delay = 0;
+      sliceSpecs.forEach((sp, idx) => {
+        if (!sp.absent) {
+          setTimeout(() => downloadSingleSlicedPart(idx), delay);
+          delay += 220;
+        }
+      });
+    }
+
+    function copyTextById(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.select();
+      navigator.clipboard.writeText(el.value);
+      alert('클립보드에 복사되었습니다!');
+    }
+
+    /* 🎯 전 파츠(표정·상의·하의·헤일로·날개·무기) 실시간 1:1 피팅 & 좌우반전 & 모션 컨트롤러 로직 */
+    const DEFAULT_PART_FITS = {
+      expr:   { scale: 100, x: 0, y: 0, clip: 44, mask: true, flipX: false },
+      top:    { scale: 100, x: 0, y: 0, flipX: false },
+      bottom: { scale: 100, x: 0, y: 0, flipX: false },
+      halo:   { scale: 100, x: 0, y: 0, flipX: false },
+      wings:  { scale: 100, x: 0, y: 0, flipX: false },
+      weapon: { scale: 100, x: 0, y: 0, flipX: false },
+      sub:    { scale: 100, x: 0, y: 0, flipX: false }
+    };
+
+    let partFitState = JSON.parse(JSON.stringify(DEFAULT_PART_FITS));
+
+    function getCurrentTuningTarget() {
+      return document.getElementById('sel-tuning-target')?.value || 'expr';
+    }
+
+    function onSwitchTuningTarget() {
+      const target = getCurrentTuningTarget();
+      const state = partFitState[target] || { scale: 100, x: 0, y: 0, flipX: false };
+
+      const scaleEl = document.getElementById('rng-target-scale');
+      const xEl = document.getElementById('rng-target-x');
+      const yEl = document.getElementById('rng-target-y');
+      const extraWrap = document.getElementById('wrap-target-extra');
+      const maskWrap = document.getElementById('wrap-expr-mask-chk');
+      const flipChk = document.getElementById('chk-target-flip');
+
+      if (scaleEl) scaleEl.value = state.scale ?? 100;
+      if (xEl) xEl.value = state.x ?? 0;
+      if (yEl) yEl.value = state.y ?? 0;
+      if (flipChk) flipChk.checked = !!state.flipX;
+
+      if (target === 'expr') {
+        if (extraWrap) extraWrap.style.display = 'block';
+        if (maskWrap) maskWrap.style.display = 'inline-flex';
+        const clipEl = document.getElementById('rng-target-extra');
+        if (clipEl) clipEl.value = state.clip ?? 44;
+        const maskChk = document.getElementById('chk-expr-mask');
+        if (maskChk) maskChk.checked = state.mask ?? true;
+      } else {
+        if (extraWrap) extraWrap.style.display = 'none';
+        if (maskWrap) maskWrap.style.display = 'none';
+      }
+
+      updateTuningUiLabels(target, state);
+    }
+
+    function updateTuningUiLabels(target, state) {
+      document.getElementById('val-target-scale').textContent = `${state.scale}%`;
+      document.getElementById('val-target-x').textContent = `${state.x > 0 ? '+' : ''}${state.x}%`;
+      document.getElementById('val-target-y').textContent = `${state.y > 0 ? '+' : ''}${state.y}%`;
+
+      if (target === 'expr') {
+        document.getElementById('val-target-extra').textContent = `${state.clip}%`;
+      }
+
+      const badge = document.getElementById('badge-part-status');
+      if (badge) {
+        const isDefault = (state.scale === 100 && state.x === 0 && state.y === 0 && !state.flipX);
+        const flipLabel = state.flipX ? ' · ↔️반전' : '';
+        badge.textContent = isDefault ? '표준 핏(100%)' : `조정 핏(${state.scale}%${flipLabel})`;
+        badge.style.background = isDefault ? '#1e3a8a' : (state.flipX ? '#065f46' : '#701a75');
+        badge.style.color = isDefault ? '#93c5fd' : (state.flipX ? '#6ee7b7' : '#f0abfc');
+      }
+    }
+
+    function onUniversalParamChange() {
+      const target = getCurrentTuningTarget();
+      if (!partFitState[target]) partFitState[target] = {};
+
+      const scale = parseInt(document.getElementById('rng-target-scale')?.value || 100, 10);
+      const x = parseFloat(document.getElementById('rng-target-x')?.value || 0);
+      const y = parseFloat(document.getElementById('rng-target-y')?.value || 0);
+
+      partFitState[target].scale = scale;
+      partFitState[target].x = x;
+      partFitState[target].y = y;
+
+      if (target === 'expr') {
+        const clip = parseInt(document.getElementById('rng-target-extra')?.value || 44, 10);
+        partFitState.expr.clip = clip;
+      }
+
+      applyPartFitToCss(target);
+      updateTuningUiLabels(target, partFitState[target]);
+
+      try {
+        localStorage.setItem('sd_studio_part_fits', JSON.stringify(partFitState));
+      } catch (e) { }
+    }
+
+    function onTargetFlipToggle(checked) {
+      const target = getCurrentTuningTarget();
+      if (!partFitState[target]) partFitState[target] = {};
+      partFitState[target].flipX = checked;
+      applyPartFitToCss(target);
+      updateTuningUiLabels(target, partFitState[target]);
+
+      try {
+        localStorage.setItem('sd_studio_part_fits', JSON.stringify(partFitState));
+      } catch (e) { }
+    }
+
+    function applyPartFitToCss(target) {
+      const state = partFitState[target];
+      if (!state) return;
+      const rootStyle = document.documentElement.style;
+      const flipVal = state.flipX ? -1 : 1;
+
+      if (target === 'expr') {
+        rootStyle.setProperty('--expr-scale', (state.scale / 100).toFixed(3));
+        rootStyle.setProperty('--expr-offset-x', `${state.x}%`);
+        rootStyle.setProperty('--expr-offset-y', `${state.y}%`);
+        rootStyle.setProperty('--expr-clip-rx', `${state.clip}%`);
+        rootStyle.setProperty('--expr-clip-ry', `${Math.round(state.clip * 0.9)}%`);
+        rootStyle.setProperty('--expr-flip', flipVal);
+      } else if (target === 'top') {
+        rootStyle.setProperty('--top-scale', (state.scale / 100).toFixed(3));
+        rootStyle.setProperty('--top-x', `${state.x}%`);
+        rootStyle.setProperty('--top-y', `${state.y}%`);
+        rootStyle.setProperty('--top-flip', flipVal);
+      } else if (target === 'bottom') {
+        rootStyle.setProperty('--bottom-scale', (state.scale / 100).toFixed(3));
+        rootStyle.setProperty('--bottom-x', `${state.x}%`);
+        rootStyle.setProperty('--bottom-y', `${state.y}%`);
+        rootStyle.setProperty('--bottom-flip', flipVal);
+      } else if (target === 'halo') {
+        rootStyle.setProperty('--halo-scale', (state.scale / 100).toFixed(3));
+        rootStyle.setProperty('--halo-x', `${state.x}%`);
+        rootStyle.setProperty('--halo-y', `${state.y}%`);
+        rootStyle.setProperty('--halo-flip', flipVal);
+      } else if (target === 'wings') {
+        rootStyle.setProperty('--wings-scale', (state.scale / 100).toFixed(3));
+        rootStyle.setProperty('--wings-x', `${state.x}%`);
+        rootStyle.setProperty('--wings-y', `${state.y}%`);
+        rootStyle.setProperty('--wings-flip', flipVal);
+      } else if (target === 'weapon') {
+        rootStyle.setProperty('--weapon-scale', (state.scale / 100).toFixed(3));
+        rootStyle.setProperty('--weapon-x', `${state.x}%`);
+        rootStyle.setProperty('--weapon-y', `${state.y}%`);
+        rootStyle.setProperty('--weapon-flip', flipVal);
+      } else if (target === 'sub') {
+        rootStyle.setProperty('--sub-scale', (state.scale / 100).toFixed(3));
+        rootStyle.setProperty('--sub-x', `${state.x}%`);
+        rootStyle.setProperty('--sub-y', `${state.y}%`);
+        rootStyle.setProperty('--sub-flip', flipVal);
+      }
+    }
+
+    function applyAllPartFitsToCss() {
+      Object.keys(partFitState).forEach(target => applyPartFitToCss(target));
+      const target = getCurrentTuningTarget();
+      onSwitchTuningTarget();
+    }
+
+    function onExprMaskToggle(checked) {
+      partFitState.expr.mask = checked;
+      const rootStyle = document.documentElement.style;
+      if (checked) {
+        rootStyle.setProperty('--expr-clip-path', 'ellipse(var(--expr-clip-rx) var(--expr-clip-ry) at 50% 48%)');
+      } else {
+        rootStyle.setProperty('--expr-clip-path', 'none');
+      }
+      try {
+        localStorage.setItem('sd_studio_part_fits', JSON.stringify(partFitState));
+      } catch (e) { }
+    }
+
+    function resetCurrentTargetTuning() {
+      const target = getCurrentTuningTarget();
+      partFitState[target] = JSON.parse(JSON.stringify(DEFAULT_PART_FITS[target]));
+      applyPartFitToCss(target);
+      onSwitchTuningTarget();
+    }
+
+    function resetAllPartTuning() {
+      partFitState = JSON.parse(JSON.stringify(DEFAULT_PART_FITS));
+      applyAllPartFitsToCss();
+      try {
+        localStorage.removeItem('sd_studio_part_fits');
+      } catch (e) { }
+    }
+
+    function copyAllPartFitParams() {
+      const slug = getSlug();
+      const code = `// 🎯 ${slug} 캐릭터 모듈러 파츠 1:1 완벽 핏 파라미터 (js/constants.js 또는 CSS에 적용)
+modularCustomFit: ${JSON.stringify(partFitState, null, 2)}`;
+
+      navigator.clipboard.writeText(code).then(() => {
+        alert('🎯 전체 파츠 핏 파라미터가 클립보드에 복사되었습니다!\n\n' + code);
+      }).catch(() => {
+        prompt('아래 파라미터를 복사하세요:', code);
+      });
+    }
+
+    // 🏹 무기 공격 모션 타입 제어 (활 사격, 석궁 격발, 근접 베기, 마법 영창)
+    function setAttackMotionType(motionType) {
+      const stages = document.querySelectorAll('.avatar-rig-stage');
+      stages.forEach(st => {
+        st.classList.remove('motion-bow', 'motion-crossbow', 'motion-sword', 'motion-magic');
+        st.classList.add(`motion-${motionType}`);
+      });
+      const sel = document.getElementById('sel-attack-motion-type');
+      if (sel) sel.value = motionType;
+    }
+
+    function onChangeAttackMotionType() {
+      const sel = document.getElementById('sel-attack-motion-type');
+      if (sel) setAttackMotionType(sel.value);
+    }
+
+    function initUniversalTuning() {
+      try {
+        const saved = localStorage.getItem('sd_studio_part_fits');
+        if (saved) {
+          const loaded = JSON.parse(saved);
+          partFitState = Object.assign({}, DEFAULT_PART_FITS, loaded);
+        }
+      } catch (e) { }
+      applyAllPartFitsToCss();
+      setAttackMotionType('bow');
+    }
+
+    // 프리셋 선택 시 프리셋 전용 핏 및 무기 모션이 있으면 자동 주입
+    const originalOnSelectCharacterPreset = onSelectCharacterPreset;
+    onSelectCharacterPreset = function() {
+      originalOnSelectCharacterPreset();
+      const sel = document.getElementById('preset-char-select')?.value;
+      const preset = characterPresets[sel];
+      if (preset) {
+        if (preset.customFit) {
+          partFitState = JSON.parse(JSON.stringify(preset.customFit));
+          applyAllPartFitsToCss();
+        }
+        if (preset.motionType) {
+          setAttackMotionType(preset.motionType);
+        }
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', initUniversalTuning);
+  </script>
+</body>
+
+</html>

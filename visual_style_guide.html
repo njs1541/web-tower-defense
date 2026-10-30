@@ -2166,26 +2166,46 @@
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-                        <!-- 모드 선택: 일반 일러스트 vs 설정 시트 -->
+                        <!-- 모드 선택: 일반 일러스트 vs Live2D 파츠 분할 티어 -->
                         <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.06); padding: 12px 14px; border-radius: 8px;">
-                            <label style="font-size: 12px; font-weight: 800; color: #e2e8f0; display: block; margin-bottom: 8px;">📑 진행 단계별 생성 모드 선택 (듀얼 시트 권장: 2-A ➔ 2-B)</label>
-                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <label style="font-size: 12px; font-weight: 800; color: #e2e8f0; display: block; margin-bottom: 8px;">📑 진행 단계 및 Live2D 파츠 분할 티어(Tier) 선택</label>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                 <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #f1f5f9; cursor: pointer; background: rgba(168,85,247,0.12); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(168,85,247,0.3);">
                                     <input type="radio" name="gen-mode" value="illust" checked onchange="updatePrompt()" style="accent-color: #a855f7;">
                                     <span>1️⃣ 1단계: 8등신 전신 원화 (Full Standing)</span>
                                 </label>
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #10b981; font-weight: 700; cursor: pointer; background: rgba(16,185,129,0.12); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.35);">
+                                    <input type="radio" name="gen-mode" value="tier1_allinone" onchange="updatePrompt()" style="accent-color: #10b981;">
+                                    <span>⚡ [Tier 1] 올인원 단일 출력 (12슬롯 Live2D 마스터 시트 - 1번에 완성)</span>
+                                </label>
                                 <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #38bdf8; font-weight: 700; cursor: pointer; background: rgba(56,189,248,0.12); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(56,189,248,0.35);">
                                     <input type="radio" name="gen-mode" value="sheet_a" onchange="updatePrompt()" style="accent-color: #38bdf8;">
-                                    <span>⭐ [강력권장] 2-A단계: SD 3면도 & 기본 소체 시트 (초대형 4슬롯, 고화질/의수보존)</span>
+                                    <span>⭐ [Tier 2-A] SD 3면도 & 기본 소체 시트 (초대형 4슬롯)</span>
                                 </label>
                                 <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #ec4899; font-weight: 700; cursor: pointer; background: rgba(236,72,153,0.12); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(236,72,153,0.35);">
                                     <input type="radio" name="gen-mode" value="sheet_b" onchange="updatePrompt()" style="accent-color: #ec4899;">
-                                    <span>⭐ [강력권장] 2-B단계: SD 장비 & 표정 팩 시트 (표정 4종 + 투명의상/1짝날개/무기 6종)</span>
+                                    <span>⭐ [Tier 2-B] Live2D 장비 & 표정 팩 (앞/뒷치마 샌드위치 + 무기 10슬롯)</span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #fde047; cursor: pointer; background: rgba(245,158,11,0.1); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.25);">
-                                    <input type="radio" name="gen-mode" value="sheet" onchange="updatePrompt()" style="accent-color: #f59e0b;">
-                                    <span>2️⃣ 2단계 (통합): 01~15 소체 & 파츠 통합 시트 (기존 15슬롯 한 장)</span>
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8b5cf6; font-weight: 700; cursor: pointer; background: rgba(139,92,246,0.12); padding: 5px 10px; border-radius: 6px; border: 1px solid rgba(139,92,246,0.35);">
+                                    <input type="radio" name="gen-mode" value="tier3_studio" onchange="updatePrompt()" style="accent-color: #8b5cf6;">
+                                    <span>👑 [Tier 3] 초정밀 6분할 Live2D 스튜디오 (파츠별 독립 고화질)</span>
                                 </label>
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8; cursor: pointer; background: rgba(148,163,184,0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(148,163,184,0.25);">
+                                    <input type="radio" name="gen-mode" value="sheet" onchange="updatePrompt()" style="accent-color: #94a3b8;">
+                                    <span>레거시 통합 (15슬롯)</span>
+                                </label>
+                            </div>
+                            <!-- Tier 3 전용 세부 파트 선택 바 -->
+                            <div id="tier3-part-selector" style="display: none; margin-top: 10px; padding: 8px 12px; background: rgba(139,92,246,0.15); border: 1px dashed #8b5cf6; border-radius: 6px; align-items: center; gap: 8px;">
+                                <span style="font-size: 11.5px; font-weight: 700; color: #c4b5fd; white-space: nowrap;">👑 Tier 3 세부 파트 선택: </span>
+                                <select id="tier3-part-select" onchange="updatePrompt()" style="flex: 1; background: #1e1b4b; color: #fff; border: 1px solid #8b5cf6; padding: 5px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 700;">
+                                    <option value="part1" selected>Part 1: SD 소체 & 독립 사지 분리 (Bare SD Body + Decoupled Arms/Legs)</option>
+                                    <option value="part2">Part 2: 페이스 & 눈/입 애니메이션 세트 (민얼굴 + 눈 깜빡임 3상태 + 입 모양)</option>
+                                    <option value="part3">Part 3: 3D 입체 헤어 레이어 (앞머리 + 옆머리 + 뒷머리 볼륨 + 포니테일)</option>
+                                    <option value="part4">Part 4: 상체 의상 & 어깨/소매 분리 세트 (보디스 + 견갑 + 소매)</option>
+                                    <option value="part5">Part 5: 하체 의상 샌드위치 세트 (앞치마 + 뒷치마 Back Skirt + 허리띠)</option>
+                                    <option value="part6">Part 6: 장비 & 1짝 날개 & 보조무기 세트 (주무기 + 날개 1짝 + 헤일로/방패)</option>
+                                </select>
                             </div>
                         </div>
 
@@ -2853,14 +2873,14 @@
         };
 
 const STYLE_PROMPTS = {
-            'supreme_gold_chain': "alluring sensual apex costume, ornate glowing gold chain bikini armor with platinum trims, jeweled chest piece with cleavage cutout, micro high-leg armor plating exposing hips, translucent white sheer silk veil draped over shoulders and flowing behind, sheer lace-up garter stockings with gold embroidery, golden choker with glowing sacred crest gem",
-            'supreme_cyber_highleg': "futuristic high-leg cybernetic bodysuit, transparent holographic chest panels, micro high-cut hip exposure with glowing cybernetic lines, glossy patent leather, snug thigh strap holster squeeze, translucent cyber stockings",
-            'supreme_celestial_lingerie': "sheer ethereal starlight lingerie, translucent flowing organza nebula robe, sacred golden chain jewelry across chest and hips, floating gracefully in the air, enormous celestial halo rings, stardust particles",
-            'style_a': "tight shiny black latex and patent leather bodysuit with glossy specular highlights, chest leather body harness with metallic buckles, keyhole cutout, thigh holster with snug leather thigh strap squeeze, asymmetrical thigh-high stockings, black leather choker with ring",
-            'style_b': "elegant dark fantasy silk dress, translucent sheer lace fabric over chest and shoulders, deep teardrop keyhole cutout, extremely high side slit exposing hip, delicate lace-up black garter belt, sheer black stockings with floral embroidery",
+            'supreme_gold_chain': "alluring aesthetic apex combat attire, ornate glowing gold filigree armor bodice with platinum trims, protective jeweled chestplate with graceful contour cutout, tapered combat tassets and articulated hip guards, translucent white sheer silk veil draped over shoulders and flowing behind, sheer lace-up garter stockings with gold embroidery, golden choker with glowing sacred crest gem",
+            'supreme_cyber_highleg': "futuristic sleek cybernetic armor suit, transparent holographic chest panels, aerodynamic articulated combat hip plates with glowing cybernetic lines, glossy polished synthetic armor, snug tactical thigh holster, translucent cyber stockings",
+            'supreme_celestial_lingerie': "ethereal starlight divine vestment, translucent flowing organza nebula robe, sacred golden chain jewelry draped across ornamental breastplate and waist, floating gracefully in the air, enormous celestial halo rings, stardust particles",
+            'style_a': "sleek form-fitting black tactical bodysuit with glossy specular highlights, chest leather body harness with metallic buckles, elegant teardrop cutout, thigh holster with snug leather thigh strap squeeze, asymmetrical thigh-high stockings, black leather choker with ring",
+            'style_b': "elegant dark fantasy silk dress, translucent sheer lace fabric over chest and shoulders, tasteful keyhole cutout, graceful high side slit skirt, delicate lace-up black garter belt, sheer black stockings with floral embroidery",
             'style_hybrid': "fantasy tactical hybrid costume, leather bodysuit layered under an elegant high-slit sheer silk coat, metallic armor buckles and lace-up garter details",
             'style_classic': "formal knight officer tunic and light breastplate armor, neat shoulder cape, high-waist leather shorts, silver filigree details, polished combat boots",
-            'curvy': "alluring sensual costume, flattering feminine design",
+            'curvy': "alluring aesthetic costume, flattering feminine design",
             'slender': "graceful elegant costume, slim fitting design",
             'boyish': "handsome dashing tactical costume, sharp tailored design"
         };
@@ -3381,17 +3401,59 @@ const STYLE_PROMPTS = {
                     'mutation': "Exotic permanent mutant anatomical traits strictly mirroring original image."
                 };
 
-                // ✨ 3종 공통 SD 아바타 소체 규격('04. 기본 체형') 명세 (2.0~3.0등신 Chibi SD 비율 강제)
+                // ✨ 3종 공통 SD 아바타 소체 규격('04. 기본 체형') 명세 (2.0~3.0등신 Chibi SD 비율 강제 & AI 안전 필터 100% 준수)
                 const baseBodyPrompt = `full-body 2D game Super-Deformed (SD / Chibi) anatomical rigging avatar base model (${rigSpec.label} — ${rigSpec.sdRatioText}) of the EXACT SAME character (NOT a tall 7-8 heads realistic body, NOT a blank mannequin, NOT a faceless doll):
 - MANDATORY SD / CHIBI PROPORTION CONVERSION: Convert the tall standing character from Image 1 into ${rigSpec.sdPrompt}. Strictly align her oversized SD head (Head-to-Chin), compact SD waist, SD hips, and SD feet to the red height guide markers of '${rigSpec.type.toUpperCase()} SD' in Image 2.
 - Identical SD Face & Hair (완전한 SD 얼굴과 헤어스타일): MUST have her complete expressive chibi anime face and full voluminous hairstyle IDENTICAL in scale and position to SD turnaround views 01-03.
 - Inherent Bodily Traits (종족 고유 신체 100% 보존): ${RACE_ANATOMICAL_FEATURES[race] || ''}
-- Equipment Stripping (순수 복장/장비 및 속옷 완전 탈의): Stripped of ALL fabric clothing, outer armor, cape, halo, weapons, accessories, and underwear (NO bra, NO panties, NO garter belt on 04 SD base body model; pure bare seamless skin-toned SD chibi anatomy model ready for paper-doll clothing overlay).
+- Equipment Stripping (순수 소체 베이스): Neutral anatomical SD avatar chassis, seamless skin-toned athletic bodysuit layer (NO outer armor, NO heavy fabric, NO cape, NO weapons, NO halo; clean anatomical base ready for modular 2D equipment overlay).
 - Korean Label: '04. 기본 체형'`;
 
-                if (genMode === 'sheet_a') {
+                // Tier 3 서브 파트 셀렉터 UI 토글
+                const t3Selector = document.getElementById('tier3-part-selector');
+                if (t3Selector) t3Selector.style.display = (genMode === 'tier3_studio') ? 'flex' : 'none';
+
+                if (genMode === 'tier1_allinone') {
                     // =========================================================================
-                    // ⭐ [2-A단계] SD 3면도 & 기본 체형 소체 시트 (초대형 4슬롯 고해상도 규격)
+                    // ⚡ [Tier 1] 올인원 단일 출력 (12슬롯 Live2D 마스터 시트 - 1번에 완성)
+                    // =========================================================================
+                    prompt = `Based on the attached Character Design reference image:
+Faithfully decompose the character into a comprehensive **${rigSpec.sdRatioText} SD Live2D Modular Master Sprite Sheet (12-Slot All-in-One Grid)** ready for Spine2D/Live2D rigging in a SINGLE generation!
+
+Strictly arrange the extracted parts into 12 standardized labeled bounding boxes:
+[ROW 1: SD Anatomy & Facial Base (01~04)]:
+- '01. SD 정면 소체': Standard chibi front A-pose SD body (${rigSpec.sdPrompt}), clean smooth skin-toned base layer, no fabric clothes.
+- '02. SD 민얼굴 헤드': Blank face chibi head base (clean skin-toned face with ear structure, NO eyes, NO eyebrows, NO mouth).
+- '03. SD 헤어 : 앞머리': Front hair bangs floating with alpha depth.
+- '04. SD 헤어 : 뒷머리': Back hair volume and ponytail/ribbon flowing behind.
+[ROW 2: Live2D Facial Animation & Core Tops (05~08)]:
+- '05. Live2D 눈 애니메이션 세트': Pair of fully open anime eyes (Ruby/Crimson) AND closed smiling eyelash curves placed side-by-side on transparent background.
+- '06. Live2D 입 & 로비 터치 이모지': Cute anime closed smile mouth, slightly open mouth, soft pink cheek blushes, and touch reaction emoji icons (Heart Eyes, Sweat Drop, Anger Mark).
+- '07. 복장 : 상의 (보디스)': Upper chest armor/bodice hollow shell (ZERO arms, ZERO neck skin, pure equipment layer).
+- '08. 복장 : 앞치마 (Front Skirt)': Lower front armor/skirt floating hollow shell covering pelvic front (NO bare legs inside).
+[ROW 3: 3D Depth Sandwich & Armory (09~12)]:
+- '09. 복장 : 뒷치마 (Back Skirt)': Back skirt inner cloth/fabric floating behind legs to create 3D cylinder depth.
+- '10. 날개 (왼쪽 1짝 단일)': MANDATORY SINGLE LEFT WING centered vertically (engine mirrors right wing).
+- '11. 주무기 세트': Primary weapon (enchanted bow/crossbow) + loaded glowing arrow + muzzle flash effect.
+- '12. 보조무기 / 헤일로': Secondary floating halo, crest gem, or off-hand magical orb.
+
+[Production Context]: Professional Live2D SD modular sprite sheet, bold clean lineart, vibrant anime cel-shading, ${chromaSpec.sheetBoxClause}, safe for work, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
+
+                    negativePrompt = "flesh legs on skirt, bare legs on skirt, arms on top dress, both wings in wing slot, pair of wings, facial features on 02 blank head, eyes on 02 blank head, mouth on 02 blank head, 7 heads tall, 8 heads tall, tall realistic proportions, blurry, lowres, bad anatomy, bad hands, extra limbs, signature, watermark";
+
+                    const tBox = document.getElementById('template-download-box');
+                    if (tBox) tBox.style.display = 'flex';
+                    const dlBtnText = document.getElementById('btn-template-download-text');
+                    if (dlBtnText) dlBtnText.textContent = "📥 [Tier 1] 12슬롯 올인원 Live2D 마스터 규격 틀 다운로드";
+
+                    document.getElementById('copy-bar-title').innerHTML = `<span>⚡ [Tier 1] 올인원 12슬롯 Live2D 마스터 시트 합성 프롬프트 복사</span><span id="copy-bar-badge" style="background: #10b981; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">TIER 1 (12-SLOT ALL-IN-ONE)</span>`;
+                    document.getElementById('copy-bar-desc').innerHTML = `📌 <b>[단 1회 출력]:</b> 나노바나나에 <b>① 원본 8등신 전신 원화</b>와 <b>② 규격 틀(PNG)</b>을 첨부하고 이 프롬프트를 전송하면 Live2D 앞/뒷치마와 눈 깜빡임 파츠까지 1번에 모두 분해됩니다!`;
+                    document.getElementById('btn-main-copy').textContent = "📋 [Tier 1] 올인원 마스터 시트 프롬프트 복사";
+                    document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #059669, #10b981)";
+
+                } else if (genMode === 'sheet_a') {
+                    // =========================================================================
+                    // ⭐ [Tier 2-A단계] SD 3면도 & 기본 체형 소체 시트 (초대형 4슬롯 고해상도 규격)
                     // =========================================================================
                     prompt = `Based on the TWO attached reference images:
 - [Image 1: Character Design Source (Standing Illustration)]: Faithfully adopt the character's exact face, hair, colors, race traits, and costume from Image 1, and DEFORM / CONVERT her into a **${rigSpec.sdRatioText} Super-Deformed (SD / Chibi) 2D Game Battle Avatar**!
@@ -3404,7 +3466,7 @@ Generate an ultra-high-resolution **${rigSpec.sdRatioText} SD Turnaround & Base 
 - '01. 정면 (SD Front)': Full-body true front-facing SD view with full battle costume, weapons, hair, and accessories.
 - '02. 측면 (SD Side)': Full-body 90-degree profile side SD view, perfectly matching height markers with view 01.
 - '03. 후면 (SD Back)': Full-body back SD view showing reverse of hairstyle, cape, wings, and rear armor.
-- '04. 기본 체형 (SD Base Body)': PURE ANATOMICAL SD AVATAR BASE MODEL stripped of ALL clothing, outer armor, cape, halo, weapons, and underwear (NO bra, NO panties, NO clothing fabric; seamless bare skin-toned SD body ready for modular equipment overlay).
+- '04. 기본 체형 (SD Base Body)': PURE ANATOMICAL SD AVATAR BASE CHASSIS: Seamless skin-toned athletic neutral mannequin body layer (NO outer armor, NO heavy fabric, NO cape, NO weapons, NO halo; clean anatomical base ready for modular 2D equipment overlay).
 [3. ⭐ CRITICAL 1:1 POSE & ORIENTATION SYNCHRONIZATION (01 정면과 04 기본 체형의 완벽한 1:1 자세/시선 동기화)]:
 - The facing angle, head direction, eye gaze, torso rotation, shoulder tilt, hip angle, and leg stance of '04. 기본 체형 (SD Base Body)' MUST BE 100% IDENTICAL to '01. 정면 (SD Front)'!
 - Both 01 and 04 MUST face the EXACT SAME orientation on the central vertical spine axis (symmetrical front A-pose). NEVER rotate 04 to a different angle than 01, NEVER flip facing direction between 01 and 04, and NEVER twist the body on 04! If view 01 is looking straight forward with slight 5-degree angle, view 04 MUST share the exact identical 5-degree angle and posture so modular clothes fit 1:1 without horizontal offset.
@@ -3412,41 +3474,41 @@ Generate an ultra-high-resolution **${rigSpec.sdRatioText} SD Turnaround & Base 
 - ${RACE_ANATOMICAL_FEATURES[race] || ''}
 [5. Safety & Production Context]: Strictly non-sexual, professional 2D game SD character asset sheet, clean bold lineart, vibrant cel-shading, safe for work, ${chromaSpec.sheetBoxClause}, entire body visible from head to toe, ${RACE_SHEET_SPECS[race] || 'female anime commander'}`;
 
-                    negativePrompt = "mismatched pose between view 01 and view 04, different facing angle between front and base body, rotated torso on base body, tilted body on 04, asymmetric stance between 01 and 04, reversed facing direction, 7 heads tall, 8 heads tall, realistic tall adult body, tall model proportions, realistic long legs, elongated torso, clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, underwear on 04 base body, bra on 04 base body, panties on 04 base body, organic arm replacing prosthetic arm on earth folk, cybernetic legs on earth folk, missing mechanical arms, furry snout, muzzle, beast face, faceless, blank face, mannequin, bald, ball-jointed doll, cropped, out of frame, cut off head, cut off feet, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, male, worst quality, low quality";
+                    negativePrompt = "mismatched pose between view 01 and view 04, different facing angle between front and base body, rotated torso on base body, tilted body on 04, asymmetric stance between 01 and 04, reversed facing direction, 7 heads tall, 8 heads tall, realistic tall adult body, tall model proportions, realistic long legs, elongated torso, clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, organic arm replacing prosthetic arm on earth folk, cybernetic legs on earth folk, missing mechanical arms, furry snout, muzzle, beast face, faceless, blank face, mannequin, bald, ball-jointed doll, cropped, out of frame, cut off head, cut off feet, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, male, worst quality, low quality";
 
                     const tBox = document.getElementById('template-download-box');
                     if (tBox) tBox.style.display = 'flex';
                     const dlBtnText = document.getElementById('btn-template-download-text');
-                    if (dlBtnText) dlBtnText.textContent = "📥 [2-A] SD 3면도 & 기본 소체 규격 틀 (PNG 2048x1152) 다운로드";
+                    if (dlBtnText) dlBtnText.textContent = "📥 [Tier 2-A] SD 3면도 & 기본 소체 규격 틀 (PNG 2048x1152) 다운로드";
 
-                    document.getElementById('copy-bar-title').innerHTML = `<span>🍌 [2-A단계] SD 3면도 & 기본 소체 합성 프롬프트 복사</span><span id="copy-bar-badge" style="background: #38bdf8; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">SHEET A (4-SLOT ULTRA-RES)</span>`;
+                    document.getElementById('copy-bar-title').innerHTML = `<span>🍌 [Tier 2-A] SD 3면도 & 기본 소체 합성 프롬프트 복사</span><span id="copy-bar-badge" style="background: #38bdf8; color: #000; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">TIER 2-A (4-SLOT ULTRA-RES)</span>`;
                     document.getElementById('copy-bar-desc').innerHTML = `📌 <b>[2장 첨부 필수]:</b> 나노바나나에 <b>① 원본 8등신 전신 원화</b>와 <b>② 다운로드한 [시트 A] 소체 규격 틀(PNG)</b> 2장을 첨부하고 이 프롬프트를 전송하세요!`;
-                    document.getElementById('btn-main-copy').textContent = "📋 [2-A단계] 소체 시트 합성 프롬프트 복사";
+                    document.getElementById('btn-main-copy').textContent = "📋 [Tier 2-A] 소체 시트 합성 프롬프트 복사";
                     document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #0284c7, #38bdf8)";
 
                 } else if (genMode === 'sheet_b') {
                     // =========================================================================
-                    // ⭐ [2-B단계] SD 모듈러 장비 & 표정 팩 시트 (10슬롯 넉넉한 와이드 규격)
+                    // ⭐ [Tier 2-B단계] SD 모듈러 장비 & 표정 팩 시트 (앞/뒷치마 샌드위치 + 무기 이펙트 강화 10슬롯)
                     // =========================================================================
                     prompt = `Based on the TWO attached reference images:
-- [Image 1: Character Design Source (Standing Illustration)]: Faithfully extract and decompose the character's exact costume, wings, weapons, accessories, and cute expressive faces into **${rigSpec.sdRatioText} SD Modular Rigging Parts**!
+- [Image 1: Character Design Source (Standing Illustration)]: Faithfully extract and decompose the character's exact costume, wings, weapons, accessories, and cute expressive faces into **${rigSpec.sdRatioText} SD Live2D Modular Rigging Parts**!
 - [Image 2: Official SD Modular Gear & Expressions Sheet Template (Sheet B: 10 Slots)]: Strictly map each extracted SD part into the matching numbered bounding box of Image 2.
 
 Generate an official **${rigSpec.sdRatioText} SD Modular Gear & Expression Breakdown Sheet (Sheet B)** strictly matching the 10-slot layout:
-[1. Top Section: SD Facial Expression Sheet (표정 시트: 05~08 in 1 Single Row)]:
+[1. Top Section: SD Facial Expression & Lobby Touch Reaction Sheet (표정 시트: 05~08 in 1 Single Row)]:
 - EXACTLY 4 distinct front-facing **SD chibi facial expression heads** in a SINGLE horizontal row (NEVER add a second row of faces below!):
   * '05. 기본 무표정' (Calm Neutral Chibi Face)
-  * '06. 밝은 미소' (Joyful Happy Smile Chibi Face)
-  * '07. 자신감' (Smug Confident Winking or Grinning Chibi Face)
-  * '08. 진지한 결의' (Focused Combat Battle Ready Chibi Face)
+  * '06. 밝은 미소 + 설렘 하트눈' (Joyful Happy Smile Chibi Face with Heart Eye Highlight)
+  * '07. 자신감 + 빠직 마크' (Smug Confident Winking Chibi Face with Anger Pop Symbol)
+  * '08. 진지한 결의 + 당황 식은땀' (Focused Combat Ready Face with Sweat Drop)
 - Heads MUST be sized to fit directly onto the compact SD body of Image 1!
-[2. Bottom Section: SD Modular Clothing & Weapons Breakdown (09~14 in Wide Slots)]:
+[2. Bottom Section: SD Modular Clothing & Weapons Breakdown with 3D Skirt Sandwich (09~14)]:
 - HOLLOW GHOST GARMENT MANDATE: All costume items (10 top, 11 bottom) MUST be floating HOLLOW shells containing ABSOLUTELY ZERO human body flesh, ZERO skin, ZERO arms, and ZERO legs!
   * '09. 복장 : 머리 장식': Headgear, halo, hairpin, or ribbon ONLY (NEVER draw torso or neck).
   * '10. 복장 : 상의 (보디스)': Upper top bodice / chest armor ONLY. STRICTLY NO arms, NO prosthetic arms, NO shoulder flesh, NO sleeves containing skin. Pure hollow chest armor shell.
-  * '11. 복장 : 하의 (스커트)': Lower skirt / loincloth ONLY. STRICTLY NO thighs, NO bare legs, NO boots containing human flesh. Pure hollow skirt shell.
-  * '12. 날개 (왼쪽 1짝 단일)': MANDATORY SINGLE LEFT WING SPEC! Draw ONLY the LEFT single wing centered vertically inside box 12 (DO NOT draw both wings, DO NOT draw a pair of wings; in-game engine mirrors this single wing).
-  * '13. 주무기 파츠': Character's primary weapon (sword, staff, bow, spear, etc.) centered vertically.
+  * '11. 복장 : 하의 (앞치마 & 뒷치마 세트)': Lower skirt broken down into **Front Skirt (앞치마)** and **Back Skirt (뒷치마)** to create 3D cylinder depth around legs! Side fluttering ribbons separated. STRICTLY NO bare legs, NO thighs inside.
+  * '12. 날개 (왼쪽 1짝 단일)': MANDATORY SINGLE LEFT WING SPEC! Draw ONLY the LEFT single wing centered vertically inside box 12 (DO NOT draw both wings; in-game engine mirrors this single wing).
+  * '13. 주무기 세트': Primary weapon (enchanted bow or crossbow) + loaded glowing arrow + muzzle flash effect centered vertically.
   * '14. 보조무기 / 구체': Character's secondary shield, floating orb, or off-hand magical focus.
 - CRITICAL: If character lacks an item, leave that box empty with Korean text '없음 (미보유 / NONE)':
 ${slotInstructions}
@@ -3457,12 +3519,71 @@ ${slotInstructions}
                     const tBox = document.getElementById('template-download-box');
                     if (tBox) tBox.style.display = 'flex';
                     const dlBtnText = document.getElementById('btn-template-download-text');
-                    if (dlBtnText) dlBtnText.textContent = "📥 [2-B] SD 장비 & 표정 팩 규격 틀 (PNG 2048x1152) 다운로드";
+                    if (dlBtnText) dlBtnText.textContent = "📥 [Tier 2-B] SD 장비 & 표정 팩 규격 틀 (PNG 2048x1152) 다운로드";
 
-                    document.getElementById('copy-bar-title').innerHTML = `<span>🍌 [2-B단계] SD 장비 & 표정 팩 합성 프롬프트 복사</span><span id="copy-bar-badge" style="background: #ec4899; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">SHEET B (10-SLOT GEAR & EXPR)</span>`;
+                    document.getElementById('copy-bar-title').innerHTML = `<span>🍌 [Tier 2-B] SD 장비 & 표정 팩 합성 프롬프트 복사</span><span id="copy-bar-badge" style="background: #ec4899; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">TIER 2-B (10-SLOT GEAR & EXPR)</span>`;
                     document.getElementById('copy-bar-desc').innerHTML = `📌 <b>[2장 첨부 필수]:</b> 나노바나나에 <b>① 원본 8등신 전신 원화</b>와 <b>② 다운로드한 [시트 B] 장비 규격 틀(PNG)</b> 2장을 첨부하고 이 프롬프트를 전송하세요!`;
-                    document.getElementById('btn-main-copy').textContent = "📋 [2-B단계] 장비/표정 시트 합성 프롬프트 복사";
+                    document.getElementById('btn-main-copy').textContent = "📋 [Tier 2-B] 장비/표정 시트 합성 프롬프트 복사";
                     document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #be185d, #ec4899)";
+
+                } else if (genMode === 'tier3_studio') {
+                    // =========================================================================
+                    // 👑 [Tier 3] 초정밀 6분할 Live2D 스튜디오 (타워디펜스 최적화형 파츠별 독립 생성)
+                    // =========================================================================
+                    const tier3Part = document.getElementById('tier3-part-select')?.value || 'part1';
+
+                    const T3_PROMPTS = {
+                        'part1': {
+                            title: 'Part 1: SD 소체 & 타워디펜스 최적화 사지 분리 세트',
+                            badge: 'TIER 3 - PART 1 (BODY & ARMS/LEGS)',
+                            desc: `Character Design source: Decompose the SD chibi character (${rigSpec.sdPrompt}) into tower-defense optimized rigging layers: 1) Headless Torso & Pelvis base chassis, 2) Decoupled Left Upper/Lower Arm (for 3-axis aiming), 3) Decoupled Right Arm & Hand, 4) Left Unified Leg & Foot (single part for knee deformer, no thigh/calf cuts), 5) Right Unified Leg & Foot. Clean smooth skin-toned base layer, seamless joints, bold crisp lineart, ${chromaSpec.sheetBoxClause}.`,
+                            neg: 'clothes, armor, shoes, underwear, 3-part leg segments, 7 heads tall, 8 heads tall, blurry, lowres'
+                        },
+                        'part2': {
+                            title: 'Part 2: 페이스 & 눈/입 + 로비 터치 리액션 세트',
+                            badge: 'TIER 3 - PART 2 (FACE & TOUCH REACTION)',
+                            desc: `Live2D facial rigging parts breakdown: 1) Blank chibi anime face base (smooth skin, ears, no eyes, no mouth), 2) Fully open ruby eyes with detailed iris highlight, 3) Closed curved smiling eyelash lines, 4) Eyebrow set (neutral, focused, happy), 5) Mouth shapes (closed smile, talking mouth, open cheer), 6) Touch reaction emotion icons (Heart eye highlights, Panic sweat drop, Anger pop mark, blushing cheeks). Isolated on ${chromaSpec.sheetBoxClause}.`,
+                            neg: 'full body, limbs, hair on face, tall realistic head, blurry, lowres, bad eyes'
+                        },
+                        'part3': {
+                            title: 'Part 3: 3D 입체 헤어 레이어 세트',
+                            badge: 'TIER 3 - PART 3 (VOLUMETRIC HAIR)',
+                            desc: `Live2D layered anime hair breakdown: 1) Front bangs (앞머리) with clean alpha strands, 2) Left/Right side hair tufts (옆머리), 3) Back hair volume base (뒷머리 베이스), 4) Sakura pink half-up ribbon ponytail floating dynamically behind head. Isolated layers on ${chromaSpec.sheetBoxClause}.`,
+                            neg: 'face, eyes, body, clothes, blurry, messy lineart'
+                        },
+                        'part4': {
+                            title: 'Part 4: 상체 의상 & 어깨/소매 분리 세트',
+                            badge: 'TIER 3 - PART 4 (UPPER COSTUME)',
+                            desc: `Live2D hollow costume upper breakdown: 1) Ornate golden filigree armor bodice (hollow shell, NO torso flesh inside), 2) Decoupled left and right shoulder armor / pauldrons, 3) Sheer white silk translucent veil floating behind shoulders, 4) Sacred golden crest choker. Pure hollow equipment shells on ${chromaSpec.sheetBoxClause}.`,
+                            neg: 'human body, bare skin, chest flesh, arms, skirt, legs, blurry, lowres'
+                        },
+                        'part5': {
+                            title: 'Part 5: 하체 의상 샌드위치 세트 (앞치마 & 뒷치마)',
+                            badge: 'TIER 3 - PART 5 (SKIRT SANDWICH)',
+                            desc: `Live2D 3D cylinder skirt sandwich breakdown: 1) Front Skirt / Loincloth plating (앞치마 - sits in front of legs, hollow pelvic armor), 2) Back Skirt / Cape lining (뒷치마 - sits behind legs with dimensional cosmic nebula interior), 3) Decoupled thigh quiver & side fluttering fabric ribbons. STRICTLY NO LEGS OR THIGH FLESH INSIDE. Isolated hollow shells on ${chromaSpec.sheetBoxClause}.`,
+                            neg: 'bare legs, human skin inside skirt, torso, arms, head, blurry'
+                        },
+                        'part6': {
+                            title: 'Part 6: 장비 & 2겹 날개 & 사격 이펙트 세트',
+                            badge: 'TIER 3 - PART 6 (WEAPONS & WINGS)',
+                            desc: `Modular SD weapons and wings breakdown: 1) Single Left Celestial Feathered Wing (2-layer compressed: top main wing + bottom feather cluster), 2) Ornate enchanted bow & mechanical crossbow, 3) Loaded glowing magical arrow projectile, 4) Firing muzzle flash burst effect, 5) Sacred glowing golden halo floating ring. Isolated on ${chromaSpec.sheetBoxClause}.`,
+                            neg: 'pair of wings, both wings, two wings, character body, head, clothes, blurry'
+                        }
+                    };
+
+                    const currentT3 = T3_PROMPTS[tier3Part] || T3_PROMPTS['part1'];
+                    prompt = `Based on the attached Character Design reference image:
+${currentT3.desc}
+[Art Quality & Safety]: Masterpiece, best quality, ultra-detailed anime game asset, clean crisp vector-like lineart, vibrant cel-shading, safe for work, professional Live2D production spec.`;
+                    negativePrompt = currentT3.neg;
+
+                    const tBox = document.getElementById('template-download-box');
+                    if (tBox) tBox.style.display = 'none';
+
+                    document.getElementById('copy-bar-title').innerHTML = `<span>👑 [Tier 3] ${currentT3.title} 프롬프트 복사</span><span id="copy-bar-badge" style="background: #8b5cf6; color: #fff; font-size: 10px; font-weight: 900; padding: 2px 6px; border-radius: 4px;">${currentT3.badge}</span>`;
+                    document.getElementById('copy-bar-desc').innerHTML = `📌 <b>[고화질 1:1 파츠 추출]:</b> 나노바나나에 <b>① 원본 8등신 전신 원화</b>를 첨부하고 이 프롬프트를 전송하세요! 6개 파트를 순서대로 출력하여 최고 퀄리티의 Live2D 캐릭터를 완성합니다.`;
+                    document.getElementById('btn-main-copy').textContent = `📋 [Tier 3] ${currentT3.title} 복사`;
+                    document.getElementById('btn-main-copy').style.background = "linear-gradient(135deg, #6d28d9, #8b5cf6)";
 
                 } else if (genMode === 'sheet') {
                     // =========================================================================

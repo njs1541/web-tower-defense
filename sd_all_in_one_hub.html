@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 SD 모듈러 캐릭터 제작 올인원 통합 스튜디오 (All-in-One Studio Hub)</title>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-panel: #0f172a;
+      --border-color: rgba(255, 255, 255, 0.12);
+      --accent-purple: #8b5cf6;
+      --accent-blue: #38bdf8;
+      --accent-pink: #ec4899;
+      --accent-gold: #f59e0b;
+      --accent-green: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Pretendard', sans-serif;
+      overflow: hidden;
+    }
+
+    /* 상단 통합 마스터 헤더 바 */
+    #master-header {
+      height: 54px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 1000;
+      position: relative;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-title {
+      font-size: 15px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #c084fc, #38bdf8, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .brand-badge {
+      background: rgba(139, 92, 246, 0.25);
+      border: 1px solid rgba(139, 92, 246, 0.5);
+      color: #c4b5fd;
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 9999px;
+    }
+
+    /* 탭 내비게이션 */
+    .tab-navigation {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(2, 6, 23, 0.6);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .nav-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .nav-tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .nav-tab-btn.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 2px 10px rgba(139, 92, 246, 0.35);
+    }
+
+    .nav-tab-btn.active.tab-split {
+      background: linear-gradient(135deg, #0284c7, #06b6d4);
+      box-shadow: 0 2px 10px rgba(6, 182, 212, 0.35);
+    }
+
+    .nav-tab-btn.active.tab-studio {
+      background: linear-gradient(135deg, #be185d, #ec4899);
+      box-shadow: 0 2px 10px rgba(236, 72, 153, 0.35);
+    }
+
+    /* 헤더 우측 유틸리티 버튼들 */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-btn {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border-color);
+      color: #cbd5e1;
+      font-size: 11.5px;
+      font-weight: 700;
+      padding: 5px 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover {
+      background: rgba(51, 65, 85, 0.9);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* 메인 뷰 컨테이너 */
+    #main-container {
+      width: 100%;
+      height: calc(100% - 54px);
+      position: relative;
+      background: #020617;
+    }
+
+    /* 탭별 뷰 패널 */
+    .view-panel {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: none;
+      border: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    /* 분할 뷰 (Split View: 좌측 프롬프트 가이드 / 우측 에셋 스튜디오) */
+    #panel-split {
+      display: none;
+      width: 100%;
+      height: 100%;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+    }
+
+    #panel-split.active {
+      display: grid;
+    }
+
+    .split-col {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      border: none;
+    }
+
+    .split-col:first-child {
+      border-right: 2px solid rgba(139, 92, 246, 0.4);
+    }
+
+    .split-col iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* SOP 매뉴얼 뷰어 */
+    #panel-sop {
+      padding: 24px 32px;
+      overflow-y: auto;
+      background: #0b1120;
+    }
+
+    .sop-wrapper {
+      max-width: 980px;
+      margin: 0 auto;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 28px 36px;
+      line-height: 1.7;
+    }
+
+    .sop-wrapper h1 {
+      font-size: 24px;
+      color: #38bdf8;
+      margin-bottom: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 10px;
+    }
+
+    .sop-wrapper h2 {
+      font-size: 18px;
+      color: #c084fc;
+      margin-top: 24px;
+      margin-bottom: 10px;
+    }
+
+    .sop-wrapper p, .sop-wrapper li {
+      font-size: 13.5px;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+    }
+
+    .sop-wrapper code {
+      background: rgba(0, 0, 0, 0.35);
+      color: #fde047;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12.5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. 상단 통합 마스터 헤더 바 -->
+  <header id="master-header">
+    <div class="brand-group">
+      <div class="brand-title">
+        <span>🎮 SD 모듈러 캐릭터 올인원 통합 스튜디오</span>
+      </div>
+      <span class="brand-badge">v2.5 OSMU PRO</span>
+    </div>
+
+    <!-- 탭 네비게이션 버튼 -->
+    <nav class="tab-navigation">
+      <button class="nav-tab-btn active" onclick="switchView('guide')" id="btn-tab-guide" title="단축키: Alt + 1">
+        <span>📑 1~2단계: 프롬프트 & 규격 시트 생성기</span>
+      </button>
+      <button class="nav-tab-btn tab-studio" onclick="switchView('studio')" id="btn-tab-studio" title="단축키: Alt + 2">
+        <span>🎨 3~4단계: 에셋 투명화 & Live2D 파츠 분리</span>
+      </button>
+      <button class="nav-tab-btn tab-split" onclick="switchView('split')" id="btn-tab-split" title="단축키: Alt + 3">
+        <span>⚡ 듀얼 분할 뷰 (Split View: 좌-프롬프트 / 우-에셋스튜디오)</span>
+      </button>
+      <button class="nav-tab-btn" onclick="switchView('sop')" id="btn-tab-sop" title="단축키: Alt + 4">
+        <span>📖 실무 표준 절차서 (SOP)</span>
+      </button>
+    </nav>
+
+    <!-- 우측 보조 액션 버튼들 -->
+    <div class="header-actions">
+      <a href="visual_style_guide.html" target="_blank" class="action-btn" title="프롬프트 생성기를 새 브라우저 창에서 독립 실행">
+        <span>프롬프트창 ↗</span>
+      </a>
+      <a href="sd_asset_studio.html" target="_blank" class="action-btn" title="에셋 스튜디오를 새 브라우저 창에서 독립 실행">
+        <span>스튜디오창 ↗</span>
+      </a>
+      <button class="action-btn" onclick="reloadCurrentFrame()" title="현재 열려있는 페이지 새로고침">
+        <span>🔄 새로고침</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. 메인 컨테이너 (iframe 패널 전환) -->
+  <main id="main-container">
+
+    <!-- 탭 1: visual_style_guide.html -->
+    <iframe id="panel-guide" class="view-panel active" src="visual_style_guide.html"></iframe>
+
+    <!-- 탭 2: sd_asset_studio.html -->
+    <iframe id="panel-studio" class="view-panel" src="sd_asset_studio.html"></iframe>
+
+    <!-- 탭 3: 듀얼 분할 뷰 (Split View) -->
+    <div id="panel-split" class="view-panel">
+      <div class="split-col">
+        <iframe id="iframe-split-left" src="visual_style_guide.html"></iframe>
+      </div>
+      <div class="split-col">
+        <iframe id="iframe-split-right" src="sd_asset_studio.html"></iframe>
+      </div>
+    </div>
+
+    <!-- 탭 4: 실무 표준 운영 절차서 (SOP) 뷰어 -->
+    <div id="panel-sop" class="view-panel">
+      <div class="sop-wrapper">
+        <h1>📑 1인 개발자를 위한 SD 모듈러 캐릭터 에셋 파이프라인 표준 운영 절차서 (SOP)</h1>
+        <p>본 포털은 <strong>[8등신 원화] ➔ [SD 규격 시트 변환] ➔ [에셋 투명화 및 파츠 분리] ➔ [Live2D 샌드위치 리깅 및 텍스처 아틀라스 패킹]</strong>까지의 전 과정을 단 하나의 화면에서 매끄럽게 수행할 수 있도록 지원합니다.</p>
+
+        <h2>🚀 4단계 핵심 제작 루프 (Loop)</h2>
+        <ol style="margin-left: 20px;">
+          <li><strong>1단계 (8등신 원화 생성)</strong>: <code>[탭 1]</code>에서 종족, 직업군, 체형, 속성을 선택하고 프롬프트를 복사하여 나노바나나 등에서 고화질 8등신 원화 생성.</li>
+          <li><strong>2단계 (SD 규격 시트 변환)</strong>: <code>[⚡ Tier 1 올인원]</code> 또는 <code>[⭐ Tier 2-A/B]</code> 모드를 선택하고 규격 틀(PNG)과 원화를 첨부하여 SD 분해 시트 출력.</li>
+          <li><strong>3단계 (에셋 투명화 & 파츠 분리)</strong>: <code>[탭 2]</code>로 이동하여 시트를 드래그 앤 드롭 ➔ 단색 크로마키 원클릭 투명화 ➔ 알맹이 픽셀 자동 밀착 크롭(Auto-Trim).</li>
+          <li><strong>4단계 (Live2D 리깅 & 아틀라스 추출)</strong>: 우측 로비 보좌관 리깅 뷰에서 <strong>앞/뒷치마 샌드위치 입체감</strong>과 <strong>얼굴 왜곡 없는 순수 눈 깜빡임</strong> 확인 ➔ <code>[📦 원클릭 텍스처 아틀라스 추출]</code>로 엔진 연동용 PNG + JSON 다운로드!</li>
+        </ol>
+
+        <h2>💡 하이브리드 파츠 설계 가이드 (로비 상호작용 + 타워디펜스 전투)</h2>
+        <ul style="margin-left: 20px;">
+          <li><strong>하체 파츠 최적화</strong>: 타워디펜스는 제자리 사격이므로 다리 관절을 쪼개지 않고 <strong>좌/우 일체형 다리(무릎 디포머)</strong>로 드로우콜을 절약합니다.</li>
+          <li><strong>무기 & 사격 타격감</strong>: 석궁/활 공격 시 <strong>머즐 플래시(발사 섬광)</strong>와 <strong>장전된 화살</strong>이 On/Off로 번쩍이며 타격감을 배가합니다.</li>
+          <li><strong>로비 터치 반응</strong>: 스튜디오에서 <strong>💖 설렘(하트눈), 💧 당황(식은땀), 💢 분노(빠직)</strong> 버튼을 눌러 실제 게임 로비에서의 터치 반응을 미리 시뮬레이션할 수 있습니다.</li>
+          <li><strong>좌우 반전 시 뺨 타투 보호</strong>: 캐릭터를 좌우로 뒤집어도 뺨의 룬 문양은 정방향을 유지하도록 <strong>[🛡️ 뺨 타투 반전 예외 보호]</strong>가 기본 적용되어 있습니다.</li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let currentView = 'guide';
+
+    function switchView(viewName) {
+      currentView = viewName;
+
+      // 1. 모든 탭 버튼 비활성화 및 선택된 탭 활성화
+      const buttons = {
+        guide: document.getElementById('btn-tab-guide'),
+        studio: document.getElementById('btn-tab-studio'),
+        split: document.getElementById('btn-tab-split'),
+        sop: document.getElementById('btn-tab-sop')
+      };
+
+      Object.keys(buttons).forEach(k => {
+        if (buttons[k]) buttons[k].classList.toggle('active', k === viewName);
+      });
+
+      // 2. 모든 패널 숨김 및 선택된 패널 활성화
+      const panels = {
+        guide: document.getElementById('panel-guide'),
+        studio: document.getElementById('panel-studio'),
+        split: document.getElementById('panel-split'),
+        sop: document.getElementById('panel-sop')
+      };
+
+      Object.keys(panels).forEach(k => {
+        if (panels[k]) {
+          panels[k].classList.toggle('active', k === viewName);
+        }
+      });
+    }
+
+    function reloadCurrentFrame() {
+      if (currentView === 'guide') {
+        document.getElementById('panel-guide').contentWindow.location.reload();
+      } else if (currentView === 'studio') {
+        document.getElementById('panel-studio').contentWindow.location.reload();
+      } else if (currentView === 'split') {
+        document.getElementById('iframe-split-left').contentWindow.location.reload();
+        document.getElementById('iframe-split-right').contentWindow.location.reload();
+      }
+    }
+
+    // 단축키 (Alt + 1~4)
+    window.addEventListener('keydown', (e) => {
+      if (e.altKey) {
+        if (e.key === '1') { switchView('guide'); e.preventDefault(); }
+        if (e.key === '2') { switchView('studio'); e.preventDefault(); }
+        if (e.key === '3') { switchView('split'); e.preventDefault(); }
+        if (e.key === '4') { switchView('sop'); e.preventDefault(); }
+      }
+    });
+  </script>
+</body>
+</html>
+
