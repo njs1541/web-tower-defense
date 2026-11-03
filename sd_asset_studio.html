@@ -399,8 +399,27 @@
     /* 실시간 3종 아바타 소체 리깅 시뮬레이터 */
     .simulator-stages-wrap {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 12px;
+    }
+
+    .sim-canvas-rig-box {
+      width: 165px;
+      height: 165px;
+      border-radius: 14px;
+      background: #151c2c;
+      border: 2px solid #38bdf8;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .sim-canvas-rig-box canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
 
     .sim-stage-card {
@@ -1766,6 +1785,7 @@
                 초기화</button>
               <button class="btn btn-gold" style="padding: 2px 8px; font-size: 11px;"
                 onclick="copyAllPartFitParams()">📋 전체 핏 코드 복사</button>
+              <button class="btn" style="padding: 2px 8px; font-size: 11px; background: linear-gradient(135deg, #0284c7, #38bdf8); color: #0b0f19; font-weight: 800; border: none;" onclick="exportLive2DRiggingJson()">✨ Live2D 관절 JSON 복사</button>
             </div>
           </div>
 
@@ -1800,6 +1820,46 @@
                 <span id="lbl-target-extra">✂️ 마스크 반경</span>
                 <span id="val-target-extra" style="color: #38bdf8; font-weight: 600;">44%</span>
               </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span>🔄 회전각 (Rot)</span>
+                <span id="val-target-rot" style="color: #a855f7; font-weight: 600;">0°</span>
+              </div>
+              <input type="range" id="rng-target-rot" min="-180" max="180" value="0" step="1"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span>🎯 피벗 X (0~1)</span>
+                <span id="val-target-piv-x" style="color: #ec4899; font-weight: 600;">0.5</span>
+              </div>
+              <input type="range" id="rng-target-piv-x" min="0" max="1" value="0.5" step="0.05"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span>🎯 피벗 Y (0~1)</span>
+                <span id="val-target-piv-y" style="color: #ec4899; font-weight: 600;">0.5</span>
+              </div>
+              <input type="range" id="rng-target-piv-y" min="0" max="1" value="0.5" step="0.05"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span>⚓ 앵커 X (px)</span>
+                <span id="val-target-anc-x" style="color: #fbbf24; font-weight: 600;">300</span>
+              </div>
+              <input type="range" id="rng-target-anc-x" min="50" max="550" value="300" step="2"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+            <div>
+              <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
+                <span>⚓ 앵커 Y (px)</span>
+                <span id="val-target-anc-y" style="color: #fbbf24; font-weight: 600;">300</span>
+              </div>
+              <input type="range" id="rng-target-anc-y" min="50" max="550" value="300" step="2"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
               <input type="range" id="rng-target-extra" min="20" max="65" value="44" step="1"
                 style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
             </div>
@@ -1960,6 +2020,21 @@
               <div class="sim-grid-cell">⚡</div>
             </div>
             <div style="font-size: 11px; color: #94a3b8;">클릭 시 표정 변화(05→08) & 주무기 외곽 스윙 모션 발동</div>
+          </div>
+
+          <!-- ✨ Live2D 정밀 관절 리깅 Canvas 2D 뷰어 -->
+          <div class="sim-stage-card" style="border-color: #38bdf8;">
+            <div class="sim-stage-label" style="color: #38bdf8; display:flex; justify-content:space-between; align-items:center; width:100%;">
+              <span>✨ Live2D 관절 캔버스 뷰 (Matrix Rig)</span>
+              <button class="btn" id="btn-toggle-gizmo" style="padding:1px 6px; font-size:10px; background:#0f172a; border-color:#38bdf8; color:#38bdf8;" onclick="toggleRigGizmo()">기즈모: ON</button>
+            </div>
+            <div class="sim-canvas-rig-box">
+              <canvas id="canvas-live2d-rig" width="600" height="600"></canvas>
+            </div>
+            <div style="font-size: 10.5px; color: #94a3b8; text-align:center; line-height: 1.3;">
+              중심점(Pivot) & 회전각(Rot) 정밀 제어<br>
+              <span style="color:#fbbf24;">노란점=앵커</span> | <span style="color:#ef4444;">빨간점=피벗축</span>
+            </div>
           </div>
         </div>
       </div>
@@ -2143,7 +2218,7 @@
         sampleStanding: 'assets/char_sylvana.jpg',
         sampleSheet: 'assets/ref_sylvana_sheet.jpg',
         customFit: {
-          expr: { scale: 100, x: 0, y: 0, clip: 44, mask: true, flipX: false },
+          expr: { scale: 100, x: 0, y: 0, clip: 44, mask: true, flipX: false, rot: 0, pivX: 0.5, pivY: 0.5, ancX: 300, ancY: 200 },
           top: { scale: 104, x: -1.0, y: 0.5, flipX: false },
           bottom: { scale: 102, x: 0, y: -1.0, flipX: false },
           halo: { scale: 100, x: 0, y: -2.0, flipX: false },
@@ -2204,6 +2279,7 @@ char_ranger: {
 
       if (preset.sampleSheetA && preset.sampleSheetB) {
         switchSheetUploadMode('dual');
+      initLive2DCanvasRig();
         sampleMap.sheetA = preset.sampleSheetA;
         sampleMap.sheetB = preset.sampleSheetB;
       } else {
@@ -3069,6 +3145,7 @@ char_ranger: {
       }
       const sumEl = document.getElementById('sim-active-parts-summary');
       if (sumEl) sumEl.innerText = summaryParts.join(' · ');
+      updateLive2DCanvasRigging();
     }
 
     function syncRigModeButtons() {
@@ -3452,12 +3529,12 @@ char_ranger: {
     /* 🎯 전 파츠(표정·상의·하의·헤일로·날개·무기) 실시간 1:1 피팅 & 좌우반전 & 모션 컨트롤러 로직 */
     const DEFAULT_PART_FITS = {
       expr: { scale: 100, x: 0, y: 0, clip: 44, mask: true, flipX: false },
-      top: { scale: 100, x: 0, y: 0, flipX: false },
-      bottom: { scale: 100, x: 0, y: 0, flipX: false },
-      halo: { scale: 100, x: 0, y: 0, flipX: false },
-      wings: { scale: 100, x: 0, y: 0, flipX: false },
-      weapon: { scale: 100, x: 0, y: 0, flipX: false },
-      sub: { scale: 100, x: 0, y: 0, flipX: false }
+      top: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.2, ancX: 300, ancY: 280 },
+      bottom: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.1, ancX: 300, ancY: 360 },
+      halo: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.8, ancX: 300, ancY: 120 },
+      wings: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.3, ancX: 300, ancY: 260 },
+      weapon: { scale: 100, x: 0, y: 0, flipX: false, rot: -15, pivX: 0.5, pivY: 0.85, ancX: 230, ancY: 330 },
+      sub: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.5, ancX: 370, ancY: 330 }
     };
 
     let partFitState = JSON.parse(JSON.stringify(DEFAULT_PART_FITS));
@@ -3482,6 +3559,23 @@ char_ranger: {
       if (yEl) yEl.value = state.y ?? 0;
       if (flipChk) flipChk.checked = !!state.flipX;
 
+      const rotEl = document.getElementById('rng-target-rot');
+      const pivXEl = document.getElementById('rng-target-piv-x');
+      const pivYEl = document.getElementById('rng-target-piv-y');
+      const ancXEl = document.getElementById('rng-target-anc-x');
+      const ancYEl = document.getElementById('rng-target-anc-y');
+
+      if (rotEl) rotEl.value = state.rot ?? 0;
+      if (pivXEl) pivXEl.value = state.pivX ?? 0.5;
+      if (pivYEl) pivYEl.value = state.pivY ?? 0.5;
+      if (ancXEl) ancXEl.value = state.ancX ?? 300;
+      if (ancYEl) ancYEl.value = state.ancY ?? 300;
+
+      if (live2dRigSystem) {
+        live2dRigSystem.selectedPartId = target;
+        live2dRigSystem.render();
+      }
+
       if (target === 'expr') {
         if (extraWrap) extraWrap.style.display = 'block';
         if (maskWrap) maskWrap.style.display = 'inline-flex';
@@ -3503,8 +3597,19 @@ char_ranger: {
       document.getElementById('val-target-y').textContent = `${state.y > 0 ? '+' : ''}${state.y}%`;
 
       if (target === 'expr') {
-        document.getElementById('val-target-extra').textContent = `${state.clip}%`;
+        const extraVal = document.getElementById('val-target-extra');
+        if (extraVal) extraVal.textContent = `${state.clip}%`;
       }
+      const rotVal = document.getElementById('val-target-rot');
+      if (rotVal) rotVal.textContent = `${state.rot ?? 0}°`;
+      const pivXVal = document.getElementById('val-target-piv-x');
+      if (pivXVal) pivXVal.textContent = `${state.pivX ?? 0.5}`;
+      const pivYVal = document.getElementById('val-target-piv-y');
+      if (pivYVal) pivYVal.textContent = `${state.pivY ?? 0.5}`;
+      const ancXVal = document.getElementById('val-target-anc-x');
+      if (ancXVal) ancXVal.textContent = `${state.ancX ?? 300}`;
+      const ancYVal = document.getElementById('val-target-anc-y');
+      if (ancYVal) ancYVal.textContent = `${state.ancY ?? 300}`;
 
       const badge = document.getElementById('badge-part-status');
       if (badge) {
@@ -3533,7 +3638,27 @@ char_ranger: {
         partFitState.expr.clip = clip;
       }
 
+      const rot = parseFloat(document.getElementById('rng-target-rot')?.value || 0);
+      const pivX = parseFloat(document.getElementById('rng-target-piv-x')?.value || 0.5);
+      const pivY = parseFloat(document.getElementById('rng-target-piv-y')?.value || 0.5);
+      const ancX = parseFloat(document.getElementById('rng-target-anc-x')?.value || 300);
+      const ancY = parseFloat(document.getElementById('rng-target-anc-y')?.value || 300);
+
+      partFitState[target].rot = rot;
+      partFitState[target].pivX = pivX;
+      partFitState[target].pivY = pivY;
+      partFitState[target].ancX = ancX;
+      partFitState[target].ancY = ancY;
+
       applyPartFitToCss(target);
+      if (live2dRigSystem) {
+        live2dRigSystem.updatePartTransform(target, {
+          scale: { x: scale / 100, y: scale / 100 },
+          rotation: rot,
+          pivot: { x: pivX, y: pivY },
+          anchor: { x: ancX, y: ancY }
+        });
+      }
       updateTuningUiLabels(target, partFitState[target]);
 
       try {
@@ -3719,6 +3844,314 @@ modularCustomFit: ${JSON.stringify(partFitState, null, 2)}`;
         }
       }
     };
+
+    
+    /**
+     * ========================================================================
+     * [CORE ENGINE] PartNormalizer & PartRiggingSystem (바닐라 JS Live2D 리깅 시스템)
+     * ========================================================================
+     */
+    class PartNormalizer {
+      static getTrimmedBounds(sourceImage, alphaThreshold = 15) {
+        const canvas = document.createElement('canvas');
+        canvas.width = sourceImage.naturalWidth || sourceImage.width;
+        canvas.height = sourceImage.naturalHeight || sourceImage.height;
+        if (canvas.width <= 0 || canvas.height <= 0) return { minX:0, minY:0, maxX:0, maxY:0, width:1, height:1 };
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(sourceImage, 0, 0);
+        let imgData;
+        try {
+          imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        } catch (e) {
+          return { minX:0, minY:0, maxX:canvas.width, maxY:canvas.height, width:canvas.width, height:canvas.height };
+        }
+        const data = imgData.data;
+        let minX = canvas.width, minY = canvas.height;
+        let maxX = -1, maxY = -1;
+
+        for (let y = 0; y < canvas.height; y++) {
+          for (let x = 0; x < canvas.width; x++) {
+            const alpha = data[(y * canvas.width + x) * 4 + 3];
+            if (alpha > alphaThreshold) {
+              if (x < minX) minX = x;
+              if (x > maxX) maxX = x;
+              if (y < minY) minY = y;
+              if (y > maxY) maxY = y;
+            }
+          }
+        }
+        if (maxX === -1) {
+          return { minX: 0, minY: 0, maxX: canvas.width, maxY: canvas.height, width: canvas.width, height: canvas.height };
+        }
+        return {
+          minX, minY, maxX, maxY,
+          width: maxX - minX + 1,
+          height: maxY - minY + 1
+        };
+      }
+
+      static createNormalizedCanvas(sourceImage, targetWidth, targetHeight, fitMode = 'contain') {
+        const bounds = this.getTrimmedBounds(sourceImage);
+        const normCanvas = document.createElement('canvas');
+        normCanvas.width = targetWidth;
+        normCanvas.height = targetHeight;
+        const ctx = normCanvas.getContext('2d');
+
+        let drawW = targetWidth;
+        let drawH = targetHeight;
+        let drawX = 0;
+        let drawY = 0;
+
+        if (fitMode === 'contain' && bounds.width > 0 && bounds.height > 0) {
+          const scale = Math.min(targetWidth / bounds.width, targetHeight / bounds.height);
+          drawW = bounds.width * scale;
+          drawH = bounds.height * scale;
+          drawX = (targetWidth - drawW) / 2;
+          drawY = (targetHeight - drawH) / 2;
+        }
+
+        ctx.drawImage(
+          sourceImage,
+          bounds.minX, bounds.minY, bounds.width, bounds.height,
+          drawX, drawY, drawW, drawH
+        );
+        return normCanvas;
+      }
+    }
+
+    class PartRiggingSystem {
+      constructor(canvasElement, config) {
+        this.canvas = canvasElement;
+        this.ctx = this.canvas.getContext('2d');
+        this.config = config;
+        this.imageMap = new Map();
+        this.selectedPartId = 'weapon';
+        this.showDebugGizmo = true;
+      }
+
+      render() {
+        if (!this.canvas) return;
+        const { width, height } = this.canvas;
+        this.ctx.clearRect(0, 0, width, height);
+
+        // 체커보드 배경
+        const ctx = this.ctx;
+        ctx.fillStyle = '#151c2c';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < width; x += 40) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+        }
+        for (let y = 0; y < height; y += 40) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+        }
+
+        // Z-Index 정렬 후 렌더링
+        const sorted = [...this.config.parts].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+        for (const part of sorted) {
+          this.drawPart(part);
+        }
+
+        if (this.showDebugGizmo && this.selectedPartId) {
+          const selected = this.config.parts.find(p => p.id === this.selectedPartId);
+          if (selected) this.drawGizmo(selected);
+        }
+      }
+
+      drawPart(part) {
+        const asset = this.imageMap.get(part.id);
+        if (!asset || asset.width <= 0 || asset.height <= 0) return;
+
+        const ctx = this.ctx;
+        ctx.save();
+        ctx.globalAlpha = part.opacity !== undefined ? part.opacity : 1.0;
+
+        ctx.translate(part.anchor.x, part.anchor.y);
+        const rad = (part.rotation || 0) * (Math.PI / 180);
+        ctx.rotate(rad);
+
+        const scaleX = (part.scale?.x ?? 1.0) * (part.flipX ? -1 : 1);
+        const scaleY = part.scale?.y ?? 1.0;
+        ctx.scale(scaleX, scaleY);
+
+        const assetW = asset.width;
+        const assetH = asset.height;
+        const pivotX = (part.pivot?.x ?? 0.5) * assetW;
+        const pivotY = (part.pivot?.y ?? 0.5) * assetH;
+
+        ctx.drawImage(asset, -pivotX, -pivotY, assetW, assetH);
+        ctx.restore();
+      }
+
+      drawGizmo(part) {
+        const asset = this.imageMap.get(part.id);
+        if (!asset) return;
+
+        const ctx = this.ctx;
+        const assetW = asset.width;
+        const assetH = asset.height;
+        const rad = (part.rotation || 0) * (Math.PI / 180);
+        const scaleX = (part.scale?.x ?? 1.0) * (part.flipX ? -1 : 1);
+        const scaleY = part.scale?.y ?? 1.0;
+        const pivotX = (part.pivot?.x ?? 0.5) * assetW;
+        const pivotY = (part.pivot?.y ?? 0.5) * assetH;
+
+        ctx.save();
+        ctx.translate(part.anchor.x, part.anchor.y);
+        ctx.rotate(rad);
+        ctx.scale(scaleX, scaleY);
+
+        // 바운딩 박스
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 4]);
+        ctx.strokeRect(-pivotX, -pivotY, assetW, assetH);
+
+        // 피벗 포인트 (빨간 원 + 십자)
+        ctx.setLineDash([]);
+        ctx.strokeStyle = '#ef4444';
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(-12, 0); ctx.lineTo(12, 0);
+        ctx.moveTo(0, -12); ctx.lineTo(0, 12);
+        ctx.stroke();
+        ctx.restore();
+
+        // 앵커 포인트 (노란 다이아몬드)
+        ctx.save();
+        ctx.translate(part.anchor.x, part.anchor.y);
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.moveTo(0, -7); ctx.lineTo(7, 0); ctx.lineTo(0, 7); ctx.lineTo(-7, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      updatePartTransform(partId, updates) {
+        const part = this.config.parts.find(p => p.id === partId);
+        if (!part) return;
+        if (updates.anchor) Object.assign(part.anchor, updates.anchor);
+        if (updates.pivot) Object.assign(part.pivot, updates.pivot);
+        if (updates.scale) Object.assign(part.scale, updates.scale);
+        if (updates.rotation !== undefined) part.rotation = updates.rotation;
+        if (updates.flipX !== undefined) part.flipX = updates.flipX;
+        this.render();
+      }
+
+      exportConfig() {
+        return JSON.stringify(this.config, null, 2);
+      }
+    }
+
+    // 01~15 설정시트와 1:1 매핑되는 기획 호환 리깅 설정
+    const DEFAULT_LIVE2D_CONFIG = {
+      characterId: "CH_MODULAR_UNIT",
+      sdRatio: 3.0,
+      baseResolution: { width: 600, height: 600 },
+      parts: [
+        { id: "bottom_back", slotId: "15", name: "하의 뒷치마", zIndex: 15, anchor: { x: 300, y: 360 }, pivot: { x: 0.5, y: 0.1 }, scale: { x: 1, y: 1 }, rotation: 0, flipX: false, targetBounds: { width: 180, height: 160 } },
+        { id: "wings", slotId: "12", name: "날개/망토", zIndex: 20, anchor: { x: 300, y: 260 }, pivot: { x: 0.5, y: 0.3 }, scale: { x: 1, y: 1 }, rotation: 0, flipX: false, targetBounds: { width: 340, height: 200 } },
+        { id: "core", slotId: "04", name: "소체 본체", zIndex: 30, anchor: { x: 300, y: 300 }, pivot: { x: 0.5, y: 0.5 }, scale: { x: 1, y: 1 }, rotation: 0, flipX: false, targetBounds: { width: 180, height: 360 } },
+        { id: "top", slotId: "10", name: "복장 상의", zIndex: 40, anchor: { x: 300, y: 280 }, pivot: { x: 0.5, y: 0.2 }, scale: { x: 1, y: 1 }, rotation: 0, flipX: false, targetBounds: { width: 140, height: 120 } },
+        { id: "bottom", slotId: "11", name: "복장 앞치마", zIndex: 50, anchor: { x: 300, y: 360 }, pivot: { x: 0.5, y: 0.1 }, scale: { x: 1, y: 1 }, rotation: 0, flipX: false, targetBounds: { width: 160, height: 140 } },
+        { id: "expr", slotId: "05", name: "표정 파츠", zIndex: 60, anchor: { x: 300, y: 200 }, pivot: { x: 0.5, y: 0.5 }, scale: { x: 1, y: 1 }, rotation: 0, flipX: false, targetBounds: { width: 130, height: 110 } },
+        { id: "halo", slotId: "09", name: "머리장식/헤일로", zIndex: 70, anchor: { x: 300, y: 120 }, pivot: { x: 0.5, y: 0.8 }, scale: { x: 1, y: 1 }, rotation: 0, flipX: false, targetBounds: { width: 220, height: 150 } },
+        { id: "weapon", slotId: "13", name: "주무기", zIndex: 80, anchor: { x: 230, y: 330 }, pivot: { x: 0.5, y: 0.85 }, scale: { x: 1, y: 1 }, rotation: -15, flipX: false, targetBounds: { width: 80, height: 260 } },
+        { id: "sub", slotId: "14", name: "보조무기", zIndex: 90, anchor: { x: 370, y: 330 }, pivot: { x: 0.5, y: 0.5 }, scale: { x: 1, y: 1 }, rotation: 0, flipX: false, targetBounds: { width: 100, height: 140 } }
+      ]
+    };
+
+    let live2dRigSystem = null;
+
+    function initLive2DCanvasRig() {
+      const c = document.getElementById('canvas-live2d-rig');
+      if (!c) return;
+      live2dRigSystem = new PartRiggingSystem(c, JSON.parse(JSON.stringify(DEFAULT_LIVE2D_CONFIG)));
+      live2dRigSystem.selectedPartId = getCurrentTuningTarget();
+      updateLive2DCanvasRigging();
+    }
+
+    function toggleRigGizmo() {
+      if (!live2dRigSystem) return;
+      live2dRigSystem.showDebugGizmo = !live2dRigSystem.showDebugGizmo;
+      const btn = document.getElementById('btn-toggle-gizmo');
+      if (btn) {
+        btn.innerText = live2dRigSystem.showDebugGizmo ? '기즈모: ON' : '기즈모: OFF';
+        btn.style.color = live2dRigSystem.showDebugGizmo ? '#38bdf8' : '#64748b';
+      }
+      live2dRigSystem.render();
+    }
+
+    function updateLive2DCanvasRigging() {
+      if (!live2dRigSystem) return;
+
+      // 슬라이스된 캔버스들에서 정규화된 그래픽 추출하여 시스템에 공급
+      live2dRigSystem.config.parts.forEach(part => {
+        let slotId = part.slotId;
+        if (part.id === 'core') {
+          slotId = useBaseBodyAsCore ? '04' : '01';
+        }
+        const idx = sliceSpecs.findIndex(s => s.id === slotId);
+        if (idx >= 0 && !sliceSpecs[idx].absent) {
+          const pCanvas = document.getElementById(`canvas-part-${idx}`);
+          if (pCanvas && pCanvas.width > 0 && pCanvas.height > 0) {
+            // 표준 규격으로 자동 정규화 피팅
+            const normCanvas = PartNormalizer.createNormalizedCanvas(
+              pCanvas,
+              part.targetBounds.width,
+              part.targetBounds.height,
+              'contain'
+            );
+            live2dRigSystem.imageMap.set(part.id, normCanvas);
+          } else {
+            live2dRigSystem.imageMap.delete(part.id);
+          }
+        } else {
+          live2dRigSystem.imageMap.delete(part.id);
+        }
+      });
+
+      // 좌우 반전 및 튜닝 상태 동기화
+      Object.keys(partFitState).forEach(target => {
+        const fit = partFitState[target];
+        if (fit) {
+          const updates = {};
+          if (fit.scale !== undefined) updates.scale = { x: fit.scale / 100, y: fit.scale / 100 };
+          if (fit.flipX !== undefined) updates.flipX = fit.flipX;
+          if (fit.rot !== undefined) updates.rotation = fit.rot;
+          if (fit.pivX !== undefined || fit.pivY !== undefined) {
+            updates.pivot = { x: fit.pivX ?? 0.5, y: fit.pivY ?? 0.5 };
+          }
+          if (fit.ancX !== undefined || fit.ancY !== undefined) {
+            updates.anchor = { x: fit.ancX ?? 300, y: fit.ancY ?? 300 };
+          }
+          live2dRigSystem.updatePartTransform(target, updates);
+        }
+      });
+
+      live2dRigSystem.render();
+    }
+
+    function exportLive2DRiggingJson() {
+      if (!live2dRigSystem) return;
+      const slug = getSlug();
+      const exportData = JSON.parse(JSON.stringify(live2dRigSystem.config));
+      exportData.characterId = slug;
+
+      const jsonStr = JSON.stringify(exportData, null, 2);
+      navigator.clipboard.writeText(jsonStr).then(() => {
+        alert('✨ [Live2D 관절 리깅 JSON]이 클립보드에 복사되었습니다! 기획 문서 및 클라이언트 엔진에 바로 붙여넣을 수 있습니다.');
+      }).catch(() => {
+        prompt('아래 JSON 데이터를 복사하세요:', jsonStr);
+      });
+    }
+
 
     window.addEventListener('DOMContentLoaded', initUniversalTuning);
   </script>
