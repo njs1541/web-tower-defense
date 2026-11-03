@@ -2,6 +2,9 @@ const USER_DATA = {
     gold: 0,
     pp: 2,         // 프리즘 포인트 (미소녀 지휘관 캐릭터 소환용, 기본 2개)
     rp: 10,        // 룬 포인트 (룬 소환용, 기본 10개)
+    prismShards: 0, // [v0.42.0] 프리즘 조각 (100개 모이면 1 PP로 자동 합성)
+    commanderPityCount: 0, // [v0.42.0] 지휘관 가챠 천장 스택
+    stageFirstClears: {},  // [v0.42.0] 스테이지 구간별 최초 클리어 여부 { stage1_10: true, ... }
     inventory: [], // 보유한 타워 ID 목록 (예: ['ranged', 'melee'])
     deck: [],      // 출전 덱 (최대 4장) (Phase D)
     fragments: {}, // { 'ranged': 5, 'melee': 2 }
@@ -41,6 +44,9 @@ function loadData() {
             // v0.22.0 캐릭터 & 룬 & 재화 호환성 마이그레이션
             if (USER_DATA.pp === undefined) USER_DATA.pp = 2;
             if (USER_DATA.rp === undefined) USER_DATA.rp = 10;
+            if (USER_DATA.prismShards === undefined) USER_DATA.prismShards = 0;
+            if (USER_DATA.commanderPityCount === undefined) USER_DATA.commanderPityCount = 0;
+            if (!USER_DATA.stageFirstClears) USER_DATA.stageFirstClears = {};
             if (!USER_DATA.characters || Object.keys(USER_DATA.characters).length === 0) {
                 USER_DATA.characters = {
                     char_titania: { id: "char_titania", star: 5, sockets: 4, equippedRunes: ["rune_void_collapse", "rune_spell_armageddon"] },
@@ -312,6 +318,9 @@ function hardResetGame() {
 
 /**
  * 현재 출전 덱의 대장(총사령관, 1번 슬롯) 정보 및 대장 고유 오버클럭 보너스 조회 (v0.32.0 New)
+ * - v0.41.0: 구형 대장 필드 강림 및 오버클럭 보급(extraSupplies) 제거.
+ *            현재는 1번 슬롯 지휘관의 '강화 한도(extraCaps) 오버클럭'만 담당하며,
+ *            전장 직접 강림은 UR/U 히어로 유닛 시스템(deployedHeroes)이 전담한다.
  */
 function getLeaderCommanderInfo() {
     if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck) || USER_DATA.characterDeck.length === 0) {
@@ -323,7 +332,6 @@ function getLeaderCommanderInfo() {
 
     const grade = charBase.grade || 'C';
     let extraCaps = {};
-    let extraSupplies = {};
     let bonusDesc = "";
 
     // R 등급 이상 대장 임명 시 대장 전용 추가 오버클럭 옵션
@@ -362,7 +370,6 @@ function getLeaderCommanderInfo() {
         charBase: charBase,
         grade: grade,
         extraCaps: extraCaps,
-        extraSupplies: {},
         bonusDesc: bonusDesc
     };
 }
@@ -419,15 +426,8 @@ function calculateDeckTowerCaps() {
 }
 
 /**
- * (은퇴) 시작 시 무료 보급 타워/기반 총합 계산 -> 고정 스톡 체계 전환으로 빈 객체 반환
- * @returns {Object} {}
- */
-function calculateDeckStartingSupplies() {
-    return {};
-}
-
-/**
  * 출전 덱에 편성된 지휘관들로부터 이번 게임에 설치 가능한 고정 타워 스톡(Stock) 총합 계산 (v0.36.0 New)
+ * - v0.41.0: UR/U(히어로 유닛) 지휘관은 스톡을 제공하지 않으므로 towerStock이 있더라도 무시한다.
  * @returns {Object} { melee: 4, ranged: 3, ... }
  */
 function calculateDeckTowerStocks() {
@@ -436,9 +436,14 @@ function calculateDeckTowerStocks() {
 
     for (const charId of USER_DATA.characterDeck) {
         const charInfo = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
-        if (charInfo && charInfo.towerStock) {
+        if (!charInfo || isHeroGradeCommander(charInfo)) continue; // UR 이상은 스톡 0기
+        if (charInfo.towerStock) {
+            // [v0.42.0 New] 성급(★)에 따른 타워 스톡 보너스: 2성부터 1성 증가당 스톡 +1기 추가!
+            const userChar = (USER_DATA.characters && USER_DATA.characters[charId]) || { star: 1 };
+            const starBonus = Math.max(0, (userChar.star || 1) - 1);
+
             for (const [key, count] of Object.entries(charInfo.towerStock)) {
-                stocks[key] = (stocks[key] || 0) + count;
+                stocks[key] = (stocks[key] || 0) + count + starBonus;
             }
         }
     }
@@ -446,7 +451,18 @@ function calculateDeckTowerStocks() {
 }
 
 /**
+ * UR 이상(UR/U) 히어로 유닛 지휘관 여부 판정 (v0.41.0 New)
+ * - UR/U 지휘관은 타워 스톡을 제공하지 않고 전장에 직접 강림한다.
+ */
+function isHeroGradeCommander(charInfo) {
+    if (!charInfo) return false;
+    return charInfo.grade === 'UR' || charInfo.grade === 'U';
+}
+
+/**
  * 타워가 속한 지휘관 등급에 따른 환급율 계산 (C: 100%, UC: 80%, 기타: 60%) (v0.36.0 New)
+ * ⚠️ [재정립 필요 - v0.41.0] 타워 설치비가 0 TP인 현 스톡 체계에서 환급 대상(강화비만? 설치비 포함?)과
+ *    등급별 환급율은 추후 재정립 예정. 현재 로직은 임시 유지.
  */
 function getTowerRefundRateForCell(cell) {
     if (!cell) return 0.6;
@@ -647,39 +663,18 @@ function calculateDeckSynergies() {
 
 /**
  * 현재 출전한 지휘관 카드들에 등록/관장된 타워 타입 목록(라이선스) 조회 (v0.25.1 New)
- * - 지휘관의 levelCaps 또는 startingTowers에 등록된 타워만 인게임 설치 가능
+ * - v0.41.0: 실제로 설치 가능한 타워 스톡(1기 이상)이 있는 타워만 인가한다.
+ *   (levelCaps/대장 오버클럭은 '강화 한도'만 올려줄 뿐 설치 권한을 주지 않음 -> UR/U 히어로 덱에서
+ *    0/0 스톡 버튼이 노출되던 문제 정리)
  * @returns {Array<string>} 예: ['melee', 'ranged', 'bomb']
  */
 function getAuthorizedTowerTypes() {
-    const authorized = new Set();
     if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck) || USER_DATA.characterDeck.length === 0) {
         return ['ranged']; // 비상용 기본
     }
 
-    for (const charId of USER_DATA.characterDeck) {
-        const charInfo = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
-        if (!charInfo) continue;
-
-        // 1. levelCaps에 등록된 타워
-        if (charInfo.levelCaps) {
-            Object.keys(charInfo.levelCaps).forEach(type => authorized.add(type));
-        }
-
-        // 2. towerStock에 등록된 타워 (스톡 1 이상)
-        if (charInfo.towerStock) {
-            Object.keys(charInfo.towerStock).forEach(type => {
-                if (type !== 'base' && charInfo.towerStock[type] > 0) authorized.add(type);
-            });
-        }
-    }
-
-    // 3. 대장 오버클럭(U등급 등)에 의한 추가 인가 타워 반영 (v0.32.0 New)
-    const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
-    if (leaderInfo && leaderInfo.extraCaps) {
-        Object.keys(leaderInfo.extraCaps).forEach(type => authorized.add(type));
-    }
-
-    return Array.from(authorized);
+    const stocks = calculateDeckTowerStocks();
+    return Object.keys(stocks).filter(type => type !== 'base' && stocks[type] > 0);
 }
 
 
@@ -754,10 +749,12 @@ function addCharacterOrDuplicate(charId) {
         if (char.sockets < (charBase.maxSockets || 3)) {
             char.sockets += 1;
         }
+        // [v0.42.0 New] C~SR 타워 빌더 캐릭터의 경우 성급 승급 시 스톡 확장 안내
+        console.log(`[${charBase.name}] ★${char.star} 성급 승급 완료! (타워 설치 스톡 +1기 보너스 부여!)`);
     }
 
     saveData();
-    return { isNew: false, upgraded: upgraded, star: char.star, sockets: char.sockets, exp: char.starExp, reqExp: char.star };
+    return { isNew: false, upgraded: upgraded, star: char.star, sockets: char.sockets, exp: char.starExp, reqExp: char.star, stockBonus: Math.max(0, (char.star || 1) - 1) };
 }
 
 // 하위 호환

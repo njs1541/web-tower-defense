@@ -330,12 +330,41 @@ function gameLoopTick() {
         clearInterval(gameInterval);
         clearInterval(spawnInterval);
         gameRunning = false;
+        const clearedRound = round;
         round++;
 
-        const isBossRound = ((round - 1) % 10 === 0);
+        // [v0.42.0 New] 1) 완막(Perfect Wave Clear) 보너스: 성벽 피해 없이 웨이브 종료 시 프리즘 조각 지급!
+        if (typeof roundStartHp !== 'undefined' && playerHP >= roundStartHp) {
+            USER_DATA.prismShards = (USER_DATA.prismShards || 0) + 10;
+            if (USER_DATA.prismShards >= 100) {
+                USER_DATA.prismShards -= 100;
+                USER_DATA.pp = (USER_DATA.pp || 0) + 1;
+                showFloatingDamage(10, 10, "✨ 완막 100조각 달성! 💎 PP +1 획득!", "#38bdf8");
+            } else {
+                showFloatingDamage(10, 10, `✨ 완막 성공! 프리즘 조각 +10 (${USER_DATA.prismShards}/100)`, "#93c5fd");
+            }
+            saveData();
+            if (typeof updateLobbyUI === 'function') updateLobbyUI();
+        }
+
+        // [v0.42.0 New] 2) 보스 격파 및 스테이지 구간별 '최초 클리어' 대량 PP 보너스
+        const isBossRound = (clearedRound % 10 === 0);
         if (isBossRound) {
-            alert("👑 보스 격파 성공! 막대한 보상 50G를 획득했습니다!");
+            alert(`👑 ${clearedRound}R 보스 격파 성공! 막대한 보상 50G를 획득했습니다!`);
             gold += 50;
+
+            const clearKey = `stage_${currentStage}_${clearedRound}`;
+            if (!USER_DATA.stageFirstClears) USER_DATA.stageFirstClears = {};
+            if (!USER_DATA.stageFirstClears[clearKey]) {
+                USER_DATA.stageFirstClears[clearKey] = true;
+                const bonusPP = (clearedRound === 30) ? 10 : ((clearedRound === 20) ? 5 : 3);
+                USER_DATA.pp = (USER_DATA.pp || 0) + bonusPP;
+                saveData();
+                setTimeout(() => {
+                    alert(`🎉 [스테이지 최초 클리어 보너스!]\n${currentStage.toUpperCase()} ${clearedRound}라운드 최초 돌파 기념!\n💎 프리즘 포인트(PP) +${bonusPP}개가 지급되었습니다!`);
+                    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+                }, 400);
+            }
         }
 
         // v0.34.0 전술가 2셋: 웨이브 클리어 시 추가 TP/골드 지급
@@ -535,12 +564,6 @@ function handleCrawlerMovement(enemy) {
 function demolishBase(cell) {
     if (!cell || !cell.buildable) return;
 
-    // v0.32.0 대장 지휘관 수호 결계: 대장이 서 있는 기반은 크롤러가 절대 철거 불가!
-    if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && cell.x === leaderPos.x && cell.y === leaderPos.y) {
-        showFloatingDamage(cell.x, cell.y, "🛡️ 대장 결계! 철거 차단!", "#38bdf8");
-        return;
-    }
-
     // v0.39.0 강림 히어로 유닛 본체 보호 및 루미나(U) 3x3 성간 결계 오라 크롤러 철거 차단
     if (typeof deployedHeroes !== 'undefined') {
         for (const [hId, hData] of Object.entries(deployedHeroes)) {
@@ -650,6 +673,9 @@ function startRound() {
     isPaused = false;
     enemies = [];
 
+    // [v0.42.0] 라운드 시작 시점 기지 체력 기록 (완막 여부 판정용)
+    window.roundStartHp = playerHP;
+
     spawnedCount = 0;
     totalEnemies = round;
 
@@ -660,14 +686,5 @@ function startRound() {
 
     updateSpeedUI();
     restartGameLoops();
-
-    // v0.32.0 라운드 시작 시 대장 이동 기회 1회 리셋
-    if (typeof leaderRelocatedThisRound !== 'undefined') {
-        leaderRelocatedThisRound = false;
-        isLeaderDeployMode = false;
-        if (typeof updateInGameCommandersBar === 'function') {
-            updateInGameCommandersBar();
-        }
-    }
 }
 

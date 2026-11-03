@@ -14,7 +14,15 @@ function updateLobbyUI() {
 
     const ppDisplay = document.getElementById("lobby-pp");
     if (ppDisplay && typeof USER_DATA !== 'undefined') {
-        ppDisplay.innerText = USER_DATA.pp || 0;
+        const shards = USER_DATA.prismShards || 0;
+        ppDisplay.innerHTML = `${USER_DATA.pp || 0} <span style="font-size:11px; font-weight:normal; opacity:0.85;">(${shards}/100 조각)</span>`;
+        ppDisplay.title = `프리즘 포인트: ${USER_DATA.pp || 0} PP (완막 시 조각 +10 지급, 100개당 1 PP 합성)`;
+    }
+
+    // [v0.42.0 New] 상점 천장 진행도 UI 갱신
+    const pityEl = document.getElementById("shop-pity-count");
+    if (pityEl && typeof USER_DATA !== 'undefined') {
+        pityEl.innerText = USER_DATA.commanderPityCount || 0;
     }
 
     const rpDisplay = document.getElementById("lobby-rp");
@@ -200,10 +208,13 @@ function createSingleCommanderCard(charId, isDeployedSlot = false, slotIndex = 0
 
     // 고정 타워 스톡 요약
     const stocksText = [];
+    const starStockBonus = Math.max(0, (charData.star || 1) - 1);
     if (baseInfo.towerStock && Object.keys(baseInfo.towerStock).length > 0) {
         for (const [sKey, sCount] of Object.entries(baseInfo.towerStock)) {
             const sName = TOWER_DATA[sKey] ? TOWER_DATA[sKey].name.replace(" 타워", "") : sKey;
-            stocksText.push(`${sName} ${sCount}기`);
+            const totalCount = sCount + starStockBonus;
+            const bonusText = starStockBonus > 0 ? ` (+★${starStockBonus})` : '';
+            stocksText.push(`${sName} ${totalCount}기${bonusText}`);
         }
     }
     const stocksSummary = stocksText.length > 0 
@@ -348,7 +359,6 @@ function renderCommanderSection() {
     const deckIds = USER_DATA.characterDeck || [];
     const deckCaps = (typeof calculateDeckTowerCaps === 'function') ? calculateDeckTowerCaps() : {};
     const deckStocks = (typeof calculateDeckTowerStocks === 'function') ? calculateDeckTowerStocks() : {};
-    const deckSupplies = (typeof calculateDeckStartingSupplies === 'function') ? calculateDeckStartingSupplies() : {};
     
     let authorizedTowers = [];
     if (deckIds.length > 0 && typeof getAuthorizedTowerTypes === 'function') {
@@ -380,9 +390,13 @@ function renderCommanderSection() {
         });
         towerListHtml += `</div>`;
     } else {
+        // v0.41.0: 지휘관은 있으나 전원 UR/U(히어로)라 스톡이 0기인 경우 안내 문구 분기
+        const emptyMsg = deckIds.length > 0
+            ? "⚡ 타워 스톡 0기 - 전원 전장 강림(히어로) 덱입니다. C~SR 지휘관을 편성하면 타워가 개방됩니다."
+            : "⚠️ 출전 지휘관이 없습니다. 아래 슬롯에 지휘관을 편성하여 타워를 개방하세요!";
         towerListHtml = `
             <div style="background: #fff; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px; text-align: center; font-size: 11.5px; color: #64748b;">
-                ⚠️ 출전 지휘관이 없습니다. 아래 슬롯에 지휘관을 편성하여 타워를 개방하세요!
+                ${emptyMsg}
             </div>
         `;
     }

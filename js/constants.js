@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.36.7";
+const GAME_VERSION = "v0.42.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -10,6 +10,8 @@ const BASE_BUILD_CONFIG = {
 };
 
 // 타워 환불율 (60%)
+// ⚠️ [재정립 필요 - v0.41.0] 스톡 체계(설치 0 TP) 도입 이후 타워 설치비(TOWER_DATA.cost)와
+//    철거 환급 규칙(등급별 C 100% / UC 80% / 그 외 60%)은 추후 재정립 예정.
 const TOWER_REFUND_RATE = 0.6;
 
 // 타워별 상징 엠블럼 이모지
@@ -1249,35 +1251,47 @@ const COMMANDER_GACHA_CONFIG = {
     costPP: 1,       // 1회 소환 시 1 PP 소모
     multiCostPP: 10, // 10회 소환 시 10 PP 소모
     multiCount: 11,  // 10회 소환 시 보너스로 총 11장 지급
+    // [v0.42.0 가챠 확률 하향 리밸런싱: 최고등급 도파민 극대화 (UR+U: 총 3.0%)]
     rates: [
-        // C 등급 (총 36%)
-        { grade: "C", charId: "char_liana", weight: 12 },
-        { grade: "C", charId: "char_mia", weight: 12 },
-        { grade: "C", charId: "char_hana", weight: 12 },
-        // UC 등급 (총 30%)
-        { grade: "UC", charId: "char_elena", weight: 5 },
-        { grade: "UC", charId: "char_chloe", weight: 5 },
-        { grade: "UC", charId: "char_charlotte", weight: 5 },
-        { grade: "UC", charId: "char_cecilia", weight: 5 },
-        { grade: "UC", charId: "char_greta", weight: 5 },
-        { grade: "UC", charId: "char_ada", weight: 5 },
-        // R 등급 (총 18%)
+        // C 등급 (총 35.0%)
+        { grade: "C", charId: "char_liana", weight: 11.666 },
+        { grade: "C", charId: "char_mia", weight: 11.667 },
+        { grade: "C", charId: "char_hana", weight: 11.667 },
+        // UC 등급 (총 35.0%)
+        { grade: "UC", charId: "char_elena", weight: 5.833 },
+        { grade: "UC", charId: "char_chloe", weight: 5.833 },
+        { grade: "UC", charId: "char_charlotte", weight: 5.833 },
+        { grade: "UC", charId: "char_cecilia", weight: 5.833 },
+        { grade: "UC", charId: "char_greta", weight: 5.834 },
+        { grade: "UC", charId: "char_ada", weight: 5.834 },
+        // R 등급 (총 18.0%)
         { grade: "R", charId: "char_freya", weight: 4.5 },
         { grade: "R", charId: "char_valeria", weight: 4.5 },
         { grade: "R", charId: "char_sylvia", weight: 4.5 },
         { grade: "R", charId: "char_camilla", weight: 4.5 },
-        // SR 등급 (총 10%)
-        { grade: "SR", charId: "char_scarlet", weight: 2.5 },
-        { grade: "SR", charId: "char_aurelia", weight: 2.5 },
-        { grade: "SR", charId: "char_selena", weight: 2.5 },
-        { grade: "SR", charId: "char_eleanor", weight: 2.5 },
-        // UR 등급 (총 4%)
-        { grade: "UR", charId: "char_seraphina", weight: 2.0 },
-        { grade: "UR", charId: "char_veronica", weight: 2.0 },
-        // U 등급 (총 2%)
-        { grade: "U", charId: "char_lumina", weight: 1.0 },
-        { grade: "U", charId: "char_titania", weight: 1.0 }
+        // SR 등급 (총 9.0%)
+        { grade: "SR", charId: "char_scarlet", weight: 2.25 },
+        { grade: "SR", charId: "char_aurelia", weight: 2.25 },
+        { grade: "SR", charId: "char_selena", weight: 2.25 },
+        { grade: "SR", charId: "char_eleanor", weight: 2.25 },
+        // UR 등급 (총 2.5% - 결전 히어로)
+        { grade: "UR", charId: "char_seraphina", weight: 1.25 },
+        { grade: "UR", charId: "char_veronica", weight: 1.25 },
+        // U 등급 (총 0.5% - 창세 여신 최고 도파민)
+        { grade: "U", charId: "char_lumina", weight: 0.25 },
+        { grade: "U", charId: "char_titania", weight: 0.25 }
     ]
+};
+
+/**
+ * v0.42.0 소프트 피티(Soft Pity) 천장 시스템 설정
+ * - 50회부터 최고등급(UR 이상) 획득 확률이 회당 +5%씩 가산
+ * - 70회 도달 시 하드 천장(100% 확정 지급)
+ */
+const COMMANDER_PITY_CONFIG = {
+    softPityStart: 50,
+    hardPity: 70,
+    bonusPerPull: 5.0
 };
 
 const RUNE_GACHA_CONFIG = {

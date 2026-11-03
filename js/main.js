@@ -106,18 +106,8 @@ function startGame() {
         usedSpellRunes = {};
     }
 
-    // 3. 지휘관 스타팅 보급 (은퇴: 고정 스톡 체계로 전환)
-    commanderSupplies = {};
-    selectedSupplyType = null;
-
-    // 3-2. v0.32.0 대장 지휘관 상태 초기화
-    leaderDeployed = false;
-    leaderPos = null;
-    leaderRelocatedThisRound = false;
-    isLeaderDeployMode = false;
-    leaderAttackCooldown = 0;
-
-    // 3-2-2. v0.39.0 UR/U 지휘관 강림 유닛 상태 초기화
+    // 3. v0.39.0 UR/U 지휘관 강림 유닛(히어로) 상태 초기화
+    //    (v0.41.0: 스타팅 보급 및 구형 대장 필드 강림 상태는 시스템 제거와 함께 삭제)
     deployedHeroes = {};
     heroDeployingCharId = null;
 
@@ -149,9 +139,6 @@ function startGame() {
     updateTowerButtons();
     if (typeof updateButtonVisuals === 'function') {
         updateButtonVisuals();
-    }
-    if (typeof renderStartingSuppliesUI === 'function') {
-        renderStartingSuppliesUI();
     }
 }
 

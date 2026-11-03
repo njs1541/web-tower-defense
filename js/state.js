@@ -37,16 +37,9 @@ let deckTowerCaps = {    // 출전 캐릭터들로부터 계산된 타워별 최
     bomb: 0
 };
 
-// v0.25.0 지휘관 스타팅 무료 보급 인벤토리
-let commanderSupplies = {}; // { melee: 2, ranged: 1, base: 2, ... }
-let selectedSupplyType = null; // 무료 보급으로 설치 중인 타워/기반 키
-
-// v0.32.0 대장 지휘관 인게임 직접 참전 & 기반 수호 상태
-let leaderDeployed = false;            // 대장 필드 배치 여부
-let leaderPos = null;                  // 대장이 서 있는 기반 좌표 { x, y }
-let leaderRelocatedThisRound = false;  // 라운드당 1회 이동 사용 여부
-let isLeaderDeployMode = false;        // 대장 강림/이동 타일 선택 모드
-let leaderAttackCooldown = 0;          // 대장 자체 공격 쿨다운
+// [v0.41.0 정리] v0.25.0 스타팅 무료 보급 상태(commanderSupplies, selectedSupplyType) 전면 제거
+// [v0.41.0 정리] v0.32.0 구형 대장 필드 강림 상태(leaderDeployed, leaderPos 등) 전면 제거
+//   -> 전장 강림은 아래 v0.39.0 히어로 유닛(UR/U) 시스템으로 일원화
 
 // v0.39.0 UR/U 결전 지휘관 전장 직접 강림(Hero Unit) 상태
 let deployedHeroes = {};          // { [charId]: { x, y, cooldownSec: 0, maxCooldownSec: 15, auraRange: 1, attackCooldown: 0 } }

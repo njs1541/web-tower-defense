@@ -26,28 +26,69 @@ function toggleShop() {
  * 1인 지휘관 추첨 헬퍼 함수
  */
 function rollSingleCommander() {
-    const rates = COMMANDER_GACHA_CONFIG.rates;
-    const totalWeight = rates.reduce((sum, r) => sum + r.weight, 0);
-    let rand = Math.random() * totalWeight;
-    let selectedRate = rates[0];
+    USER_DATA.commanderPityCount = (USER_DATA.commanderPityCount || 0) + 1;
+    const pityCount = USER_DATA.commanderPityCount;
+    const pityCfg = (typeof COMMANDER_PITY_CONFIG !== 'undefined') 
+        ? COMMANDER_PITY_CONFIG 
+        : { softPityStart: 50, hardPity: 70, bonusPerPull: 5.0 };
 
-    for (const r of rates) {
-        if (rand < r.weight) {
-            selectedRate = r;
-            break;
+    // [v0.42.0] 소프트 피티 적용 판정
+    // 기본 UR+U 확률 = 3.0% (UR 2.5% + U 0.5%)
+    let highGradeChance = 3.0;
+    if (pityCount >= pityCfg.hardPity) {
+        highGradeChance = 100.0; // 하드 천장 100%
+    } else if (pityCount >= pityCfg.softPityStart) {
+        // 50회부터 뽑기당 +5%p 가산
+        highGradeChance = Math.min(100.0, 3.0 + (pityCount - pityCfg.softPityStart + 1) * pityCfg.bonusPerPull);
+    }
+
+    const isHighGradeTriggered = (Math.random() * 100) < highGradeChance;
+    let selectedRate = null;
+
+    if (isHighGradeTriggered) {
+        // UR 또는 U 등급 지휘관 풀에서만 추첨
+        const highRates = COMMANDER_GACHA_CONFIG.rates.filter(r => r.grade === 'UR' || r.grade === 'U');
+        const highWeight = highRates.reduce((sum, r) => sum + r.weight, 0);
+        let rand = Math.random() * highWeight;
+        for (const r of highRates) {
+            if (rand < r.weight) {
+                selectedRate = r;
+                break;
+            }
+            rand -= r.weight;
         }
-        rand -= r.weight;
+        if (!selectedRate) selectedRate = highRates[0];
+        console.log(`✨ [가챠 천장/소프트피티 발동!] ${pityCount}스택에서 ${selectedRate.grade} 등급 지휘관 획득!`);
+        // 최고등급 획득 시 천장 스택 초기화
+        USER_DATA.commanderPityCount = 0;
+    } else {
+        // C ~ SR 일반 풀에서 추첨
+        const normalRates = COMMANDER_GACHA_CONFIG.rates.filter(r => r.grade !== 'UR' && r.grade !== 'U');
+        const normalWeight = normalRates.reduce((sum, r) => sum + r.weight, 0);
+        let rand = Math.random() * normalWeight;
+        for (const r of normalRates) {
+            if (rand < r.weight) {
+                selectedRate = r;
+                break;
+            }
+            rand -= r.weight;
+        }
+        if (!selectedRate) selectedRate = normalRates[0];
     }
 
     const charId = selectedRate.charId;
     const charBase = CHARACTER_DATA[charId];
     const result = addCharacterOrDuplicate(charId);
 
+    saveData();
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+
     return {
         charId: charId,
         charBase: charBase,
         result: result,
-        grade: charBase.grade
+        grade: charBase.grade,
+        pityCount: pityCount
     };
 }
 

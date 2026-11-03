@@ -15,19 +15,14 @@ function render() {
 
         dom.className = "cell";
 
-        // 현재 셀에 배치된 대장 또는 강림 히어로 식별 (60FPS 모션 유지를 위한 스마트 DOM 보존)
+        // 현재 셀에 배치된 강림 히어로 식별 (60FPS 모션 유지를 위한 스마트 DOM 보존)
+        // (v0.41.0: 구형 대장 필드 유닛 분기 제거, 히어로 유닛만 렌더링)
         let activeUnitCharId = null;
-        let activeUnitIsLeader = false;
+        let activeUnitIsLeader = false; // 1번 슬롯(대장) 히어로일 경우 왕관 표시용
         let activeUnitFacing = 'right';
         let activeUnitAttacking = false;
 
-        if (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
-            const lInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
-            activeUnitCharId = (lInfo && lInfo.charId) ? lInfo.charId : ((typeof USER_DATA !== 'undefined' && USER_DATA.characterDeck) ? USER_DATA.characterDeck[0] : 'char_liana');
-            activeUnitIsLeader = true;
-            activeUnitFacing = (typeof window.leaderFacing === 'string') ? window.leaderFacing : 'right';
-            activeUnitAttacking = (typeof window.leaderAttackAnimUntil === 'number' && Date.now() < window.leaderAttackAnimUntil);
-        } else if (typeof deployedHeroes !== 'undefined') {
+        if (typeof deployedHeroes !== 'undefined') {
             for (const [hId, hData] of Object.entries(deployedHeroes)) {
                 if (hData && hData.x === cell.x && hData.y === cell.y) {
                     activeUnitCharId = hId;
@@ -63,8 +58,8 @@ function render() {
             dom.classList.add("buildable");
             // 타워 건설 모드일 때 대장/히어로가 없는 순수 빈 기반만 '설치 가능'으로 맥동 하이라이트
             if (isBuildMode && !cell.tower) {
-                let occupiedByUnit = (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y);
-                if (!occupiedByUnit && typeof deployedHeroes !== 'undefined') {
+                let occupiedByUnit = false;
+                if (typeof deployedHeroes !== 'undefined') {
                     for (const h of Object.values(deployedHeroes)) {
                         if (h && h.x === cell.x && h.y === cell.y) {
                             occupiedByUnit = true;
@@ -95,13 +90,9 @@ function render() {
             }
         }
 
-        // v0.40.0 모듈러 캐릭터(Rig & Parts) 필드 렌더링 (대장 & UR/U 강림 히어로 통합)
+        // v0.40.0 모듈러 캐릭터(Rig & Parts) 필드 렌더링 (UR/U 강림 히어로)
         if (activeUnitCharId) {
-            if (activeUnitIsLeader && typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y) {
-                dom.classList.add("has-leader");
-            } else {
-                dom.classList.add("has-hero");
-            }
+            dom.classList.add("has-hero");
 
             const currentUnitEl = dom.querySelector(".modular-char-unit");
             if (currentUnitEl && currentUnitEl.getAttribute("data-char-id") === activeUnitCharId) {
@@ -119,26 +110,10 @@ function render() {
             }
         }
 
-        // 대장 강림/이동 모드 시 비어있는 기반(벽) 하이라이트 (다른 히어로 점유 타일 제외)
-        if (typeof isLeaderDeployMode !== 'undefined' && isLeaderDeployMode && cell.buildable && !cell.tower && !(leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y)) {
-            let occupiedByHero = false;
-            if (typeof deployedHeroes !== 'undefined') {
-                for (const h of Object.values(deployedHeroes)) {
-                    if (h && h.x === cell.x && h.y === cell.y) {
-                        occupiedByHero = true;
-                        break;
-                    }
-                }
-            }
-            if (!occupiedByHero) {
-                dom.classList.add("leader-targetable");
-            }
-        }
-
-        // 히어로 유닛 강림/이동 모드 시 비어있는 기반(벽) 하이라이트 (대장 및 다른 히어로 점유 타일 제외)
+        // 히어로 유닛 강림/이동 모드 시 비어있는 기반(벽) 하이라이트 (다른 히어로 점유 타일 제외)
         if (typeof heroDeployingCharId !== 'undefined' && heroDeployingCharId && cell.buildable && !cell.tower && !cell.isStart && !cell.isGoal) {
-            let occupied = (typeof leaderDeployed !== 'undefined' && leaderDeployed && leaderPos && leaderPos.x === cell.x && leaderPos.y === cell.y);
-            if (!occupied && typeof deployedHeroes !== 'undefined') {
+            let occupied = false;
+            if (typeof deployedHeroes !== 'undefined') {
                 for (const [oId, h] of Object.entries(deployedHeroes)) {
                     if (h && h.x === cell.x && h.y === cell.y && oId !== heroDeployingCharId) {
                         occupied = true;
@@ -405,10 +380,9 @@ function updateInGameCommandersBar() {
             }
         }
 
-        // 대장 컨트롤 및 보너스 마크업 (UR/U 결전 히어로는 전용 강림 컨트롤을 사용하므로 구형 대장 버튼 중복 표시 제외)
-        let leaderControlHtml = "";
+        // 대장(1번 슬롯) 오버클럭 보너스 마크업
+        // (v0.41.0: C~SR 구형 대장 필드 강림 버튼 제거. 전장 강림은 UR/U 히어로 전용 컨트롤만 사용)
         let leaderBonusHtml = "";
-        const isHeroUnit = (charBase.grade === 'UR' || charBase.grade === 'U');
         if (isLeader) {
             const leaderInfo = (typeof getLeaderCommanderInfo === 'function') ? getLeaderCommanderInfo() : null;
             if (leaderInfo && leaderInfo.bonusDesc) {
@@ -417,28 +391,6 @@ function updateInGameCommandersBar() {
                         <span>${leaderInfo.bonusDesc}</span>
                     </div>
                 `;
-            }
-
-            if (!isHeroUnit) {
-                if (!leaderDeployed) {
-                    leaderControlHtml = `
-                        <button class="btn-leader-card-action ${isLeaderDeployMode ? 'active' : ''}" onclick="event.stopPropagation(); toggleLeaderDeployMode();">
-                            👑 대장 필드 강림 (벽에 배치)
-                        </button>
-                    `;
-                } else if (!leaderRelocatedThisRound) {
-                    leaderControlHtml = `
-                        <button class="btn-leader-card-action relocate ${isLeaderDeployMode ? 'active' : ''}" onclick="event.stopPropagation(); toggleLeaderDeployMode();">
-                            👑 전술 위치 이동 (1회 가능)
-                        </button>
-                    `;
-                } else {
-                    leaderControlHtml = `
-                        <div class="ingame-leader-relocated-notice">
-                            🔒 이번 라운드 이동 완료 (다음 라운드 가능)
-                        </div>
-                    `;
-                }
             }
         }
 
@@ -510,7 +462,6 @@ function updateInGameCommandersBar() {
             </div>
 
             ${leaderBonusHtml}
-            ${leaderControlHtml}
             ${heroControlHtml}
         `;
 
