@@ -333,15 +333,16 @@ function gameLoopTick() {
         const clearedRound = round;
         round++;
 
-        // [v0.42.0 New] 1) 완막(Perfect Wave Clear) 보너스: 성벽 피해 없이 웨이브 종료 시 프리즘 조각 지급!
+        // [v0.43.0 New] 1) 완막(Perfect Wave Clear) 보너스: 라운드 위험도 비례 프리즘 조각 스케일링 지급 (1R 1개 ~ 20R+ 10개)
         if (typeof roundStartHp !== 'undefined' && playerHP >= roundStartHp) {
-            USER_DATA.prismShards = (USER_DATA.prismShards || 0) + 10;
+            const earnedShards = Math.max(1, Math.min(10, Math.floor(clearedRound / 2)));
+            USER_DATA.prismShards = (USER_DATA.prismShards || 0) + earnedShards;
             if (USER_DATA.prismShards >= 100) {
                 USER_DATA.prismShards -= 100;
                 USER_DATA.pp = (USER_DATA.pp || 0) + 1;
                 showFloatingDamage(10, 10, "✨ 완막 100조각 달성! 💎 PP +1 획득!", "#38bdf8");
             } else {
-                showFloatingDamage(10, 10, `✨ 완막 성공! 프리즘 조각 +10 (${USER_DATA.prismShards}/100)`, "#93c5fd");
+                showFloatingDamage(10, 10, `✨ 완막 (+ ${earnedShards}개)! 조각: ${USER_DATA.prismShards}/100`, "#93c5fd");
             }
             saveData();
             if (typeof updateLobbyUI === 'function') updateLobbyUI();
@@ -677,11 +678,12 @@ function startRound() {
     window.roundStartHp = playerHP;
 
     spawnedCount = 0;
-    totalEnemies = round;
-
     const isBossRound = (round % 10 === 0);
     if (isBossRound) {
         totalEnemies = 1; // 보스전은 강력한 보스 1기 집중!
+    } else {
+        // [v0.43.0 New] TD 정석 스폰 공식 정상화: 1R 7마리부터 점진적 웨이브 증가
+        totalEnemies = 6 + Math.floor(round * 1.5);
     }
 
     updateSpeedUI();
