@@ -3,8 +3,8 @@
 미소녀 지휘관 수집, 룬 소켓 덱빌딩, 히어로 컨트롤을 결합한 브라우저 타워 디펜스 게임과 그 에셋 제작 도구 모음이다.
 빌드 도구와 외부 의존성이 없는 바닐라 JS/HTML/CSS 프로젝트다.
 
-- 게임 버전: v0.47.0
-- 이 문서의 행 번호와 현황은 v0.47.0 작업본 기준이다. 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
+- 게임 버전: v0.50.0
+- 이 문서의 행 번호와 현황은 v0.50.0 작업본 기준이다. 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
 - **커밋은 사용자가 수동으로 한다.** 명시적인 요청이 없으면 커밋이나 푸시를 하지 않는다.
 - 세부 규칙은 [QA_AND_RULES.md](QA_AND_RULES.md), 기획은 [기획문서.md](기획문서.md), 에셋 절차는 [asset_generation_pipeline_guide.html](asset_generation_pipeline_guide.html)을 본다.
 
@@ -20,7 +20,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 - 문법 확인: `node -e "const fs=require('fs');for(const f of fs.readdirSync('js'))new Function(fs.readFileSync('js/'+f,'utf8'))"`
 - 게임 동작을 바꾸면 브라우저에서 실제로 확인한다. Edge 헤드리스와 CDP로 `startGame`, `onEnemyHit`을 호출해 흐름을 검증할 수 있다(임시 프로필 사용). 확인하지 못했으면 그렇게 보고한다.
 
-## 반드시 지킬 규칙 (QA_AND_RULES.md L79-140)
+## 반드시 지킬 규칙 (QA_AND_RULES.md L85-146)
 
 **언어:** 설명, 주석, 문서, 작업 보고는 모두 한국어로 쓴다.
 
@@ -32,11 +32,11 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 **게임 로직:** `generateBoard`와 경로 탐색(`findAStarPath`, `recalculateGlobalPath`)을 해치지 않는다. 기능을 추가할 때는 `gameLoopTick`, `setInterval`, `setTimeout` 같은 비동기 로직과의 충돌을 확인한다. 규칙 원문의 `gameLoop`, `generateEnemyPath`는 코드에 없는 옛 이름이다.
 
-**문서 갱신:** 기능을 바꾸면 `QA_AND_RULES.md`의 인수인계 절도 함께 갱신한다(L842). 수치를 바꿨다면 `기획문서.md`도 맞춘다.
+**문서 갱신:** 기능을 바꾸면 `QA_AND_RULES.md`의 인수인계 절도 함께 갱신한다(L848). 수치를 바꿨다면 `기획문서.md`도 맞춘다.
 
-**캐릭터:** 지휘관은 100% 성인 여성이다. 남성 캐릭터는 넣지 않고, 아동/로리형 체형은 배제한다(L93-94). 종족별 체형과 등급별 복장 규격은 L95-136를 본다.
+**캐릭터:** 지휘관은 100% 성인 여성이다. 남성 캐릭터는 넣지 않고, 아동/로리형 체형은 배제한다(L99-100). 종족별 체형과 등급별 복장 규격은 L101-142를 본다.
 
-**이미지 프롬프트 필수 항목 (L138-140, 기획문서 L244):**
+**이미지 프롬프트 필수 항목 (L144-146, 기획문서 L244):**
 - 포지티브: `full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose`, `anatomically correct, exactly two arms, exactly two legs, adult female`
 - 네거티브: `cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot`, `extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs`, `poorly drawn hands, extra fingers, deformed fingers`, `child, kid, underage, loli, male, boy, man`
 
@@ -91,7 +91,18 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 **룬:** `RUNE_DATA`, `RUNE_GACHA_CONFIG`, 패시브 체인(user_data.js:857-888) 또는 스펠 체인(tower.js:1052-1110).
 **스테이지:** `STAGE_DATA`, 버튼(index.html:75-77).
 
-## 에셋 파이프라인
+## 새 에셋 파이프라인 (진행 중, `test/`)
+
+전신 원화 이후의 작업은 처음부터 다시 만든다(사용자 결정). **아래 "기존 에셋 파이프라인"의 시트, 슬라이스, 리깅 과정은 새 작업의 전제로 삼지 않는다.** 기존 파일은 삭제하지 않는다.
+
+- **목적:** 많은 캐릭터 추가에 대비해 로딩을 줄이고, 인게임에서 Live2D 같은 움직임을 낸다. 로비는 크게 움직이지 않아도 되고, 인게임 이동과 공격 모션은 필수다.
+- **구조:** 종족별 공통 바디 1벌 + 캐릭터 파츠(얼굴, 머리카락, 의상, 무기). 투명 파츠를 겹치고 관절을 코드로 회전한다. 규격은 [test/ASSET_SPEC.md](test/ASSET_SPEC.md).
+- **역할 분담:** 프롬프트와 이미지 생성은 사용자가 다른 AI와 나노바나나로 진행해 납품한다. 여기서는 사양, 조립, 모션, 게임 연동을 맡고 프롬프트는 작성하지 않는다.
+- **납품 위치:** `test/incoming/body_human/`, `test/incoming/char_liana/`. 다음 단계는 납품된 이미지로 배경 제거, 관절 지정, 모션 뷰어를 `test/`에 만드는 것이다.
+- **등급별 범위(사용자 결정):** UR/U는 전장에 출전하고 전체 모션(파츠 15장). C~SR은 전장에 나오지 않고 도감과 지휘관 선택에서 대기 모션만(파츠 11장).
+- **구조상 확인할 점:** 현재 전장 유닛은 36px이다. 도감(`lobby.js`의 지휘관 카드)은 보유 지휘관 전체를 54px 원화 썸네일로 표시하므로, 전원에게 파츠 모션을 돌리면 화면당 레이어 수가 크게 늘어난다. 리아나(C)는 전체 모션 시험용으로 15장을 만들고 뷰어에서 먼저 시험한다. `CHARACTER_DATA`에 종족 필드가 없어 게임 연동 시 추가가 필요하다.
+
+## 기존 에셋 파이프라인 (새 작업의 전제가 아님)
 
 모든 단계가 브라우저 수동 조작이다. 이미지 생성 API나 Stable Diffusion 연동은 없고, 웹 AI 도구(나노바나나/Gemini)를 사람이 직접 쓴다.
 
@@ -167,11 +178,11 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 **문서 ↔ 코드 불일치**
 
 수급 규칙처럼 문서와 코드가 다르면 **문서를 기준으로 코드를 맞춘다**(사용자 결정). MP, RP 수급은 v0.44.0에서 이 원칙으로 맞췄다. 아래 항목은 문서가 옛 내용일 가능성이 있으니 고치기 전에 어느 쪽을 바꿀지 확인한다.
-- QA L170-175의 확률표, L736·737의 성장·보스 배율은 옛 값이다. 현행은 constants.js:38-39, 1227-1272.
-- QA에서 "전면 은퇴"(L54)한 대장 강림/결계가 QA L204, L218-226와 기획 L177-192에 현행처럼 남아 있다.
+- QA L176-181의 확률표, L742·743의 성장·보스 배율은 옛 값이다. 현행은 constants.js:38-39, 1227-1272.
+- QA에서 "전면 은퇴"(L60)한 대장 강림/결계가 QA L210, L224-232와 기획 L177-192에 현행처럼 남아 있다.
 - `QA_AND_RULES.md`의 "수정된 버그" 절에 v0.37~v0.43 항목이 없다. 최신 내역은 인수인계 절을 본다.
 
-## 다음 작업 (QA_AND_RULES.md L65-71, 기획문서 L295-300)
+## 다음 작업 (QA_AND_RULES.md L71-77, 기획문서 L295-300)
 
 1. 가챠 재화 수급 설계. 소프트 피티(v0.42)와 RP 완막/클리어 보상(v0.44)은 구현되었고, 수치 조정과 PP 수급처 다각화가 남았다.
 2. 타워 설치비/철거 환급 규칙 재정립(무한 TP 문제와 연결).
@@ -185,6 +196,6 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 ## 세션 인수인계
 
-- 작업을 시작할 때 이 문서와 `QA_AND_RULES.md` L7-78(인수인계 절)를 읽는다. 전체 문서는 크므로 필요한 부분만 읽는다.
+- 작업을 시작할 때 이 문서와 `QA_AND_RULES.md` L7-84(인수인계 절)를 읽는다. 전체 문서는 크므로 필요한 부분만 읽는다.
 - `visual_style_guide.html`(약 330KB)은 Grep과 부분 읽기로 다룬다.
 - 작업을 끝내면 해결한 문제를 "알려진 문제"에서 지우고, 구조나 절차가 바뀌었으면 이 문서를 갱신한다.

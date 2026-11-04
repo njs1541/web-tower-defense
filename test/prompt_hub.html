@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>새 SD 에셋 파이프라인 프롬프트 허브 (리아나 1차 테스트)</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --green: #22c55e;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.6;
+    }
+    .container { max-width: 1100px; margin: 0 auto; }
+    header { margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+    h1 { font-size: 1.6rem; color: var(--accent); margin-bottom: 8px; }
+    p.desc { color: var(--text-muted); font-size: 0.95rem; }
+    .spec-badge {
+      display: inline-block; background: #0369a1; color: white; padding: 2px 8px; border-radius: 4px;
+      font-size: 0.8rem; font-weight: 600; margin-right: 6px;
+    }
+    .section-title {
+      font-size: 1.25rem; font-weight: 700; margin: 28px 0 12px; display: flex; align-items: center; gap: 8px;
+    }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px;
+    }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .card-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .card-title { font-weight: 700; color: #e2e8f0; font-size: 1rem; }
+    .card-code { font-family: monospace; font-size: 0.85rem; color: var(--accent); }
+    .prompt-box {
+      background: #090d16; border: 1px solid var(--border); border-radius: 6px; padding: 10px;
+      font-family: Consolas, monospace; font-size: 0.82rem; color: #cbd5e1; white-space: pre-wrap;
+      word-break: break-all; max-height: 140px; overflow-y: auto; margin-bottom: 12px;
+    }
+    .btn {
+      background: var(--accent); color: #0f172a; border: none; padding: 8px 12px; border-radius: 6px;
+      font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.15s; width: 100%;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn.copied { background: var(--green); color: white; }
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; background: var(--green); color: white;
+      padding: 10px 18px; border-radius: 6px; font-weight: 600; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🎯 새 SD 에셋 파이프라인 프롬프트 복사 허브</h1>
+    <p class="desc">
+      <span class="spec-badge">1024×1024 PNG</span>
+      <span class="spec-badge">단색 #00FF00 크로마키</span>
+      <span class="spec-badge">2.5등신 SD</span>
+      <span class="spec-badge">1:1 좌표 고정 오버레이</span>
+      <br>
+      <code>test/ASSET_SPEC.md</code> 사양서와 기존 종족 프롬프트에 맞춰 구성된 프롬프트입니다. 클릭하여 클립보드에 복사하세요.
+    </p>
+  </header>
+
+  <div class="section-title">🧍‍♀️ 1단계: 인간족 기준 바디 (body_human/ 10종)</div>
+  <div class="grid" id="human-grid"></div>
+
+  <div class="section-title">⚔️ 2단계: 리아나 파츠 (char_liana/ 15종)</div>
+  <div class="grid" id="liana-grid"></div>
+</div>
+
+<div id="toast" class="toast">클립보드에 복사되었습니다!</div>
+
+<script>
+const HUMAN_PROMPTS = [
+  {
+    id: "b00_t2i", file: "b00_master.png (방법 1: 텍스트 단독)", name: "인간족 기준 바디 (민머리 살색 소체 - T2I)",
+    prompt: "masterpiece, best quality, ultra-detailed 2D anime game art, crisp clean anime lineart, vibrant smooth cel-shading, Genshin and Blue Archive style, flat single solid chroma key background, green background (#00FF00), completely isolated, no floor shadows, human race anatomical base avatar, cute 2.5 heads tall chibi anime girl proportion, adult female anime body compressed into 2.5 heads chibi scale, smooth cute egg-shaped anime head, completely bald, smooth hairless head with cute anime head contour and neat jawline, NO facial features, completely blank smooth porcelain skin-toned face, NO eyes, NO nose, NO mouth, NO eyebrows, smooth anime ears on sides of head, pure seamless skin-toned anime body silhouette, wearing an ultra-thin seamless skin-colored form-fitting bodysuit matching natural skin tone perfectly, smooth clean skin surface, modest non-sexual proportions, slender neck, compact feminine torso, natural cute chibi limbs, bare hands, bare feet, straight upright standing pose facing slightly right (3/4 perspective), arms held slightly outward away from the torso with elbows slightly bent, legs spaced naturally shoulder-width apart without crossing, perfectly centered on 1024x1024 canvas, head top at y=180, feet at y=880, center axis at x=512. Avoid: wooden, wooden mannequin, ball-jointed doll, doll joints, robotic joints, mechanical, cyborg, metallic, plastic doll, creepy, uncanny valley, alien, faceless monster, horror, rough texture, 3D render, photorealistic, hair, long hair, short hair, wig, facial features, eyes, pupils, mouth, nose, lips, clothes, fabric folds, heavy armor, underwear, lingerie, bra, panties, dark bodysuit, black suit, shoes, boots, ground shadow, background gradient, glow, bloom, text, watermark, signature, cropped, extra limbs, bad anatomy"
+  },
+  {
+    id: "b00_i2i", file: "b00_master.png (방법 2: 원화 첨부)", name: "인간족 기준 바디 (원화 참조 변환 - I2I)",
+    prompt: "Based on attached Image 1: Faithfully keep the anime art style, clean lineart, and smooth cel-shading quality of Image 1, but DEFORM and CONVERT her into an official 2.5 heads tall chibi SD blank anatomical base body model: 2.5 heads tall chibi anime girl proportion, perfectly centered on 1024x1024 canvas, standing in 3/4 perspective facing slightly right, head top at y=180, feet at y=880. Hairless smooth cute egg-shaped anime head, completely bald, neat anime chin contour, smooth featureless skin-toned face with NO eyes, NO nose, NO mouth, NO eyebrows (pure smooth blank porcelain skin, cute anime ears). Pure seamless skin-toned anime silhouette. Strip ALL armor, tunic, boots, belts, weapons, and clothing. Wearing only an ultra-thin seamless skin-toned layer matching her skin tone. Bare hands and bare feet. Arms slightly spaced with elbows bent, legs spaced shoulder-width apart. Flat single solid chroma key green background (#00FF00), completely isolated, no floor shadows. Avoid: wooden, wooden mannequin, ball-jointed doll, doll joints, mechanical, plastic doll, creepy, alien, 3D render, hair, eyes, nose, mouth, clothes, armor, boots, dark bodysuit, text, watermark, cropped."
+  },
+  {
+    id: "b01", file: "b01_head_base.png", name: "머리 소체",
+    prompt: "Cleanly extract ONLY the head and upper neck from the reference image b00. Keep exact same canvas coordinate (x=512, y=180-460). Blank faceless head, no hair, no eyes. Fill neck joint smoothly down by 35px. Everything else is pure solid green (#00FF00)."
+  },
+  {
+    id: "b02", file: "b02_torso_upper.png", name: "상체 소체",
+    prompt: "Extract ONLY the upper torso from neck base down to waist and shoulder joints from b00. Keep identical position. Extend neck base up by 30px and shoulder joints outward by 35px with rounded contour for pivot overlap. Remove head, arms, pelvis, and legs into solid green (#00FF00)."
+  },
+  {
+    id: "b03", file: "b03_pelvis.png", name: "골반 소체",
+    prompt: "Extract ONLY the pelvis/hips from waist down to hip socket joints from b00. Keep identical position. Extend upper waist line up by 30px inside torso overlap, and round hip sockets by 35px. Remove all other parts into solid green (#00FF00)."
+  },
+  {
+    id: "b04", file: "b04_arm_near_upper.png", name: "가까운 팔 위 (어깨~팔꿈치)",
+    prompt: "Extract ONLY the viewer-near upper arm (right arm, shoulder to elbow) from b00. Keep exact position. Extend shoulder ball up-inwards by 35px and elbow down-inwards by 35px with clean rounded circular joints. Pure green background (#00FF00)."
+  },
+  {
+    id: "b05", file: "b05_arm_near_lower.png", name: "가까운 팔 아래 (손 포함)",
+    prompt: "Extract ONLY the viewer-near forearm and hand (elbow to fingertips) from b00. Keep exact position. Extend elbow joint up-inwards by 35px with smooth rounded cap. Pure green background (#00FF00)."
+  },
+  {
+    id: "b06", file: "b06_arm_far_upper.png", name: "먼 팔 위 (어깨~팔꿈치)",
+    prompt: "Extract ONLY the viewer-far upper arm (left arm in 3/4 view, shoulder to elbow) from b00. Keep exact position. Extend shoulder and elbow joints by 35px rounded overlap. Pure green background (#00FF00)."
+  },
+  {
+    id: "b07", file: "b07_arm_far_lower.png", name: "먼 팔 아래 (손 포함)",
+    prompt: "Extract ONLY the viewer-far forearm and hand (elbow to fingertips) from b00. Keep exact position. Extend elbow joint up-inwards by 35px rounded overlap. Pure green background (#00FF00)."
+  },
+  {
+    id: "b08", file: "b08_leg_near.png", name: "가까운 다리 (골반~발끝)",
+    prompt: "Extract ONLY the viewer-near leg (right leg from hip joint down to boot/foot tip) from b00. Keep exact position. Extend hip socket joint upwards by 35px rounded overlap. Pure green background (#00FF00)."
+  },
+  {
+    id: "b09", file: "b09_leg_far.png", name: "먼 다리 (골반~발끝)",
+    prompt: "Extract ONLY the viewer-far leg (left leg from hip joint down to boot/foot tip) from b00. Keep exact position. Extend hip socket joint upwards by 35px rounded overlap. Pure green background (#00FF00)."
+  }
+];
+
+const LIANA_PROMPTS = [
+  {
+    id: "c00", file: "c00_complete.png", name: "리아나 완성본 전신",
+    prompt: "masterpiece, best quality, ultra-detailed 2D anime game character art, bold clean outlines, crisp cell shading, flat single solid chroma key green background (#00FF00), completely isolated, no floor shadows, faithful 2.5 heads chibi SD adaptation of the character Liana from reference image: young adult female rookie knight, 2.5 heads tall chibi proportion, identical pose, scale and coordinates to b00 mannequin base, short neat brown bob hairstyle, expressive clear brown anime eyes, gentle determined expression, silver steel breastplate chest armor with brown leather shoulder straps, white tunic cloth shirt underneath with sleeves rolled up to elbows showing bare forearms, brown leather waist belt with iron buckle, dark navy trousers pants, sturdy brown leather combat boots, holding a polished steel longsword in near hand (right hand), holding a wooden kite shield with winged helmet crest insignia on far arm (left arm), facing slightly right in 3/4 standing pose, arms slightly spaced, legs shoulder-width apart, head top at y=180, feet planted at y=880, center axis at x=512, perfectly aligned with b00"
+  },
+  {
+    id: "c01", file: "c01_hair_back.png", name: "뒷머리",
+    prompt: "Extract ONLY the back hair layer of Liana's brown bob hair that sits behind the face and neck from c00. Complete the hidden parts behind the head. NO face, NO body, NO clothing. Solid green (#00FF00)."
+  },
+  {
+    id: "c02", file: "c02_hair_front.png", name: "앞·옆머리",
+    prompt: "Extract ONLY the front bangs and side hair tufts from c00. Hollow transparent center where the face goes. NO skin, NO eyes, NO face. Solid green (#00FF00)."
+  },
+  {
+    id: "c03", file: "c03_face_neutral.png", name: "기본 표정 (눈/눈썹/입)",
+    prompt: "Extract ONLY the facial expression from c00: neat brown eyebrows, open clear brown anime eyes, and small neutral mouth. NO face skin, NO head contour, NO hair, floating on pure solid green (#00FF00)."
+  },
+  {
+    id: "c04", file: "c04_face_blink.png", name: "눈 감음 표정",
+    prompt: "Exact same position as c03: neat brown eyebrows, closed resting eye lines (^ ^ / curved blink lines), small neutral mouth. NO skin, NO hair. Solid green (#00FF00)."
+  },
+  {
+    id: "c05", file: "c05_face_attack.png", name: "공격 표정",
+    prompt: "Exact same position as c03: sharply angled determined eyebrows, focused wide attacking brown eyes, open shouting battle mouth. NO skin, NO hair. Solid green (#00FF00)."
+  },
+  {
+    id: "c06", file: "c06_top.png", name: "상의 (흉갑+튜닉)",
+    prompt: "Extract ONLY the upper clothing from c00: silver breastplate, brown leather shoulder straps, and white tunic chest. HOLLOW shell: NO human neck, NO arms, NO skin inside. Solid green (#00FF00)."
+  },
+  {
+    id: "c07", file: "c07_skirt_front.png", name: "튜닉 앞자락 & 벨트",
+    prompt: "Extract ONLY the front waist belt and the front-falling flap of the white tunic over the thighs from c00. Hollow shell, NO legs, NO torso flesh. Solid green (#00FF00)."
+  },
+  {
+    id: "c08", file: "c08_skirt_back.png", name: "튜닉 뒷자락",
+    prompt: "Extract ONLY the back hem of the white tunic hanging behind the legs from c00. Hollow cloth layer, NO legs, NO torso. Solid green (#00FF00)."
+  },
+  {
+    id: "c09", file: "c09_sleeve_near.png", name: "가까운 소매",
+    prompt: "Extract ONLY the rolled-up white tunic sleeve on the viewer-near upper arm from c00. Hollow cylinder cloth, NO arm skin inside. Solid green (#00FF00)."
+  },
+  {
+    id: "c10", file: "c10_sleeve_far.png", name: "먼 소매",
+    prompt: "Extract ONLY the rolled-up white tunic sleeve on the viewer-far upper arm from c00. Hollow cylinder cloth, NO arm skin inside. Solid green (#00FF00)."
+  },
+  {
+    id: "c11", file: "c11_pants_near.png", name: "가까운 다리 의상 (바지+부츠)",
+    prompt: "Extract ONLY the clothing of the viewer-near leg from c00: navy trousers and brown leather boot. Hollow shell, NO pelvis, NO far leg. Solid green (#00FF00)."
+  },
+  {
+    id: "c12", file: "c12_pants_far.png", name: "먼 다리 의상 (바지+부츠)",
+    prompt: "Extract ONLY the clothing of the viewer-far leg from c00: navy trousers and brown leather boot. Hollow shell, NO pelvis, NO near leg. Solid green (#00FF00)."
+  },
+  {
+    id: "c13", file: "c13_weapon_main.png", name: "칼 (주무기)",
+    prompt: "Extract ONLY the steel longsword from c00 in its exact held position. Complete the full hilt and pommel normally covered by the hand (NO hand fingers drawn on the sword). Solid green (#00FF00)."
+  },
+  {
+    id: "c14", file: "c14_weapon_sub.png", name: "방패 (보조무기)",
+    prompt: "Extract ONLY the wooden kite shield with winged helmet crest from c00. Draw the complete shield including straps behind it (NO arm drawn on the shield). Solid green (#00FF00)."
+  }
+];
+
+function renderGrid(containerId, items) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = items.map(item => `
+    <div class="card">
+      <div>
+        <div class="card-header">
+          <span class="card-title">${item.name}</span>
+          <span class="card-code">${item.file}</span>
+        </div>
+        <div class="prompt-box" id="prompt-${item.id}">${item.prompt}</div>
+      </div>
+      <button class="btn" onclick="copyPrompt('${item.id}', this)">📋 프롬프트 복사</button>
+    </div>
+  `).join('');
+}
+
+function copyPrompt(id, btn) {
+  const text = document.getElementById(`prompt-${id}`).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const origText = btn.textContent;
+    btn.textContent = "✅ 복사 완료!";
+    btn.classList.add("copied");
+    showToast();
+    setTimeout(() => {
+      btn.textContent = origText;
+      btn.classList.remove("copied");
+    }, 1500);
+  });
+}
+
+function showToast() {
+  const toast = document.getElementById('toast');
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 1500);
+}
+
+renderGrid('human-grid', HUMAN_PROMPTS);
+renderGrid('liana-grid', LIANA_PROMPTS);
+</script>
+</body>
+</html>
+
