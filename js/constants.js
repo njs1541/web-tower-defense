@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.50.0";
+const GAME_VERSION = "v0.51.0";
 
 // v0.44.0 재화 수급 (기획문서 3.1)
 const MP_REGEN_AMOUNT = 2;            // 시간 경과 MP 충전량 (전투 중 초당 +2)
