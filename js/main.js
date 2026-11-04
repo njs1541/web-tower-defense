@@ -101,6 +101,7 @@ function startGame() {
         console.log("출전 지휘관 덱 타워 강화 한도 적용 완료:", deckTowerCaps);
     }
     mp = 0;
+    mpRegenTickCount = 0;
     maxMp = 100 + (synStats.maxMpBonus || 0);
     if (typeof usedSpellRunes !== 'undefined') {
         usedSpellRunes = {};

@@ -229,6 +229,13 @@ function findNearestBaseCell(fromX, fromY) {
 function gameLoopTick() {
     if (isPaused) return;
 
+    // v0.44.0 MP 시간 경과 충전: 전투 중에만 동작 (라운드 사이에는 틱 루프가 멈춤)
+    mpRegenTickCount++;
+    if (mpRegenTickCount >= MP_REGEN_INTERVAL_TICKS) {
+        mpRegenTickCount = 0;
+        mp = Math.min(maxMp || 100, (mp || 0) + MP_REGEN_AMOUNT);
+    }
+
     for (let enemy of enemies) {
         if (!enemy.alive) continue;
 
@@ -337,6 +344,9 @@ function gameLoopTick() {
         if (typeof roundStartHp !== 'undefined' && playerHP >= roundStartHp) {
             const earnedShards = Math.max(1, Math.min(10, Math.floor(clearedRound / 2)));
             USER_DATA.prismShards = (USER_DATA.prismShards || 0) + earnedShards;
+            // [v0.44.0 New] 웨이브 완막 RP 보너스
+            USER_DATA.rp = (USER_DATA.rp || 0) + RP_REWARD_PERFECT_WAVE;
+            showFloatingDamage(10, 11, `🔮 완막 보너스 RP +${RP_REWARD_PERFECT_WAVE}!`, "#c084fc");
             if (USER_DATA.prismShards >= 100) {
                 USER_DATA.prismShards -= 100;
                 USER_DATA.pp = (USER_DATA.pp || 0) + 1;
@@ -351,7 +361,10 @@ function gameLoopTick() {
         // [v0.42.0 New] 2) 보스 격파 및 스테이지 구간별 '최초 클리어' 대량 PP 보너스
         const isBossRound = (clearedRound % 10 === 0);
         if (isBossRound) {
-            alert(`👑 ${clearedRound}R 보스 격파 성공! 막대한 보상 50G를 획득했습니다!`);
+            // [v0.44.0 New] 스테이지 클리어 RP 보상 (현재 종료 라운드가 없어 10R 단위 돌파를 클리어로 처리)
+            USER_DATA.rp = (USER_DATA.rp || 0) + RP_REWARD_STAGE_CLEAR;
+            saveData();
+            alert(`👑 ${clearedRound}R 보스 격파 성공! 막대한 보상 50G와 🔮 RP +${RP_REWARD_STAGE_CLEAR}개를 획득했습니다!`);
             gold += 50;
 
             const clearKey = `stage_${currentStage}_${clearedRound}`;

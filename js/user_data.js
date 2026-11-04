@@ -47,37 +47,28 @@ function loadData() {
             if (USER_DATA.prismShards === undefined) USER_DATA.prismShards = 0;
             if (USER_DATA.commanderPityCount === undefined) USER_DATA.commanderPityCount = 0;
             if (!USER_DATA.stageFirstClears) USER_DATA.stageFirstClears = {};
+            // v0.44.0 게임에서 제외된 지휘관을 세이브에서 정리 (덱이 비면 아래 기본값으로 복구)
+            if (USER_DATA.characters) {
+                for (const charId of Object.keys(USER_DATA.characters)) {
+                    if (!CHARACTER_DATA[charId]) delete USER_DATA.characters[charId];
+                }
+            }
+            if (Array.isArray(USER_DATA.characterDeck)) {
+                USER_DATA.characterDeck = USER_DATA.characterDeck.filter(charId => CHARACTER_DATA[charId]);
+            }
             if (!USER_DATA.characters || Object.keys(USER_DATA.characters).length === 0) {
                 USER_DATA.characters = {
-                    char_titania: { id: "char_titania", star: 5, sockets: 4, equippedRunes: ["rune_void_collapse", "rune_spell_armageddon"] },
                     char_liana: { id: "char_liana", star: 1, sockets: 1, equippedRunes: ["rune_flame"] },
                     char_elena: { id: "char_elena", star: 1, sockets: 1, equippedRunes: ["rune_spell_gold"] }
                 };
             }
             if (!USER_DATA.characterDeck || USER_DATA.characterDeck.length === 0) {
-                USER_DATA.characterDeck = ["char_titania", "char_liana", "char_elena"];
+                USER_DATA.characterDeck = ["char_liana", "char_elena"];
             }
             if (!USER_DATA.runes || USER_DATA.runes.length === 0) {
-                USER_DATA.runes = ["rune_void_collapse", "rune_spell_armageddon", "rune_flame", "rune_spell_gold"];
+                USER_DATA.runes = ["rune_flame", "rune_spell_gold"];
             }
 
-            // [임시 테스트용] 신규 U등급 지휘관 '티타니아(char_titania)' 자동 지급 및 1번 보좌관(대장) 편성
-            if (!USER_DATA.characters.char_titania) {
-                USER_DATA.characters.char_titania = {
-                    id: "char_titania",
-                    star: 5,
-                    sockets: 4,
-                    equippedRunes: ["rune_void_collapse", "rune_spell_armageddon"]
-                };
-            }
-            if (!USER_DATA.runes.includes("rune_void_collapse")) USER_DATA.runes.push("rune_void_collapse");
-            if (!USER_DATA.runes.includes("rune_spell_armageddon")) USER_DATA.runes.push("rune_spell_armageddon");
-            if (!USER_DATA.characterDeck.includes("char_titania")) {
-                USER_DATA.characterDeck.unshift("char_titania");
-                if (USER_DATA.characterDeck.length > 3) {
-                    USER_DATA.characterDeck = USER_DATA.characterDeck.slice(0, 3);
-                }
-            }
             saveData();
 
             console.log("저장된 데이터 로드 완료 (v0.22.0 호환):", USER_DATA);
@@ -102,14 +93,13 @@ function initDefaultData() {
     USER_DATA.levels = { 'ranged': 1, 'melee': 1 };
     USER_DATA.talents = { startGold: 0, maxHp: 0, towerPower: 0 };
 
-    // 기본 캐릭터 및 룬 세팅 (임시 테스트용 티타니아 기본 포함)
+    // 기본 캐릭터 및 룬 세팅
     USER_DATA.characters = {
-        char_titania: { id: "char_titania", star: 5, sockets: 4, equippedRunes: ["rune_void_collapse", "rune_spell_armageddon"] },
         char_liana: { id: "char_liana", star: 1, sockets: 1, equippedRunes: ["rune_flame"] },
         char_elena: { id: "char_elena", star: 1, sockets: 1, equippedRunes: ["rune_spell_gold"] }
     };
-    USER_DATA.characterDeck = ["char_titania", "char_liana", "char_elena"];
-    USER_DATA.runes = ["rune_void_collapse", "rune_spell_armageddon", "rune_flame", "rune_spell_gold"];
+    USER_DATA.characterDeck = ["char_liana", "char_elena"];
+    USER_DATA.runes = ["rune_flame", "rune_spell_gold"];
 
     saveData();
 }

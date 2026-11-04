@@ -30,6 +30,7 @@ let currentStage = 1;
 // v0.22.0 마나 및 지휘관 덱 타워 강화 한도
 let mp = 0;              // 현재 마나 포인트 (MP)
 let maxMp = 100;         // 최대 마나 포인트
+let mpRegenTickCount = 0; // v0.44.0 시간 경과 MP 충전용 틱 카운터
 let deckTowerCaps = {    // 출전 캐릭터들로부터 계산된 타워별 최대 인게임 강화 가능 레벨
     ranged: 0,
     melee: 0,
