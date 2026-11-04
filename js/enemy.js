@@ -359,13 +359,19 @@ function gameLoopTick() {
         }
 
         // [v0.42.0 New] 2) 보스 격파 및 스테이지 구간별 '최초 클리어' 대량 PP 보너스
+        // 보스가 출구로 빠져나간 경우는 격파가 아니므로 보상과 클리어에서 제외한다.
         const isBossRound = (clearedRound % 10 === 0);
-        if (isBossRound) {
-            // [v0.44.0 New] 스테이지 클리어 RP 보상 (현재 종료 라운드가 없어 10R 단위 돌파를 클리어로 처리)
-            USER_DATA.rp = (USER_DATA.rp || 0) + RP_REWARD_STAGE_CLEAR;
-            saveData();
-            alert(`👑 ${clearedRound}R 보스 격파 성공! 막대한 보상 50G와 🔮 RP +${RP_REWARD_STAGE_CLEAR}개를 획득했습니다!`);
-            gold += 50;
+        const isStageClear = isBossRound && bossKilledThisRound && clearedRound >= STAGE_CLEAR_ROUND;
+        if (isBossRound && bossKilledThisRound) {
+            if (isStageClear) {
+                // [v0.45.0 New] 스테이지 클리어 RP 보상
+                USER_DATA.rp = (USER_DATA.rp || 0) + RP_REWARD_STAGE_CLEAR;
+                saveData();
+                alert(`🏆 ${clearedRound}R 보스 격파! 스테이지 클리어! 보상 🔮 RP +${RP_REWARD_STAGE_CLEAR}개를 획득했습니다!`);
+            } else {
+                alert(`👑 ${clearedRound}R 보스 격파 성공! 막대한 보상 50G를 획득했습니다!`);
+                gold += 50;
+            }
 
             const clearKey = `stage_${currentStage}_${clearedRound}`;
             if (!USER_DATA.stageFirstClears) USER_DATA.stageFirstClears = {};
@@ -375,7 +381,7 @@ function gameLoopTick() {
                 USER_DATA.pp = (USER_DATA.pp || 0) + bonusPP;
                 saveData();
                 setTimeout(() => {
-                    alert(`🎉 [스테이지 최초 클리어 보너스!]\n${currentStage.toUpperCase()} ${clearedRound}라운드 최초 돌파 기념!\n💎 프리즘 포인트(PP) +${bonusPP}개가 지급되었습니다!`);
+                    alert(`🎉 [스테이지 최초 클리어 보너스!]\n${STAGE_DATA[currentStage].name} ${clearedRound}라운드 최초 돌파 기념!\n💎 프리즘 포인트(PP) +${bonusPP}개가 지급되었습니다!`);
                     if (typeof updateLobbyUI === 'function') updateLobbyUI();
                 }, 400);
             }
@@ -402,6 +408,13 @@ function gameLoopTick() {
 
         // 라운드 종료 후 버튼 및 보드 상태 갱신
         if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
+
+        // [v0.45.0 New] 스테이지 클리어: 라운드 표기와 정산을 클리어한 라운드 기준으로 맞추고 런 종료
+        if (isStageClear) {
+            round = clearedRound;
+            endGame(true);
+            return;
+        }
     }
 
     render();
@@ -689,6 +702,7 @@ function startRound() {
 
     // [v0.42.0] 라운드 시작 시점 기지 체력 기록 (완막 여부 판정용)
     window.roundStartHp = playerHP;
+    bossKilledThisRound = false;
 
     spawnedCount = 0;
     const isBossRound = (round % 10 === 0);

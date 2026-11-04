@@ -1,10 +1,11 @@
-const GAME_VERSION = "v0.44.0";
+const GAME_VERSION = "v0.47.0";
 
 // v0.44.0 재화 수급 (기획문서 3.1)
 const MP_REGEN_AMOUNT = 2;            // 시간 경과 MP 충전량 (전투 중 초당 +2)
 const MP_REGEN_INTERVAL_TICKS = 5;    // 충전 주기 (200ms 틱 5회 = 게임 시간 1초)
 const RP_REWARD_PERFECT_WAVE = 1;     // 웨이브 완막 보너스 RP
-const RP_REWARD_STAGE_CLEAR = 5;      // 스테이지 클리어(10R 단위 보스 라운드 돌파) RP
+const RP_REWARD_STAGE_CLEAR = 5;      // 스테이지 클리어 RP
+const STAGE_CLEAR_ROUND = 20;         // v0.45.0 스테이지 클리어 라운드 (이 라운드 이후의 보스를 처치하면 클리어)
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정

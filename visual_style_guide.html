@@ -2138,7 +2138,7 @@
                             <option value="glamour">✨ 글래머 (Glamour - 풍만한 볼륨감, 잘록한 허리와 골반, D~E컵)</option>
                             <option value="mega_glamour">💥 메가 글래머 (Mega Glamour - 압도적 폭유, 육감적 모래시계 힙, F~H컵)</option>
                             <option value="tomboy">⚡ 톰보이 (Tomboy - 탄탄한 11자 복근, 역동적 잔근육, 건강미 체형)</option>
-                            <option value="petite">🎀 로리 / 쁘띠 (Petite - 아담한 단신 145cm, 요정 같은 소형 프레임)</option>
+                            <option value="earth_shortstack">⛏️ 땅의 종족 전용 (Earth Shortstack - 150cm 성인 숏스택, 기계 의수)</option>
                         </select>
                     </div>
 
@@ -2273,7 +2273,7 @@
                             </label>
                             <label style="display:flex; align-items:center; gap:6px; font-size:12px; color:#fde047; cursor:pointer; background:rgba(245,158,11,0.12); padding:6px 10px; border-radius:6px; border:1px solid rgba(245,158,11,0.35);">
                                 <input type="checkbox" id="slot-active-15" checked onchange="updatePrompt()" style="accent-color:#f59e0b; width:15px; height:15px;">
-                                <span><b>15. 복장 : 속옷</b> (해제 시 '미착용/없음')</span>
+                                <span><b>15. 복장 : 하의 뒷면 (뒷치마)</b> (해제 시 '미보유/없음')</span>
                             </label>
                         </div>
                     </div>
@@ -2288,7 +2288,7 @@
                             <span style="background: #10b981; color: #000; font-size: 11px; font-weight: 900; padding: 2px 7px; border-radius: 4px;">GRID TEMPLATE</span>
                         </div>
                         <div style="font-size: 12.5px; color: #e2e8f0; margin-top: 5px; line-height: 1.6;">
-                            📌 <b>01~04 턴어라운드 박스(키 눈금 포함), 05~08 표정 4칸, 09~15 복장·속옷 분해도</b>가 픽셀 단위로 인쇄된 <b>2048x1152 공식 템플릿 PNG</b>를 다운로드합니다.<br>
+                            📌 <b>01~04 턴어라운드 박스(키 눈금 포함), 05~08 표정 4칸, 09~15 복장·무기 분해도</b>가 픽셀 단위로 인쇄된 <b>2048x1152 공식 템플릿 PNG</b>를 다운로드합니다.<br>
                             나노바나나(제미나이)에 <b>① 원본 캐릭터 전신 일러스트</b>와 <b>② 다운로드한 설정 시트 규격 틀(PNG)</b> 2장을 함께 첨부(Ctrl+V)하고 아래 프롬프트를 전송하세요!
                         </div>
                     </div>
@@ -2342,12 +2342,12 @@
     <script>
         // 🧍‍♀️ 3종 공통 SD 아바타 소체 규격 판별 헬퍼 (TALL SD 3.0등신 / STANDARD SD 2.5등신 / PETITE SD 2.0등신)
         function getAvatarRigSpec(race, bodyType) {
-            if (bodyType === 'petite' || (bodyType === 'auto' && (race === 'earth' || race === 'avian'))) {
+            if (bodyType === 'earth_shortstack' || (bodyType === 'auto' && (race === 'earth' || race === 'avian'))) {
                 return {
                     type: 'petite',
                     label: 'PETITE SD (2.0등신 단신 숏스택 SD 아바타 소체 규격)',
                     sdRatioText: '2.0 to 2.2 heads tall cute Chibi SD proportions',
-                    sdPrompt: '2.0 to 2.2 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, large adorable chibi head (45% of total height) with big expressive eyes, compact curvy shortstack chibi torso, cute stubby chibi arms and legs, Blue Archive / Princess Connect / Spine 2D SD character asset style',
+                    sdPrompt: '2.0 to 2.2 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, large adorable chibi head (45% of total height) with big expressive eyes, compact chibi torso, cute stubby chibi arms and legs, Blue Archive / Princess Connect / Spine 2D SD character asset style',
                     guideLevels: [120 + 95, 120 + 285, 120 + 360, 120 + 415, 120 + 530]
                 };
             }
@@ -2356,7 +2356,7 @@
                     type: 'tall',
                     label: 'TALL SD (3.0등신 장신 모델 SD 아바타 소체 규격)',
                     sdRatioText: '2.8 to 3.0 heads tall Chibi SD proportions',
-                    sdPrompt: '2.8 to 3.0 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, oversized expressive anime chibi head (35% of total height), compact alluring chibi hourglass torso, cute stylized short SD legs and arms, Blue Archive / Princess Connect / Spine 2D SD character asset style',
+                    sdPrompt: '2.8 to 3.0 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, oversized expressive anime chibi head (35% of total height), compact chibi torso, cute stylized short SD legs and arms, Blue Archive / Princess Connect / Spine 2D SD character asset style',
                     guideLevels: [120 + 65, 120 + 235, 120 + 320, 120 + 385, 120 + 530]
                 };
             }
@@ -2364,7 +2364,7 @@
                 type: 'standard',
                 label: 'STANDARD SD (2.5등신 표준 황금비율 SD 아바타 소체 규격)',
                 sdRatioText: '2.5 heads tall standard Chibi SD proportions',
-                sdPrompt: '2.5 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, large expressive anime chibi head (40% of total height), compact balanced curvy chibi torso, cute short SD arms and legs, Blue Archive / Princess Connect / Spine 2D SD character asset style',
+                sdPrompt: '2.5 heads tall super-deformed (SD / Chibi) 2D game battle avatar proportions, large expressive anime chibi head (40% of total height), compact balanced chibi torso, cute short SD arms and legs, Blue Archive / Princess Connect / Spine 2D SD character asset style',
                 guideLevels: [120 + 80, 120 + 260, 120 + 340, 120 + 400, 120 + 530]
             };
         }
@@ -2724,12 +2724,12 @@
                 drawSlotBox(startX + (subExpW + subExpGap) * 2, expY, subExpW, expH, '07. 자신감', '[Confident]');
                 drawSlotBox(startX + (subExpW + subExpGap) * 3, expY, subExpW, expH, '08. 진지한 결의', '[Serious]');
 
-                // 하단 우측: 소체 리깅용 복장·무기·속옷 분해도
+                // 하단 우측: 소체 리깅용 복장·무기 분해도
                 const costStartX = 880;
                 ctx.fillStyle = '#0f172a';
                 ctx.font = 'bold 19px sans-serif';
                 ctx.textAlign = 'left';
-                ctx.fillText('리깅 파츠 & 복장·속옷 분해도 (Modular Rig Parts 09~15 : 미보유 항목은 "없음" 표기)', costStartX, expY - 10);
+                ctx.fillText('리깅 파츠 & 복장·무기 분해도 (Modular Rig Parts 09~15 : 미보유 항목은 "없음" 표기)', costStartX, expY - 10);
 
                 const costSlotW = 145;
                 const costGap = 16;
@@ -2854,7 +2854,7 @@
             'mutation': "unique mutant anomaly, rare contrasting exotic hybrid features"
         };
 
-                // 💃 몸매 / 체형 명세 (종족 자동 + 슬랜더, 표준, 글래머, 메가 글래머, 톰보이, 로리/쁘띠)
+                // 💃 몸매 / 체형 명세 (종족 자동 + 슬랜더, 표준, 글래머, 메가 글래머, 톰보이, 땅의 종족 전용)
         // 🌍 종족별 기본 표준 체형 명세 (종족 자동 선택 시 적용)
         const RACE_BODY_SPECS = {
                     'earth': "shortstack voluptuous build, 150cm height, 6.0 head ratio, huge bust (E-G cup), wide curvy hips, thick thighs, cybernetic prosthetic arm",
@@ -2870,7 +2870,7 @@
             'glamour': "voluptuous curvy hourglass adult female build, 165cm height, 7.0 head ratio, heavy D-E cup bust, narrow waist, wide feminine curvy hips, thick alluring thighs",
             'mega_glamour': "hyper-voluptuous extreme hourglass adult female build, 167cm height, 6.8 head ratio, gigantic heavy breasts (F-H cup), tiny corseted waist, extremely wide curvy hips, plump thick thighs, deeply alluring mature feminine silhouette",
             'tomboy': "athletic toned tomboy adult female build, 165cm height, 7.0 head ratio, defined 11-line abs, firm compact bust, toned athletic muscles, dynamic healthy silhouette, androgynous charming posture",
-            'petite': "petite adult female build, compact delicate stature, 145cm height, 5.8 head ratio, small feminine frame, slender waist and hips, graceful cute proportions (adult female)"
+            'earth_shortstack': RACE_BODY_SPECS.earth // 땅의 종족 기본 규격과 항상 동일하게 유지
         };
 
 const STYLE_PROMPTS = {
@@ -3277,7 +3277,14 @@ const STYLE_PROMPTS = {
                 tBtnText.textContent = `📥 [${RACE_KR_MAP[race] || '종족'}] 공식 설정 시트 규격 틀 (PNG 2048x1152) 다운로드`;
             }
             const style = document.getElementById('gen-style').value;
-            const bodyType = document.getElementById('gen-body-type')?.value || 'auto';
+            // 땅의 종족 전용 체형은 다른 종족에서 선택할 수 없다.
+            const bodyTypeSelect = document.getElementById('gen-body-type');
+            const earthBodyOption = bodyTypeSelect?.querySelector('option[value="earth_shortstack"]');
+            if (earthBodyOption) {
+                earthBodyOption.disabled = (race !== 'earth');
+                if (race !== 'earth' && bodyTypeSelect.value === 'earth_shortstack') bodyTypeSelect.value = 'auto';
+            }
+            const bodyType = bodyTypeSelect?.value || 'auto';
             const details = document.getElementById('gen-details').value.trim();
             const isRemoveBg = document.getElementById('gen-remove-bg').checked;
             const genMode = document.querySelector('input[name="gen-mode"]:checked')?.value || 'illust';
@@ -3298,8 +3305,12 @@ const STYLE_PROMPTS = {
             let prompt = "";
             let negativePrompt = NEGATIVE_PROMPT_FIXED;
 
-            if (genMode === 'sheet') {
-                // 📐 캐릭터 설정 시트 (Model Sheet / Setting Guide) 모드
+            // Tier 3 서브 파트 셀렉터 UI 토글
+            const t3Selector = document.getElementById('tier3-part-selector');
+            if (t3Selector) t3Selector.style.display = (genMode === 'tier3_studio') ? 'flex' : 'none';
+
+            if (genMode !== 'illust') {
+                // 📐 캐릭터 설정 시트 (Model Sheet / Setting Guide) 모드: tier1, sheet_a, sheet_b, tier3, sheet
                 const RACE_SHEET_SPECS = {
                     'earth': "earth folk, DUAL cybernetic mechanical prosthetic arms on BOTH left and right arms from shoulders to fingers with intricate brass gears and hydraulics, while both legs and torso are 100% natural organic skin",
                     'beastkin': "beastkin kemonomimi, beautiful anime human female face, fluffy animal ears on head and fluffy expressive animal tail, cute canine fangs, NO animal snout, NO muzzle",
@@ -3307,50 +3318,6 @@ const STYLE_PROMPTS = {
                     'avian': "avian folk, majestic feathered wings spread on back, floating in air",
                     'human': "human folk, elegant imperial styling, versatile commander presence",
                     'mutation': "unique mutant anomaly, rare contrasting exotic hybrid features"
-                };
-
-                // 🩱 5대 종족 및 등급별 기본 내의(이너 레이어) 상세 명세
-                const INNER_LAYER_SPECS = {
-                    'earth': {
-                        'C': "활동성 높은 그레이 스포츠 이너탑 & 로우라이즈 코튼 쇼츠 착용 (gray athletic stretch inner top and low-rise cotton undershorts)",
-                        'UC': "활동성 높은 그레이 스포츠 이너탑 & 로우라이즈 코튼 쇼츠 착용 (gray athletic stretch inner top and low-rise cotton undershorts)",
-                        'R': "블랙 통기성 메쉬 하프탑 & 심리스 보이쇼츠 착용 (black breathable mesh half-top and seamless boy-shorts under-suit)",
-                        'SR': "바디슈트 안감 밀착용 블랙 새틴 스트랩 이너탑 & 하이레그 스트링 이너 쇼츠 착용 (black satin strappy minimal inner top and high-leg micro string undershorts under the catsuit)",
-                        'UR': "황금 플레이트와 맞물리는 메탈릭 골드 스트링 이너탑 & 마이크로 사이드타이 이너 레이어 착용 (metallic gold string inner top and micro side-tie low-rise base layer)",
-                        'U': "물리적 섬유 내의 미착용, 황금 나노 바디체인 부착 (No traditional fabric inner layer; form-fitting radiant holographic body-chains and golden circuit lines on bare skin)"
-                    },
-                    'beastkin': {
-                        'C': "탄력적인 블랙 스포츠 이너탑 & 야성적인 신축성 쇼츠 착용 (elastic black athletic inner top and low-waist flexible stretch undershorts)",
-                        'UC': "탄력적인 블랙 스포츠 이너탑 & 야성적인 신축성 쇼츠 착용 (elastic black athletic inner top and low-waist flexible stretch undershorts)",
-                        'R': "타이트한 레더 룩 스트랩 이너탑 & 하이웨이스트 심리스 압박 쇼츠 착용 (tight leatherette strappy top and high-waist seamless compression undershorts)",
-                        'SR': "키홀 컷아웃 전용 오픈 가슴 레이스 이너탑 & 골반 컷아웃 하이레그 스트링 이너 착용 (plunging open-bust lace bralette top and pelvic cutout high-leg undershorts)",
-                        'UR': "호피 퍼 트림 골드 마이크로 탑 & 하이레그 스트링 이너 레이어 착용 (leopard-fur trimmed gold micro top and ultra high-leg string base layer)",
-                        'U': "물리적 섬유 내의 미착용, 신수 오로라 바디체인 부착 (No traditional fabric inner layer; bare skin adorned only with beast-god aurora body-chains and divine 9-tail aura)"
-                    },
-                    'forest': {
-                        'C': "정갈한 순백 리넨 레이스업 소프트 탑 & 로우컷 리넨 쇼츠 착용 (pure white linen lace-up soft top and comfortable low-cut linen undershorts)",
-                        'UC': "정갈한 순백 리넨 레이스업 소프트 탑 & 로우컷 리넨 쇼츠 착용 (pure white linen lace-up soft top and comfortable low-cut linen undershorts)",
-                        'R': "에메랄드빛 실크 하프컵 이너탑 & 누드톤 심리스 사이드 스트링 이너 착용 (emerald sheer silk half-cup top and seamless nude-tone side-string undershorts)",
-                        'SR': "딥 그린 시스루 플로럴 레이스 이너탑 & 레이스 하이레그 이너 쇼츠 착용 (deep emerald sheer floral lace bralette top and matching lace high-leg undershorts with garter straps)",
-                        'UR': "황금 나뭇잎 컵 비키니 탑 & 시스루 마이크로 에메랄드 사이드타이 스트링 이너 착용 (ornate gold leaf-cup top and sheer micro emerald side-tie string base layer)",
-                        'U': "물리적 섬유 내의 미착용, 에메랄드 이슬 바디체인 부착 (No traditional fabric inner layer; bare skin adorned only with botanical vine jewels and emerald dewdrop body-chains)"
-                    },
-                    'avian': {
-                        'C': "하늘빛 코튼 소프트 이너탑 & 프릴 레이스 파스텔 쇼츠 착용 (sky-blue soft cotton top and ruffled edge pastel lace undershorts)",
-                        'UC': "하늘빛 코튼 소프트 이너탑 & 프릴 레이스 파스텔 쇼츠 착용 (sky-blue soft cotton top and ruffled edge pastel lace undershorts)",
-                        'R': "순백 실크 리본 이너탑 & 골반 트임 레이스 사이드타이 이너 착용 (pure white silk ribbon top and high-slit lace side-tie undershorts)",
-                        'SR': "고혹적인 블랙 쉬폰 플런징 이너탑 & 시스루 레이스 가터 루프 이너 착용 (seductive black sheer chiffon plunging top and sheer lace garter-loop base layer)",
-                        'UR': "순금 깃털 양각 마이크로 이너탑 & 초소형 골드 체인 스트링 이너 착용 (sculpted gold feather micro top and ultra-minimal gold chain base layer)",
-                        'U': "물리적 섬유 내의 미착용, 성운 다이아몬드 바디체인 부착 (No traditional fabric inner layer; bare skin adorned only with starlight diamond body-chains and glowing feather light ribbons)"
-                    },
-                    'human': {
-                        'C': "단정한 제국 네이비/화이트 규정 면 스포츠 이너탑 & 활동성 복서 쇼츠 착용 (neat imperial navy/white athletic regulation cotton top and flexible boxer undershorts)",
-                        'UC': "단정한 제국 네이비/화이트 규정 면 스포츠 이너탑 & 활동성 복서 쇼츠 착용 (neat imperial navy/white athletic regulation cotton top and flexible boxer undershorts)",
-                        'R': "가슴골 모아주는 블랙 푸시업 이너탑 & 심리스 로우라이즈 보이쇼츠 착용 (black push-up cleavage top and low-rise seamless boy-shorts undershorts under leather shorts)",
-                        'SR': "키홀 컷아웃 전용 누디 코르셋 탑 & 가터벨트 일체형 하이레그 레이스 이너 착용 (plunging keyhole nude-cut corset top and high-leg lace garter-belt base layer)",
-                        'UR': "정교한 백금 흉갑형 마이크로 탑 & 골반 90% 개방 골드 스트링 플레이트 이너 착용 (ornate platinum sculpted micro top and 90% open pelvic gold chain micro base layer)",
-                        'U': "물리적 섬유 내의 미착용, 순백 성광 스타더스트 바디체인 부착 (No traditional fabric inner layer; bare skin adorned only with stardust diamond body-chains and holy light halos)"
-                    }
                 };
 
                 // 🏷️ 소체 리깅 직결 표준 파츠 분해도 라벨 명세 (09~15번)
@@ -3363,17 +3330,13 @@ const STYLE_PROMPTS = {
                     'acc2': '14. 보조무기 / 구체 (왼손 방패 / 마도서 / 부유 구체)'
                 };
 
-                const currentInnerLayer = (INNER_LAYER_SPECS[race] && INNER_LAYER_SPECS[race][grade]) 
-                    ? INNER_LAYER_SPECS[race][grade] 
-                    : "appropriate stylized inner base layer matching the costume grade (fitted top and undershorts)";
-
                 // 🧩 09~15번 부위별 존재/부재('없음' 출력) 및 슬롯 간 밀림/침범 방지 엄격 지시문 생성
-                const slotInstructions = [
+                const slotInstructionList = [
                     activeSlots.s09
                         ? `- '09. 복장 : 머리 장식' [BOX 09 STRICT ISOLATION]: Extract ONLY her headpiece/halo/tiara/hairpins from Image 1. ⚠️ CRITICAL: ABSOLUTELY NO breastplate, NO chest armor, NO torso, NO clothes, and NO neck in box 09! Draw ONLY the floating head halo and hair accessories in the upper half of box 09, leaving the rest of box 09 empty.`
                         : `- '09. 복장 : 머리 장식' [ABSENT / NONE]: The character has NO headgear or halo. DO NOT draw any item in box 09; leave the box blank and print ONLY '없음 (NONE - 미착용)' in the center.`,
                     activeSlots.s10
-                        ? `- '10. 복장 : 상의' [BOX 10 STRICT ISOLATION]: Extract ONLY her upper garment / breastplate / bodice / bra armor from Image 1. ⚠️ CRITICAL: This is STRICTLY for the TOP clothing! ABSOLUTELY NO skirt, NO waistband, NO legs, NO hips, and NO lower body in box 10! The upper garment must be a floating HOLLOW armor/cloth shell with NO human flesh, NO skin, and NO torso body.`
+                        ? `- '10. 복장 : 상의' [BOX 10 STRICT ISOLATION]: Extract ONLY her upper garment / breastplate / bodice / chest armor from Image 1. ⚠️ CRITICAL: This is STRICTLY for the TOP clothing! ABSOLUTELY NO skirt, NO waistband, NO legs, NO hips, and NO lower body in box 10! The upper garment must be a floating HOLLOW armor/cloth shell with NO human flesh, NO skin, and NO torso body.`
                         : `- '10. 복장 : 상의' [ABSENT / NONE]: DO NOT draw any upper garment in box 10; leave the box blank and print ONLY '없음 (NONE - 미착용)' in the center.`,
                     activeSlots.s11
                         ? `- '11. 복장 : 하의' [BOX 11 STRICT ISOLATION]: Extract ONLY her lower garment / skirt / waist chains / loincloth from Image 1. ⚠️ CRITICAL: This is STRICTLY for the SKIRT/BOTTOM! ABSOLUTELY NO wings, NO feathers, NO upper armor, and ABSOLUTELY NO human legs flesh, NO thighs, and NO bare knees! Draw ONLY the floating hollow skirt/cloth fabric without any mannequin body.`
@@ -3388,9 +3351,10 @@ const STYLE_PROMPTS = {
                         ? `- '14. 보조무기 / 구체' [BOX 14 STRICT ISOLATION]: Extract her secondary off-hand equipment (shield, grimoire, floating orb, sub-weapon) cleanly isolated inside box 14. IF absent, print '없음 (미보유)'.`
                         : `- '14. 보조무기 / 구체' [ABSENT / NONE]: The character has NO secondary weapon, shield, or orb. DO NOT draw any item in box 14; leave the box blank and print ONLY '없음 (NONE - 미보유)' in the center.`,
                     activeSlots.s15
-                        ? `- '15. 복장 : 속옷' [BOX 15]: Detailed isolated breakdown of inner layer [${currentInnerLayer}]. IF character wears no fabric underwear, print '없음 (미착용 / NONE)' in box 15.`
-                        : `- '15. 복장 : 속옷' [ABSENT / NONE]: The character wears NO underwear (미착용). DO NOT draw any bra, panties, or fabric underwear in box 15; leave box 15 blank and print ONLY the Korean text '없음 (미착용 / NONE)' in the center.`
-                ].join('\n');
+                        ? `- '15. 복장 : 하의 뒷면 (뒷치마)' [BOX 15 STRICT ISOLATION]: Extract ONLY the back layer of her skirt or drape that sits behind the legs, as a floating hollow shell with NO legs and NO skin inside. IF absent, print '없음 (미보유)'.`
+                        : `- '15. 복장 : 하의 뒷면 (뒷치마)' [ABSENT / NONE]: The character has NO back skirt or drape. DO NOT draw any item in box 15; leave box 15 blank and print ONLY '없음 (NONE - 미보유)' in the center.`
+                ];
+                const slotInstructions = slotInstructionList.join('\n');
 
                 // 🧬 5대 종족 고유 신체 특징 명세 (04 기본 체형에도 탈의되지 않고 원본과 100% 동일한 사지 구성 유지)
                 const RACE_ANATOMICAL_FEATURES = {
@@ -3410,10 +3374,6 @@ const STYLE_PROMPTS = {
 - Equipment Stripping (순수 소체 베이스): Neutral anatomical SD avatar chassis, seamless skin-toned athletic bodysuit layer (NO outer armor, NO heavy fabric, NO cape, NO weapons, NO halo; clean anatomical base ready for modular 2D equipment overlay).
 - Korean Label: '04. 기본 체형'`;
 
-                // Tier 3 서브 파트 셀렉터 UI 토글
-                const t3Selector = document.getElementById('tier3-part-selector');
-                if (t3Selector) t3Selector.style.display = (genMode === 'tier3_studio') ? 'flex' : 'none';
-
                 if (genMode === 'tier1_allinone') {
                     // =========================================================================
                     // ⚡ [Tier 1] 올인원 단일 출력 (12슬롯 Live2D 마스터 시트 - 1번에 완성)
@@ -3423,24 +3383,24 @@ Faithfully decompose the character into a comprehensive **${rigSpec.sdRatioText}
 
 Strictly arrange the extracted parts into 12 standardized labeled bounding boxes:
 [ROW 1: SD Anatomy & Facial Base (01~04)]:
-- '01. SD 정면 소체': Standard chibi front A-pose SD body (${rigSpec.sdPrompt}), clean smooth skin-toned base layer, no fabric clothes.
+- '01. SD 정면 소체': Standard chibi front A-pose SD body (${rigSpec.sdPrompt}), seamless skin-toned athletic bodysuit layer, no outer armor.
 - '02. SD 민얼굴 헤드': Blank face chibi head base (clean skin-toned face with ear structure, NO eyes, NO eyebrows, NO mouth).
 - '03. SD 헤어 : 앞머리': Front hair bangs floating with alpha depth.
 - '04. SD 헤어 : 뒷머리': Back hair volume and ponytail/ribbon flowing behind.
 [ROW 2: Live2D Facial Animation & Core Tops (05~08)]:
-- '05. Live2D 눈 애니메이션 세트': Pair of fully open anime eyes (Ruby/Crimson) AND closed smiling eyelash curves placed side-by-side on transparent background.
+- '05. Live2D 눈 애니메이션 세트': Pair of fully open anime eyes (same eye color as the reference image) AND closed smiling eyelash curves placed side-by-side on transparent background.
 - '06. Live2D 입 & 로비 터치 이모지': Cute anime closed smile mouth, slightly open mouth, soft pink cheek blushes, and touch reaction emoji icons (Heart Eyes, Sweat Drop, Anger Mark).
 - '07. 복장 : 상의 (보디스)': Upper chest armor/bodice hollow shell (ZERO arms, ZERO neck skin, pure equipment layer).
 - '08. 복장 : 앞치마 (Front Skirt)': Lower front armor/skirt floating hollow shell covering pelvic front (NO bare legs inside).
 [ROW 3: 3D Depth Sandwich & Armory (09~12)]:
 - '09. 복장 : 뒷치마 (Back Skirt)': Back skirt inner cloth/fabric floating behind legs to create 3D cylinder depth.
 - '10. 날개 (왼쪽 1짝 단일)': MANDATORY SINGLE LEFT WING centered vertically (engine mirrors right wing).
-- '11. 주무기 세트': Primary weapon (enchanted bow/crossbow) + loaded glowing arrow + muzzle flash effect.
+- '11. 주무기 세트': Primary weapon from the reference image + its attack effect.
 - '12. 보조무기 / 헤일로': Secondary floating halo, crest gem, or off-hand magical orb.
 
-[Production Context]: Professional Live2D SD modular sprite sheet, bold clean lineart, vibrant anime cel-shading, ${chromaSpec.sheetBoxClause}, safe for work, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
+[Production Context]: Strictly non-sexual, professional Live2D SD modular sprite sheet, bold clean lineart, vibrant anime cel-shading, ${chromaSpec.sheetBoxClause}, safe for work, ${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
 
-                    negativePrompt = "flesh legs on skirt, bare legs on skirt, arms on top dress, both wings in wing slot, pair of wings, facial features on 02 blank head, eyes on 02 blank head, mouth on 02 blank head, 7 heads tall, 8 heads tall, tall realistic proportions, blurry, lowres, bad anatomy, bad hands, extra limbs, signature, watermark";
+                    negativePrompt = "flesh legs on skirt, bare legs on skirt, arms on top dress, both wings in wing slot, pair of wings, facial features on 02 blank head, eyes on 02 blank head, mouth on 02 blank head, 7 heads tall, 8 heads tall, tall realistic proportions, blurry, lowres, bad anatomy, bad hands, extra limbs, nudity, sexualized body, signature, watermark";
 
                     const tBox = document.getElementById('template-download-box');
                     if (tBox) tBox.style.display = 'flex';
@@ -3467,7 +3427,7 @@ Generate an ultra-high-resolution **${rigSpec.sdRatioText} SD Turnaround & Base 
 - '01. 정면 (SD Front)': Full-body true front-facing SD view with full battle costume, weapons, hair, and accessories.
 - '02. 측면 (SD Side)': Full-body 90-degree profile side SD view, perfectly matching height markers with view 01.
 - '03. 후면 (SD Back)': Full-body back SD view showing reverse of hairstyle, cape, wings, and rear armor.
-- '04. 기본 체형 (SD Base Body)': PURE ANATOMICAL SD AVATAR BASE CHASSIS: Seamless skin-toned athletic neutral mannequin body layer (NO outer armor, NO heavy fabric, NO cape, NO weapons, NO halo; clean anatomical base ready for modular 2D equipment overlay).
+- '04. 기본 체형 (SD Base Body)': PURE ANATOMICAL SD AVATAR BASE CHASSIS: Seamless skin-toned athletic neutral bodysuit layer (NO outer armor, NO heavy fabric, NO cape, NO weapons, NO halo; clean anatomical base ready for modular 2D equipment overlay).
 [3. ⭐ CRITICAL 1:1 POSE & ORIENTATION SYNCHRONIZATION (01 정면과 04 기본 체형의 완벽한 1:1 자세/시선 동기화)]:
 - The facing angle, head direction, eye gaze, torso rotation, shoulder tilt, hip angle, and leg stance of '04. 기본 체형 (SD Base Body)' MUST BE 100% IDENTICAL to '01. 정면 (SD Front)'!
 - Both 01 and 04 MUST face the EXACT SAME orientation on the central vertical spine axis (symmetrical front A-pose). NEVER rotate 04 to a different angle than 01, NEVER flip facing direction between 01 and 04, and NEVER twist the body on 04! If view 01 is looking straight forward with slight 5-degree angle, view 04 MUST share the exact identical 5-degree angle and posture so modular clothes fit 1:1 without horizontal offset.
@@ -3475,7 +3435,7 @@ Generate an ultra-high-resolution **${rigSpec.sdRatioText} SD Turnaround & Base 
 - ${RACE_ANATOMICAL_FEATURES[race] || ''}
 [5. Safety & Production Context]: Strictly non-sexual, professional 2D game SD character asset sheet, clean bold lineart, vibrant cel-shading, safe for work, ${chromaSpec.sheetBoxClause}, entire body visible from head to toe, ${RACE_SHEET_SPECS[race] || 'female anime commander'}`;
 
-                    negativePrompt = "mismatched pose between view 01 and view 04, different facing angle between front and base body, rotated torso on base body, tilted body on 04, asymmetric stance between 01 and 04, reversed facing direction, 7 heads tall, 8 heads tall, realistic tall adult body, tall model proportions, realistic long legs, elongated torso, clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, organic arm replacing prosthetic arm on earth folk, cybernetic legs on earth folk, missing mechanical arms, furry snout, muzzle, beast face, faceless, blank face, mannequin, bald, ball-jointed doll, cropped, out of frame, cut off head, cut off feet, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, male, worst quality, low quality";
+                    negativePrompt = "mismatched pose between view 01 and view 04, different facing angle between front and base body, rotated torso on base body, tilted body on 04, asymmetric stance between 01 and 04, reversed facing direction, 7 heads tall, 8 heads tall, tall model proportions, realistic long legs, elongated torso, nudity, sexualized body, outer clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, organic arm replacing prosthetic arm on earth folk, cybernetic legs on earth folk, missing mechanical arms, furry snout, muzzle, beast face, faceless, blank face, mannequin, bald, ball-jointed doll, cropped, out of frame, cut off head, cut off feet, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, male, worst quality, low quality";
 
                     const tBox = document.getElementById('template-download-box');
                     if (tBox) tBox.style.display = 'flex';
@@ -3509,13 +3469,13 @@ Generate an official **${rigSpec.sdRatioText} SD Modular Gear & Expression Break
   * '10. 복장 : 상의 (보디스)': Upper top bodice / chest armor ONLY. STRICTLY NO arms, NO prosthetic arms, NO shoulder flesh, NO sleeves containing skin. Pure hollow chest armor shell.
   * '11. 복장 : 하의 (앞치마 & 뒷치마 세트)': Lower skirt broken down into **Front Skirt (앞치마)** and **Back Skirt (뒷치마)** to create 3D cylinder depth around legs! Side fluttering ribbons separated. STRICTLY NO bare legs, NO thighs inside.
   * '12. 날개 (왼쪽 1짝 단일)': MANDATORY SINGLE LEFT WING SPEC! Draw ONLY the LEFT single wing centered vertically inside box 12 (DO NOT draw both wings; in-game engine mirrors this single wing).
-  * '13. 주무기 세트': Primary weapon (enchanted bow or crossbow) + loaded glowing arrow + muzzle flash effect centered vertically.
+  * '13. 주무기 세트': Primary weapon from the reference image + its attack effect centered vertically.
   * '14. 보조무기 / 구체': Character's secondary shield, floating orb, or off-hand magical focus.
 - CRITICAL: If character lacks an item, leave that box empty with Korean text '없음 (미보유 / NONE)':
-${slotInstructions}
-[3. Safety & Production Context]: Professional 2D game SD character asset sheet, clean bold lineart, vibrant cel-shading, safe for work, ${chromaSpec.sheetBoxClause}, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
+${slotInstructionList.slice(0, 6).join('\n')}
+[3. Safety & Production Context]: Strictly non-sexual, professional 2D game SD character asset sheet, clean bold lineart, vibrant cel-shading, safe for work, ${chromaSpec.sheetBoxClause}, ${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
 
-                    negativePrompt = "second row of expressions, extra expression row, two rows of faces, human skin on clothing parts, body flesh on clothing parts, flesh legs on skirt, bare legs on skirt, arms on top dress, robotic arm on top dress, limbs attached to clothing, both wings in box 12, pair of wings in box 12, two wings in box 12, dual wings in box 12, split wings, oversized wings bleeding outside box 12, 7 heads tall, 8 heads tall, tall realistic proportions, blurry, lowres, bad anatomy, bad hands, extra limbs, signature, watermark";
+                    negativePrompt = "second row of expressions, extra expression row, two rows of faces, human skin on clothing parts, body flesh on clothing parts, flesh legs on skirt, bare legs on skirt, arms on top dress, robotic arm on top dress, limbs attached to clothing, both wings in box 12, pair of wings in box 12, two wings in box 12, dual wings in box 12, split wings, oversized wings bleeding outside box 12, 7 heads tall, 8 heads tall, tall realistic proportions, nudity, sexualized body, blurry, lowres, bad anatomy, bad hands, extra limbs, signature, watermark";
 
                     const tBox = document.getElementById('template-download-box');
                     if (tBox) tBox.style.display = 'flex';
@@ -3537,37 +3497,37 @@ ${slotInstructions}
                         'part1': {
                             title: 'Part 1: SD 소체 & 타워디펜스 최적화 사지 분리 세트',
                             badge: 'TIER 3 - PART 1 (BODY & ARMS/LEGS)',
-                            desc: `Character Design source: Decompose the SD chibi character (${rigSpec.sdPrompt}) into tower-defense optimized rigging layers: 1) Headless Torso & Pelvis base chassis, 2) Decoupled Left Upper/Lower Arm (for 3-axis aiming), 3) Decoupled Right Arm & Hand, 4) Left Unified Leg & Foot (single part for knee deformer, no thigh/calf cuts), 5) Right Unified Leg & Foot. Clean smooth skin-toned base layer, seamless joints, bold crisp lineart, ${chromaSpec.sheetBoxClause}.`,
-                            neg: 'clothes, armor, shoes, underwear, 3-part leg segments, 7 heads tall, 8 heads tall, blurry, lowres'
+                            desc: `Character Design source: Decompose the SD chibi character (${rigSpec.sdPrompt}) into tower-defense optimized rigging layers: 1) Headless Torso & Pelvis base chassis, 2) Decoupled Left Upper/Lower Arm (for 3-axis aiming), 3) Decoupled Right Arm & Hand, 4) Left Unified Leg & Foot (single part for knee deformer, no thigh/calf cuts), 5) Right Unified Leg & Foot. Seamless skin-toned athletic bodysuit layer, seamless joints, bold crisp lineart, ${chromaSpec.sheetBoxClause}.`,
+                            neg: 'outer clothes, armor, shoes, nudity, sexualized body, 3-part leg segments, 7 heads tall, 8 heads tall, blurry, lowres'
                         },
                         'part2': {
                             title: 'Part 2: 페이스 & 눈/입 + 로비 터치 리액션 세트',
                             badge: 'TIER 3 - PART 2 (FACE & TOUCH REACTION)',
-                            desc: `Live2D facial rigging parts breakdown: 1) Blank chibi anime face base (smooth skin, ears, no eyes, no mouth), 2) Fully open ruby eyes with detailed iris highlight, 3) Closed curved smiling eyelash lines, 4) Eyebrow set (neutral, focused, happy), 5) Mouth shapes (closed smile, talking mouth, open cheer), 6) Touch reaction emotion icons (Heart eye highlights, Panic sweat drop, Anger pop mark, blushing cheeks). Isolated on ${chromaSpec.sheetBoxClause}.`,
+                            desc: `Live2D facial rigging parts breakdown: 1) Blank chibi anime face base (smooth skin, ears, no eyes, no mouth), 2) Fully open eyes matching the reference image with detailed iris highlight, 3) Closed curved smiling eyelash lines, 4) Eyebrow set (neutral, focused, happy), 5) Mouth shapes (closed smile, talking mouth, open cheer), 6) Touch reaction emotion icons (Heart eye highlights, Panic sweat drop, Anger pop mark, blushing cheeks). Isolated on ${chromaSpec.sheetBoxClause}.`,
                             neg: 'full body, limbs, hair on face, tall realistic head, blurry, lowres, bad eyes'
                         },
                         'part3': {
                             title: 'Part 3: 3D 입체 헤어 레이어 세트',
                             badge: 'TIER 3 - PART 3 (VOLUMETRIC HAIR)',
-                            desc: `Live2D layered anime hair breakdown: 1) Front bangs (앞머리) with clean alpha strands, 2) Left/Right side hair tufts (옆머리), 3) Back hair volume base (뒷머리 베이스), 4) Sakura pink half-up ribbon ponytail floating dynamically behind head. Isolated layers on ${chromaSpec.sheetBoxClause}.`,
+                            desc: `Live2D layered anime hair breakdown: 1) Front bangs (앞머리) with clean alpha strands, 2) Left/Right side hair tufts (옆머리), 3) Back hair volume base (뒷머리 베이스), 4) Ponytail, ribbon, or other hair accessory from the reference image floating dynamically behind head. Isolated layers on ${chromaSpec.sheetBoxClause}.`,
                             neg: 'face, eyes, body, clothes, blurry, messy lineart'
                         },
                         'part4': {
                             title: 'Part 4: 상체 의상 & 어깨/소매 분리 세트',
                             badge: 'TIER 3 - PART 4 (UPPER COSTUME)',
-                            desc: `Live2D hollow costume upper breakdown: 1) Ornate golden filigree armor bodice (hollow shell, NO torso flesh inside), 2) Decoupled left and right shoulder armor / pauldrons, 3) Sheer white silk translucent veil floating behind shoulders, 4) Sacred golden crest choker. Pure hollow equipment shells on ${chromaSpec.sheetBoxClause}.`,
+                            desc: `Live2D hollow costume upper breakdown: 1) Upper armor or bodice from the reference image (hollow shell, NO torso flesh inside), 2) Decoupled left and right shoulder armor / pauldrons, 3) Shoulder mantle or veil from the reference image, 4) Neck accessory from the reference image. Pure hollow equipment shells on ${chromaSpec.sheetBoxClause}.`,
                             neg: 'human body, bare skin, chest flesh, arms, skirt, legs, blurry, lowres'
                         },
                         'part5': {
                             title: 'Part 5: 하체 의상 샌드위치 세트 (앞치마 & 뒷치마)',
                             badge: 'TIER 3 - PART 5 (SKIRT SANDWICH)',
-                            desc: `Live2D 3D cylinder skirt sandwich breakdown: 1) Front Skirt / Loincloth plating (앞치마 - sits in front of legs, hollow pelvic armor), 2) Back Skirt / Cape lining (뒷치마 - sits behind legs with dimensional cosmic nebula interior), 3) Decoupled thigh quiver & side fluttering fabric ribbons. STRICTLY NO LEGS OR THIGH FLESH INSIDE. Isolated hollow shells on ${chromaSpec.sheetBoxClause}.`,
+                            desc: `Live2D 3D cylinder skirt sandwich breakdown: 1) Front Skirt / Loincloth plating (앞치마 - sits in front of legs, hollow pelvic armor), 2) Back Skirt / Cape lining (뒷치마 - sits behind legs), 3) Decoupled side accessories & side fluttering fabric ribbons. STRICTLY NO LEGS OR THIGH FLESH INSIDE. Isolated hollow shells on ${chromaSpec.sheetBoxClause}.`,
                             neg: 'bare legs, human skin inside skirt, torso, arms, head, blurry'
                         },
                         'part6': {
                             title: 'Part 6: 장비 & 2겹 날개 & 사격 이펙트 세트',
                             badge: 'TIER 3 - PART 6 (WEAPONS & WINGS)',
-                            desc: `Modular SD weapons and wings breakdown: 1) Single Left Celestial Feathered Wing (2-layer compressed: top main wing + bottom feather cluster), 2) Ornate enchanted bow & mechanical crossbow, 3) Loaded glowing magical arrow projectile, 4) Firing muzzle flash burst effect, 5) Sacred glowing golden halo floating ring. Isolated on ${chromaSpec.sheetBoxClause}.`,
+                            desc: `Modular SD weapons and wings breakdown: 1) Single Left Wing from the reference image (2-layer compressed: top main wing + bottom cluster), 2) Primary weapon from the reference image, 3) Secondary weapon or off-hand item from the reference image, 4) Attack effect matching the weapon, 5) Halo or floating ring if the reference image has one. Isolated on ${chromaSpec.sheetBoxClause}.`,
                             neg: 'pair of wings, both wings, two wings, character body, head, clothes, blurry'
                         }
                     };
@@ -3575,7 +3535,7 @@ ${slotInstructions}
                     const currentT3 = T3_PROMPTS[tier3Part] || T3_PROMPTS['part1'];
                     prompt = `Based on the attached Character Design reference image:
 ${currentT3.desc}
-[Art Quality & Safety]: Masterpiece, best quality, ultra-detailed anime game asset, clean crisp vector-like lineart, vibrant cel-shading, safe for work, professional Live2D production spec.`;
+[Art Quality & Safety]: Masterpiece, best quality, ultra-detailed anime game asset, clean crisp vector-like lineart, vibrant cel-shading, strictly non-sexual, safe for work, professional Live2D production spec.`;
                     negativePrompt = currentT3.neg;
 
                     const tBox = document.getElementById('template-download-box');
@@ -3600,7 +3560,7 @@ Generate an official **2.0~3.0 Heads Tall Chibi SD Modular Avatar Rigging & Part
 - Main SD Turnaround & SD Avatar Base: '01. 정면', '02. 측면', '03. 후면', '04. 기본 체형'
 - SD Expression Sheet: '05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의'
 - SD Modular Rigging Parts & Costume Breakdown (09~15):
-  '09. 복장 : 머리 장식', '10. 복장 : 상의', '11. 복장 : 하의', '12. 복장 : 외투 / 날개', '13. 주무기 파츠', '14. 보조무기 / 구체', '15. 복장 : 속옷'
+  '09. 복장 : 머리 장식', '10. 복장 : 상의', '11. 복장 : 하의', '12. 복장 : 외투 / 날개', '13. 주무기 파츠', '14. 보조무기 / 구체', '15. 복장 : 하의 뒷면 (뒷치마)'
 [3. Character Natural SD Avatar Base Body Model ('04. 기본 체형')]: ${baseBodyPrompt}.
 [4. SD Modular Rigging Parts & Costume Breakdown Rules (09~15 — STRICT 1:1 SLOT ISOLATION & HOLLOW GHOST CLOTHING)]:
 - HOLLOW GHOST GARMENT MANDATE: All costume items in slots 09~15 MUST be floating HOLLOW garments/shells containing ABSOLUTELY ZERO human body flesh, ZERO skin, ZERO torso, and ZERO legs! They are transparently overlaid onto '04. 기본 체형' like paper-doll dress-up layers.
@@ -3610,12 +3570,12 @@ Generate an official **2.0~3.0 Heads Tall Chibi SD Modular Avatar Rigging & Part
   * Box 11 is STRICTLY for the lower skirt/loincloth ONLY (NEVER draw wings or human legs in box 11).
   * Box 12 is STRICTLY for the wings/cape ONLY. Scale the ENTIRE wing to fit 100% completely inside box 12 alone.
 - Every extracted clothing and weapon part in slots 09~15 MUST be proportioned to fit directly onto the compact **${rigSpec.sdRatioText} SD base body ('04. 기본 체형')**!
-- CRITICAL RULE: If the character does NOT have a specific item (such as no halo/headgear in 09, no top in 10, no bottom in 11, no wings/cape in 12, no main weapon in 13, no secondary weapon/shield/orb in 14, or no underwear in 15), DO NOT invent or hallucinate fake items! Leave that numbered slot empty and clearly write '없음 (미착용)' or '없음 (미보유)' in Korean in the center of that box:
+- CRITICAL RULE: If the character does NOT have a specific item (such as no halo/headgear in 09, no top in 10, no bottom in 11, no wings/cape in 12, no main weapon in 13, no secondary weapon/shield/orb in 14, or no back skirt in 15), DO NOT invent or hallucinate fake items! Leave that numbered slot empty and clearly write '없음 (미착용)' or '없음 (미보유)' in Korean in the center of that box:
 ${slotInstructions}
 [5. SD Facial Expression Sheet (표정 시트: 05~08)]: 4 distinct front-facing **SD Chibi facial expression head parts** matching the exact head size of '04. 기본 체형' ('05. 기본 무표정', '06. 밝은 미소', '07. 자신감', '08. 진지한 결의').
-[6. Safety & Production Context]: Strictly non-sexual, professional 2D game SD character rigging asset sheet, clean bold lineart, vibrant cel-shading, safe for work, ${chromaSpec.sheetBoxClause}, no cut off, entire SD body visible from head to toe, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${STYLE_PROMPTS[style] || 'stylish costume'}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
+[6. Safety & Production Context]: Strictly non-sexual, professional 2D game SD character rigging asset sheet, clean bold lineart, vibrant cel-shading, safe for work, ${chromaSpec.sheetBoxClause}, no cut off, entire SD body visible from head to toe, ${RACE_SHEET_SPECS[race] || 'female anime commander'}, ${details ? details + ', ' : ''}${ROLE_PROMPTS[role] || ''}, ${ELEMENT_PROMPTS[element] || ''}`;
 
-                    negativePrompt = "breastplate in box 09, torso in box 09, chest armor in box 09, body in box 09, upper garment in box 09, skirt in box 10, legs in box 10, thighs in box 10, human legs inside costume breakdown, flesh legs on skirt, body flesh on clothing parts, human skin on clothing parts, wings in box 11, feathers in box 11, split wings across multiple boxes, wings crossing divider lines, two boxes for wings, oversized wings bleeding outside box 12, 7 heads tall, 8 heads tall, tall realistic body proportions, long realistic legs, tall model build, realistic adult height, elongated torso, long limbs, detached animal tail in costume breakdown, animal ears headband in costume section, missing tail on 04 base body, missing animal ears on 04 base body, furry, anthro, animal snout, muzzle, animal nose, animal face, beast face, cat face, snout, four ears on beastkin, human ears on beastkin, missing elf ears on forest folk, short round ears on forest folk, detached elf ears in costume breakdown, missing wings on avian folk, detached feathered wings in costume breakdown, prosthetic leg replacing organic leg, converting organic legs into robotic legs, cybernetic leg when original has human legs, single robotic arm when original has dual robotic arms, one organic arm when both arms are mechanical, normal flesh arm on mechanical arm side, human arm replacing mechanical arm, asymmetric flesh arm, one robotic arm and one flesh arm, detached mechanical arm in costume breakdown, mechanical limbs in exploded costume section, black bodysuit on 04 base body, dark leotard on 04 base body, dark swimsuit on 04 base body, ball-jointed doll, joint doll, doll joints, featureless head, bald, faceless, blank face, no eyes, mannequin, wooden mannequin, plastic doll, organic arm replacing prosthetic arm on earth folk, missing mechanical arm, clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, underwear on 04 base body, bra on 04 base body, panties on 04 base body, garter straps on 04 base body, lingerie on 04 base body, different hairstyle on 04 base body, short hair on 04 base body, different face, different character, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username";
+                    negativePrompt = "breastplate in box 09, torso in box 09, chest armor in box 09, body in box 09, upper garment in box 09, skirt in box 10, legs in box 10, thighs in box 10, human legs inside costume breakdown, flesh legs on skirt, body flesh on clothing parts, human skin on clothing parts, wings in box 11, feathers in box 11, split wings across multiple boxes, wings crossing divider lines, two boxes for wings, oversized wings bleeding outside box 12, 7 heads tall, 8 heads tall, tall realistic body proportions, long realistic legs, tall model build, realistic adult height, elongated torso, long limbs, detached animal tail in costume breakdown, animal ears headband in costume section, missing tail on 04 base body, missing animal ears on 04 base body, furry, anthro, animal snout, muzzle, animal nose, animal face, beast face, cat face, snout, four ears on beastkin, human ears on beastkin, missing elf ears on forest folk, short round ears on forest folk, detached elf ears in costume breakdown, missing wings on avian folk, detached feathered wings in costume breakdown, prosthetic leg replacing organic leg, converting organic legs into robotic legs, cybernetic leg when original has human legs, single robotic arm when original has dual robotic arms, one organic arm when both arms are mechanical, normal flesh arm on mechanical arm side, human arm replacing mechanical arm, asymmetric flesh arm, one robotic arm and one flesh arm, detached mechanical arm in costume breakdown, mechanical limbs in exploded costume section, black bodysuit on 04 base body, dark leotard on 04 base body, dark swimsuit on 04 base body, ball-jointed doll, joint doll, doll joints, featureless head, bald, faceless, blank face, no eyes, mannequin, wooden mannequin, plastic doll, organic arm replacing prosthetic arm on earth folk, missing mechanical arm, outer clothes on 04 base body, wings on 04 base body, halo on 04 base body, armor on 04 base body, underwear on 04 base body, bra on 04 base body, panties on 04 base body, garter straps on 04 base body, lingerie on 04 base body, different hairstyle on 04 base body, short hair on 04 base body, different face, different character, nsfw, explicit, erotic, sexual, inconsistent costume, english text labels, english words, chinese characters, japanese text, cropped, out of frame, cut off head, cut off feet, complex background, scenery, landscape, blurry, lowres, bad anatomy, bad hands, extra limbs, extra arms, extra legs, third arm, four arms, mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs, cloned limbs, floating limbs, extra fingers, deformed fingers, fused fingers, male, man, boy, text, error, missing fingers, extra digit, fewer digits, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username";
 
                     const tBox = document.getElementById('template-download-box');
                     if (tBox) tBox.style.display = 'flex';
@@ -3629,10 +3589,14 @@ ${slotInstructions}
                 }
 
             } else {
+                // Tier 3에서 숨긴 규격 틀 안내를 되돌린다.
+                const illustTemplateBox = document.getElementById('template-download-box');
+                if (illustTemplateBox) illustTemplateBox.style.display = 'flex';
+
                 // ✨ 전신 일러스트 모드: 사용자가 선택한 [체형 + 복장 + 역할군 + 속성 + 등급 + 종족 + 세부특징] 완전 동적 결합 엔진
                 const baseMaster = "masterpiece, best quality, ultra-detailed anime mobile gacha illustration, Genshin and Blue Archive art style, 1girl, solo, adult female, full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose, anatomically correct, clean lineart, vibrant cel-shading, cinematic lighting";
                 
-                // 1. 선택된 체형 주입 (슬랜더, 표준, 글래머, 메가 글래머, 톰보이, 로리/쁘띠 또는 종족 자동)
+                // 1. 선택된 체형 주입 (슬랜더, 표준, 글래머, 메가 글래머, 톰보이, 땅의 종족 전용 또는 종족 자동)
                 const bodyClause = selectedBodySpec;
                 
                 // 2. 선택된 의상 스타일 주입
@@ -3673,8 +3637,8 @@ ${slotInstructions}
                 // 체형별 상반되는 키워드 자동 배제
                 if (bodyType === 'slender') {
                     customNegatives.push("huge breasts, large breasts, heavy cleavage, voluptuous, thick thighs, wide hips, plump");
-                } else if (bodyType === 'petite') {
-                    customNegatives.push("tall, mature adult woman, huge breasts, long legs, heavy curves, voluptuous");
+                } else if (bodyType === 'earth_shortstack') {
+                    customNegatives.push("tall, long legs, skinny, flat chest, childlike body, childlike face");
                 } else if (bodyType === 'standard') {
                     customNegatives.push("huge breasts, gigantic breasts, flat chest, extreme curves");
                 } else if (bodyType === 'mega_glamour') {
@@ -3749,7 +3713,7 @@ ${slotInstructions}
                 message = "✅ 인체 오류/잘림 방지 네거티브 프롬프트가 복사되었습니다!";
             } else if (type === 'all_in_one') {
                 text = `${pos}. Avoid: ${neg}`;
-                if (genMode === 'sheet') {
+                if (genMode !== 'illust') {
                     message = "📐 [캐릭터 설정 시트 모드] 복사 완료!\n\n📌 안내: 나노바나나(제미나이)에 '캐릭터 원본 이미지'를 먼저 첨부(Ctrl+V)하고 이 프롬프트를 함께 붙여넣어 전송하세요!";
                 } else if (isRemoveBg) {
                     message = "⬜ [에셋 누끼/순백 배경 모드] 복사 완료!\n\n나노바나나 입력창에 그대로 붙여넣기(Ctrl+V) 하시면 단색 순백 배경으로 캐릭터가 단독 출력됩니다.";

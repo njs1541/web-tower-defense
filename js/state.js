@@ -31,6 +31,7 @@ let currentStage = 1;
 let mp = 0;              // 현재 마나 포인트 (MP)
 let maxMp = 100;         // 최대 마나 포인트
 let mpRegenTickCount = 0; // v0.44.0 시간 경과 MP 충전용 틱 카운터
+let bossKilledThisRound = false; // v0.45.0 이번 라운드 보스 처치 여부 (출구 누출과 구분)
 let deckTowerCaps = {    // 출전 캐릭터들로부터 계산된 타워별 최대 인게임 강화 가능 레벨
     ranged: 0,
     melee: 0,

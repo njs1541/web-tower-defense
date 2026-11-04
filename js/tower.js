@@ -534,6 +534,7 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey 
 
         // 3. 10라운드 보스 처치 시 프리즘 포인트 (PP) 1개 확정 지급! (v0.22.0)
         if (enemy.isBoss) {
+            bossKilledThisRound = true;
             USER_DATA.pp = (USER_DATA.pp || 0) + 1;
             saveData();
             showFloatingDamage(enemy.x, enemy.y, "💎 보스 격파! PP +1 획득!", "#38bdf8");

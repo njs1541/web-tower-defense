@@ -3,8 +3,8 @@
 미소녀 지휘관 수집, 룬 소켓 덱빌딩, 히어로 컨트롤을 결합한 브라우저 타워 디펜스 게임과 그 에셋 제작 도구 모음이다.
 빌드 도구와 외부 의존성이 없는 바닐라 JS/HTML/CSS 프로젝트다.
 
-- 게임 버전: v0.44.0
-- 이 문서의 행 번호와 현황은 v0.44.0 작업본 기준이다. 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
+- 게임 버전: v0.47.0
+- 이 문서의 행 번호와 현황은 v0.47.0 작업본 기준이다. 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
 - **커밋은 사용자가 수동으로 한다.** 명시적인 요청이 없으면 커밋이나 푸시를 하지 않는다.
 - 세부 규칙은 [QA_AND_RULES.md](QA_AND_RULES.md), 기획은 [기획문서.md](기획문서.md), 에셋 절차는 [asset_generation_pipeline_guide.html](asset_generation_pipeline_guide.html)을 본다.
 
@@ -18,9 +18,9 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 - `Ctrl+J`: 게임 내 QA 치트 패널(`js/qa.js`). 재화 지급, 전체 해금, 라운드 설정, 하드 리셋. 자동 테스트가 아니다.
 - **게임 자동 테스트는 없다.** `scratch/sim_harness.js`는 게임이 아니라 프롬프트 생성기 스냅샷용이고, 현행 코드와도 어긋나 있다.
 - 문법 확인: `node -e "const fs=require('fs');for(const f of fs.readdirSync('js'))new Function(fs.readFileSync('js/'+f,'utf8'))"`
-- 게임 동작을 바꾸면 브라우저에서 실제로 확인한다. 확인하지 못했으면 그렇게 보고한다.
+- 게임 동작을 바꾸면 브라우저에서 실제로 확인한다. Edge 헤드리스와 CDP로 `startGame`, `onEnemyHit`을 호출해 흐름을 검증할 수 있다(임시 프로필 사용). 확인하지 못했으면 그렇게 보고한다.
 
-## 반드시 지킬 규칙 (QA_AND_RULES.md L62-123)
+## 반드시 지킬 규칙 (QA_AND_RULES.md L79-140)
 
 **언어:** 설명, 주석, 문서, 작업 보고는 모두 한국어로 쓴다.
 
@@ -32,20 +32,21 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 **게임 로직:** `generateBoard`와 경로 탐색(`findAStarPath`, `recalculateGlobalPath`)을 해치지 않는다. 기능을 추가할 때는 `gameLoopTick`, `setInterval`, `setTimeout` 같은 비동기 로직과의 충돌을 확인한다. 규칙 원문의 `gameLoop`, `generateEnemyPath`는 코드에 없는 옛 이름이다.
 
-**문서 갱신:** 기능을 바꾸면 `QA_AND_RULES.md`의 인수인계 절도 함께 갱신한다(L825). 수치를 바꿨다면 `기획문서.md`도 맞춘다.
+**문서 갱신:** 기능을 바꾸면 `QA_AND_RULES.md`의 인수인계 절도 함께 갱신한다(L842). 수치를 바꿨다면 `기획문서.md`도 맞춘다.
 
-**캐릭터:** 지휘관은 100% 성인 여성이다. 남성 캐릭터는 넣지 않고, 아동/로리형 체형은 배제한다(L76-77). 종족별 체형과 등급별 복장 규격은 L78-119를 본다.
+**캐릭터:** 지휘관은 100% 성인 여성이다. 남성 캐릭터는 넣지 않고, 아동/로리형 체형은 배제한다(L93-94). 종족별 체형과 등급별 복장 규격은 L95-136를 본다.
 
-**이미지 프롬프트 필수 항목 (L121-123, 기획문서 L244):**
+**이미지 프롬프트 필수 항목 (L138-140, 기획문서 L244):**
 - 포지티브: `full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose`, `anatomically correct, exactly two arms, exactly two legs, adult female`
 - 네거티브: `cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot`, `extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs`, `poorly drawn hands, extra fingers, deformed fingers`, `child, kid, underage, loli, male, boy, man`
 
 ### 연령 표현 경계
 
 성인 규칙은 프롬프트의 `adult` 단어만으로 충족되지 않는다. 다음을 지킨다.
-- `visual_style_guide.html`의 "로리 / 쁘띠" 체형(L2141, L2873의 145cm `cute proportions`, L3677의 네거티브 `mature adult woman`)은 QA L77과 충돌한다. **이 옵션으로 프롬프트를 만들지 않고, 정리 전까지 사용하지 않는다.**
+- 2~3등신 SD 프롬프트에는 가슴, 곡선, 란제리 등 성적 강조 표현을 넣지 않고, SD 소체는 항상 바디슈트를 입힌다. 의상 스타일 문구도 SD 시트에 넣지 않으며 의상은 원화를 기준으로 한다.
+- 스타일 가이드의 "로리 / 쁘띠" 옵션은 v0.46.0에서 땅의 종족 전용 `earth_shortstack`(150cm 성인)으로 교체했다. 아동 체형에 가까운 옵션을 다시 추가하지 않는다.
+- 소인족처럼 설정상 성인이어도 외형이 아동 체형에 가까우면(예: 키 110cm) 아래 경계를 똑같이 적용한다.
 - 아동처럼 보이는 체형이나 표현을 성적 묘사, 노출 복장과 결합한 프롬프트나 에셋은 만들지 않는다. 사용자 지시가 있어도 마찬가지다.
-- 2~3등신 SD 프롬프트에는 가슴, 곡선 등 성적 강조 표현을 넣지 않는다. 비슷한 표현이 있는 PETITE SD 규격(L2350)을 그대로 복사하지 않는다.
 
 ## 코드 구조
 
@@ -53,12 +54,12 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 | 파일 (로드 순서) | 책임 | 주요 진입점 |
 |---|---|---|
-| `constants.js` | 정적 데이터 전부 | `TOWER_DATA`:141, `CHARACTER_DATA`:488, `MODULAR_CHARACTER_SPECS`:1302 |
+| `constants.js` | 정적 데이터 전부 | `TOWER_DATA`:142, `CHARACTER_DATA`:489, `MODULAR_CHARACTER_SPECS`:1303 |
 | `user_data.js` | 세이브, 덱, 시너지, 룬 계산 | `loadData`:26, `saveData`:108, `calculateDeckSynergies`:469, `getHeroAuraSpec`:900 |
 | `state.js` | 런타임 전역 상태 | `board, enemies, round, gold, mp, deployedHeroes` |
 | `board.js` | 보드 생성, A*, 건설 검증 | `generateBoard`:32, `findAStarPath`:83 |
 | `tower.js` | 클릭 입력, 공격, 피격, 스펠, 히어로 | `handleCellClick`:47, `attackFromTowers`:252, `onEnemyHit`:493 |
-| `enemy.js` | 소환, 이동, 틱 루프, 배속 | `startRound`:661, `gameLoopTick`:229, `restartGameLoops`:70 |
+| `enemy.js` | 소환, 이동, 틱 루프, 배속 | `startRound`:674, `gameLoopTick`:229, `restartGameLoops`:70 |
 | `ui.js` | 인게임 DOM 렌더, 보고서, 아바타 | `render`:8, `buildModularCharacterHtml`:668 |
 | `lobby.js` | 로비, 덱, 룬 장착, 연구소 | `updateLobbyUI`:9 |
 | `gacha.js` | 소환과 연출 | `rollSingleCommander`:28 |
@@ -73,20 +74,21 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 - 인게임 `gold`와 영구 `USER_DATA.gold`는 다른 값인데 UI 라벨은 둘 다 TP다.
 - 세이브 키는 `tower_defense_save_v1` 하나이고 스키마 버전이 없다. 필드를 바꾸면 `loadData`의 기본값 채우기(user_data.js:31-70)도 수정한다. 로드 중 예외가 나면 백업 없이 초기화된다.
 - 파일은 UTF-8이고 행 끝이 파일마다 다르다. `user_data.js`, `기획문서.md`는 LF, `enemy.js`, `main.js`, `QA_AND_RULES.md`는 CRLF, `constants.js`, `state.js`, `index.html`은 섞여 있다. 수정할 때 기존 행 끝을 유지하고, PowerShell 5.1로 쓸 때는 인코딩을 지정한다.
-- 재화 수급 수치(`MP_REGEN_*`, `RP_REWARD_*`)는 `constants.js` 맨 위에 있다. MP 충전은 `gameLoopTick` 안에서 돌아서 전투 중에만 동작한다.
+- 재화 수급 수치(`MP_REGEN_*`, `RP_REWARD_*`)는 `constants.js` 맨 위에 있다. MP 충전은 `gameLoopTick` 안에서 돌아서 전투 중에만 동작한다(사용자 확정). RP는 처치 12% 드롭, 완막 +1, 스테이지 클리어 +5로 확정되었다.
+- 스테이지 클리어: `STAGE_CLEAR_ROUND`(20) 이후의 보스를 **처치**하면 `endGame(true)`로 런이 승리 종료된다. 보스 누출은 `bossKilledThisRound`로 구분해 격파 보상과 최초 클리어 PP를 주지 않고, 생존하면 런이 계속되어 30R 보스가 다음 기회가 된다. 그래서 30R 최초 클리어 +10 PP는 이 경우에만 받을 수 있다.
 
 ## 추가 체크리스트
 
 **지휘관**
 1. `CHARACTER_DATA`에 항목 추가: id, name, title, grade, element, role, avatar, image, baseSockets, maxSockets, levelCaps, towerStock, quotes, skillQuote, desc. UR/U는 `isHeroUnit`을 넣고 `towerStock:{}`로 둔다.
-2. `COMMANDER_GACHA_CONFIG.rates`(constants.js:1231)에 추가하고 등급별 합계를 재조정한다. 빠지면 획득할 수 없다.
+2. `COMMANDER_GACHA_CONFIG.rates`(constants.js:1232)에 추가하고 등급별 합계를 재조정한다. 빠지면 획득할 수 없다.
 3. `assets/char_<id>.jpg` 추가. 선택: `MODULAR_CHARACTER_SPECS`(없으면 `getCharacterModularSpec`이 자동 추론).
 4. UR/U 고유 오라: `getHeroAuraSpec`(user_data.js:905-963).
-5. 새 원소/역할군이면 `SYNERGY_DATA`, 시너지 분기(user_data.js:576-600, 624-647), 정렬 가중치(lobby.js:169-180), 필터 버튼(lobby.js:547-556), `elemPalette`(constants.js:1457).
+5. 새 원소/역할군이면 `SYNERGY_DATA`, 시너지 분기(user_data.js:576-600, 624-647), 정렬 가중치(lobby.js:169-180), 필터 버튼(lobby.js:547-556), `elemPalette`(constants.js:1458).
 
-**타워:** `TOWER_DATA`, `TOWER_EMBLEMS`, 타격 분기(tower.js:398-436), 효과 문구(tower.js:827-830), `.cell.<id>` CSS, U 대장 한도(user_data.js:354), 제공 지휘관의 `towerStock`.
+**타워:** `TOWER_DATA`, `TOWER_EMBLEMS`, 타격 분기(tower.js:398-436), 효과 문구(tower.js:828-831), `.cell.<id>` CSS, U 대장 한도(user_data.js:354), 제공 지휘관의 `towerStock`.
 **적:** `ENEMY_TYPES`, `determineEnemyType`(enemy.js:88-114), `.monster-body.<id>` CSS.
-**룬:** `RUNE_DATA`, `RUNE_GACHA_CONFIG`, 패시브 체인(user_data.js:857-888) 또는 스펠 체인(tower.js:1051-1109).
+**룬:** `RUNE_DATA`, `RUNE_GACHA_CONFIG`, 패시브 체인(user_data.js:857-888) 또는 스펠 체인(tower.js:1052-1110).
 **스테이지:** `STAGE_DATA`, 버튼(index.html:75-77).
 
 ## 에셋 파이프라인
@@ -143,44 +145,46 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 표시: **[확인]** 원본 코드를 직접 대조함. **[판독]** 분석 시 코드만 읽고 재대조는 하지 않음. 모두 브라우저에서 재현하지는 않았으니 수정 전에 재현한다.
 
 **게임 로직**
-- 높음 **[확인]** 승리 경로 없음: `endGame()` 호출은 enemy.js:654의 패배 분기뿐이다. 모든 런이 패배로 끝난다.
-- 높음 **[확인]** 크롤러 소프트락: 히어로 보호 기반에 인접하면 철거가 계속 실패하고 이동하지 않는다(enemy.js:524-551, 586-595). 타워로 못 잡으면 라운드가 끝나지 않는다.
-- 중간 **[확인]** 무한 TP: 무료 설치인데 투자액에 기본 비용이 더해지고(tower.js:750) C등급은 100% 환급된다.
-- 중간 **[확인]** 수호자 2셋 무효: `freeBases`가 어디에도 정의되어 있지 않다(enemy.js:679).
-- 중간 **[확인]** 최초 클리어 알림 예외: 숫자인 `currentStage`에 `.toUpperCase()`를 호출한다(enemy.js:378). PP는 이미 저장되지만 알림과 로비 갱신이 누락된다.
-- 중간 **[판독]** `extraDamageRatio` 이중 적용(tower.js:291, 918-920).
-- 중간 **[판독]** 크롤러 A* 추적 불능(enemy.js:562, board.js:96), 오버킬 방지 무효(적에 `id` 없음, tower.js:225, 346, 370), 송환 스펠 무효(tower.js:1076-1084), 룬 `cooldownSec` 미사용.
+- 높음 **[확인]** 크롤러 소프트락: 히어로 보호 기반에 인접하면 철거가 계속 실패하고 이동하지 않는다(enemy.js:537-564, 599-608). 타워로 못 잡으면 라운드가 끝나지 않는다.
+- 중간 **[확인]** 무한 TP: 무료 설치인데 투자액에 기본 비용이 더해지고(tower.js:751) C등급은 100% 환급된다.
+- 중간 **[확인]** 수호자 2셋 무효: `freeBases`가 어디에도 정의되어 있지 않다(enemy.js:692).
+- 중간 **[판독]** `extraDamageRatio` 이중 적용(tower.js:291, 919-921).
+- 중간 **[판독]** 크롤러 A* 추적 불능(enemy.js:575, board.js:96), 오버킬 방지 무효(적에 `id` 없음, tower.js:225, 346, 370), 송환 스펠 무효(tower.js:1077-1085), 룬 `cooldownSec` 미사용.
 - 낮음 **[판독]** 판매 버튼 60% 고정 표기, 룬 1개를 여러 소켓에 장착 가능, MP 표시 `/ 100`과 실제 최대 120 불일치.
 
+**에셋 도구**
+- 중간 **[판독]** Tier 1 전용 규격 틀 코드가 없다. 다운로드 버튼은 "12슬롯"이라고 표시하지만 틀 생성 함수(`sheet_a`, `sheet_b`, 그 외 분기)에서는 15슬롯 통합 틀이 나온다.
+- 중간 **[판독]** 스튜디오 UI에 `15. 속옷` 표기와 `underwear` 레이어가 남아 있다(sd_asset_studio.html:608, 1740, 1887). 슬라이서는 이미 뒷치마 기준이다.
+
 **에셋 ↔ 게임 연결**
-- 높음 **[확인]** `mirrorWings`가 `modularParts` 안에 있어(constants.js:1428) `spec.mirrorWings`(ui.js:802)가 읽지 못한다. 날개가 단일 레이어로 나온다.
+- 높음 **[확인]** `mirrorWings`가 `modularParts` 안에 있어(constants.js:1429) `spec.mirrorWings`(ui.js:802)가 읽지 못한다. 날개가 단일 레이어로 나온다.
 - 높음 **[확인]** `bottomSkirtBack`을 렌더하는 코드가 없다. 문서에는 뒷치마 샌드위치가 완료로 적혀 있다.
 - 높음 **[확인]** `modularCustomFit`의 소비 코드가 없다. 게임은 CSS 고정 %를 쓰므로 스튜디오의 핏 값이 반영되지 않는다.
 - 높음 **[확인]** 스튜디오 생성 코드의 키(`standingArt`, `referenceSheet`, sd_asset_studio.html:3276-3277)가 게임 키(`refSheet`, `sdPartsSheet`)와 다르다. 복붙 후 수정이 필요하다.
 - 높음 **[판독]** 듀얼 시트에 15번 좌표가 없어(`OFFICIAL_SHEET_B_SPECS`:2176) SOP 권장 경로로는 뒷치마를 따로 얻지 못한다. Tier1/Tier3 슬라이스도 미지원이다.
-- 중간 **[판독]** 문서 간 충돌: 배경색(SOP 녹색 고정 / 가이드 종족별), 15번 정의(속옷 / 뒷치마), 소체 정의(탈의 / 바디슈트 / 언더웨어), 표정 06·07 정의. 이 정의들은 기준이 아직 정해지지 않았다.
+- 중간 **[판독]** 문서 간 충돌: 배경색(SOP 녹색 고정 / 가이드 종족별), 소체 정의(탈의 / 바디슈트 / 언더웨어), 표정 06·07 정의. 이 정의들은 기준이 아직 정해지지 않았다.
 
 **문서 ↔ 코드 불일치**
 
 수급 규칙처럼 문서와 코드가 다르면 **문서를 기준으로 코드를 맞춘다**(사용자 결정). MP, RP 수급은 v0.44.0에서 이 원칙으로 맞췄다. 아래 항목은 문서가 옛 내용일 가능성이 있으니 고치기 전에 어느 쪽을 바꿀지 확인한다.
-- QA L153-158의 확률표, L719·720의 성장·보스 배율은 옛 값이다. 현행은 constants.js:37-38, 1226-1271.
-- QA에서 "전면 은퇴"(L37)한 대장 강림/결계가 QA L187, L201-209와 기획 L177-192에 현행처럼 남아 있다.
+- QA L170-175의 확률표, L736·737의 성장·보스 배율은 옛 값이다. 현행은 constants.js:38-39, 1227-1272.
+- QA에서 "전면 은퇴"(L54)한 대장 강림/결계가 QA L204, L218-226와 기획 L177-192에 현행처럼 남아 있다.
 - `QA_AND_RULES.md`의 "수정된 버그" 절에 v0.37~v0.43 항목이 없다. 최신 내역은 인수인계 절을 본다.
 
-## 다음 작업 (QA_AND_RULES.md L48-54, 기획문서 L295-300)
+## 다음 작업 (QA_AND_RULES.md L65-71, 기획문서 L295-300)
 
 1. 가챠 재화 수급 설계. 소프트 피티(v0.42)와 RP 완막/클리어 보상(v0.44)은 구현되었고, 수치 조정과 PP 수급처 다각화가 남았다.
 2. 타워 설치비/철거 환급 규칙 재정립(무한 TP 문제와 연결).
-3. 스테이지 목표, 난이도, 엔드게임 구축, 챕터 클리어와 무한 모드 분리(승리 경로 부재와 연결).
+3. 스테이지 난이도, 엔드게임 구축, 챕터 목표와 무한 모드 분리. 20R 클리어 조건은 v0.45.0에서 구현되었고, 20R까지의 밸런스는 아직 플레이로 검증하지 않았다.
 4. 중장기: 호감도와 스토리, Stage 4(번개 폭풍의 협곡), Stage 5(공허의 심연).
 
 ## 사용자 확인 필요
 
-- RP 지급량(완막 +1, 구간 클리어 +5)은 문서에 수치가 없어 임의로 정한 초기값이다. 확정 여부와, 종료 라운드가 생긴 뒤의 스테이지 클리어 판정.
-- "로리 / 쁘띠" 옵션의 삭제 또는 성인 체형으로의 교체 방식.
+- 현재 없음.
+
 
 ## 세션 인수인계
 
-- 작업을 시작할 때 이 문서와 `QA_AND_RULES.md` L7-61(인수인계 절)를 읽는다. 전체 문서는 크므로 필요한 부분만 읽는다.
+- 작업을 시작할 때 이 문서와 `QA_AND_RULES.md` L7-78(인수인계 절)를 읽는다. 전체 문서는 크므로 필요한 부분만 읽는다.
 - `visual_style_guide.html`(약 330KB)은 Grep과 부분 읽기로 다룬다.
 - 작업을 끝내면 해결한 문제를 "알려진 문제"에서 지우고, 구조나 절차가 바뀌었으면 이 문서를 갱신한다.
