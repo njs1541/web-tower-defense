@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D 캐릭터 에셋 생성 파이프라인 공식 명세서 & 실무 가이드북</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700;800&family=Outfit:wght@500;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #070a13;
+            --bg-surface: #0e1526;
+            --bg-card: #141d33;
+            --bg-card-alt: #1a2540;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(99, 102, 241, 0.35);
+
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --secondary: #06b6d4;
+            --accent-emerald: #10b981;
+            --accent-pink: #ec4899;
+            --accent-amber: #f59e0b;
+            --accent-purple: #a855f7;
+            --accent-rose: #f43f5e;
+
+            --text-title: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #8292ab;
+            --text-dim: #475569;
+
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-body);
+            line-height: 1.7;
+            background-image:
+                radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.09) 0%, transparent 45%),
+                radial-gradient(circle at 85% 75%, rgba(236, 72, 153, 0.07) 0%, transparent 50%),
+                radial-gradient(circle at 50% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+            padding-bottom: 120px;
+        }
+
+        /* 코드 폰트 */
+        code,
+        pre {
+            font-family: 'JetBrains Mono', Consolas, monospace;
+        }
+
+        /* 상단 네비게이션 헤더 */
+        header.nav-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            background: rgba(14, 21, 38, 0.85);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-badge {
+            background: linear-gradient(135deg, #4f46e5, #9333ea);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            letter-spacing: 1px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .brand-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .nav-btn-hub {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-subtle);
+            color: #f1f5f9;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn-hub:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        /* 메인 레이아웃 컨테이너 */
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* 문서 히어로 배너 */
+        .doc-hero {
+            background: linear-gradient(135deg, rgba(20, 29, 51, 0.95), rgba(26, 37, 64, 0.95));
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-lg);
+            padding: 48px 44px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .doc-hero::after {
+            content: "PIPELINE 2.0";
+            position: absolute;
+            right: 25px;
+            bottom: -20px;
+            font-size: 96px;
+            font-weight: 900;
+            color: rgba(255, 255, 255, 0.02);
+            pointer-events: none;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .hero-meta-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+            padding: 5px 12px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-status {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+        }
+
+        .badge-ver {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #818cf8;
+        }
+
+        .badge-target {
+            background: rgba(245, 158, 11, 0.15);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+        }
+
+        .doc-hero h1 {
+            font-size: 34px;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1.3;
+            margin-bottom: 14px;
+            letter-spacing: -0.5px;
+        }
+
+        .doc-hero p.subtitle {
+            font-size: 15.5px;
+            color: var(--text-body);
+            max-width: 980px;
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+
+        /* 독자 관점 전환 퀵 필터 바 */
+        .audience-switch-panel {
+            background: rgba(14, 21, 38, 0.9);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .audience-switch-title {
+            font-size: 12.5px;
+            font-weight: 800;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .audience-btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-filter-role {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: #cbd5e1;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-filter-role:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #fff;
+        }
+
+        .btn-filter-role.active {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #fff;
+            border-color: #818cf8;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+        }
+
+        /* 메인 섹션 스타일 */
+        .section-block {
+            margin-bottom: 50px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+            border: 1px solid var(--border-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.3px;
+        }
+
+        .section-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* 카드 UI */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 24px 28px;
+            margin-bottom: 20px;
+            transition: all 0.25s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.16);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        /* 그리드 레이아웃 */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+            gap: 20px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        /* 프로세스 단계 플로우 차트 */
+        .pipeline-flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .flow-step-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            display: flex;
+            gap: 22px;
+            position: relative;
+        }
+
+        .flow-step-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .step-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5, #06b6d4);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+        }
+
+        .step-line {
+            width: 2px;
+            flex-grow: 1;
+            background: linear-gradient(to bottom, #4f46e5, rgba(255, 255, 255, 0.05));
+            margin: 8px 0;
+        }
+
+        .flow-step-body {
+            flex-grow: 1;
+        }
+
+        .flow-step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .flow-step-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .step-tag-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tag-pill {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #94a3b8;
+        }
+
+        .tag-pill.blue {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .tag-pill.green {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .tag-pill.purple {
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .tag-pill.amber {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .flow-step-desc {
+            font-size: 14px;
+            color: var(--text-body);
+            line-height: 1.7;
+            margin-bottom: 14px;
+        }
+
+        /* 세부 박스 */
+        .info-subbox {
+            background: rgba(14, 21, 38, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-sm);
+            padding: 14px 18px;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        .info-subbox strong {
+            color: #38bdf8;
+        }
+
+        /* 이슈 & 해결 Alert 카드 */
+        .issue-card {
+            background: rgba(30, 20, 20, 0.6);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-left: 4px solid #ef4444;
+            border-radius: var(--radius-sm);
+            padding: 18px 22px;
+            margin-bottom: 16px;
+        }
+
+        .issue-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .issue-badge {
+            background: #ef4444;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .issue-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #fca5a5;
+        }
+
+        .issue-content {
+            font-size: 13px;
+            color: #f1f5f9;
+            line-height: 1.7;
+        }
+
+        .solution-box {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            font-size: 12.5px;
+            color: #a7f3d0;
+        }
+
+        .solution-box strong {
+            color: #34d399;
+        }
+
+        /* 코드 스니펫 박스 */
+        .code-container {
+            background: #060911;
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin: 14px 0;
+        }
+
+        .code-header {
+            background: rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11.5px;
+            color: #94a3b8;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .btn-copy-code {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #cbd5e1;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-copy-code:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        pre.code-body {
+            padding: 16px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #e2e8f0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* 3열 테이블 */
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            margin: 14px 0;
+        }
+
+        .spec-table th,
+        .spec-table td {
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        .spec-table th {
+            background: rgba(255, 255, 255, 0.04);
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .spec-table td {
+            background: rgba(14, 21, 38, 0.4);
+            color: #cbd5e1;
+        }
+
+        .spec-table tr:hover td {
+            background: rgba(99, 102, 241, 0.06);
+        }
+
+        /* 에이전트 제언 박스 */
+        .agent-insight-card {
+            background: linear-gradient(135deg, rgba(30, 27, 75, 0.8), rgba(20, 20, 45, 0.8));
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            border-radius: var(--radius-md);
+            padding: 24px 28px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .insight-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .agent-insight-card h3 {
+            font-size: 17px;
+            font-weight: 800;
+            color: #f5d0fe;
+            margin-bottom: 8px;
+        }
+
+        .agent-insight-card p {
+            font-size: 13.5px;
+            color: #e9d5ff;
+            line-height: 1.7;
+        }
+
+        /* 독자별 탭 필터링 반응용 클래스 */
+        .audience-ai,
+        .audience-designer,
+        .audience-director {
+            transition: all 0.3s ease;
+        }
+
+        .dimmed-section {
+            opacity: 0.25;
+            filter: grayscale(0.7);
+        }
+
+        /* 반응형 모바일 */
+        @media (max-width: 768px) {
+            header.nav-header {
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .doc-hero {
+                padding: 30px 20px;
+            }
+
+            .doc-hero h1 {
+                font-size: 24px;
+            }
+
+            .flow-step-card {
+                flex-direction: column;
+                gap: 14px;
+            }
+
+            .step-line {
+                display: none;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 고정 네비게이션 헤더 -->
+    <header class="nav-header">
+        <div class="brand-group">
+            <span class="brand-badge">TECH SPEC v1.0</span>
+            <span class="brand-title">타워디펜스 2D 캐릭터 에셋 생성 파이프라인 공식 명세서</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#section-architecture">파이프라인 아키텍처</a></li>
+            <li><a href="#section-steps">5단계 실무 공정</a></li>
+            <li><a href="#section-troubleshooting">빈출 이슈 & 해결책</a></li>
+            <li><a href="#section-roles">독자별 체크포인트</a></li>
+            <li><a href="#section-insights">AI 전문가 관점 제언</a></li>
+            <li><a href="sd_all_in_one_hub.html" class="nav-btn-hub">🎮 올인원 허브</a></li>
+            <li><a href="visual_style_guide.html" class="nav-btn-hub">📑 프롬프트 가이드</a></li>
+        </ul>
+    </header>
+
+    <div class="container">
+
+        <!-- 히어로 배너 섹션 -->
+        <section class="doc-hero">
+            <div class="hero-meta-badges">
+                <span class="hero-badge badge-status">✅ PRODUCTION READY (v0.43.0 호환)</span>
+                <span class="hero-badge badge-ver">PIPELINE SPECIFICATION v1.0.0</span>
+                <span class="hero-badge badge-target">🎯 내부/외부 실무자 협업 & 의견 조율용</span>
+            </div>
+            <h1>서브컬처 2D 캐릭터 에셋 생성 파이프라인 종합 명세서</h1>
+            <p class="subtitle">
+                본 문서는 타워디펜스 프로젝트에 적용 중인 <strong>생성형 AI(제미나이/나노바나나 등) 기반 캐릭터 원화 생성부터 2048×1152 규격 SD 설정 시트 정합, 크로마키 알파
+                    슬라이싱, Live2D 샌드위치 리깅 및 인게임 엔진 탑재</strong>에 이르는 전체 워크플로우를 기술적으로 정리한 공식 가이드입니다.<br>
+                프로젝트 총괄 디렉터, 현업 게임 그래픽 디자이너(원화가·스파인 리거), 생성형 AI 프로그램 간의 용어 통일과 품질 기준 확립, 공정 개선 방향성을 도출하기 위해 작성되었습니다.
+            </p>
+
+            <!-- 독자 관점 필터 스위처 -->
+            <div class="audience-switch-panel">
+                <div class="audience-switch-title">
+                    <span>👁️ 독자별 맞춤 하이라이트 뷰:</span>
+                </div>
+                <div class="audience-btn-group">
+                    <button class="btn-filter-role active" onclick="filterAudience('all')">🌐 전체 보기 (All)</button>
+                    <button class="btn-filter-role" onclick="filterAudience('ai')">🤖 AI 프로그램 (LLM / Diffusion)</button>
+                    <button class="btn-filter-role" onclick="filterAudience('designer')">🎨 현업 그래픽 디자이너
+                        (2D/Live2D)</button>
+                    <button class="btn-filter-role" onclick="filterAudience('director')">👤 총괄 디렉터 / 개발자 (Project
+                        Owner)</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. 파이프라인 전체 아키텍처 개요 -->
+        <section id="section-architecture" class="section-block">
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="section-icon-badge">📐</div>
+                    <div>
+                        <h2 class="section-title">1. 전체 파이프라인 아키텍처 (End-to-End Pipeline)</h2>
+                        <p class="section-desc">기획 룰셋 정의부터 게임 런타임 등록까지의 6단계 순환 공정</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 프로세스 다이어그램 카드 -->
+            <div class="card">
+                <div
+                    style="background: rgba(10, 14, 25, 0.85); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 22px; margin-bottom: 20px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; font-size: 13px; font-weight: 800; color: #38bdf8; margin-bottom: 16px;">
+                        <span>🔄 데이터 및 에셋 흐름도 (Data & Asset Lifecycle Flow)</span>
+                        <span style="color: #94a3b8; font-size: 11.5px; font-weight: normal;">Non-destructive •
+                            Chroma-Key Isolated • Sliced Modular Asset</span>
+                    </div>
+
+                    <!-- 흐름 블록 -->
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; text-align: center;">
+                        <div
+                            style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.35); padding: 14px 10px; border-radius: 8px;">
+                            <div style="font-size: 11px; color: #818cf8; font-weight: 800;">STEP 0</div>
+                            <div style="font-size: 13.5px; font-weight: 800; color: #fff; margin: 4px 0;">기획 룰셋 정의</div>
+                            <div style="font-size: 11px; color: #94a3b8;">5대 종족 & 등급별 노출도 체계</div>
+                        </div>
+                        <div
+                            style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); padding: 14px 10px; border-radius: 8px;">
+                            <div style="font-size: 11px; color: #34d399; font-weight: 800;">STEP 1</div>
+                            <div style="font-size: 13.5px; font-weight: 800; color: #fff; margin: 4px 0;">8등신 전신 원화
+                            </div>
+                            <div style="font-size: 11px; color: #94a3b8;">크로마키 배경 & 풀바디 보장</div>
+                        </div>
+                        <div
+                            style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); padding: 14px 10px; border-radius: 8px;">
+                            <div style="font-size: 11px; color: #fbbf24; font-weight: 800;">STEP 2</div>
+                            <div style="font-size: 13.5px; font-weight: 800; color: #fff; margin: 4px 0;">SD 모델 시트</div>
+                            <div style="font-size: 11px; color: #94a3b8;">2048 규격 템플릿 1:1 매핑</div>
+                        </div>
+                        <div
+                            style="background: rgba(236, 72, 153, 0.12); border: 1px solid rgba(236, 72, 153, 0.35); padding: 14px 10px; border-radius: 8px;">
+                            <div style="font-size: 11px; color: #f472b6; font-weight: 800;">STEP 3</div>
+                            <div style="font-size: 13.5px; font-weight: 800; color: #fff; margin: 4px 0;">크로마키 & 슬라이싱
+                            </div>
+                            <div style="font-size: 11px; color: #94a3b8;">오토 트림 & 11종 투명 PNG</div>
+                        </div>
+                        <div
+                            style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); padding: 14px 10px; border-radius: 8px;">
+                            <div style="font-size: 11px; color: #c084fc; font-weight: 800;">STEP 4</div>
+                            <div style="font-size: 13.5px; font-weight: 800; color: #fff; margin: 4px 0;">Live2D 샌드위치
+                            </div>
+                            <div style="font-size: 11px; color: #94a3b8;">Z-Index 뎁스 & 눈 깜빡임</div>
+                        </div>
+                        <div
+                            style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); padding: 14px 10px; border-radius: 8px;">
+                            <div style="font-size: 11px; color: #38bdf8; font-weight: 800;">STEP 5</div>
+                            <div style="font-size: 13.5px; font-weight: 800; color: #fff; margin: 4px 0;">인게임 상수 등록
+                            </div>
+                            <div style="font-size: 11px; color: #94a3b8;">constants.js DB & 캔버스 바인딩</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 800; color: #f8fafc; margin-bottom: 8px;">🎯 파이프라인 핵심
+                            설계 철학</h4>
+                        <ul style="font-size: 13px; color: #cbd5e1; padding-left: 20px; line-height: 1.8;">
+                            <li><strong>AI 불확실성 제어:</strong> AI의 무작위성을 제어하기 위해 픽셀 좌표가 인쇄된 '공식 규격 틀(Template PNG)'을 제2
+                                레퍼런스로 주입하여 좌표 오차를 원천 억제.</li>
+                            <li><strong>비파괴적 파츠 모듈화:</strong> 캐릭터를 한 덩어리로 그리지 않고, 의상·무기·헤일로·소체를 독립 파츠로 분리 생성하여 장비 탈착 및
+                                애니메이션 리깅 자유도 확보.</li>
+                            <li><strong>크로마키 색상 충돌 방지:</strong> 캐릭터 고유 컬러(녹색 의상, 흰색 제복 등)에 따라 배경 키 컬러를 동적으로 전환(네온 그린 vs
+                                마젠타 vs 블루).</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 14px; font-weight: 800; color: #f8fafc; margin-bottom: 8px;">⚡ 실무 생산성 지표
+                            (Efficiency Metrics)</h4>
+                        <ul style="font-size: 13px; color: #cbd5e1; padding-left: 20px; line-height: 1.8;">
+                            <li><strong>소요 시간 단축:</strong> 전통적 수작업 원화/분해(캐릭터당 4~7일) 대비 <strong>단 1~2시간 만에 원화+시트+11종
+                                    파츠+리깅 완료</strong> (90% 이상 리소스 절감).</li>
+                            <li><strong>해상도 표준:</strong> 전신 원화 (1024×1792 또는 고해상도 세로형) / SD 설정 시트 (2048×1152 가로 표준).
+                            </li>
+                            <li><strong>인게임 적용성:</strong> HTML5 Canvas, WebGL, Spine 2D 엔진에 즉시 호환 가능한 투명 PNG 규격 산출.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 각 단계별 상세 실무 공정 -->
+        <section id="section-steps" class="section-block">
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="section-icon-badge">🛠️</div>
+                    <div>
+                        <h2 class="section-title">2. 단계별 상세 실무 공정 (Step-by-Step Breakdown)</h2>
+                        <p class="section-desc">기획부터 에셋 슬라이싱, Live2D 리깅까지의 실질적인 구현 테크닉</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pipeline-flow-container">
+
+                <!-- STEP 0 -->
+                <div class="flow-step-card audience-director audience-designer">
+                    <div class="flow-step-indicator">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #6366f1, #818cf8);">0</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="flow-step-body">
+                        <div class="flow-step-header">
+                            <h3 class="flow-step-name">STEP 0: 캐릭터 기획 및 해부학/종족 룰셋 정의</h3>
+                            <div class="step-tag-row">
+                                <span class="tag-pill blue">100% 성인 여성</span>
+                                <span class="tag-pill amber">5대 종족 체형 분화</span>
+                                <span class="tag-pill purple">5단계 등급별 노출도 체계</span>
+                            </div>
+                        </div>
+                        <p class="flow-step-desc">
+                            모든 캐릭터는 남성 및 아동/로리형 체형을 엄격히 배제하며, 서양식 모델/육감적 성인 여성(Mature Adult Female)으로 설계합니다. 종족별 고유 체형과
+                            시그니처 복장 스타일을 엄격히 분리하여 시각적 다양성을 확보합니다.
+                        </p>
+
+                        <table class="spec-table">
+                            <thead>
+                                <tr>
+                                    <th>종족</th>
+                                    <th>체형 & 두신비</th>
+                                    <th>바스트 / 골반</th>
+                                    <th>시그니처 복장 스타일</th>
+                                    <th>기계화 / 종족 특성</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>⛰️ 땅의 종족</strong></td>
+                                    <td>145~155cm (6.0~6.5등신)</td>
+                                    <td>E~G컵 폭발적 볼륨, 탄탄한 꿀벅지</td>
+                                    <td>밀착 광택 라텍스 바디슈트 & 공학 하네스 (스타일 A)</td>
+                                    <td>유압 피스톤/황동/백금 사이보그 의수 팔</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>🐾 수인족</strong></td>
+                                    <td>160~168cm (7.0~7.5등신)</td>
+                                    <td>E~F컵 글래머 또는 C~D컵 11자 복근</td>
+                                    <td>가죽 캣슈트 & 체스트 하네스 & 허벅지 밴드 (스타일 A)</td>
+                                    <td>풍성한 동물 귀, 표현력 있는 꼬리, 송곳니</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>🌲 숲의 종족</strong></td>
+                                    <td>168~175cm (7.5~8.0등신)</td>
+                                    <td>E~G컵 모델 바디, 매끈한 각선미</td>
+                                    <td>시스루 플로럴 레이스 드레스, 키홀 컷아웃 (스타일 B)</td>
+                                    <td>길고 날렵한 엘프 귀, 에테르 날개/티아라</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>🪽 비행족</strong></td>
+                                    <td>148~156cm (6.0~6.5등신)</td>
+                                    <td>F~G컵 숏스택 볼륨, 개미허리</td>
+                                    <td>공중 부유용 시스루 쉬폰 드레스 & 하이슬릿 (스타일 B)</td>
+                                    <td>부유 포즈, 깃털/크리스털 날개(2~12장)</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>🏛️ 인간족</strong></td>
+                                    <td>160~167cm (7.0~7.5등신)</td>
+                                    <td>D~F컵 균형 잡힌 모델-아이돌 체형</td>
+                                    <td>제국 제복 코트 + 바디슈트 하이브리드 (A ↔ B 교차)</td>
+                                    <td>황실 룬 마법진, 결전 성기사 판타지 아머</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="info-subbox">
+                            <strong>⭐ 등급별 노출도 체계 (Costume Tier Hierarchy):</strong><br>
+                            • <strong>C / UC 등급 (★☆☆☆☆):</strong> 단정한 제복, 튜닉, 작업복 (신체 볼륨감 암시, 노출 억제)<br>
+                            • <strong>R 등급 (★★☆☆☆):</strong> 슬림 언더슈트, 가슴골 윗선(Cleavage) 노출, 허벅지 홀스터 살 눌림(Flesh Pinch)<br>
+                            • <strong>SR 등급 (★★★☆☆):</strong> 광택 에나멜 라텍스, 깊은 키홀 컷아웃(Keyhole), 하이 사이드 슬릿, 가터벨트<br>
+                            • <strong>UR 등급 (★★★★★ Apex):</strong> 브라운더스트2/라스트오리진 감성의 <strong>황금 체인 비키니 아머</strong>, 골반
+                            90% 개방 마이크로 하이레그, 순백 실크 베일<br>
+                            • <strong>U 등급 (★★★★★+ Transcendent):</strong> 의상을 초월한 <strong>태초의 성광/은하수 란제리 & 다이아몬드 바디체인
+                                (맨살 95% 노출)</strong>, 부유 연출
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 1 -->
+                <div class="flow-step-card audience-ai audience-designer audience-director">
+                    <div class="flow-step-indicator">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #10b981, #059669);">1</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="flow-step-body">
+                        <div class="flow-step-header">
+                            <h3 class="flow-step-name">STEP 1: 8등신 전신 원화 (Full Standing Illust) 생성</h3>
+                            <div class="step-tag-row">
+                                <span class="tag-pill green">크로마키 배경 100% 분리</span>
+                                <span class="tag-pill blue">프레임 잘림 원천 차단</span>
+                                <span class="tag-pill amber">사지 기형 가드레일</span>
+                            </div>
+                        </div>
+                        <p class="flow-step-desc">
+                            카드 일러스트, 캐릭터 도감, 전투 승리 컷인으로 사용할 8등신 고해상도 전신 일러스트를 생성합니다. 차후 배경 제거(투명화)를 완벽하게 수행하기 위해
+                            <strong>단색 크로마키 배경</strong>을 강제합니다.
+                        </p>
+
+                        <div class="info-subbox">
+                            <strong>🎨 종족별 동적 크로마키(Chroma-Key) 배경 매핑 규칙:</strong><br>
+                            • <strong>일반 표준 캐릭터 (비-자연 계열):</strong> 네온 그린
+                            (<code>solid pure vibrant green screen background #00FF00, studio green chroma key</code>)<br>
+                            • <strong>숲의 종족 / 나뭇잎·초록 의상 보유 캐릭터:</strong> 마젠타
+                            (<code>solid pure vibrant magenta background #FF00FF, chroma key magenta</code>) — <em>초록빛
+                                잎사귀 투명 펑크 원천 방지</em><br>
+                            • <strong>초록 & 분홍 혼합 캐릭터:</strong> 네온 블루
+                            (<code>solid pure vibrant electric blue background #0000FF</code>)
+                        </div>
+
+                        <div class="code-container audience-ai">
+                            <div class="code-header">
+                                <span>8등신 원화 전신 보장 & 오류 방지 프롬프트 (Positive & Negative Injection)</span>
+                                <button class="btn-copy-code" onclick="copySnippet(this)">복사</button>
+                            </div>
+                            <pre class="code-body"><code>// [Positive Prompt Core]
+full body shot, entire body visible from head to toe, wide shot, no cut off,
+feet and shoes fully in frame, standing elegant pose, centered composition,
+168cm mature adult female, 7.5 heads tall, perfectly proportioned body,
+clean sharp anime illustration, high resolution, detailed eyes,
+solid pure vibrant magenta background #FF00FF, seamless studio chroma key background,
+smooth solid color backdrop, high contrast edge, clean silhouette cutout outline
+
+// [Negative Prompt Guardrail - 필수 주입]
+cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait,
+bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm,
+mutated hands, poorly drawn hands, missing limbs, fused limbs, malformed limbs,
+cloned limbs, blurry, textured background, complex background, shadow on floor</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div class="flow-step-card audience-ai audience-designer audience-director">
+                    <div class="flow-step-indicator">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #f59e0b, #d97706);">2</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="flow-step-body">
+                        <div class="flow-step-header">
+                            <h3 class="flow-step-name">STEP 2: 공식 규격 틀 기반 SD 01~15 설정 시트 생성</h3>
+                            <div class="step-tag-row">
+                                <span class="tag-pill amber">2048×1152 표준 규격</span>
+                                <span class="tag-pill blue">앞치마 & 뒷치마 분리</span>
+                                <span class="tag-pill green">텍스트 라벨 0% 엄수</span>
+                            </div>
+                        </div>
+                        <p class="flow-step-desc">
+                            1단계에서 생성된 8등신 원화를 <strong>2.8~3.0등신 TALL SD 메가글래머 체형</strong>으로 변환하면서, 턴어라운드(01~04), 표정
+                            팩(05~08), 의상 및 장비 분해도(09~15)를 1장의 시트에 렌더링합니다.<br>
+                            반드시 공식 템플릿(<code>forest_tall_model_sheet_template_2048x1152.png</code>)을 제2 레퍼런스로 함께 첨부하여
+                            AI가 박스 위치를 마음대로 왜곡하지 못하도록 고정합니다.
+                        </p>
+
+                        <div class="info-subbox">
+                            <strong>⭐ 01~15 슬롯 표준 배치 명세:</strong><br>
+                            • <strong>상단 대형 박스 (턴어라운드 & 소체):</strong> <code>01 정면 완성체</code> | <code>02 좌측면</code> |
+                            <code>03 후면</code> | <code>04 기본 체형(소체 - 언더웨어/맨다리)</code><br>
+                            • <strong>하단 좌측 4슬롯 (표정 팩):</strong> <code>05 기본 무표정</code> | <code>06 윙크 미소</code> |
+                            <code>07 수줍은 홍조</code> | <code>08 진지/결의</code><br>
+                            • <strong>하단 우측 7슬롯 (파츠 분해):</strong> <code>09 머리장식/헤일로</code> | <code>10 상의(흉갑/보디스)</code>
+                            | <code>11 앞치마(Front Skirt)</code> | <code>12 날개/망토</code> | <code>13 주무기</code> |
+                            <code>14 보조무기/방패</code> | <code>15 뒷치마(Back Skirt)</code>
+                        </div>
+
+                        <div class="issue-card">
+                            <div class="issue-card-header">
+                                <span class="issue-badge">핵심 실무 규칙</span>
+                                <span class="issue-title">11번 앞치마와 15번 뒷치마를 왜 반드시 분리해야 하는가?</span>
+                            </div>
+                            <div class="issue-content">
+                                통짜로 된 치마를 생성하면 Live2D 리깅 시 다리가 치마를 뚫고 나오는 클리핑(Clipping) 현상이 발생합니다. 따라서 최초 생성 단계부터
+                                <strong>11번 박스에는 골반 앞쪽을 가리는 앞치마(Front)</strong>를, <strong>15번 박스에는 엉덩이 뒤로 퍼지는
+                                    뒷치마(Back)</strong>를 독립 분리하여 생성해야만 샌드위치 입체 리깅이 가능해집니다.
+                            </div>
+                        </div>
+
+                        <div class="code-container audience-ai">
+                            <div class="code-header">
+                                <span>SD 시트 텍스트 0% 및 규격 고정 프롬프트 (Positive Directive)</span>
+                                <button class="btn-copy-code" onclick="copySnippet(this)">복사</button>
+                            </div>
+                            <pre
+                                class="code-body"><code>master character model sheet, 2048x1152 resolution, exact 1:1 layout match to attached template image,
+chibi SD proportions 2.8 to 3.0 heads tall, mature voluptuous curves,
+[BOX 11: Front Skirt only covering front pelvic area]
+[BOX 15: Back Skirt flowing behind the legs, separate layer]
+[CRITICAL STRICT RULE: ABSOLUTELY NO TEXT, NO WORDS, NO NUMBERS, NO LABELS, NO WATERMARK INSIDE BOXES],
+clean solid background matching template chroma color #FF00FF, crisp clean cell shading, high quality 2D game asset</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3 -->
+                <div class="flow-step-card audience-designer audience-director">
+                    <div class="flow-step-indicator">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #ec4899, #be185d);">3</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="flow-step-body">
+                        <div class="flow-step-header">
+                            <h3 class="flow-step-name">STEP 3: 크로마키 알파 키잉 및 스마트 슬라이싱 (Asset Slicing)</h3>
+                            <div class="step-tag-row">
+                                <span class="tag-pill purple">sd_asset_studio.html 활용</span>
+                                <span class="tag-pill green">OFFICIAL_2048_SLICE_SPECS</span>
+                                <span class="tag-pill blue">스마트 바운딩 박스 오토 트림</span>
+                            </div>
+                        </div>
+                        <p class="flow-step-desc">
+                            생성된 2048×1152 시트 이미지를 자체 개발 도구인 <code>sd_asset_studio.html</code>에 로드하여, 단 한 번의 클릭으로 배경
+                            크로마키를 투명화하고 11종의 핵심 파츠를 독립된 투명 PNG로 분리 추출합니다.
+                        </p>
+
+                        <div class="info-subbox">
+                            <strong>📐 OFFICIAL_2048_SLICE_SPECS 좌표 공식 (Safe Padding 포함):</strong><br>
+                            AI가 박스 경계선이나 상단 라벨에 그림을 바짝 붙이는 경우를 방지하기 위해 <strong>상단 -38px 라벨 제외 마진 및 좌우 +5px 안전
+                                패딩</strong>이 적용된 백분율(%) 좌표계를 사용합니다.<br>
+                            • <code>01 정면 완성체:</code> X: 3.2%, Y: 14.1%, W: 21.1%, H: 43.2%<br>
+                            • <code>04 기본 소체:</code> X: 74.0%, Y: 14.1%, W: 21.1%, H: 43.2%<br>
+                            • <code>05 기본 표정:</code> X: 3.2%, Y: 67.2%, W: 8.0%, H: 25.0%<br>
+                            • <code>08 결의 표정:</code> X: 31.8%, Y: 67.2%, W: 8.0%, H: 25.0%<br>
+                            • <code>09~15 장비/의상 파츠:</code> Y: 67.2%, W: 6.5~7.4%, H: 25.0% 균등 배치
+                        </div>
+
+                        <div class="solution-box">
+                            <strong>⚡ 스마트 바운딩 박스 오토 트림(Auto Trim) 알고리즘:</strong><br>
+                            지정된 슬라이스 영역 내에서 실제 투명하지 않은 유효 픽셀(Alpha &gt; 10)만을 정밀 스캔하여 불필요한 투명 여백을 자동으로 잘라내고, 파츠의 알맹이 크기에
+                            맞춘 최적화된 투명 PNG(예: 89×172 px)로 자동 압축 저장합니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4 -->
+                <div class="flow-step-card audience-designer audience-director">
+                    <div class="flow-step-indicator">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #a855f7, #7e22ce);">4</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="flow-step-body">
+                        <div class="flow-step-header">
+                            <h3 class="flow-step-name">STEP 4: Live2D 샌드위치 조립 및 로비 리깅 검증</h3>
+                            <div class="step-tag-row">
+                                <span class="tag-pill purple">3D 샌드위치 Z-Index</span>
+                                <span class="tag-pill amber">속눈썹 독립 눈 깜빡임</span>
+                                <span class="tag-pill green">로비 터치 인터랙션</span>
+                            </div>
+                        </div>
+                        <p class="flow-step-desc">
+                            추출된 11종의 파츠를 스튜디오 엔진 및 인게임 캔버스 뷰포트에 조립합니다. 2D 평면 이미지지만 샌드위치 뎁스 구조를 통해 다리가 치마 안쪽으로 자연스럽게 들어가
+                            걷고 숨쉬는 3D 입체감을 구현합니다.
+                        </p>
+
+                        <div class="card" style="background: rgba(10, 14, 25, 0.7); margin: 12px 0;">
+                            <h4 style="font-size: 13.5px; font-weight: 800; color: #f8fafc; margin-bottom: 8px;">🍰 샌드위치
+                                계층(Z-Index) 구조 명세</h4>
+                            <div style="font-size: 12.5px; font-family: 'JetBrains Mono', monospace; line-height: 1.8;">
+                                <span style="color: #818cf8;">[Z: 1.0]</span> 배경 효과 / 마법진 후광<br>
+                                <span style="color: #c084fc;">[Z: 1.5]</span> 에테르 날개 / 백헤어 뒷머리
+                                (<code>sylvana_wings_cape.png</code>)<br>
+                                <span style="color: #f43f5e; font-weight: bold;">[Z: 1.8] 뒷치마 Back Skirt
+                                    (sylvana_bottom_skirt_back.png) ➔ 다리 뒤로 배치</span><br>
+                                <span style="color: #fbbf24; font-weight: bold;">[Z: 3.0] 체형 소체 다리/몸통
+                                    (sylvana_base_body.png) ➔ 치마 사이에 끼워짐</span><br>
+                                <span style="color: #fb7185; font-weight: bold;">[Z: 4.0] 앞치마 Front Skirt
+                                    (sylvana_bottom_skirt.png) ➔ 다리 앞쪽을 덮음</span><br>
+                                <span style="color: #f472b6;">[Z: 4.2]</span> 잎사귀 흉갑 상의
+                                (<code>sylvana_top_dress.png</code>)<br>
+                                <span style="color: #38bdf8;">[Z: 5.0]</span> 황금 티아라 / 머리장식
+                                (<code>sylvana_headgear.png</code>)<br>
+                                <span style="color: #facc15;">[Z: 6.0]</span> 주무기 장검
+                                (<code>sylvana_main_weapon.png</code>)<br>
+                                <span style="color: #4ade80;">[Z: 7.0]</span> 전면 대방패
+                                (<code>sylvana_sub_weapon.png</code>)
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div class="info-subbox">
+                                <strong>👁️ 얼굴 왜곡 없는 순수 눈 깜빡임:</strong><br>
+                                얼굴 전체를 Y축으로 찌그러뜨리는 구형 스쿼시 방식을 폐기하고, 상/하 속눈썹 오버레이 라인만 4.2초 주기로 0.15초간 부드럽게 닫혔다 열리는 독립
+                                애니메이션을 적용하여 고해상도 엘프 미모를 100% 보존합니다.
+                            </div>
+                            <div class="info-subbox">
+                                <strong>💖 로비 터치 3단 감정 반응:</strong><br>
+                                캐릭터 터치 좌표에 따라 <code>💖 설렘(하트눈/홍조)</code>, <code>💧 당황(식은땀)</code>,
+                                <code>💢 분노(빠직)</code> 이모티콘 팝업과 함께 신체 관절 바운스(Bounce) 물리 연출을 수행합니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5 -->
+                <div class="flow-step-card audience-director audience-designer">
+                    <div class="flow-step-indicator">
+                        <div class="step-circle" style="background: linear-gradient(135deg, #38bdf8, #0284c7);">5</div>
+                    </div>
+                    <div class="flow-step-body">
+                        <div class="flow-step-header">
+                            <h3 class="flow-step-name">STEP 5: 인게임 및 스튜디오 캐릭터 영구 등록</h3>
+                            <div class="step-tag-row">
+                                <span class="tag-pill blue">constants.js DB</span>
+                                <span class="tag-pill green">sd_asset_studio.html 프리셋</span>
+                                <span class="tag-pill amber">1초 원클릭 로드</span>
+                            </div>
+                        </div>
+                        <p class="flow-step-desc">
+                            추출된 파츠 파일들을 <code>assets/parts/</code> 디렉토리에 저장하고, 게임 엔진 상수
+                            파일(<code>js/constants.js</code>)의 <code>COMMANDER_DATABASE</code>에 정합 등록합니다.
+                        </p>
+
+                        <div class="code-container audience-director">
+                            <div class="code-header">
+                                <span>js/constants.js 캐릭터 등록 실무 코드 스니펫</span>
+                                <button class="btn-copy-code" onclick="copySnippet(this)">복사</button>
+                            </div>
+                            <pre class="code-body"><code>char_sylvana: {
+    id: "char_sylvana",
+    name: "실바나",
+    title: "성역의 여황 (신록의 성소)",
+    grade: "UR",
+    element: "nature",
+    role: "guardian",
+    avatar: "👑",
+    image: "assets/char_sylvana.jpg",                  // 1단계 8등신 전신 원화
+    standingIllust: "assets/char_sylvana.jpg",
+    sheet: "assets/ref_sylvana_sheet.jpg",             // 2단계 공식 01~15 SD 설정 시트
+    modularParts: {
+        useBaseBody: true,
+        mirrorWings: true,
+        frontCore: "assets/parts/sylvana_front_core.png",
+        baseBody: "assets/parts/sylvana_base_body.png",
+        exprNeutral: "assets/parts/sylvana_expr_neutral.png",
+        exprSerious: "assets/parts/sylvana_expr_serious.png",
+        headgear: "assets/parts/sylvana_headgear.png",
+        topDress: "assets/parts/sylvana_top_dress.png",
+        bottomSkirt: "assets/parts/sylvana_bottom_skirt.png",          // 앞치마 (Z: 4.0)
+        bottomSkirtBack: "assets/parts/sylvana_bottom_skirt_back.png", // 뒷치마 (Z: 1.8 샌드위치)
+        wingsCape: "assets/parts/sylvana_wings_cape.png",
+        mainWeapon: "assets/parts/sylvana_main_weapon.png",
+        subWeapon: "assets/parts/sylvana_sub_weapon.png",
+        underwear: null
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. 단계별 특이사항 및 빈출 문제점 & 해결 솔루션 -->
+        <section id="section-troubleshooting" class="section-block">
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="section-icon-badge">🚨</div>
+                    <div>
+                        <h2 class="section-title">3. 단계별 빈출 문제점 및 해결 솔루션 (Troubleshooting Bible)</h2>
+                        <p class="section-desc">실제 파이프라인 운용 중 발생했던 중대 결함과 현장 해결 조치 기록</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 이슈 1 -->
+            <div class="issue-card audience-ai audience-designer audience-director">
+                <div class="issue-card-header">
+                    <span class="issue-badge">ISSUE 01</span>
+                    <h3 class="issue-title">AI가 시트 박스 안에 텍스트 라벨("1. Skirt", "Main Weapon")을 직접 그려넣는 결함</h3>
+                </div>
+                <div class="issue-content">
+                    • <strong>발생 현상:</strong> AI에게 설정 시트를 지시하면 각 파츠 박스 상단에 영문 설명 텍스트를 인쇄함. 슬라이서가 해당 영역을 자를 때 글자가 파츠에 잘려
+                    붙어 리깅 화면에서 캐릭터 몸 위에 'Skirt' 글자가 둥둥 떠다님.<br>
+                    • <strong>근본 원인:</strong> AI 학습 데이터셋의 설정 시트(Concept Art Sheet)에 텍스트 주석이 많아 이를 필수 구성 요소로 오인함.<br>
+                    • <strong>해결 솔루션:</strong><br>
+                    1) 프롬프트에
+                    <code>[CRITICAL: ZERO TEXT, ABSOLUTELY NO LETTERS, NO WORDS, NO LABELS INSIDE BOXES]</code>를 대문자로
+                    최상단 강조.<br>
+                    2) 템플릿의 박스 헤더 영역(38px 높이)을 슬라이스 좌표에서 영구 제외하는 <strong>Safe Margin Padding</strong> 도입.
+                </div>
+            </div>
+
+            <!-- 이슈 2 -->
+            <div class="issue-card audience-ai audience-designer">
+                <div class="issue-card-header">
+                    <span class="issue-badge">ISSUE 02</span>
+                    <h3 class="issue-title">크로마키 배경과 캐릭터 복장 색상이 겹쳐 투명 구멍(Hole)이 뚫리는 결함</h3>
+                </div>
+                <div class="issue-content">
+                    • <strong>발생 현상:</strong> 숲의 종족 실바나의 에메랄드 나뭇잎 드레스와 뾰족한 엘프 귀가 표준 그린 스크린(#00FF00)과 함께 투명화되어 캐릭터 몸에 벌집
+                    구멍이 뚫림.<br>
+                    • <strong>근본 원인:</strong> RGB 색차 기반 투명화 시 의상의 그린 채널 값이 크로마키 임계값(Threshold)에 걸려 지워짐.<br>
+                    • <strong>해결 솔루션:</strong><br>
+                    1) <strong>종족별 동적 크로마키 시스템 구축:</strong> 숲의 종족은 무조건 마젠타(<code>#FF00FF</code>) 배경으로 강제 생성.<br>
+                    2) 스튜디오 슬라이서에 <strong>RGB 거리 기반 디스필(Despill) 가중치 필터</strong>를 탑재하여 녹색/자홍색 반사광을 부드럽게 복원.
+                </div>
+            </div>
+
+            <!-- 이슈 3 -->
+            <div class="issue-card audience-designer audience-director">
+                <div class="issue-card-header">
+                    <span class="issue-badge">ISSUE 03</span>
+                    <h3 class="issue-title">AI가 시트의 박스 크기와 화면 비율을 제멋대로 왜곡하는 문제</h3>
+                </div>
+                <div class="issue-content">
+                    • <strong>발생 현상:</strong> 턴어라운드 박스를 너무 넓게 그리거나 파츠 박스를 작게 몰아 그려서, 고정 좌표 슬라이싱 시 파츠의 절반이 잘려나감.<br>
+                    • <strong>근본 원인:</strong> 텍스트 프롬프트만으로는 2048×1152 캔버스 내에서의 픽셀 그리드 배치를 정확히 인지하지 못함.<br>
+                    • <strong>해결 솔루션:</strong><br>
+                    1) <strong>공식 규격 틀(Template PNG) 강제 첨부:</strong> 01~15번 구획선과 번호가 인쇄된 투명 PNG를 생성 도구(나노바나나 등)에
+                    이미지-to-이미지 제2 레퍼런스로 동시 첨부.<br>
+                    2) <strong>스마트 바운딩 박스 오토 트림:</strong> AI가 살짝 어긋나게 그리더라도 알파 픽셀의 외곽선을 자동 추적하여 완벽한 크롭 보정.
+                </div>
+            </div>
+
+            <!-- 이슈 4 -->
+            <div class="issue-card audience-designer">
+                <div class="issue-card-header">
+                    <span class="issue-badge">ISSUE 04</span>
+                    <h3 class="issue-title">치마와 다리의 3D 클리핑(관통) 및 걷기 애니메이션 불가 문제</h3>
+                </div>
+                <div class="issue-content">
+                    • <strong>발생 현상:</strong> 치마를 한 덩어리로 잘라 입히면 다리가 앞으로 나올 때 치마 앞면을 뚫고 튀어나오며, 치마 뒷면이 없어 다리 사이가 텅 비어
+                    보임.<br>
+                    • <strong>근본 원인:</strong> 2D 평면 레이어 순서상 소체(다리)가 치마보다 앞에 있으면 치마 전체가 가려지고, 뒤에 있으면 치마가 다리를 100%
+                    덮어버림.<br>
+                    • <strong>해결 솔루션:</strong><br>
+                    1) <strong>11번 앞치마(Front) & 15번 뒷치마(Back) 물리적 분리 생성.</strong><br>
+                    2) <strong>3D 샌드위치 Z-Index 결합:</strong> <code>뒷치마(Z:1.8)</code> ➔ <code>소체 다리(Z:3.0)</code> ➔
+                    <code>앞치마(Z:4.0)</code> 구조를 적용하여 소체 다리가 치마 안쪽 통에 쏙 들어간 완벽한 3D 입체감 달성.
+                </div>
+            </div>
+
+            <!-- 이슈 5 -->
+            <div class="issue-card audience-ai audience-designer">
+                <div class="issue-card-header">
+                    <span class="issue-badge">ISSUE 05</span>
+                    <h3 class="issue-title">Live2D 눈 깜빡임 시 캐릭터 얼굴이 찌그러지는 미모 훼손 결함</h3>
+                </div>
+                <div class="issue-content">
+                    • <strong>발생 현상:</strong> 눈을 감길 때 얼굴 부위를 세로로 스쿼시(압축)하면 코와 입, 턱선, 귀까지 함께 눌려 호러 영화 같은 얼굴 왜곡이 일어남.<br>
+                    • <strong>근본 원인:</strong> 얼굴 전체 텍스처를 단일 메쉬로 취급하여 변형을 가했기 때문.<br>
+                    • <strong>해결 솔루션:</strong><br>
+                    얼굴 베이스와 턱선은 완전히 고정(Fixed)하고, 오버레이 속눈썹(Eye Lash) 라인만 0.15초간 살짝 내려앉았다 올라오는 <strong>'독립 속눈썹 라인
+                        드로우'</strong> 기법을 적용하여 원화 고유의 수려한 미모를 100% 보존.
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 4. 독자별 체크포인트 & 가이드라인 -->
+        <section id="section-roles" class="section-block">
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="section-icon-badge">👥</div>
+                    <div>
+                        <h2 class="section-title">4. 열람 대상별 실무 체크포인트 & 협업 가이드</h2>
+                        <p class="section-desc">AI, 그래픽 디자이너, 총괄 디렉터 각 주체별 역할과 확인 사항</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-3">
+
+                <!-- 🤖 AI 프로그램 관점 -->
+                <div class="card audience-ai" style="border-top: 4px solid #6366f1;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">🤖</span>
+                        <h3 style="font-size: 16px; font-weight: 800; color: #818cf8;">AI 프로그램 (Gemini, ChatGPT, Grok)
+                        </h3>
+                    </div>
+                    <ul style="font-size: 12.5px; color: #cbd5e1; line-height: 1.8; padding-left: 16px;">
+                        <li><strong>단일창 복사 최적화:</strong> 나노바나나 등 단일 프롬프트 입력창을 위해 포지티브와 네거티브, 전신 보장 수식어를 결합한 All-in-One
+                            스트링 산출.</li>
+                        <li><strong>텍스트 금지 트리거:</strong> 시트 프롬프트에 <code>no text, no letters, no labels</code>를 필수 가드레일로
+                            자동 주입할 것.</li>
+                        <li><strong>크로마키 자동 판별:</strong> 캐릭터 설명에 '나무, 잎, 에메랄드, 그린, 자연'이 포함되면 자동으로
+                            마젠타(<code>#FF00FF</code>) 크로마키 프롬프트로 스위칭할 것.</li>
+                        <li><strong>해부학 비율 엄수:</strong> 8등신 원화는 7.0~8.0등신, SD 시트는 2.8~3.0등신 키워드를 명확히 분리하여 혼합 프롬프트 방지.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 🎨 현업 그래픽 디자이너 관점 -->
+                <div class="card audience-designer" style="border-top: 4px solid #ec4899;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">🎨</span>
+                        <h3 style="font-size: 16px; font-weight: 800; color: #f472b6;">현업 2D 그래픽 디자이너 (원화가 / 스파인 리거)
+                        </h3>
+                    </div>
+                    <ul style="font-size: 12.5px; color: #cbd5e1; line-height: 1.8; padding-left: 16px;">
+                        <li><strong>AI 생성물은 '1차 베이스 소스':</strong> AI가 생성한 파츠를 그대로 쓰기보다, 스튜디오 슬라이스 후 클립스튜디오/포토샵에서
+                            <strong>엣지 안티앨리어싱 정리 및 관절 피벗(Pivot) 리터칭</strong> 진행 권장.</li>
+                        <li><strong>뒷치마와 소체의 관절 블리딩:</strong> 다리를 크게 벌리는 모션 시 소체 허벅지 밑바탕이 드러나므로, 소체 04번 박스에 속옷/언더웨어가 깨끗이
+                            채워져 있는지 검수.</li>
+                        <li><strong>좌우 대칭 파츠 효율화:</strong> 날개나 견갑 등 좌우 대칭인 파츠는 1쪽만 생성하여 <code>mirrorWings: true</code>로
+                            뒤집어 쓰는 것이 용량/해상도상 유리.</li>
+                        <li><strong>표정 파츠의 크기 일관성:</strong> 05~08번 표정 박스의 눈/입 위치가 소체 얼굴과 1:1 오버레이될 수 있도록 얼굴 윤곽선 비율 확인.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 👤 작성자 본인 / 총괄 디렉터 관점 -->
+                <div class="card audience-director" style="border-top: 4px solid #10b981;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                        <span style="font-size: 20px;">👤</span>
+                        <h3 style="font-size: 16px; font-weight: 800; color: #34d399;">총괄 디렉터 / 개발자 (Project Director)
+                        </h3>
+                    </div>
+                    <ul style="font-size: 12.5px; color: #cbd5e1; line-height: 1.8; padding-left: 16px;">
+                        <li><strong>리소스 단가 및 일정 단축:</strong> 기존 외주/원화 제작 기간 대비 <strong>캐릭터 1인당 제작 시간을 90% 이상
+                                단축</strong>하여 주당 5~10인의 지휘관 업데이트 파이프라인 확보.</li>
+                        <li><strong>품질 검수(QC) 5대 필수 항목:</strong><br>
+                            1. 전신 발끝 잘림 없음?<br>
+                            2. 텍스트 라벨 침범 없음?<br>
+                            3. 앞/뒷치마 분리 완료?<br>
+                            4. 소체 관절 결손 없음?<br>
+                            5. <code>constants.js</code> 데이터베이스 정상 등록?
+                        </li>
+                        <li><strong>지적재산권(IP) 안전성:</strong> 독창적인 5대 종족 기획과 고유 세계관 복식 규정을 기반으로 프롬프트를 통제하여 타 게임 저작권 침해 방지.
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 5. AI 전문가 관점의 추가 제언 및 미래 로드맵 -->
+        <section id="section-insights" class="section-block">
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="section-icon-badge">💡</div>
+                    <div>
+                        <h2 class="section-title">5. AI 전문가 관점의 추가 제언 (AI Specialist Insights & Future Roadmap)</h2>
+                        <p class="section-desc">엔지니어링 시각에서 바라본 차기 파이프라인 고도화 및 품질 혁신 제안 5선</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 제언 1 -->
+            <div class="agent-insight-card">
+                <span class="insight-badge">제언 1 • 자동화 & 재현성 극대화</span>
+                <h3>ComfyUI 기반 ControlNet OpenPose + IP-Adapter 로컬 완전 고정 워크플로우 도입</h3>
+                <p>
+                    현재 웹 기반 LLM/나노바나나를 활용한 생성 방식은 신속한 아이디어 스케치에는 탁월하나, 매 생성 시 미세한 시드(Seed) 편차와 비결정적(Non-deterministic)
+                    오차가 존재합니다.<br>
+                    <strong>차기 단계 제언:</strong> 로컬 환경에 <strong>ComfyUI</strong>를 구축하고, 2048×1152 템플릿의 박스 좌표를
+                    <code>ControlNet Tile/Canny</code>로 하드 픽스(Hard Fix)한 뒤 <code>IP-Adapter</code>를 통해 8등신 원화의 얼굴/의상 특징을
+                    100% 주입하는 <strong>'1-Click 시트 자동 생성 노드'</strong>로 전환할 것을 제안합니다. 이렇게 하면 텍스트 오염 및 비율 왜곡이 기술적으로 0%가
+                    됩니다.
+                </p>
+            </div>
+
+            <!-- 제언 2 -->
+            <div class="agent-insight-card">
+                <span class="insight-badge">제언 2 • 전문 툴킷 연동성</span>
+                <h3>웹 캔버스 슬라이서에서 'Spine 2D / Live2D Cubism 호환 멀티레이어 PSD 자동 익스포트' 구축</h3>
+                <p>
+                    현재는 슬라이스된 파츠들을 각각의 PNG 파일로 내려받아 캔버스에서 조립하고 있습니다.<br>
+                    <strong>차기 단계 제언:</strong> <code>sd_asset_studio.html</code>에 <code>ag-psd</code> 라이브러리를 결합하여,
+                    <strong>피벗 포인트(Pivot)와 Z-Index 레이어 순서, 마스크가 온전히 보존된 포토샵 PSD 파일로 즉시 묶어서 내보내는(Export PSD) 기능</strong>을
+                    탑재할 것을 권장합니다. 현업 원화가나 스파인 리거가 해당 PSD를 열어 10분 만에 뼈대(Bone)를 심고 메쉬를 생성할 수 있어 외주 협업 속도가 비약적으로 향상됩니다.
+                </p>
+            </div>
+
+            <!-- 제언 3 -->
+            <div class="agent-insight-card">
+                <span class="insight-badge">제언 3 • 비주얼 퀄리티 혁신</span>
+                <h3>딥러닝 기반 Alpha Matting (BiRefNet / RMBG-2.0) 도입을 통한 반투명 베일 및 헤어 엣지 보존</h3>
+                <p>
+                    단색 크로마키(Green/Magenta) 키잉은 단단한 외곽선 추출에는 효율적이지만, <strong>UR/U 등급 지휘관의 핵심 매력 요소인 '반투명 실크 베일', '미세한
+                        머리카락 가닥', '스타킹 시스루'의 알파 블렌딩</strong>에서 녹색/자홍색 색 번짐(Color Bleed)이 미세하게 남는 한계가 있습니다.<br>
+                    <strong>차기 단계 제언:</strong> 단순 색차 투명화 대신 최신 딥러닝 알파 매팅 모델(<code>BiRefNet</code> 또는
+                    <code>RMBG-2.0</code>)을 파이프라인 중간 단계에 배치하여, <strong>머리카락 한 올과 반투명 쉬폰 레이어까지 100% 투명 알파 채널로 살려내는 울트라
+                        하이엔드 퀄리티 컷아웃</strong>을 구현할 것을 제안합니다.
+                </p>
+            </div>
+
+            <!-- 제언 4 -->
+            <div class="agent-insight-card">
+                <span class="insight-badge">제언 4 • 캐릭터 연속성 보장</span>
+                <h3>캐릭터 고유 LoRA(Low-Rank Adaptation) 또는 FaceID 임베딩을 통한 원화-SD 일체화</h3>
+                <p>
+                    한 캐릭터의 8등신 원화와 SD 시트, 차후 추가될 '스킨(Costume)'이나 '전투 이펙트 컷인' 간에 동일 인물이라는 인상을 100% 유지하는 것이 서브컬처 팬덤의
+                    핵심입니다.<br>
+                    <strong>차기 단계 제언:</strong> 대표 원화 1장이 확정되면 해당 캐릭터의 페이스/헤어 특징을 10초 만에 추출하는
+                    <code>InstantID / FaceID</code> 모델을 파이프라인에 결합하여, 표정 바리에이션이나 추가 포즈를 생성할 때 작화 붕괴 없이 동일 지휘관의 외모를 영구
+                    유지하도록 제안합니다.
+                </p>
+            </div>
+
+            <!-- 제언 5 -->
+            <div class="agent-insight-card">
+                <span class="insight-badge">제언 5 • 실무 협업 모델 정립</span>
+                <h3>'AI = 초고속 파츠 소스 공장' + '전문 디자이너 = 피벗/물리 메쉬 마스터' 하이브리드 프로덕션</h3>
+                <p>
+                    AI로 모든 것을 끝내려 하기보다, <strong>"AI는 11종의 초고해상도 원화 소스를 단 3분 만에 공급하고, 전문 디자이너는 관절 피벗 설정과 가슴/머리카락 흔들림 물리
+                        연산(Physics)에만 집중"</strong>하는 역할 분담 체계를 정립해야 합니다.<br>
+                    이 하이브리드 모델이 확립되면 소규모 인디 팀이라도 대형 게임사(원신, 승리의 여신 니케 등)급의 압도적인 2D Live2D 퀄리티와 물량을 동시에 달성할 수 있습니다.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- 6. 부록 및 협의 안건 -->
+        <section class="section-block">
+            <div class="section-header">
+                <div class="section-title-wrap">
+                    <div class="section-icon-badge">📋</div>
+                    <div>
+                        <h2 class="section-title">6. 내부/외부 실무자 회의용 핵심 안건 5선 (Discussion Topics)</h2>
+                        <p class="section-desc">본 문서를 토대로 유관 부서 및 협업 파트너와 결정해야 할 주요 아젠다</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; flex-direction: column; gap: 14px; font-size: 13.5px; line-height: 1.8;">
+                    <div
+                        style="background: rgba(14, 21, 38, 0.7); border-left: 3px solid #6366f1; padding: 12px 16px; border-radius: 0 6px 6px 0;">
+                        <strong>안건 1. 공식 시트 템플릿의 파츠 슬롯 확장 여부:</strong><br>
+                        현재 11~15번(상의, 앞치마, 뒷치마, 무기) 체제에서 <strong>'신발/부츠 분리 슬롯'</strong>과 <strong>'망토 독립 슬롯'</strong>을
+                        추가로 16~18번으로 확장할 것인지 여부 결정.
+                    </div>
+                    <div
+                        style="background: rgba(14, 21, 38, 0.7); border-left: 3px solid #10b981; padding: 12px 16px; border-radius: 0 6px 6px 0;">
+                        <strong>안건 2. 크로마키 배경 vs 투명 PNG 직접 출력 방식의 품질 비교 평가:</strong><br>
+                        최신 모델(Flux, SDXL 투명 로라 등)의 네이티브 알파 투명화 품질과 현재의 크로마키 알파 키잉 방식 중 어느 쪽이 프로덕션 라인에 더 안정적인지 실증 비교.
+                    </div>
+                    <div
+                        style="background: rgba(14, 21, 38, 0.7); border-left: 3px solid #f59e0b; padding: 12px 16px; border-radius: 0 6px 6px 0;">
+                        <strong>안건 3. Live2D 메쉬 물리 흔들림(바운스) 파라미터 표준화:</strong><br>
+                        지휘관의 바스트 볼륨(E~H컵) 및 헤어 길이에 따른 호흡 주기(Idle Breath Rate)와 터치 반응 물리 계수를 통일된 테이블 규격으로 문서화할 것인지 협의.
+                    </div>
+                    <div
+                        style="background: rgba(14, 21, 38, 0.7); border-left: 3px solid #ec4899; padding: 12px 16px; border-radius: 0 6px 6px 0;">
+                        <strong>안건 4. 디자이너 리터칭 공수의 표준 가이드라인 확립:</strong><br>
+                        AI 생성물에 대해 디자이너가 투입할 리터칭 범위(1단계: 엣지만 정리 15분 / 2단계: 선화 및 음영 재터치 1시간 / 3단계: 완전 수작업 재드로잉) 가이드라인 확정.
+                    </div>
+                    <div
+                        style="background: rgba(14, 21, 38, 0.7); border-left: 3px solid #38bdf8; padding: 12px 16px; border-radius: 0 6px 6px 0;">
+                        <strong>안건 5. 인게임 캔버스 렌더러와 Spine 2D 엔진 간의 전환 로드맵:</strong><br>
+                        현재 자체 HTML5 Canvas 기반 가경량 리거에서 향후 Spine 2D WebGL 런타임으로 전면 교체할 시점 및 에셋 규격 승계 계획 수립.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // 독자 맞춤 뷰 필터링 스크립트
+        function filterAudience(role) {
+            // 버튼 액티브 스타일 전환
+            const btns = document.querySelectorAll('.btn-filter-role');
+            btns.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const allElements = document.querySelectorAll('.audience-ai, .audience-designer, .audience-director');
+
+            if (role === 'all') {
+                allElements.forEach(el => {
+                    el.classList.remove('dimmed-section');
+                    el.style.opacity = '1';
+                });
+                return;
+            }
+
+            allElements.forEach(el => {
+                if (el.classList.contains('audience-' + role)) {
+                    el.classList.remove('dimmed-section');
+                    el.style.opacity = '1';
+                } else {
+                    el.classList.add('dimmed-section');
+                    el.style.opacity = '0.35';
+                }
+            });
+        }
+
+        // 코드 복사 헬퍼
+        function copySnippet(btn) {
+            const pre = btn.parentElement.nextElementSibling;
+            const codeText = pre.innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = '복사 완료! ✓';
+                btn.style.background = '#10b981';
+                btn.style.color = '#fff';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+
+</html>
