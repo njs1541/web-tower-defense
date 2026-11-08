@@ -48,36 +48,18 @@ function loadData() {
             if (USER_DATA.commanderPityCount === undefined) USER_DATA.commanderPityCount = 0;
             if (!USER_DATA.stageFirstClears) USER_DATA.stageFirstClears = {};
             if (!USER_DATA.characters || Object.keys(USER_DATA.characters).length === 0) {
-                USER_DATA.characters = {
-                    char_titania: { id: "char_titania", star: 5, sockets: 4, equippedRunes: ["rune_void_collapse", "rune_spell_armageddon"] },
-                    char_liana: { id: "char_liana", star: 1, sockets: 1, equippedRunes: ["rune_flame"] },
-                    char_elena: { id: "char_elena", star: 1, sockets: 1, equippedRunes: ["rune_spell_gold"] }
-                };
+                USER_DATA.characters = getDefaultStarterCharacters();
             }
             if (!USER_DATA.characterDeck || USER_DATA.characterDeck.length === 0) {
-                USER_DATA.characterDeck = ["char_titania", "char_liana", "char_elena"];
+                USER_DATA.characterDeck = ["char_liana", "char_elena"];
             }
             if (!USER_DATA.runes || USER_DATA.runes.length === 0) {
-                USER_DATA.runes = ["rune_void_collapse", "rune_spell_armageddon", "rune_flame", "rune_spell_gold"];
+                USER_DATA.runes = ["rune_flame", "rune_spell_gold"];
             }
 
-            // [임시 테스트용] 신규 U등급 지휘관 '티타니아(char_titania)' 자동 지급 및 1번 보좌관(대장) 편성
-            if (!USER_DATA.characters.char_titania) {
-                USER_DATA.characters.char_titania = {
-                    id: "char_titania",
-                    star: 5,
-                    sockets: 4,
-                    equippedRunes: ["rune_void_collapse", "rune_spell_armageddon"]
-                };
-            }
-            if (!USER_DATA.runes.includes("rune_void_collapse")) USER_DATA.runes.push("rune_void_collapse");
-            if (!USER_DATA.runes.includes("rune_spell_armageddon")) USER_DATA.runes.push("rune_spell_armageddon");
-            if (!USER_DATA.characterDeck.includes("char_titania")) {
-                USER_DATA.characterDeck.unshift("char_titania");
-                if (USER_DATA.characterDeck.length > 3) {
-                    USER_DATA.characterDeck = USER_DATA.characterDeck.slice(0, 3);
-                }
-            }
+            // [v0.44.0] 티타니아(U) 로드 시 강제 지급 제거 -> QA 치트 패널(Ctrl+J)의 qaGrantTitania()로 이전
+            // [v0.44.0] 보유 수량을 초과하여 중복 장착된 룬 정리 (구버전 세이브 호환)
+            sanitizeRuneEquips();
             saveData();
 
             console.log("저장된 데이터 로드 완료 (v0.22.0 호환):", USER_DATA);
@@ -102,16 +84,62 @@ function initDefaultData() {
     USER_DATA.levels = { 'ranged': 1, 'melee': 1 };
     USER_DATA.talents = { startGold: 0, maxHp: 0, towerPower: 0 };
 
-    // 기본 캐릭터 및 룬 세팅 (임시 테스트용 티타니아 기본 포함)
-    USER_DATA.characters = {
-        char_titania: { id: "char_titania", star: 5, sockets: 4, equippedRunes: ["rune_void_collapse", "rune_spell_armageddon"] },
-        char_liana: { id: "char_liana", star: 1, sockets: 1, equippedRunes: ["rune_flame"] },
-        char_elena: { id: "char_elena", star: 1, sockets: 1, equippedRunes: ["rune_spell_gold"] }
-    };
-    USER_DATA.characterDeck = ["char_titania", "char_liana", "char_elena"];
-    USER_DATA.runes = ["rune_void_collapse", "rune_spell_armageddon", "rune_flame", "rune_spell_gold"];
+    // 기본 캐릭터 및 룬 세팅 (v0.44.0: 티타니아 기본 지급 제거 -> QA 치트 패널에서 지급)
+    USER_DATA.characters = getDefaultStarterCharacters();
+    USER_DATA.characterDeck = ["char_liana", "char_elena"];
+    USER_DATA.runes = ["rune_flame", "rune_spell_gold"];
 
     saveData();
+}
+
+/**
+ * [v0.44.0] 신규 유저 기본 지급 지휘관 (C 리아나 + UC 엘레나)
+ */
+function getDefaultStarterCharacters() {
+    return {
+        char_liana: { id: "char_liana", star: 1, starExp: 0, sockets: 1, equippedRunes: ["rune_flame"] },
+        char_elena: { id: "char_elena", star: 1, starExp: 0, sockets: 1, equippedRunes: ["rune_spell_gold"] }
+    };
+}
+
+/**
+ * [v0.44.0] 룬 보유 수량 조회
+ */
+function getRuneOwnedCount(runeId) {
+    return (USER_DATA.runes || []).filter(id => id === runeId).length;
+}
+
+/**
+ * [v0.44.0] 전체 지휘관 소켓에 장착된 특정 룬 수량 조회
+ * @param {string} runeId
+ * @param {Object} [exclude] - 제외할 소켓 { charId, socketIndex } (교체 장착 시 기존 소켓 제외)
+ */
+function getRuneEquippedCount(runeId, exclude = null) {
+    let count = 0;
+    for (const [cId, c] of Object.entries(USER_DATA.characters || {})) {
+        if (!c || !Array.isArray(c.equippedRunes)) continue;
+        c.equippedRunes.forEach((rId, idx) => {
+            if (rId !== runeId) return;
+            if (exclude && exclude.charId === cId && exclude.socketIndex === idx) return;
+            count++;
+        });
+    }
+    return count;
+}
+
+/**
+ * [v0.44.0] 보유 수량을 초과하여 장착된 룬을 소켓에서 해제 (1개 룬 무한 중복 장착 방지)
+ */
+function sanitizeRuneEquips() {
+    const usage = {};
+    for (const c of Object.values(USER_DATA.characters || {})) {
+        if (!c || !Array.isArray(c.equippedRunes)) continue;
+        c.equippedRunes = c.equippedRunes.map(rId => {
+            if (!rId) return rId;
+            usage[rId] = (usage[rId] || 0) + 1;
+            return usage[rId] > getRuneOwnedCount(rId) ? null : rId;
+        });
+    }
 }
 
 // 데이터 저장
@@ -451,6 +479,35 @@ function calculateDeckTowerStocks() {
 }
 
 /**
+ * [v0.44.0 New] 특정 지휘관이 제공하는 특정 타워의 스톡 수량 (성급 보너스 포함)
+ */
+function getCommanderTowerStock(charId, towerType) {
+    const charInfo = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[charId] : null;
+    if (!charInfo || isHeroGradeCommander(charInfo) || !charInfo.towerStock) return 0;
+    const base = charInfo.towerStock[towerType] || 0;
+    if (base <= 0) return 0;
+    const userChar = (USER_DATA.characters && USER_DATA.characters[charId]) || { star: 1 };
+    return base + Math.max(0, (userChar.star || 1) - 1);
+}
+
+/**
+ * [v0.44.0 New] 새로 설치할 타워의 관장 지휘관 결정
+ * - 덱 순서대로, 해당 타워 스톡에 여유가 있는 지휘관에게 귀속 (룬 패시브/환급율 결정용)
+ * @returns {string|null} charId
+ */
+function assignTowerOwner(towerType) {
+    if (!Array.isArray(USER_DATA.characterDeck)) return null;
+    const cells = (typeof board !== 'undefined') ? board : [];
+    for (const cId of USER_DATA.characterDeck) {
+        const stock = getCommanderTowerStock(cId, towerType);
+        if (stock <= 0) continue;
+        const placed = cells.filter(c => c.tower === towerType && c.towerOwner === cId).length;
+        if (placed < stock) return cId;
+    }
+    return null;
+}
+
+/**
  * UR 이상(UR/U) 히어로 유닛 지휘관 여부 판정 (v0.41.0 New)
  * - UR/U 지휘관은 타워 스톡을 제공하지 않고 전장에 직접 강림한다.
  */
@@ -549,17 +606,27 @@ function calculateDeckSynergies() {
             result.bonusStats.extraDamageRatio += 0.10;
         }
 
-        // 활성화 가능성 있는 다른 모든 원소/역할군에 +1 조커 부스트
-        for (const eKey of Object.keys(SYNERGY_DATA.elements)) {
-            if (eKey !== 'void' && result.elementCounts[eKey] > 0) {
-                result.elementCounts[eKey] += 1;
+        // [v0.44.0 밸런스] 조커 부스트는 덱에서 가장 많은 원소 1종 + 역할군 1종에만 +1 적용
+        //  (기존: 존재하는 모든 원소/역할군 +1 -> 시너지 6개 동시 활성으로 덱빌딩 고민 소멸)
+        //  동률일 경우 덱 순서상 먼저 등장한 태그 우선
+        const pickTopKey = (counts, validKeys, field) => {
+            let bestKey = null;
+            let bestCount = 0;
+            for (const cId of USER_DATA.characterDeck) {
+                const cb = CHARACTER_DATA[cId];
+                const key = cb && cb[field];
+                if (!key || key === 'void' || !validKeys.includes(key)) continue;
+                if ((counts[key] || 0) > bestCount) {
+                    bestCount = counts[key];
+                    bestKey = key;
+                }
             }
-        }
-        for (const rKey of Object.keys(SYNERGY_DATA.roles)) {
-            if (result.roleCounts[rKey] > 0) {
-                result.roleCounts[rKey] += 1;
-            }
-        }
+            return bestKey;
+        };
+        const topElement = pickTopKey(result.elementCounts, Object.keys(SYNERGY_DATA.elements), 'element');
+        const topRole = pickTopKey(result.roleCounts, Object.keys(SYNERGY_DATA.roles), 'role');
+        if (topElement) result.elementCounts[topElement] += 1;
+        if (topRole) result.roleCounts[topRole] += 1;
     }
 
     // 3. 원소(Element) 시너지 판정 및 버프 합산
@@ -784,6 +851,15 @@ function equipRuneToCharacter(charId, socketIndex, runeId) {
     // 유효한 소켓 인덱스인지 확인
     if (socketIndex >= char.sockets) return false;
 
+    // [v0.44.0] 보유 수량 검사: 같은 룬은 보유한 개수만큼만 장착 가능
+    const owned = getRuneOwnedCount(runeId);
+    const equippedElsewhere = getRuneEquippedCount(runeId, { charId, socketIndex });
+    if (equippedElsewhere >= owned) {
+        const rName = (RUNE_DATA[runeId] && RUNE_DATA[runeId].name) || runeId;
+        alert(`⚠️ 장착 가능한 '${rName}'이(가) 없습니다! (보유 ${owned}개 / 다른 소켓 장착 ${equippedElsewhere}개)`);
+        return false;
+    }
+
     char.equippedRunes[socketIndex] = runeId;
     saveData();
     return true;
@@ -833,7 +909,7 @@ function getEquippedSpellRunes() {
  * 현재 출전 덱에 편성된 지휘관들이 장착 중인 속성(패시브) 룬 효과 집계 (v0.24.0 New)
  * @returns {Object} 패시브 효과 집계 객체
  */
-function getActiveRunePassives() {
+function getActiveRunePassives(ownerCharId) {
     const passives = {
         burn: false,          // 화염 도트 여부
         burnDuration: 3,
@@ -854,7 +930,15 @@ function getActiveRunePassives() {
 
     if (!USER_DATA.characterDeck || !Array.isArray(USER_DATA.characterDeck)) return passives;
 
-    for (const charId of USER_DATA.characterDeck) {
+    // [v0.44.0] 기획서 3.5 정합: 속성 룬은 '장착한 지휘관이 관장하는 타워 / 강림한 본체'에만 적용
+    //  - ownerCharId(문자열) 지정 시 해당 지휘관의 룬만 집계
+    //  - 미지정(undefined) 시 덱 전체 집계 (UI 요약용 하위 호환)
+    //  - null (관장 지휘관 없음) 이면 빈 패시브 반환
+    if (ownerCharId === null) return passives;
+    const sourceIds = (typeof ownerCharId === 'string') ? [ownerCharId] : USER_DATA.characterDeck;
+
+    for (const charId of sourceIds) {
+        if (!USER_DATA.characterDeck.includes(charId)) continue;
         const char = USER_DATA.characters && USER_DATA.characters[charId];
         if (!char || !char.equippedRunes) continue;
 

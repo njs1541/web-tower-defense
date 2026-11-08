@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.43.0";
+const GAME_VERSION = "v0.45.0";
 const boardSize = 20;
 
 // 기반 건설(Base Building) 비용 및 규칙 설정
@@ -35,6 +35,62 @@ const ENEMY_BALANCE = {
     crawlerHpMulti: 1.5,// 크롤러 체력 배율
     flyingHpMulti: 0.8  // 비행 체력 배율
 };
+
+/**
+ * [v0.44.0 New] 웨이브 구성 및 진행 설정
+ * - 웨이브는 라운드 시작 전에 미리 확정(nextWavePlan)되어 정비 시간에 예고된다.
+ */
+const WAVE_CONFIG = {
+    baseCount: 6,           // 일반 웨이브 기본 마릿수
+    countPerRound: 1.5,     // 라운드당 증가 마릿수
+    bossEscortRatio: 0.5,   // 보스 라운드 호위병 수 = 일반 웨이브 마릿수 × 비율
+    // 보스 등장 순서 (10R: 지상 → 20R: 도약 → 30R: 비행, 이후 순환)
+    bossRotation: ['boss_ground', 'boss_leaping', 'boss_flying'],
+    waveClearTpBase: 2,     // 웨이브 클리어 기본 TP 보상
+    waveClearTpPerRounds: 5 // N라운드마다 웨이브 클리어 TP +1
+};
+
+/**
+ * [v0.44.0 New] 마나(MP) 설정 - 기획서 3.1 "시간 경과 충전 (초당 +2)"
+ */
+const MP_CONFIG = {
+    regenPerSec: 2,   // 전투 중 초당 자연 충전량
+    perKill: 2        // 처치 시 획득량
+};
+
+/**
+ * [v0.44.0 New] 라운드 스케일링 고정 피해 설정
+ * - 히어로/룬/스펠의 피해를 '현재 라운드 일반 몬스터 기준 체력'의 배수로 계산하여
+ *   초반 과잉 화력 및 후반 무력화를 동시에 방지한다.
+ * - damage = max(min, roundBaseHp × hpMultiple)
+ */
+const SCALED_DAMAGE_CONFIG = {
+    heroU: { hpMultiple: 3.0, min: 10 },        // U 히어로 1회 요격
+    heroUR: { hpMultiple: 2.0, min: 6 },        // UR 히어로 1회 요격
+    voidCollapse: { hpMultiple: 2.0, min: 5 },  // 시공 붕괴 룬 폭발
+    thunder: { hpMultiple: 1.5, min: 8 },       // 천벌의 낙뢰 스펠
+    armageddon: { hpMultiple: 4.0, min: 20 }    // 아마겟돈 궁극기
+};
+
+/**
+ * 현재 라운드/스테이지 기준 일반 몬스터 기본 체력 (스케일링 피해 계산용)
+ */
+function getRoundBaseHp(r) {
+    const rr = Math.max(1, r || 1);
+    const stage = (typeof STAGE_DATA !== 'undefined' && typeof currentStage !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : { hpMulti: 1.0 };
+    return Math.floor(ENEMY_BALANCE.baseHp * Math.pow(ENEMY_BALANCE.hpGrowthRate, rr - 1)) * (stage.hpMulti || 1.0);
+}
+
+/**
+ * 스케일링 피해 계산 헬퍼
+ * @param {string} key - SCALED_DAMAGE_CONFIG 키
+ */
+function getScaledDamage(key, r) {
+    const cfg = SCALED_DAMAGE_CONFIG[key];
+    if (!cfg) return 0;
+    const rr = (typeof r === 'number') ? r : ((typeof round !== 'undefined') ? round : 1);
+    return Math.max(cfg.min, Math.round(getRoundBaseHp(rr) * cfg.hpMultiple));
+}
 
 /**
  * 몬스터 공통 정의 및 확장 레지스트리
@@ -98,7 +154,7 @@ const ENEMY_TYPES = {
         moveType: "ground",
         isBoss: true,
         speedTick: 4,
-        hpMulti: 10,
+        hpMulti: 25, // v0.44.0: 호위 웨이브 동반 & 클라이맥스 강화 (10 → 25)
         color: "#b91c1c",
         emoji: "👹",
         desc: "초고체력의 정통 지상 보스. 미로를 따라 천천히 진격합니다."
@@ -109,7 +165,7 @@ const ENEMY_TYPES = {
         moveType: "flying",
         isBoss: true,
         speedTick: 3,
-        hpMulti: 7,
+        hpMulti: 18, // v0.44.0: 7 → 18
         color: "#dc2626",
         emoji: "🐉",
         desc: "공중을 가로지르는 비행 보스. 대공 타워로 화력을 집중해야 합니다."
@@ -120,7 +176,7 @@ const ENEMY_TYPES = {
         moveType: "leap",
         isBoss: true,
         speedTick: 2,
-        hpMulti: 8,
+        hpMulti: 20, // v0.44.0: 8 → 20
         color: "#4c1d95",
         emoji: "🥷",
         leapCooldown: 6, // 6틱마다 1칸 벽 도약
@@ -136,6 +192,7 @@ const TOWER_DATA = {
     ranged: {
         name: "원거리 타워",
         type: "ranged",
+        attackIntervalTicks: 1, // v0.44.0 공격 주기(틱=0.2초): 기본 연사
         cost: 3,
         damage: 1,
         range: 2,
@@ -147,6 +204,7 @@ const TOWER_DATA = {
     melee: {
         name: "근거리 타워",
         type: "melee",
+        attackIntervalTicks: 1, // v0.44.0 공격 주기(틱=0.2초): 기본 연사
         cost: 2,
         damage: 2,
         range: 1,
@@ -158,6 +216,7 @@ const TOWER_DATA = {
     ice: {
         name: "얼음 타워",
         type: "ice",
+        attackIntervalTicks: 2, // v0.44.0 공격 주기(틱=0.2초): 0.4초
         cost: 4,
         damage: 1,
         range: 2,
@@ -171,6 +230,7 @@ const TOWER_DATA = {
     bomb: {
         name: "폭탄 타워",
         type: "bomb",
+        attackIntervalTicks: 3, // v0.44.0 공격 주기(틱=0.2초): 0.6초
         cost: 5,
         damage: 3,
         range: 2,
@@ -184,6 +244,7 @@ const TOWER_DATA = {
     sniper: {
         name: "저격 타워",
         type: "sniper",
+        attackIntervalTicks: 4, // v0.44.0 공격 주기(틱=0.2초): 0.8초 (초장거리 일격)
         cost: 6,
         damage: 5,
         range: 4,
@@ -195,6 +256,7 @@ const TOWER_DATA = {
     shock: {
         name: "전격 타워",
         type: "shock",
+        attackIntervalTicks: 2, // v0.44.0 공격 주기(틱=0.2초): 0.4초
         cost: 5,
         damage: 2,
         range: 2,
@@ -211,30 +273,81 @@ const STAGE_DATA = {
     1: {
         id: 1,
         name: "Stage 1: 평원의 미로",
-        desc: "기본 난이도 (표준 몬스터 & 크롤러)",
+        desc: "기본 난이도 · 🌿 가시 덤불(건설 불가) 지형",
         boardBg: "#94a3b8",
         hpMulti: 1.0,
         speedMulti: 1.0,
-        rewardMulti: 1.0
+        rewardMulti: 1.0,
+        clearRound: 30, // v0.44.0: 30R 보스 격파 시 스테이지 클리어(승리)
+        // [v0.45.0] 맵 장애물: 군락(cluster) 개수 및 군락당 타일 수 범위
+        obstacles: [
+            { type: "thicket", clusters: 4, minSize: 3, maxSize: 5 }
+        ]
     },
     2: {
         id: 2,
         name: "Stage 2: 혹한의 성채",
-        desc: "몬스터 속도 +15% / 보상 골드 +30%",
+        desc: "몬스터 속도 +15% / 보상 골드 +30% · 🧊 빙판(적 가속) 지형",
         boardBg: "#38bdf8",
         hpMulti: 1.0,
         speedMulti: 1.15,
-        rewardMulti: 1.3
+        rewardMulti: 1.3,
+        clearRound: 30,
+        obstacles: [
+            { type: "thicket", clusters: 3, minSize: 3, maxSize: 5 },
+            { type: "ice", clusters: 4, minSize: 3, maxSize: 5 }
+        ]
     },
     3: {
         id: 3,
         name: "Stage 3: 화산의 회랑",
-        desc: "몬스터 체력 +30% / 보상 골드 +60%",
+        desc: "몬스터 체력 +30% / 보상 골드 +60% · 🌋 용암 균열(적 체력 재생) 지형",
         boardBg: "#f87171",
         hpMulti: 1.3,
         speedMulti: 1.0,
-        rewardMulti: 1.6
+        rewardMulti: 1.6,
+        clearRound: 30,
+        obstacles: [
+            { type: "thicket", clusters: 3, minSize: 3, maxSize: 5 },
+            { type: "lava", clusters: 5, minSize: 3, maxSize: 5 }
+        ]
     }
+};
+
+/**
+ * [v0.45.0 New] 맵 장애물(지형) 레지스트리
+ * - 모든 장애물은 '통행 가능 + 기반/타워 건설 불가' 지형
+ *   (통행 불가 바위는 무료 벽 역할을 해 오히려 미로 구축이 쉬워지므로 채택하지 않음)
+ * - 지상 몬스터(ground/leap/crawler)에게만 지형 효과 적용, 비행 몬스터는 무시
+ */
+const OBSTACLE_TYPES = {
+    thicket: {
+        id: "thicket",
+        name: "가시 덤불",
+        emoji: "🌿",
+        desc: "기반을 건설할 수 없는 덤불 지형. 미로 설계 공간을 제한합니다."
+    },
+    ice: {
+        id: "ice",
+        name: "빙판",
+        emoji: "🧊",
+        speedBonus: 0.6, // 빙판 위 지상 몬스터 이동 속도 +60%
+        desc: "건설 불가. 빙판 위를 지나는 지상 몬스터의 이동 속도가 60% 증가합니다."
+    },
+    lava: {
+        id: "lava",
+        name: "용암 균열",
+        emoji: "🌋",
+        regenPerSec: 0.10, // 용암 위 지상 몬스터 초당 최대 체력 10% 재생
+        desc: "건설 불가. 용암 위에 있는 지상 몬스터가 초당 최대 체력의 10%를 회복합니다."
+    }
+};
+
+/**
+ * [v0.45.0 New] 장애물 배치 규칙
+ */
+const OBSTACLE_CONFIG = {
+    entranceClearRadius: 2 // 입구/출구 주변 N칸(체비셰프 거리)에는 장애물 미배치
 };
 
 // 영구 특성 연구소 데이터
@@ -383,7 +496,7 @@ const SYNERGY_DATA = {
                 1: {
                     count: 1,
                     title: "시공 왜곡 (조커)",
-                    desc: "단독 편성 시에도 모든 활성 원소/역할군 카운트에 +1 추가(와일드카드) 및 전 타워 피해 +10%"
+                    desc: "덱에서 가장 많은 원소 1종과 역할군 1종의 카운트에 +1 추가(와일드카드) 및 전 타워 피해 +10%"
                 }
             }
         }
@@ -1100,7 +1213,7 @@ const RUNE_DATA = {
         image: "assets/rune_passive.jpg",
         burnDurationSec: 3,
         burnRatio: 0.25,
-        desc: "타워 공격 시 3초간 매초 공격력의 25% 화염 도트 피해를 부여합니다."
+        desc: "장착 지휘관의 타워 공격 시 3초간 매초 공격력의 25% 화염 도트 피해를 부여합니다."
     },
     rune_critical: {
         id: "rune_critical",
@@ -1124,7 +1237,7 @@ const RUNE_DATA = {
         image: "assets/rune_passive.jpg",
         pierceCount: 1,
         bonusDamageRatio: 0.15,
-        desc: "투사체 공격력 +15% 및 관통 충격파를 발산합니다."
+        desc: "투사체 공격력 +15% 및 관통 충격파로 대상 인접 적 1기에게 50% 추가 피해를 줍니다."
     },
     rune_chain_lightning: {
         id: "rune_chain_lightning",
@@ -1162,7 +1275,7 @@ const RUNE_DATA = {
         collapseChance: 0.2,
         collapseRadius: 60,
         collapseDamage: 35,
-        desc: "공격 시 20% 확률로 시공간을 왜곡시켜 반경 내 모든 적에게 35의 붕괴 폭발 피해를 가합니다."
+        desc: "공격 시 20% 확률로 시공간을 왜곡시켜 주변 3x3의 모든 적에게 붕괴 폭발 피해(현재 라운드 기준 체력의 2배)를 가합니다."
     },
 
     // [스펠 액티브 룬]
@@ -1204,7 +1317,7 @@ const RUNE_DATA = {
         mpCost: 40,
         cooldownSec: 25,
         damage: 18,
-        desc: "마나 40 소모: 지정된 필드 구역에 벼락을 내리쳐 18의 마법 피해를 입힙니다."
+        desc: "마나 40 소모: 전장의 모든 적에게 벼락을 내리쳐 마법 피해(현재 라운드 기준 체력의 1.5배)를 입힙니다."
     },
     rune_spell_teleport: {
         id: "rune_spell_teleport",
@@ -1240,7 +1353,7 @@ const RUNE_DATA = {
         image: "assets/rune_spell.jpg",
         mpCost: 90,
         damage: 60,
-        desc: "마나 90 소모 [전투당 1회 궁극기]: 하늘에서 거대한 메테오를 낙하시켜 전장의 모든 적에게 60의 파멸 피해를 입힙니다."
+        desc: "마나 90 소모 [전투당 1회 궁극기]: 하늘에서 거대한 메테오를 낙하시켜 전장의 모든 적에게 파멸 피해(현재 라운드 기준 체력의 4배)를 입힙니다."
     }
 };
 

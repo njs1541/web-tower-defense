@@ -22,6 +22,8 @@ function qaSetRound() {
         const val = parseInt(input.value);
         if (!isNaN(val) && val > 0) {
             round = val;
+            // [v0.44.0] 라운드 변경 시 다음 웨이브 예고 재생성
+            if (typeof ensureWavePlan === 'function' && !gameRunning) ensureWavePlan();
             render();
         }
     }
@@ -69,6 +71,38 @@ function qaAddRP(amount = 20) {
     saveData();
     if (typeof updateLobbyUI === 'function') updateLobbyUI();
     alert(`🔮 룬 포인트 (RP) +${amount}개 지급! (현재: ${USER_DATA.rp}개)`);
+}
+
+/**
+ * [v0.44.0] 테스트용 U등급 지휘관 '티타니아' 지급 치트
+ * - 기존 loadData()의 매 로드 강제 지급을 제거하고 QA 패널(Ctrl+J)로 이전
+ * - ★5 / 소켓 4 + 시공 붕괴 룬 & 아마겟돈 룬 각 1개 지급 후 장착, 1번 슬롯(대장) 편성
+ */
+function qaGrantTitania() {
+    if (!USER_DATA.characters) USER_DATA.characters = {};
+    if (!USER_DATA.runes) USER_DATA.runes = [];
+
+    // 전용 룬 2종 지급 (장착 분량 확보)
+    USER_DATA.runes.push("rune_void_collapse", "rune_spell_armageddon");
+
+    const existing = USER_DATA.characters.char_titania;
+    const prevRunes = (existing && Array.isArray(existing.equippedRunes)) ? existing.equippedRunes : [];
+    USER_DATA.characters.char_titania = {
+        id: "char_titania",
+        star: 5,
+        starExp: 0,
+        sockets: 4,
+        equippedRunes: ["rune_void_collapse", "rune_spell_armageddon", prevRunes[2] || null, prevRunes[3] || null]
+    };
+
+    // 1번 슬롯(대장) 편성 (최대 3인 유지)
+    if (!Array.isArray(USER_DATA.characterDeck)) USER_DATA.characterDeck = [];
+    USER_DATA.characterDeck = ["char_titania", ...USER_DATA.characterDeck.filter(id => id !== "char_titania")].slice(0, 3);
+
+    if (typeof sanitizeRuneEquips === 'function') sanitizeRuneEquips();
+    saveData();
+    if (typeof updateLobbyUI === 'function') updateLobbyUI();
+    alert("🌿 [QA] U등급 티타니아(★5)가 지급되어 대장으로 편성되었습니다! (시공 붕괴 · 아마겟돈 룬 장착)");
 }
 
 // 인게임 MP (마나) 100% 충전

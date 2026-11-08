@@ -60,17 +60,80 @@ function generateBoard() {
                 tower: null,
                 buildable: false, // true이면 기반(벽)이 건설된 상태
                 path: false,
+                terrain: null,    // [v0.45.0] 장애물 지형 ID ('thicket' | 'ice' | 'lava' | null)
                 isStart,
                 isGoal
             });
         }
     }
 
+    // [v0.45.0] 스테이지(난이도)별 장애물 지형 배치
+    placeStageObstacles();
+
     // 마우스가 보드를 벗어날 때 프리뷰 제거
     gameBoard.addEventListener("mouseleave", clearRangePreview);
 
     // 3. 초기 최단 경로 계산 및 마킹
     recalculateGlobalPath();
+}
+
+/**
+ * [v0.45.0 New] 장애물 지형 셀 여부 (건설 불가 지형)
+ */
+function isObstacleCell(cell) {
+    return !!(cell && cell.terrain);
+}
+
+/**
+ * [v0.45.0 New] 현재 스테이지 설정에 따라 장애물 군락을 랜덤 배치
+ * - 군락은 무작위 시작점에서 상하좌우로 번지는 방식(Blob Growth)으로 생성
+ * - 입구/출구 주변(entranceClearRadius)과 입구/출구 타일 자체에는 배치하지 않음
+ * - 모든 장애물은 통행 가능하므로 몬스터 경로가 봉쇄되지 않음
+ */
+function placeStageObstacles() {
+    const stage = (typeof STAGE_DATA !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : null;
+    if (!stage || !Array.isArray(stage.obstacles) || typeof OBSTACLE_TYPES === 'undefined') return;
+
+    const clearRadius = (typeof OBSTACLE_CONFIG !== 'undefined') ? OBSTACLE_CONFIG.entranceClearRadius : 2;
+    const isEligible = (cell) => {
+        if (!cell || cell.terrain || cell.isStart || cell.isGoal) return false;
+        if (Math.abs(cell.x - startPos.x) <= clearRadius && Math.abs(cell.y - startPos.y) <= clearRadius) return false;
+        if (Math.abs(cell.x - goalPos.x) <= clearRadius && Math.abs(cell.y - goalPos.y) <= clearRadius) return false;
+        return true;
+    };
+    const dirs = [{ dx: 0, dy: 1 }, { dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: -1, dy: 0 }];
+
+    for (const spec of stage.obstacles) {
+        if (!OBSTACLE_TYPES[spec.type]) continue;
+
+        for (let c = 0; c < (spec.clusters || 0); c++) {
+            // 1. 군락 시작점 선정 (최대 50회 시도)
+            let seed = null;
+            for (let tries = 0; tries < 50 && !seed; tries++) {
+                const candidate = getCell(Math.floor(Math.random() * boardSize), Math.floor(Math.random() * boardSize));
+                if (isEligible(candidate)) seed = candidate;
+            }
+            if (!seed) continue;
+
+            // 2. 목표 크기만큼 인접 셀로 번식
+            const minSize = spec.minSize || 3;
+            const maxSize = Math.max(minSize, spec.maxSize || minSize);
+            const targetSize = minSize + Math.floor(Math.random() * (maxSize - minSize + 1));
+            const blob = [seed];
+            seed.terrain = spec.type;
+
+            let guard = 0;
+            while (blob.length < targetSize && guard++ < 100) {
+                const from = blob[Math.floor(Math.random() * blob.length)];
+                const d = dirs[Math.floor(Math.random() * dirs.length)];
+                const next = getCell(from.x + d.dx, from.y + d.dy);
+                if (isEligible(next)) {
+                    next.terrain = spec.type;
+                    blob.push(next);
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -189,6 +252,7 @@ function canBuildBaseAt(x, y) {
     if (cell.buildable) return false; // 이미 기반이 설치됨
     if (cell.isStart || cell.isGoal) return false; // 입구/출구 자체
     if (isSafetyZone(x, y)) return false; // 시작/골 보호구역
+    if (isObstacleCell(cell)) return false; // [v0.45.0] 장애물 지형은 건설 불가
 
     // 1. 해당 셀을 벽으로 가정한 상태에서 입구 -> 출구 최단 경로 검사
     const simulatedPath = findAStarPath(startPos, goalPos, [{ x, y }]);

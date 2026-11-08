@@ -121,10 +121,19 @@ function startGame() {
     battleStats = {
         towers: {},
         commanders: {},
+        ownerTowerDamage: {}, // [v0.44.0] 관장 지휘관별 타워/스펠 기여 피해 (MVP 산출용)
         totalDamage: 0,
         totalKills: 0,
         wastedOverkillDamage: 0
     };
+
+    // [v0.44.0] 신규 전투 상태 초기화
+    enemyIdCounter = 0;
+    frenzyTicksRemaining = 0;
+    stageCleared = false;
+    // 수호자 2셋 '철벽 방진': 게임 시작 시 무료 기반 +1 (이후 라운드 시작마다 +1)
+    freeBases = (synStats.extraBasePerRound || 0);
+    nextWavePlan = (typeof generateWavePlan === 'function') ? generateWavePlan(round) : null;
 
     // 4. 스테이지 테마 및 보드 배경 적용 (Phase D)
     const stage = (typeof STAGE_DATA !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : { boardBg: "#94a3b8" };
@@ -139,6 +148,9 @@ function startGame() {
     updateTowerButtons();
     if (typeof updateButtonVisuals === 'function') {
         updateButtonVisuals();
+    }
+    if (typeof updateWavePreviewUI === 'function') {
+        updateWavePreviewUI();
     }
 }
 

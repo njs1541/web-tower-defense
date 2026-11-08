@@ -56,3 +56,18 @@ let battleStats = {                // 최종 전투 현황판(Battle Report)용 
     totalKills: 0,
     wastedOverkillDamage: 0
 };
+
+// [v0.44.0 New] 무료 기반(벽) 보급 수량 (수호자 2셋 시너지: 게임 시작 및 라운드마다 +1)
+let freeBases = 0;
+
+// [v0.44.0 New] 몬스터 고유 ID 발급 카운터 (스마트 오버킬 방지용 pendingDamageMap 키)
+let enemyIdCounter = 0;
+
+// [v0.44.0 New] 다음 웨이브 사전 확정 구성 (정비 시간 예고 UI 및 스폰에 사용)
+let nextWavePlan = null; // { round, types: ['normal', 'fast', ...] }
+
+// [v0.44.0 New] 성스러운 축복(공속 2배) 남은 틱 수
+let frenzyTicksRemaining = 0;
+
+// [v0.44.0 New] 스테이지 클리어(승리) 처리 여부
+let stageCleared = false;

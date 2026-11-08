@@ -58,7 +58,7 @@ function togglePause() {
 function syncMonsterTransitions() {
     for (const enemy of enemies) {
         if (enemy.alive && enemy.element) {
-            const duration = (enemy.speedTick * 0.2) / (gameSpeed || 1);
+            const duration = (enemy.speedTick * 0.2) / ((gameSpeed || 1) * (enemy.speedMulti || 1));
             enemy.element.style.transition = `left ${duration}s linear, top ${duration}s linear`;
         }
     }
@@ -83,20 +83,73 @@ function restartGameLoops() {
 }
 
 /**
- * 라운드별 출현 몬스터 타입 결정
+ * [v0.44.0] 라운드별 보스 타입 (고정 순환: 10R 지상 → 20R 도약 → 30R 비행 → ...)
+ *  - 기존 랜덤 보스는 근접 위주 덱이 10R에 첫 공중 적으로 비행 보스를 만나는 운빨 패배를 유발
  */
-function determineEnemyType(isBossRound) {
-    if (isBossRound) {
-        // 보스 3종 중 랜덤 출현 (지상형, 비행형, 도약형)
-        const bossTypes = ['boss_ground', 'boss_flying', 'boss_leaping'];
-        return bossTypes[Math.floor(Math.random() * bossTypes.length)];
-    }
+function getBossTypeForRound(r) {
+    const rotation = (typeof WAVE_CONFIG !== 'undefined' && WAVE_CONFIG.bossRotation) ? WAVE_CONFIG.bossRotation : ['boss_ground', 'boss_leaping', 'boss_flying'];
+    const idx = Math.max(0, Math.floor(r / 10) - 1) % rotation.length;
+    return rotation[idx];
+}
 
-    if (round <= 3) {
+/**
+ * [v0.44.0 New] 라운드 웨이브 구성 사전 확정 (정비 시간 예고용)
+ * - 일반 라운드: 6 + 1.5R 마리
+ * - 보스 라운드: 호위병(일반 웨이브의 50%) 선행 후 보스 1기 등장
+ * @returns {{ round: number, types: string[] }}
+ */
+function generateWavePlan(r) {
+    const cfg = (typeof WAVE_CONFIG !== 'undefined') ? WAVE_CONFIG : { baseCount: 6, countPerRound: 1.5, bossEscortRatio: 0.5 };
+    const normalCount = cfg.baseCount + Math.floor(r * cfg.countPerRound);
+    const types = [];
+    if (r % 10 === 0) {
+        const escortCount = Math.floor(normalCount * cfg.bossEscortRatio);
+        for (let i = 0; i < escortCount; i++) types.push(determineEnemyType(false, r));
+        types.push(getBossTypeForRound(r));
+    } else {
+        for (let i = 0; i < normalCount; i++) types.push(determineEnemyType(false, r));
+    }
+    return { round: r, types };
+}
+
+/**
+ * [v0.44.0 New] 다음 웨이브 구성 요약 텍스트 (예: "👾×8 ⚡×3 🦇×2")
+ */
+function getWavePlanSummary(plan) {
+    if (!plan || !Array.isArray(plan.types)) return "-";
+    const counts = {};
+    plan.types.forEach(t => counts[t] = (counts[t] || 0) + 1);
+    return Object.entries(counts).map(([t, n]) => {
+        const def = (typeof ENEMY_TYPES !== 'undefined' && ENEMY_TYPES[t]) ? ENEMY_TYPES[t] : { emoji: "👾", name: t };
+        return `<span title="${def.name}">${def.emoji}×${n}</span>`;
+    }).join(" ");
+}
+
+/**
+ * 다음 웨이브 예고 계획이 현재 라운드와 일치하도록 보장
+ */
+function ensureWavePlan() {
+    if (!nextWavePlan || nextWavePlan.round !== round) {
+        nextWavePlan = generateWavePlan(round);
+    }
+    if (typeof updateWavePreviewUI === 'function') updateWavePreviewUI();
+    return nextWavePlan;
+}
+
+/**
+ * 라운드별 출현 몬스터 타입 결정 (일반 몬스터)
+ */
+function determineEnemyType(isBossRound, r = round) {
+    if (isBossRound) {
+        return getBossTypeForRound(r);
+    }
+    const round_ = r;
+
+    if (round_ <= 3) {
         return 'normal';
-    } else if (round <= 6) {
+    } else if (round_ <= 6) {
         return Math.random() < 0.65 ? 'normal' : 'fast';
-    } else if (round <= 9) {
+    } else if (round_ <= 9) {
         const rand = Math.random();
         if (rand < 0.45) return 'normal';
         if (rand < 0.70) return 'fast';
@@ -120,8 +173,9 @@ function spawnNextMonster() {
     if (isPaused) return;
 
     if (spawnedCount < totalEnemies) {
-        const isBossRound = (round % 10 === 0);
-        const type = determineEnemyType(isBossRound);
+        // [v0.44.0] 사전 확정된 웨이브 계획 순서대로 소환
+        const plan = ensureWavePlan();
+        const type = (plan && plan.types[spawnedCount]) || determineEnemyType(false);
         const typeDef = (typeof ENEMY_TYPES !== 'undefined' && ENEMY_TYPES[type]) ? ENEMY_TYPES[type] : {
             moveType: "ground", speedTick: 2, hpMulti: 1.0, emoji: "👾"
         };
@@ -136,10 +190,10 @@ function spawnNextMonster() {
         const baseHP = Math.floor(balance.baseHp * Math.pow(balance.hpGrowthRate, round - 1));
         const finalHP = Math.max(1, Math.floor(baseHP * (typeDef.hpMulti || 1.0) * (stage.hpMulti || 1.0)));
 
-        let speedTick = typeDef.speedTick || 2;
-        if (stage.speedMulti && stage.speedMulti > 1.0 && speedTick > 1) {
-            speedTick = Math.max(1, Math.round(speedTick / stage.speedMulti));
-        }
+        // [v0.44.0] 스테이지 속도 배율은 틱 누적 배율(speedMulti)로 적용
+        //  (기존: round(2 / 1.15) = 2 로 반올림되어 Stage 2 '속도 +15%'가 일반/탱커에 무효)
+        const speedTick = typeDef.speedTick || 2;
+        const speedMulti = stage.speedMulti || 1.0;
 
         // 스폰 위치는 동적 시작 지점(startPos)
         const spawnX = startPos ? startPos.x : 10;
@@ -152,6 +206,8 @@ function spawnNextMonster() {
         }
 
         const enemyExp = {
+            id: ++enemyIdCounter, // [v0.44.0] 고유 ID (스마트 오버킬 방지 pendingDamageMap 키)
+            speedMulti: speedMulti,
             x: spawnX,
             y: spawnY,
             pathIndex: 0,
@@ -175,7 +231,7 @@ function spawnNextMonster() {
         wrapper.style.left = `${spawnX * 30}px`;
         wrapper.style.top = `${spawnY * 30}px`;
 
-        const duration = (speedTick * 0.2) / (gameSpeed || 1);
+        const duration = (speedTick * 0.2) / ((gameSpeed || 1) * speedMulti);
         wrapper.style.transition = `left ${duration}s linear, top ${duration}s linear`;
 
         // 체력바
@@ -242,7 +298,7 @@ function gameLoopTick() {
                     const body = enemy.element.querySelector(".monster-body");
                     if (body) body.classList.remove("slowed");
 
-                    const duration = (enemy.speedTick * 0.2) / (gameSpeed || 1);
+                    const duration = (enemy.speedTick * 0.2) / ((gameSpeed || 1) * (enemy.speedMulti || 1));
                     enemy.element.style.transition = `left ${duration}s linear, top ${duration}s linear`;
                 }
             }
@@ -251,19 +307,46 @@ function gameLoopTick() {
         // 1-2. 화상(Burn) 도트 피해 틱 차감 및 데미지 적용 (v0.24.0 New)
         if (enemy.burnTicks && enemy.burnTicks > 0) {
             enemy.burnTicks--;
-            const bDmg = enemy.burnDmg || 1;
-            enemy.hp -= bDmg;
-            if (typeof onEnemyHit === 'function') {
+            const bDmg = enemy.burnDmg || 0.1;
+            // [v0.44.0] 화상 피해도 통계/처치 귀속(타워 & 관장 지휘관) 처리
+            if (typeof dealDamage === 'function') {
+                dealDamage(enemy, bDmg, "#ff4500", false, enemy.burnSource || null, enemy.burnOwner || null);
+            } else {
+                enemy.hp -= bDmg;
                 onEnemyHit(enemy, bDmg, "#ff4500");
             }
             if (!enemy.alive) continue;
         }
 
-        enemy.currentTick++;
+        // [v0.45.0] 장애물 지형 효과 (지상 몬스터 전용, 비행 몬스터는 무시)
+        let terrainSpeedMulti = 1;
+        if (enemy.moveType !== 'flying' && typeof OBSTACLE_TYPES !== 'undefined') {
+            const tCell = getCell(enemy.x, enemy.y);
+            const terrain = (tCell && tCell.terrain) ? OBSTACLE_TYPES[tCell.terrain] : null;
+            if (terrain) {
+                // 🧊 빙판: 이동 속도 증가
+                if (terrain.speedBonus > 0) {
+                    terrainSpeedMulti += terrain.speedBonus;
+                }
+                // 🌋 용암 균열: 틱(0.2초)당 최대 체력 재생
+                if (terrain.regenPerSec > 0 && enemy.hp < enemy.maxHp) {
+                    enemy.hp = Math.min(enemy.maxHp, enemy.hp + enemy.maxHp * terrain.regenPerSec / 5);
+                    updateEnemyHpBar(enemy);
+                    if (enemy.element) enemy.element.classList.add("lava-regen");
+                } else if (enemy.element) {
+                    enemy.element.classList.remove("lava-regen");
+                }
+            } else if (enemy.element) {
+                enemy.element.classList.remove("lava-regen");
+            }
+        }
+
+        // [v0.44.0] 스테이지 속도 배율(speedMulti)을 소수 누적으로 반영 (v0.45.0: 지형 배율 곱연산)
+        enemy.currentTick += (enemy.speedMulti || 1) * terrainSpeedMulti;
         if (enemy.currentTick < enemy.speedTick) {
             continue;
         }
-        enemy.currentTick = 0;
+        enemy.currentTick -= enemy.speedTick;
 
         // 2. 이동 방식(moveType)에 따른 분기 로직
         // ----------------------------------------------------
@@ -301,9 +384,20 @@ function gameLoopTick() {
     // 타워 공격 실행
     attackFromTowers();
 
+    // [v0.44.0] 성스러운 축복: 지속 중에는 틱당 공격 루프 1회 추가 (공격 주기 쿨다운도 2배속 소모 = 공속 2배)
+    if (typeof frenzyTicksRemaining !== 'undefined' && frenzyTicksRemaining > 0) {
+        frenzyTicksRemaining--;
+        attackFromTowers();
+    }
+
     // v0.39.0 전장 강림 히어로 유닛 요격 사격 실행
     if (typeof handleHeroAttacks === 'function') {
         handleHeroAttacks();
+    }
+
+    // [v0.44.0] 마나 자연 충전 (기획서: 초당 +2) - 틱(0.2초)당 분할 충전
+    if (typeof MP_CONFIG !== 'undefined' && MP_CONFIG.regenPerSec > 0) {
+        mp = Math.min(maxMp || 100, (mp || 0) + MP_CONFIG.regenPerSec / 5);
     }
 
     // 1초(5틱) 주기 히어로 전술 이동 쿨다운 차감
@@ -351,7 +445,7 @@ function gameLoopTick() {
         // [v0.42.0 New] 2) 보스 격파 및 스테이지 구간별 '최초 클리어' 대량 PP 보너스
         const isBossRound = (clearedRound % 10 === 0);
         if (isBossRound) {
-            alert(`👑 ${clearedRound}R 보스 격파 성공! 막대한 보상 50G를 획득했습니다!`);
+            alert(`👑 ${clearedRound}R 보스 격파 성공! 막대한 보상 50 TP를 획득했습니다!`);
             gold += 50;
 
             const clearKey = `stage_${currentStage}_${clearedRound}`;
@@ -362,10 +456,17 @@ function gameLoopTick() {
                 USER_DATA.pp = (USER_DATA.pp || 0) + bonusPP;
                 saveData();
                 setTimeout(() => {
-                    alert(`🎉 [스테이지 최초 클리어 보너스!]\n${currentStage.toUpperCase()} ${clearedRound}라운드 최초 돌파 기념!\n💎 프리즘 포인트(PP) +${bonusPP}개가 지급되었습니다!`);
+                    alert(`🎉 [스테이지 최초 클리어 보너스!]\nStage ${currentStage} ${clearedRound}라운드 최초 돌파 기념!\n💎 프리즘 포인트(PP) +${bonusPP}개가 지급되었습니다!`);
                     if (typeof updateLobbyUI === 'function') updateLobbyUI();
                 }, 400);
             }
+        }
+
+        // [v0.44.0] 웨이브 클리어 기본 TP 보상 (기획서 3.1: TP는 '웨이브 진행' + 처치로 획득)
+        if (typeof WAVE_CONFIG !== 'undefined') {
+            const waveTp = WAVE_CONFIG.waveClearTpBase + Math.floor(clearedRound / WAVE_CONFIG.waveClearTpPerRounds);
+            gold += waveTp;
+            showFloatingDamage(10, 12, `🪙 웨이브 클리어 +${waveTp} TP`, "#eab308");
         }
 
         // v0.34.0 전술가 2셋: 웨이브 클리어 시 추가 TP/골드 지급
@@ -389,6 +490,19 @@ function gameLoopTick() {
 
         // 라운드 종료 후 버튼 및 보드 상태 갱신
         if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
+
+        // [v0.44.0] 다음 웨이브 구성 사전 확정 및 예고
+        nextWavePlan = generateWavePlan(round);
+        if (typeof updateWavePreviewUI === 'function') updateWavePreviewUI();
+
+        // [v0.44.0] 스테이지 클리어(승리) 판정: 목표 라운드 보스 격파 시
+        const stageInfo = (typeof STAGE_DATA !== 'undefined' && STAGE_DATA[currentStage]) ? STAGE_DATA[currentStage] : null;
+        if (stageInfo && stageInfo.clearRound && clearedRound >= stageInfo.clearRound && !stageCleared) {
+            stageCleared = true;
+            render();
+            setTimeout(() => endGame(true), 600);
+            return;
+        }
     }
 
     render();
@@ -541,15 +655,22 @@ function handleCrawlerMovement(enemy) {
     if (enemy.element) enemy.element.classList.remove("demolishing");
     enemy.channelingTicks = 0;
 
-    // 2. 필드에 남아있는 가장 가까운 기반 탐색
+    // 2. 필드에 남아있는 가장 가까운 기반의 '인접 빈 셀'로 A* 이동
+    //  [v0.44.0] 기존: 목표가 기반(벽) 셀 자체라 A*가 항상 실패(5000회 루프 소모) → 출구 경로로만 이동하던 버그 수정
     const nearestBase = findNearestBaseCell(enemy.x, enemy.y);
 
     if (nearestBase) {
-        // 해당 기반의 인접 빈 셀로 A* 이동
-        const targetPath = findAStarPath({ x: enemy.x, y: enemy.y }, nearestBase);
-        if (targetPath && targetPath.length > 1) {
-            enemy.x = targetPath[1].x;
-            enemy.y = targetPath[1].y;
+        let bestPath = null;
+        const dirs = [{ dx: 0, dy: 1 }, { dx: 0, dy: -1 }, { dx: 1, dy: 0 }, { dx: -1, dy: 0 }];
+        for (const d of dirs) {
+            const adj = getCell(nearestBase.x + d.dx, nearestBase.y + d.dy);
+            if (!adj || adj.buildable) continue;
+            const p = findAStarPath({ x: enemy.x, y: enemy.y }, { x: adj.x, y: adj.y });
+            if (p && (!bestPath || p.length < bestPath.length)) bestPath = p;
+        }
+        if (bestPath && bestPath.length > 1) {
+            enemy.x = bestPath[1].x;
+            enemy.y = bestPath[1].y;
             updateEnemyPosition(enemy);
             return;
         }
@@ -589,6 +710,9 @@ function demolishBase(cell) {
     cell.targeting = null;
     cell.inGameLevel = 0;
     cell.investedGold = 0;
+    cell.towerOwner = null;
+    cell.towerOwnerGrade = null;
+    cell.attackCooldown = 0;
 
     // 크롤러에 의해 타워가 파괴된 경우 해당 타워의 설치 스톡 1 복구
     if (hadTower && typeof commanderTowerRemaining !== 'undefined' && typeof commanderTowerStocks !== 'undefined') {
@@ -662,10 +786,11 @@ function startRound() {
                     console.log(`[신성 시너지] 라운드 시작 기지 HP +${syn.bonusStats.roundHpRegen} 회복! (현재: ${playerHP}/${maxPlayerHP})`);
                 }
             }
-            // 수호자 2셋: 매 라운드 시작 시 무료 기반 +1개 추가 보급
+            // 수호자 2셋: 매 라운드 시작 시 무료 기반 +1개 추가 보급 (v0.44.0: freeBases 상태 선언으로 실제 동작)
             if (syn.bonusStats.extraBasePerRound > 0 && typeof freeBases !== 'undefined') {
                 freeBases = (freeBases || 0) + syn.bonusStats.extraBasePerRound;
                 console.log(`[수호자 시너지] 라운드 시작 무료 기반 +${syn.bonusStats.extraBasePerRound}개 보급! (현재: ${freeBases}개)`);
+                if (typeof updateButtonVisuals === 'function') updateButtonVisuals();
             }
         }
     }
@@ -678,13 +803,10 @@ function startRound() {
     window.roundStartHp = playerHP;
 
     spawnedCount = 0;
-    const isBossRound = (round % 10 === 0);
-    if (isBossRound) {
-        totalEnemies = 1; // 보스전은 강력한 보스 1기 집중!
-    } else {
-        // [v0.43.0 New] TD 정석 스폰 공식 정상화: 1R 7마리부터 점진적 웨이브 증가
-        totalEnemies = 6 + Math.floor(round * 1.5);
-    }
+    // [v0.44.0] 사전 확정 웨이브 계획 사용 (일반: 6 + 1.5R 마리 / 보스전: 호위병 + 보스 1기)
+    const plan = ensureWavePlan();
+    totalEnemies = plan.types.length;
+    frenzyTicksRemaining = 0;
 
     updateSpeedUI();
     restartGameLoops();
