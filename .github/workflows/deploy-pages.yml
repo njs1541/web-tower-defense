@@ -1,6 +1,12 @@
-# GitHub Pages 배포 (v0.53.3, 워크플로 P2-1)
-# main에 푸시하면 게임 실행에 필요한 파일만 모아 Pages로 배포한다.
-# 저장소 Settings → Pages → Build and deployment → Source를 "GitHub Actions"로 한 번 설정해야 동작한다.
+# GitHub Pages 배포 (v0.53.3 작성, v0.54.0 수동 전용으로 변경, 워크플로 P2-1)
+#
+# ⚠️ 공개 배포는 사용자가 확정하기 전까지 하지 않는다 (사용자 결정, 2026-11-09).
+#    v1.0에 도달해도 사용자의 명시적 확정 없이는 실행하지 않는다.
+#    - 푸시로는 실행되지 않는다. GitHub Actions 화면에서 수동 실행(workflow_dispatch)만 가능하다.
+#    - 수동 실행 시 confirm 입력란에 정확히 "배포 확정"을 넣어야 진행되고, 그 외에는 첫 단계에서 실패한다.
+#    - 저장소 Settings → Pages → Source를 "GitHub Actions"로 바꾸는 것도 사용자가 확정한 뒤에 한다.
+#
+# 실행되면 게임 실행에 필요한 파일만 모아 Pages로 배포한다.
 #
 # 포함: index.html, style.css, js/, assets/ (게임이 쓰지 않는 참고 이미지는 제외)
 # 제외: 에셋 도구 HTML, 스타일 가이드, 기획/QA 문서, test/, scratch/, docs/
@@ -8,9 +14,13 @@
 name: Deploy game to GitHub Pages
 
 on:
-  push:
-    branches: [main]
+  # push 트리거 없음: 커밋/푸시해도 배포되지 않는다
   workflow_dispatch:
+    inputs:
+      confirm:
+        description: '공개 배포를 사용자가 확정했다면 정확히 "배포 확정"을 입력'
+        required: true
+        default: ''
 
 permissions:
   contents: read
@@ -28,6 +38,15 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Require explicit deploy confirmation
+        env:
+          CONFIRM: ${{ github.event.inputs.confirm }}
+        run: |
+          if [ "$CONFIRM" != "배포 확정" ]; then
+            echo "공개 배포가 확정되지 않았습니다. 배포를 중단합니다."
+            exit 1
+          fi
+
       - uses: actions/checkout@v4
 
       - name: Collect game files
