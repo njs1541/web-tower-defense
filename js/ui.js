@@ -54,6 +54,15 @@ function render() {
         if (cell.path && !cell.buildable && !cell.isStart && !cell.isGoal) {
             dom.classList.add("path");
         }
+
+        // [v0.45.0] 장애물 지형 표시 (경로 위에 있어도 지형 색이 보이도록 path 이후 적용)
+        if (cell.terrain) {
+            dom.classList.add("obstacle", `obstacle-${cell.terrain}`);
+            if (!dom.title) {
+                const tInfo = (typeof OBSTACLE_TYPES !== 'undefined') ? OBSTACLE_TYPES[cell.terrain] : null;
+                if (tInfo) dom.title = `${tInfo.emoji} ${tInfo.name}: ${tInfo.desc}`;
+            }
+        }
         if (cell.buildable) {
             dom.classList.add("buildable");
             // 타워 건설 모드일 때 대장/히어로가 없는 순수 빈 기반만 '설치 가능'으로 맥동 하이라이트
@@ -147,6 +156,10 @@ function render() {
     if (mpDisplay) {
         mpDisplay.innerText = Math.floor(mp || 0);
     }
+    const mpMaxDisplay = document.getElementById("mp-max");
+    if (mpMaxDisplay) {
+        mpMaxDisplay.innerText = maxMp || 100;
+    }
 
     // 몬스터 수 표시 갱신
     const aliveCount = enemies.filter(e => e.alive).length;
@@ -156,6 +169,27 @@ function render() {
     if (typeof renderInGameSpells === 'function') {
         renderInGameSpells();
     }
+}
+
+/**
+ * [v0.44.0 New] 다음 웨이브 구성 예고 UI 갱신
+ */
+function updateWavePreviewUI() {
+    const el = document.getElementById("wave-preview");
+    if (!el) return;
+    const plan = (typeof nextWavePlan !== 'undefined') ? nextWavePlan : null;
+    if (!plan) {
+        el.innerHTML = "-";
+        return;
+    }
+    const isBoss = plan.round % 10 === 0;
+    const hasFlying = plan.types.some(t => (ENEMY_TYPES[t] || {}).moveType === 'flying');
+    const hasCrawler = plan.types.includes('crawler');
+    const warnings = [];
+    if (isBoss) warnings.push('<span style="color:#dc2626; font-weight:bold;">👑 보스전</span>');
+    if (hasFlying) warnings.push('<span style="color:#7c3aed;">🦇 공중 주의 (근접/폭탄 타격 불가)</span>');
+    if (hasCrawler) warnings.push('<span style="color:#ea580c;">🦂 기반 철거</span>');
+    el.innerHTML = `<strong>${plan.round}R</strong> ${getWavePlanSummary(plan)}${warnings.length ? '<br>' + warnings.join(' · ') : ''}`;
 }
 
 /**
@@ -202,7 +236,10 @@ function updateButtonVisuals() {
     const btnUnlock = document.getElementById("btn-unlock");
     if (btnUnlock) {
         const cost = (typeof getBaseBuildCost === 'function') ? getBaseBuildCost() : 1;
-        btnUnlock.innerText = `🏗️ 기반 건설 (${cost}G)`;
+        const freeCount = (typeof freeBases !== 'undefined') ? freeBases : 0;
+        btnUnlock.innerText = freeCount > 0
+            ? `🏗️ 기반 건설 (무료 ${freeCount}개 남음)`
+            : `🏗️ 기반 건설 (${cost} TP)`;
         btnUnlock.title = `기반(벽)을 건설합니다. 5개 건설할 때마다 비용이 1G 증가하며 환불할 수 없습니다. (현재 건설된 기반: ${builtBaseCount || 0}개)`;
 
         if (interactionMode === 'base' || interactionMode === 'unlock') {
@@ -519,32 +556,18 @@ function showBattleReport(isVictory = false) {
     let mvpBase = (mvpCharId && typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[mvpCharId] : null;
     let bestContributionDmg = -1;
 
-    // 3-1. 타워 딜량이 가장 높은 타워의 관장 지휘관 탐색
-    if (typeof battleStats !== 'undefined' && battleStats.towers) {
-        let bestTowerKey = null;
-        for (const [tKey, tData] of Object.entries(battleStats.towers)) {
-            if (tData.damage > bestContributionDmg) {
-                bestContributionDmg = tData.damage;
-                bestTowerKey = tKey;
-            }
+    // 3-1. [v0.44.0] 지휘관별 총 기여 피해 = 관장 타워/스펠 기여(ownerTowerDamage) + 강림 직접 요격(commanders)
+    if (typeof battleStats !== 'undefined') {
+        const contribution = {};
+        for (const [cId, d] of Object.entries(battleStats.ownerTowerDamage || {})) {
+            contribution[cId] = (contribution[cId] || 0) + d;
         }
-        if (bestTowerKey && typeof USER_DATA !== 'undefined' && USER_DATA.characterDeck) {
-            for (const cId of USER_DATA.characterDeck) {
-                const cInfo = CHARACTER_DATA[cId];
-                if (cInfo && cInfo.towerStock && cInfo.towerStock[bestTowerKey] > 0) {
-                    mvpCharId = cId;
-                    mvpBase = cInfo;
-                    break;
-                }
-            }
+        for (const [cId, d] of Object.entries(battleStats.commanders || {})) {
+            if (typeof d === 'number') contribution[cId] = (contribution[cId] || 0) + d;
         }
-    }
-
-    // 3-2. 전장 직접 강림 히어로(UR/U)의 요격 딜량 비교
-    if (typeof battleStats !== 'undefined' && battleStats.commanders) {
-        for (const [cId, cDmg] of Object.entries(battleStats.commanders)) {
-            if (cDmg > bestContributionDmg && CHARACTER_DATA[cId]) {
-                bestContributionDmg = cDmg;
+        for (const [cId, total] of Object.entries(contribution)) {
+            if (total > bestContributionDmg && CHARACTER_DATA[cId]) {
+                bestContributionDmg = total;
                 mvpCharId = cId;
                 mvpBase = CHARACTER_DATA[cId];
             }

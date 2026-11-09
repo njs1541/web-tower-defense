@@ -662,9 +662,16 @@ function openRuneEquipModal(charId, socketIndex) {
         if (runes.length === 0) {
             list.innerHTML = `<div style="text-align: center; color: #64748b; padding: 20px; font-size: 13px;">보유한 룬이 없습니다.<br>상점에서 룬 포인트(RP)로 신비한 룬을 소환해보세요!</div>`;
         } else {
-            runes.forEach((runeId, rIndex) => {
+            // [v0.44.0] 동일 룬은 1줄로 묶고 '보유 / 장착 가능' 수량 표기 (보유 수량 초과 중복 장착 차단)
+            const uniqueRunes = Array.from(new Set(runes));
+            uniqueRunes.forEach((runeId) => {
                 const runeInfo = RUNE_DATA[runeId];
                 if (!runeInfo) return;
+                const owned = (typeof getRuneOwnedCount === 'function') ? getRuneOwnedCount(runeId) : 1;
+                const usedElsewhere = (typeof getRuneEquippedCount === 'function')
+                    ? getRuneEquippedCount(runeId, { charId: charId, socketIndex: socketIndex })
+                    : 0;
+                const available = Math.max(0, owned - usedElsewhere);
 
                 const gradeInfo = CARD_GRADES[runeInfo.grade] || { name: runeInfo.grade, color: "#3b82f6" };
                 const isSpell = runeInfo.type === 'spell';
@@ -680,8 +687,9 @@ function openRuneEquipModal(charId, socketIndex) {
                             <span style="font-size: 10px; color:${isSpell ? '#2563eb' : '#ea580c'};">(${isSpell ? '액티브 스펠' : '속성 패시브'})</span>
                         </div>
                         <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${runeInfo.desc}</div>
+                        <div style="font-size: 10px; color: ${available > 0 ? '#16a34a' : '#ef4444'}; margin-top: 2px; font-weight: bold;">보유 ${owned}개 · 장착 가능 ${available}개</div>
                     </div>
-                    <button class="btn-select-rune" onclick="selectRuneForSocket('${runeId}')">장착</button>
+                    <button class="btn-select-rune" ${available > 0 ? '' : 'disabled style="opacity:0.5; cursor:not-allowed;"'} onclick="selectRuneForSocket('${runeId}')">장착</button>
                 `;
                 list.appendChild(item);
             });

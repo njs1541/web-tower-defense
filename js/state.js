@@ -30,7 +30,6 @@ let currentStage = 1;
 // v0.22.0 마나 및 지휘관 덱 타워 강화 한도
 let mp = 0;              // 현재 마나 포인트 (MP)
 let maxMp = 100;         // 최대 마나 포인트
-let mpRegenTickCount = 0; // v0.44.0 시간 경과 MP 충전용 틱 카운터
 let bossKilledThisRound = false; // v0.45.0 이번 라운드 보스 처치 여부 (출구 누출과 구분)
 let deckTowerCaps = {    // 출전 캐릭터들로부터 계산된 타워별 최대 인게임 강화 가능 레벨
     ranged: 0,
@@ -58,3 +57,18 @@ let battleStats = {                // 최종 전투 현황판(Battle Report)용 
     totalKills: 0,
     wastedOverkillDamage: 0
 };
+
+// [v0.44.0 New] 무료 기반(벽) 보급 수량 (수호자 2셋 시너지: 게임 시작 및 라운드마다 +1)
+let freeBases = 0;
+
+// [v0.44.0 New] 몬스터 고유 ID 발급 카운터 (스마트 오버킬 방지용 pendingDamageMap 키)
+let enemyIdCounter = 0;
+
+// [v0.44.0 New] 다음 웨이브 사전 확정 구성 (정비 시간 예고 UI 및 스폰에 사용)
+let nextWavePlan = null; // { round, types: ['normal', 'fast', ...] }
+
+// [v0.44.0 New] 성스러운 축복(공속 2배) 남은 틱 수
+let frenzyTicksRemaining = 0;
+
+// [v0.44.0 New] 스테이지 클리어(승리) 처리 여부
+let stageCleared = false;

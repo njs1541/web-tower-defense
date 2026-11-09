@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>경로 기반 타워 디펜스</title>
-  <link rel="stylesheet" href="style.css?v=sd3" />
+  <link rel="stylesheet" href="style.css?v=0450" />
 </head>
 
 <body>
@@ -23,7 +23,7 @@
           <div class="op-start-sub">CLICK ANYWHERE TO START</div>
         </div>
 
-        <div class="op-footer-version">v0.51.0</div>
+        <div class="op-footer-version">v0.52.0</div>
       </div>
     </div>
 
@@ -37,7 +37,7 @@
         <div style="display: flex; gap: 10px; align-items: center;">
           <a href="sd_asset_studio.html" target="_blank"
             style="background: linear-gradient(135deg, #7c3aed, #6366f1); border: 1px solid #a78bfa; color: #ffffff; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; text-decoration: none; box-shadow: 0 2px 6px rgba(124, 58, 237, 0.35);">🎨 SD 에셋 스튜디오 열기</a>
-          <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.51.0</span>
+          <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.52.0</span>
         </div>
       </div>
       <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card & Commander</h1>
@@ -76,7 +76,7 @@
         <button class="btn-stage-select" data-stage-id="2" onclick="selectStage(2)">Stage 2 (혹한)</button>
         <button class="btn-stage-select" data-stage-id="3" onclick="selectStage(3)">Stage 3 (화산)</button>
       </div>
-      <div id="stage-desc-text" style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Stage 1: 평원의 미로 (기본 난이도)
+      <div id="stage-desc-text" style="font-size: 12px; color: #64748b; margin-bottom: 20px;">Stage 1: 평원의 미로 (기본 난이도 · 🌿 가시 덤불(건설 불가) 지형)
       </div>
 
       <!-- 상점 UI (2대 소환 시스템: 지휘관 1PP, 룬 5RP) -->
@@ -165,8 +165,11 @@
           <p>🌟 라운드: <span id="round">1</span></p>
           <p>❤️ HP: <span id="hp">10</span></p>
           <p>🪙 TP (타워포인트): <span id="gold">10</span></p>
-          <p>💧 MP (마나): <span id="mp-count">0</span> / 100</p>
+          <p>💧 MP (마나): <span id="mp-count">0</span> / <span id="mp-max">100</span></p>
           <p>👾 Monster: <span id="monster-count">0 / 0</span></p>
+          <div style="font-size: 12px; margin: 4px 0 8px; padding: 6px; border: 1px dashed #94a3b8; border-radius: 6px; line-height: 1.6;">
+            📋 다음 웨이브: <span id="wave-preview">-</span>
+          </div>
           <button onclick="startRound()"
             style="width: 100%; font-weight: bold; background: #e8f5e9; border: 1px solid #4caf50; padding: 8px;">▶ 라운드
             시작</button>
@@ -217,7 +220,7 @@
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.51.0</div>
+          v0.52.0</div>
       </div>
     </div>
   </div>
@@ -449,6 +452,9 @@
         <button onclick="qaAddRP(50)" style="background:#581c87; color:#fde047; font-weight:bold; flex:1.2; font-size:11px; padding: 4px;">🔮 RP +50 (10연차)</button>
         <button onclick="qaFillMP()" style="background:#059669; color:white; flex:1; font-size:11px; padding: 4px;">💧 MP 100%</button>
       </div>
+      <div style="margin-bottom: 8px;">
+        <button onclick="qaGrantTitania()" style="background:#047857; color:#fde047; font-weight:bold; width:100%; font-size:11px; padding: 4px;">🌿 [테스트] U 티타니아 ★5 지급 + 전용 룬 + 대장 편성</button>
+      </div>
       <strong>Card Reset (QA)</strong>
       <div id="qa-card-list">
         <!-- JS로 버튼 생성 -->
@@ -510,25 +516,25 @@
   </div>
 
   <!-- 1. 상수 및 데이터/저장소 모듈 -->
-  <script src="js/constants.js?v=sd3"></script>
-  <script src="js/user_data.js?v=sd3"></script>
-  <script src="js/state.js?v=sd3"></script>
+  <script src="js/constants.js?v=0520"></script>
+  <script src="js/user_data.js?v=0520"></script>
+  <script src="js/state.js?v=0520"></script>
 
   <!-- 2. 인게임 시스템 모듈 -->
-  <script src="js/board.js?v=sd3"></script>
-  <script src="js/tower.js?v=sd3"></script>
-  <script src="js/enemy.js?v=sd3"></script>
-  <script src="js/ui.js?v=sd3"></script>
+  <script src="js/board.js?v=0520"></script>
+  <script src="js/tower.js?v=0520"></script>
+  <script src="js/enemy.js?v=0520"></script>
+  <script src="js/ui.js?v=0520"></script>
 
   <!-- 3. 메타 / 로비 / 가챠 모듈 -->
-  <script src="js/lobby.js?v=sd3"></script>
-  <script src="js/gacha.js?v=sd3"></script>
+  <script src="js/lobby.js?v=0520"></script>
+  <script src="js/gacha.js?v=0520"></script>
 
   <!-- 4. QA / 디버그 도구 모듈 -->
-  <script src="js/qa.js?v=sd3"></script>
+  <script src="js/qa.js?v=0520"></script>
 
   <!-- 5. 게임 초기화 진입점 -->
-  <script src="js/main.js?v=sd3"></script>
+  <script src="js/main.js?v=0520"></script>
 </body>
 
 </html>

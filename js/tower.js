@@ -112,16 +112,29 @@ function handleCellClick(x, y) {
             return;
         }
 
+        // [v0.45.0] 장애물 지형에는 기반 건설 불가
+        if (typeof isObstacleCell === 'function' && isObstacleCell(cell)) {
+            const tInfo = (typeof OBSTACLE_TYPES !== 'undefined') ? OBSTACLE_TYPES[cell.terrain] : null;
+            alert(`${tInfo ? tInfo.emoji + ' ' + tInfo.name : '장애물'} 지형에는 기반을 건설할 수 없습니다!`);
+            return;
+        }
+
         // 2-1. 봉쇄 방지 검사 (A* 길찾기로 몬스터의 출구 경로가 막히는지 확인)
         if (typeof canBuildBaseAt === 'function' && !canBuildBaseAt(x, y)) {
             alert("⚠️ 몬스터의 이동 경로를 완전히 차단할 수 없습니다! (통로를 남겨주세요)");
             return;
         }
 
-        const cost = (typeof getBaseBuildCost === 'function') ? getBaseBuildCost() : 1;
+        // [v0.44.0] 수호자 2셋 무료 기반 보급분이 있으면 TP 소모 없이 우선 사용
+        const useFreeBase = (typeof freeBases !== 'undefined' && freeBases > 0);
+        const cost = useFreeBase ? 0 : ((typeof getBaseBuildCost === 'function') ? getBaseBuildCost() : 1);
         if (gold >= cost) {
             cell.buildable = true;
-            gold -= cost;
+            if (useFreeBase) {
+                freeBases--;
+            } else {
+                gold -= cost;
+            }
             builtBaseCount = (builtBaseCount || 0) + 1;
 
             // 전역 몬스터 최단 경로 즉시 재계산
@@ -188,19 +201,15 @@ function handleCellClick(x, y) {
         cell.targeting = 'first'; // 기본 타깃팅: 선두
         cell.inGameLevel = 0;     // 인게임 0강 기본 상태
         cell.investedGold = 0;    // 강화에 투자한 TP 누적치
+        cell.attackCooldown = 0;
 
-        // 해당 타워를 제공한 출전 지휘관의 등급 판별 (환급율 결정용)
-        let ownerGrade = 'C';
-        if (typeof USER_DATA !== 'undefined' && Array.isArray(USER_DATA.characterDeck)) {
-            for (const cId of USER_DATA.characterDeck) {
-                const cInfo = (typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[cId] : null;
-                if (cInfo && cInfo.towerStock && cInfo.towerStock[selectedTower] > 0) {
-                    ownerGrade = cInfo.grade || 'C';
-                    break;
-                }
-            }
-        }
-        cell.towerOwnerGrade = ownerGrade;
+        // [v0.44.0] 스톡 여유가 있는 관장 지휘관에게 타워 귀속 (룬 패시브 적용 대상 & 환급율 결정)
+        //  주의: assignTowerOwner는 board의 기존 귀속 수를 세므로 cell.tower 지정 후 towerOwner를 설정하기 전에 호출
+        cell.towerOwner = null;
+        const ownerId = (typeof assignTowerOwner === 'function') ? assignTowerOwner(selectedTower) : null;
+        const ownerInfo = (ownerId && typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[ownerId] : null;
+        cell.towerOwner = ownerId;
+        cell.towerOwnerGrade = ownerInfo ? (ownerInfo.grade || 'C') : 'C';
 
         clearRangePreview();
         clearActiveRange();
@@ -231,34 +240,71 @@ function selectTargetEnemy(cell, inRangeEnemies) {
 
     const mode = cell.targeting || 'first';
 
+    // [v0.44.0] 진행도는 남은 경로 거리 기준(getEnemyProgress)으로 비교
+    const byProgress = (a, b) => getEnemyProgress(b) - getEnemyProgress(a);
+
     if (mode === 'strongest') {
-        return candidates.slice().sort((a, b) => b.hp - a.hp || b.pathIndex - a.pathIndex)[0];
+        return candidates.slice().sort((a, b) => b.hp - a.hp || byProgress(a, b))[0];
     } else if (mode === 'weakest') {
-        return candidates.slice().sort((a, b) => a.hp - b.hp || b.pathIndex - a.pathIndex)[0];
+        return candidates.slice().sort((a, b) => a.hp - b.hp || byProgress(a, b))[0];
     } else if (mode === 'boss') {
         const bosses = candidates.filter(e => e.isBoss || e.type.startsWith('boss'));
         if (bosses.length > 0) {
-            return bosses.sort((a, b) => b.pathIndex - a.pathIndex)[0];
+            return bosses.sort(byProgress)[0];
         }
-        return candidates.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
+        return candidates.slice().sort(byProgress)[0];
     } else {
-        return candidates.slice().sort((a, b) => b.pathIndex - a.pathIndex)[0];
+        return candidates.slice().sort(byProgress)[0];
     }
 }
 
 /**
- * 타워들의 적 공격 루프 (공중 유닛 요격 필터 및 신규 타워 확장 지원)
+ * [v0.44.0 New] 적의 진행도 계산 (클수록 출구에 가까움)
+ * - 기존 pathIndex 기준은 경로 재계산 시 0으로 초기화되어 '선두' 타깃팅이 오작동하던 문제 수정
+ * - 지상/도약: 남은 A* 경로 길이, 비행/크롤러: 출구까지 맨해튼 거리 기준
+ */
+function getEnemyProgress(e) {
+    if (!e) return -Infinity;
+    const manhattan = (typeof goalPos !== 'undefined' && goalPos)
+        ? Math.abs(goalPos.x - e.x) + Math.abs(goalPos.y - e.y)
+        : 0;
+    if ((e.moveType === 'ground' || e.moveType === 'leap') && Array.isArray(e.dynamicPath) && e.dynamicPath.length > 0) {
+        return -Math.max(0, (e.dynamicPath.length - 1) - (e.pathIndex || 0));
+    }
+    return -manhattan;
+}
+
+/**
+ * 타워들의 적 공격 루프 (v0.44.0 전면 개편)
+ * - 타워별 공격 주기(attackIntervalTicks) 도입
+ * - 속성 룬 패시브는 타워를 관장하는 지휘관(cell.towerOwner)의 룬만 적용
+ * - 시너지 피해 % 이중 적용 제거 (getGameTowerStats에서 1회만 반영)
  */
 function attackFromTowers() {
-    const passives = typeof getActiveRunePassives === 'function' ? getActiveRunePassives() : {};
     const synData = typeof calculateDeckSynergies === 'function' ? calculateDeckSynergies() : null;
     const synStats = (synData && synData.bonusStats) ? synData.bonusStats : {};
+
+    // 관장 지휘관별 패시브 캐시 (틱당 1회 계산)
+    const passivesCache = {};
+    const getOwnerPassives = (ownerId) => {
+        const key = ownerId || '__none__';
+        if (!passivesCache[key]) {
+            passivesCache[key] = (typeof getActiveRunePassives === 'function') ? getActiveRunePassives(ownerId || null) : {};
+        }
+        return passivesCache[key];
+    };
 
     for (const cell of board) {
         if (!cell.tower) continue;
 
         const towerStats = getGameTowerStats(cell);
         if (!towerStats) continue;
+
+        // [v0.44.0] 타워별 공격 주기 쿨다운
+        if ((cell.attackCooldown || 0) > 0) {
+            cell.attackCooldown--;
+            continue;
+        }
 
         const range = towerStats.range;
         const targetType = towerStats.targetType || "all";
@@ -283,12 +329,19 @@ function attackFromTowers() {
         const targetEnemy = selectTargetEnemy(cell, inRangeEnemies);
         if (!targetEnemy) continue;
 
+        // 발사 확정 -> 공격 주기 쿨다운 설정 (1틱 주기 타워는 매 틱 발사)
+        cell.attackCooldown = Math.max(0, (towerStats.attackIntervalTicks || 1) - 1);
+
+        const ownerId = cell.towerOwner || null;
+        const passives = getOwnerPassives(ownerId);
+
         // 데미지 계산: 관통 보너스 및 치명타 판정 (v0.24.0 / v0.34.0 시너지 반영)
         let totalCritChance = (passives.critChance || 0) + (synStats.critChance || 0);
         let totalCritMulti = Math.max(passives.critMultiplier || 2.0, synStats.critMultiplier || 2.0);
         let totalAtkSpeedBonus = (synStats.attackSpeedRatio || 0);
 
-        let baseDmg = towerStats.damage * (1 + (passives.bonusDamageRatio || 0) + (synStats.extraDamageRatio || 0));
+        // [v0.44.0] towerStats.damage에는 이미 시너지 extraDamageRatio가 반영되어 있으므로 룬 보너스만 추가
+        let baseDmg = towerStats.damage * (1 + (passives.bonusDamageRatio || 0));
 
         // v0.39.0 인접 3x3 강림 지휘관(Hero Unit) 지휘 오라 버프 집계
         if (typeof deployedHeroes !== 'undefined') {
@@ -364,6 +417,9 @@ function attackFromTowers() {
 
         // 배속에 맞춘 투사체 도달 딜레이
         const hitDelay = Math.max(50, Math.floor(200 / (gameSpeed || 1)));
+        const towerKey = cell.tower;
+        const cellX = cell.x;
+        const cellY = cell.y;
 
         setTimeout(() => {
             // 투사체 도달 시 Pending Damage 차감
@@ -380,82 +436,46 @@ function attackFromTowers() {
                 return;
             }
 
-            // v0.36.0 전투 통계 집계 (Battle Report)
-            if (typeof battleStats !== 'undefined' && battleStats.towers) {
-                const tKey = cell.tower;
-                if (!battleStats.towers[tKey]) {
-                    battleStats.towers[tKey] = { damage: 0, kills: 0 };
-                }
-                const effectiveDmg = Math.min(targetEnemy.hp, finalDamage);
-                battleStats.towers[tKey].damage += effectiveDmg;
-                battleStats.totalDamage = (battleStats.totalDamage || 0) + effectiveDmg;
-                if (finalDamage > effectiveDmg) {
-                    battleStats.wastedOverkillDamage = (battleStats.wastedOverkillDamage || 0) + (finalDamage - effectiveDmg);
-                }
-            }
-
-            // 1. 얼음 타워 (Ice): 슬로우 효과 부여 (빙결 2셋 지속시간 보너스 반영)
-            if (cell.tower === 'ice') {
-                targetEnemy.hp -= finalDamage;
+            // 1. 얼음 타워 (Ice): 슬로우 효과 부여 (빙결 2셋 감속률/지속시간 보너스 반영)
+            if (towerKey === 'ice') {
+                dealDamage(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#00e5ff", isCrit, towerKey, ownerId);
                 let slowTicks = towerStats.slowTicks || 10;
                 if (synStats.slowDurationBonusSec > 0) {
                     slowTicks += Math.round(synStats.slowDurationBonusSec * 5);
                 }
-                applySlowEffect(targetEnemy, slowTicks);
-                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#00e5ff", isCrit, cell.tower);
+                const slowRatio = Math.min(0.8, (towerStats.slowRatio || 0.5) + (synStats.slowRatioBonus || 0));
+                applySlowEffect(targetEnemy, slowTicks, slowRatio);
             }
             // 2. 폭탄 타워 (Bomb): 착탄 지점 광역 스플래시 데미지 (화염 3셋 폭발 반경 +1 반영)
-            else if (cell.tower === 'bomb') {
+            else if (towerKey === 'bomb') {
                 createSplashEffect(targetEnemy.x, targetEnemy.y);
-                const splashRad = 1 + (synStats.bombSplashExtraRadius || 0);
+                const splashRad = (towerStats.splashRange || 1) + (synStats.bombSplashExtraRadius || 0);
 
                 const victims = enemies.filter(e => {
                     return e.alive && Math.abs(e.x - targetEnemy.x) <= splashRad && Math.abs(e.y - targetEnemy.y) <= splashRad && e.moveType !== 'flying';
                 });
 
                 for (const victim of victims) {
-                    victim.hp -= finalDamage;
-                    onEnemyHit(victim, finalDamage, isCrit ? "#ef4444" : "#ff9100", isCrit, cell.tower);
+                    dealDamage(victim, finalDamage, isCrit ? "#ef4444" : "#ff9100", isCrit, towerKey, ownerId);
                 }
             }
-            // 3. 전격 타워 (Shock): 연쇄 번개 피해
-            else if (cell.tower === 'shock') {
-                targetEnemy.hp -= finalDamage;
-                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#f59e0b", isCrit, cell.tower);
+            // 3. 전격 타워 (Shock): 연쇄 번개 피해 (v0.44.0: 데이터 chainCount 기준 연쇄)
+            else if (towerKey === 'shock') {
+                dealDamage(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#f59e0b", isCrit, towerKey, ownerId);
 
-                const chainTargets = enemies.filter(e => e.alive && e !== targetEnemy && Math.abs(e.x - targetEnemy.x) <= 2 && Math.abs(e.y - targetEnemy.y) <= 2).slice(0, 2);
+                const chainMax = Math.max(0, (towerStats.chainCount || 3) - 1); // 주 대상 포함 총 chainCount기
+                const chainTargets = enemies.filter(e => e.alive && e !== targetEnemy && Math.abs(e.x - targetEnemy.x) <= 2 && Math.abs(e.y - targetEnemy.y) <= 2).slice(0, chainMax);
                 for (const chain of chainTargets) {
-                    chain.hp -= finalDamage * 0.7;
-                    onEnemyHit(chain, finalDamage * 0.7, "#fbbf24", false, cell.tower);
+                    dealDamage(chain, finalDamage * 0.7, "#fbbf24", false, towerKey, ownerId);
                 }
             }
             // 4. 일반/저격 타워 (Ranged / Melee / Sniper)
             else {
-                targetEnemy.hp -= finalDamage;
-                onEnemyHit(targetEnemy, finalDamage, isCrit ? "#ef4444" : (towerStats.color || "#ffeb3b"), isCrit, cell.tower);
+                dealDamage(targetEnemy, finalDamage, isCrit ? "#ef4444" : (towerStats.color || "#ffeb3b"), isCrit, towerKey, ownerId);
             }
 
             // [속성 룬 패시브 및 원소 시너지 추가 발동]
-            if (targetEnemy.alive) {
-                // A. 작열의 룬 / 화염 2셋 시너지 (화상 도트 부여)
-                const shouldBurn = passives.burn || (synStats.burnChance > 0 && Math.random() < synStats.burnChance);
-                if (shouldBurn) {
-                    targetEnemy.burnTicks = passives.burnDuration || synStats.burnDuration || 3;
-                    targetEnemy.burnDmg = Math.max(1, Math.round(finalDamage * (passives.burnRatio || 0.25)));
-                }
-
-                // B. 연쇄 전격 룬 / 전격 3셋 시너지 (연쇄 번개 발동)
-                const totalChainChance = Math.max(passives.chainChance || 0, synStats.chainChance || 0);
-                if (totalChainChance > 0 && Math.random() < totalChainChance) {
-                    const chainRatio = passives.chainRatio || synStats.chainDamageRatio || 0.6;
-                    triggerRuneChainLightning(targetEnemy, finalDamage * chainRatio, passives.chainCount || 2);
-                }
-
-                // C. 시공 붕괴 룬 발동
-                if (passives.voidCollapseChance > 0 && Math.random() < passives.voidCollapseChance) {
-                    triggerRuneVoidCollapse(targetEnemy, passives.voidCollapseDamage || 35);
-                }
-            }
+            applyOnHitPassives(targetEnemy, finalDamage, passives, synStats, towerKey, ownerId);
         }, hitDelay);
     }
 
@@ -463,34 +483,104 @@ function attackFromTowers() {
 }
 
 /**
+ * [v0.44.0 New] 피해 적용 공통 헬퍼: 유효 피해/오버킬 통계 집계 + 피격/사망 처리
+ * @param {string} sourceKey - 타워 타입 (통계용)
+ * @param {string|null} ownerId - 관장 지휘관 ID (통계/약탈 룬용)
+ */
+function dealDamage(enemy, damage, color, isCrit = false, sourceKey = null, ownerId = null) {
+    if (!enemy || !enemy.alive || !(damage > 0)) return;
+
+    if (typeof battleStats !== 'undefined' && battleStats) {
+        const effectiveDmg = Math.min(enemy.hp, damage);
+        if (sourceKey) {
+            if (!battleStats.towers) battleStats.towers = {};
+            if (!battleStats.towers[sourceKey]) battleStats.towers[sourceKey] = { damage: 0, kills: 0 };
+            battleStats.towers[sourceKey].damage += effectiveDmg;
+        }
+        if (ownerId) {
+            if (!battleStats.ownerTowerDamage) battleStats.ownerTowerDamage = {};
+            battleStats.ownerTowerDamage[ownerId] = (battleStats.ownerTowerDamage[ownerId] || 0) + effectiveDmg;
+        }
+        battleStats.totalDamage = (battleStats.totalDamage || 0) + effectiveDmg;
+        if (damage > effectiveDmg) {
+            battleStats.wastedOverkillDamage = (battleStats.wastedOverkillDamage || 0) + (damage - effectiveDmg);
+        }
+    }
+
+    enemy.hp -= damage;
+    onEnemyHit(enemy, damage, color, isCrit, sourceKey, ownerId);
+}
+
+/**
+ * [v0.44.0 New] 타격 시 속성 룬 패시브 & 원소 시너지 부가 효과 (타워/히어로 공용)
+ */
+function applyOnHitPassives(targetEnemy, finalDamage, passives, synStats, sourceKey = null, ownerId = null) {
+    passives = passives || {};
+    synStats = synStats || {};
+
+    if (targetEnemy.alive) {
+        // A. 작열의 룬 / 화염 2셋 시너지 (화상 도트 부여)
+        //  - v0.44.0: 지속시간 '초' 단위를 틱(×5)으로 정확히 환산, 매초 burnRatio 피해를 틱 단위로 분할 (최소 1 피해 강제 제거)
+        const shouldBurn = passives.burn || (synStats.burnChance > 0 && Math.random() < synStats.burnChance);
+        if (shouldBurn) {
+            const durationSec = passives.burn ? (passives.burnDuration || 3) : (synStats.burnDuration || 3);
+            const ratioPerSec = passives.burnRatio || 0.25;
+            targetEnemy.burnTicks = Math.round(durationSec * 5);
+            targetEnemy.burnDmg = Math.max(0.1, Math.round((finalDamage * ratioPerSec / 5) * 10) / 10);
+            targetEnemy.burnSource = sourceKey;
+            targetEnemy.burnOwner = ownerId;
+        }
+
+        // B. 연쇄 전격 룬 / 전격 3셋 시너지 (연쇄 번개 발동)
+        const totalChainChance = Math.max(passives.chainChance || 0, synStats.chainChance || 0);
+        if (totalChainChance > 0 && Math.random() < totalChainChance) {
+            const chainRatio = passives.chainRatio || synStats.chainDamageRatio || 0.6;
+            triggerRuneChainLightning(targetEnemy, finalDamage * chainRatio, passives.chainCount || 2, sourceKey, ownerId);
+        }
+    }
+
+    // C. 관통의 룬: 대상 인접(3x3) 적 pierceCount기에게 50% 관통 충격파 (v0.44.0 구현)
+    if (passives.pierceCount > 0) {
+        const pierceTargets = enemies.filter(e => e.alive && e !== targetEnemy && Math.abs(e.x - targetEnemy.x) <= 1 && Math.abs(e.y - targetEnemy.y) <= 1).slice(0, passives.pierceCount);
+        for (const p of pierceTargets) {
+            dealDamage(p, Math.round(finalDamage * 0.5 * 10) / 10, "#94a3b8", false, sourceKey, ownerId);
+        }
+    }
+
+    // D. 시공 붕괴 룬 발동 (v0.44.0: 라운드 스케일링 피해)
+    if (passives.voidCollapseChance > 0 && Math.random() < passives.voidCollapseChance) {
+        const collapseDmg = (typeof getScaledDamage === 'function') ? getScaledDamage('voidCollapse') : 35;
+        triggerRuneVoidCollapse(targetEnemy, collapseDmg, sourceKey, ownerId);
+    }
+}
+
+/**
  * 룬 속성 효과: 인접 적 연쇄 전격 발동
  */
-function triggerRuneChainLightning(sourceEnemy, chainDmg, maxChains = 2) {
+function triggerRuneChainLightning(sourceEnemy, chainDmg, maxChains = 2, sourceKey = null, ownerId = null) {
     const chainTargets = enemies.filter(e => e.alive && e !== sourceEnemy && Math.abs(e.x - sourceEnemy.x) <= 2 && Math.abs(e.y - sourceEnemy.y) <= 2).slice(0, maxChains);
     for (const chain of chainTargets) {
-        chain.hp -= chainDmg;
-        onEnemyHit(chain, chainDmg, "#38bdf8");
+        dealDamage(chain, chainDmg, "#38bdf8", false, sourceKey, ownerId);
     }
 }
 
 /**
  * 룬 속성 효과: 시공 붕괴 광역 왜곡 폭발
  */
-function triggerRuneVoidCollapse(sourceEnemy, collapseDmg = 35) {
+function triggerRuneVoidCollapse(sourceEnemy, collapseDmg = 35, sourceKey = null, ownerId = null) {
     createSplashEffect(sourceEnemy.x, sourceEnemy.y);
     showFloatingDamage(sourceEnemy.x, sourceEnemy.y, "🌌 시공 붕괴!", "#a855f7");
 
     const victims = enemies.filter(e => e.alive && Math.abs(e.x - sourceEnemy.x) <= 1 && Math.abs(e.y - sourceEnemy.y) <= 1);
     for (const victim of victims) {
-        victim.hp -= collapseDmg;
-        onEnemyHit(victim, collapseDmg, "#c084fc");
+        dealDamage(victim, collapseDmg, "#c084fc", false, sourceKey, ownerId);
     }
 }
 
 /**
  * 단일 적 피격 후 체력바 갱신, 플로팅 텍스트 팝업 및 사망 처리
  */
-function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey = null) {
+function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey = null, ownerId = null) {
     // 플로팅 데미지 텍스트 생성
     if (typeof damage === 'number' || typeof damage === 'string') {
         showFloatingDamage(enemy.x, enemy.y, damage, color, isCrit);
@@ -522,8 +612,8 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey 
         // 1. 기본 TP(골드) 획득
         gold++;
 
-        // 2. 마나 포인트(MP) 회복 (+2 MP, 마법사 2셋 시너지 반영)
-        let mpGain = 2;
+        // 2. 마나 포인트(MP) 회복 (처치 기본량 + 마법사 2셋 시너지 반영)
+        let mpGain = (typeof MP_CONFIG !== 'undefined') ? MP_CONFIG.perKill : 2;
         if (typeof calculateDeckSynergies === 'function') {
             const syn = calculateDeckSynergies();
             if (syn && syn.bonusStats && syn.bonusStats.extraMpPerKill) {
@@ -548,8 +638,8 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey 
             }
         }
 
-        // 4. 황금 약탈 패시브 룬 발동 (v0.24.0 New)
-        const passives = typeof getActiveRunePassives === 'function' ? getActiveRunePassives() : {};
+        // 4. 황금 약탈 패시브 룬 발동 (v0.44.0: 처치한 타워/히어로의 관장 지휘관 룬만 적용)
+        const passives = (typeof getActiveRunePassives === 'function' && ownerId) ? getActiveRunePassives(ownerId) : {};
         if (passives.plunderChance > 0 && Math.random() < passives.plunderChance) {
             const loot = passives.plunderGold || 2;
             gold += loot;
@@ -600,20 +690,29 @@ function showFloatingDamage(gridX, gridY, damage, color = "#ffeb3b", isCrit = fa
 /**
  * 얼음 타워 둔화(Slow) 디버프 적용
  */
-function applySlowEffect(enemy, durationTicks) {
+function applySlowEffect(enemy, durationTicks, slowRatio = 0.5) {
     if (!enemy || !enemy.alive) return;
 
     enemy.slowTicksRemaining = Math.max(enemy.slowTicksRemaining || 0, durationTicks);
 
-    // 최초 슬로우 진입 시 속도 틱 2배 (둔화)
+    // [v0.44.0] 감속률(slowRatio) 반영: 이동 주기 = 원래 주기 / (1 - 감속률)
+    //  (0.5 → 2배, 0.4 → 1.67배, 0.65 → 2.86배 느려짐). 더 강한 감속이 들어오면 갱신.
+    const ratio = Math.max(0, Math.min(0.8, slowRatio));
     if (!enemy.isSlowed) {
-        enemy.isSlowed = true;
         enemy.originalSpeedTick = enemy.speedTick;
-        enemy.speedTick = enemy.speedTick * 2; // 이동 주기 2배 느려짐
+    }
+    const base = enemy.originalSpeedTick || enemy.speedTick;
+    const slowedTick = base / (1 - ratio);
+    if (!enemy.isSlowed || slowedTick > enemy.speedTick) {
+        enemy.isSlowed = true;
+        enemy.speedTick = slowedTick;
 
         if (enemy.element) {
             const body = enemy.element.querySelector(".monster-body");
             if (body) body.classList.add("slowed");
+            // 감속 시 이동 트랜지션 속도도 동기화
+            const duration = (enemy.speedTick * 0.2) / ((gameSpeed || 1) * (enemy.speedMulti || 1));
+            enemy.element.style.transition = `left ${duration}s linear, top ${duration}s linear`;
         }
     }
 }
@@ -702,6 +801,8 @@ function sellSelectedTower() {
     cell.inGameLevel = 0;
     cell.investedGold = 0;
     cell.towerOwnerGrade = null;
+    cell.towerOwner = null;
+    cell.attackCooldown = 0;
     // cell.buildable 은 true 유지! (기반은 환불 불가)
 
     clearActiveRange();
@@ -748,7 +849,8 @@ function upgradeSelectedTower() {
 
     gold -= upgradeCost;
     cell.inGameLevel = currentLv + 1;
-    cell.investedGold = (cell.investedGold || towerInfo.cost) + upgradeCost;
+    // [v0.44.0] 설치비 0 TP 스톡 체계: 실제 지불한 강화비만 누적 (기존: 미지불 설치비가 가산되어 강화→철거 무한 TP 복사 발생)
+    cell.investedGold = (cell.investedGold || 0) + upgradeCost;
 
     // 축하 플로팅 텍스트
     showFloatingDamage(cell.x, cell.y, `⬆️ Lv.${cell.inGameLevel} 강화!`, "#22c55e");
@@ -825,12 +927,19 @@ function showTowerDetailPanel(cell, stats) {
     if (statsEl) {
         const dmgText = Math.round(stats.damage * 10) / 10;
         let specialDesc = "";
-        if (cell.tower === 'ice') specialDesc = "<br>❄️ 효과: 50% 슬로우";
+        if (cell.tower === 'ice') {
+            const synIce = (typeof calculateDeckSynergies === 'function') ? calculateDeckSynergies().bonusStats : {};
+            const slowPct = Math.round(Math.min(0.8, (stats.slowRatio || 0.5) + (synIce.slowRatioBonus || 0)) * 100);
+            specialDesc = `<br>❄️ 효과: ${slowPct}% 슬로우`;
+        }
         if (cell.tower === 'bomb') specialDesc = "<br>💣 효과: 광역 폭발";
-        if (cell.tower === 'shock') specialDesc = "<br>⚡ 효과: 3기 연쇄 번개";
+        if (cell.tower === 'shock') specialDesc = `<br>⚡ 효과: ${stats.chainCount || 3}기 연쇄 번개`;
         if (cell.tower === 'sniper') specialDesc = "<br>🎯 효과: 초장거리 단일 정밀 저격";
 
-        statsEl.innerHTML = `⚔️ 공격력: ${dmgText} | 🏹 사거리: ${stats.range}${specialDesc}`;
+        const intervalSec = ((stats.attackIntervalTicks || 1) * 0.2).toFixed(1);
+        const ownerInfo = (cell.towerOwner && typeof CHARACTER_DATA !== 'undefined') ? CHARACTER_DATA[cell.towerOwner] : null;
+        const ownerText = ownerInfo ? `<br>👤 관장: ${ownerInfo.name} (룬 적용)` : "";
+        statsEl.innerHTML = `⚔️ 공격력: ${dmgText} | 🏹 사거리: ${stats.range} | ⏱️ ${intervalSec}초${specialDesc}${ownerText}`;
     }
 
     // 강화 버튼 처리
@@ -856,12 +965,14 @@ function showTowerDetailPanel(cell, stats) {
         }
     }
 
-    // 판매 버튼 처리 (투자 비용 60% 환급)
-    const refundRate = (typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6;
-    const totalInvested = cell.investedGold || stats.cost;
+    // 판매 버튼 처리 (v0.44.0: 실제 적용되는 등급별 환급율 & 실제 투자액 기준으로 표기)
+    const refundRate = (typeof getTowerRefundRateForCell === 'function')
+        ? getTowerRefundRateForCell(cell)
+        : ((typeof TOWER_REFUND_RATE !== 'undefined') ? TOWER_REFUND_RATE : 0.6);
+    const totalInvested = cell.investedGold || 0;
     const refund = Math.floor(totalInvested * refundRate);
     if (sellBtn) {
-        sellBtn.innerText = `💰 타워 판매 (+${refund} TP, 60%)`;
+        sellBtn.innerText = `💰 타워 철거 (+${refund} TP, 강화비 ${Math.round(refundRate * 100)}% 환급)`;
     }
 
     updateTargetingButtonsUI(cell.targeting || 'first');
@@ -1048,36 +1159,51 @@ function castSpellRune(spellItem) {
     // v0.28.0: 대각선 지휘관 스펠 컷인 연출 발동
     triggerSpellCutin(spellItem.charId, rInfo);
 
+    // [v0.44.0] 마법사 3셋 '비전 폭주': 모든 스펠 데미지 및 효과 +30% (기존: 수치만 계산되고 미적용)
+    const synSpell = (typeof calculateDeckSynergies === 'function') ? calculateDeckSynergies().bonusStats : {};
+    const spellPower = 1 + (synSpell.spellPowerRatio || 0);
+
     // 스펠 고유 효과 실행
     if (runeId === 'rune_spell_gold') {
         // 1. 긴급 보급: +8 TP
-        gold += (rInfo.effectValue || 8);
-        showFloatingDamage(10, 10, `+${rInfo.effectValue || 8} TP 보급!`, "#eab308");
+        const supply = Math.round((rInfo.effectValue || 8) * spellPower);
+        gold += supply;
+        showFloatingDamage(10, 10, `+${supply} TP 보급!`, "#eab308");
     } else if (runeId === 'rune_spell_gust') {
-        // 2. 돌풍의 결계: 모든 살아있는 적 4초간 40% 감속
+        // 2. 돌풍의 결계: 모든 살아있는 적 4초간 40% 감속 (v0.44.0: 데이터의 감속률/지속시간 정확 반영)
+        const gustTicks = Math.round((rInfo.durationSec || 4) * 5 * spellPower);
         for (const enemy of enemies) {
             if (enemy.alive && typeof applySlowEffect === 'function') {
-                applySlowEffect(enemy, 20); // 4초 상당
+                applySlowEffect(enemy, gustTicks, rInfo.slowRatio || 0.4);
             }
         }
         showFloatingDamage(10, 10, "🌪️ 돌풍의 결계 발동!", "#06b6d4");
     } else if (runeId === 'rune_spell_thunder') {
-        // 3. 천벌의 낙뢰: 전장의 모든 적에게 15 피해
+        // 3. 천벌의 낙뢰: 전장의 모든 적에게 라운드 스케일링 피해
+        const thunderDmg = Math.round(getScaledDamage('thunder') * spellPower);
         let hitCount = 0;
-        for (const enemy of enemies) {
+        for (const enemy of enemies.slice()) {
             if (enemy.alive) {
-                enemy.hp -= (rInfo.damage || 15);
-                onEnemyHit(enemy, rInfo.damage || 15, "#eab308");
+                dealDamage(enemy, thunderDmg, "#eab308", false, null, spellItem.charId);
                 hitCount++;
             }
         }
         showFloatingDamage(10, 10, `⚡ 천벌의 낙뢰 (${hitCount}기 타격)!`, "#f59e0b");
     } else if (runeId === 'rune_spell_teleport') {
         // 4. 시공의 왜곡 (궁극기): 모든 적을 스폰 입구로 강제 송환
+        //  v0.44.0: 경로 진행도(pathIndex)까지 초기화하여 다음 틱에 원래 위치로 되돌아가던 버그 수정
         for (const enemy of enemies) {
             if (enemy.alive) {
                 enemy.x = startPos.x;
                 enemy.y = startPos.y;
+                enemy.dynamicPath = (enemy.moveType === 'ground' || enemy.moveType === 'leap')
+                    ? (findAStarPath({ x: startPos.x, y: startPos.y }, goalPos) || [])
+                    : [];
+                enemy.pathIndex = 0;
+                enemy.cornerLag = 0;
+                delete enemy.lastMoveDx;
+                delete enemy.lastMoveDy;
+                enemy.channelingTicks = 0;
                 if (typeof updateEnemyPosition === 'function') {
                     updateEnemyPosition(enemy);
                 }
@@ -1085,24 +1211,17 @@ function castSpellRune(spellItem) {
         }
         showFloatingDamage(10, 10, "🌀 시공의 왜곡: 전원 강제 송환!", "#a855f7");
     } else if (runeId === 'rune_spell_frenzy') {
-        // 5. 성스러운 축복 (UR): 6초간 아군 타워 공격속도 폭주 & 연속 사격
-        showFloatingDamage(10, 10, "✨ 성스러운 축복: 전 타워 폭주 사격!", "#eab308");
-        attackFromTowers();
-        const frenzyInterval = setInterval(() => {
-            if (typeof gameRunning !== 'undefined' && gameRunning && !isPaused) {
-                attackFromTowers();
-            }
-        }, 600);
-        setTimeout(() => {
-            clearInterval(frenzyInterval);
-        }, (rInfo.durationSec || 6) * 1000);
+        // 5. 성스러운 축복 (UR): 6초간 아군 타워 공격속도 2배
+        //  v0.44.0: 기존 600ms 추가 사격(실제 +33%)을 게임 틱 기반 2배 사격으로 교체 (배속/일시정지 연동)
+        frenzyTicksRemaining = Math.round((rInfo.durationSec || 6) * 5 * spellPower);
+        showFloatingDamage(10, 10, "✨ 성스러운 축복: 전 타워 공격속도 2배!", "#eab308");
     } else if (runeId === 'rune_spell_armageddon') {
-        // 6. 아마겟돈 (U): 전 필드 거대 메테오 낙하 60 파멸 피해
+        // 6. 아마겟돈 (U): 전 필드 거대 메테오 낙하 (라운드 스케일링 파멸 피해)
+        const meteorDmg = Math.round(getScaledDamage('armageddon') * spellPower);
         let meteorHits = 0;
-        for (const enemy of enemies) {
+        for (const enemy of enemies.slice()) {
             if (enemy.alive) {
-                enemy.hp -= (rInfo.damage || 60);
-                onEnemyHit(enemy, rInfo.damage || 60, "#ef4444", true);
+                dealDamage(enemy, meteorDmg, "#ef4444", true, null, spellItem.charId);
                 meteorHits++;
             }
         }
@@ -1241,10 +1360,11 @@ function handleHeroTokenClick(charId) {
 function handleHeroAttacks() {
     if (typeof deployedHeroes === 'undefined' || !enemies || enemies.length === 0) return;
 
-    const passives = (typeof getActiveRunePassives === 'function') ? getActiveRunePassives() : {};
-
     for (const [charId, hero] of Object.entries(deployedHeroes)) {
         if (!hero) continue;
+
+        // [v0.44.0] 히어로 본체에는 본인이 장착한 속성 룬만 적용
+        const passives = (typeof getActiveRunePassives === 'function') ? getActiveRunePassives(charId) : {};
 
         // 공격 쿨다운 처리 (기본 0.8초 주기 = 4틱)
         if (hero.attackCooldown > 0) {
@@ -1256,18 +1376,19 @@ function handleHeroAttacks() {
         if (!charBase) continue;
 
         const isGradeU = (charBase.grade === 'U');
-        const baseDamage = isGradeU ? 100 : 65;
+        // [v0.44.0] 고정 피해(U 100 / UR 65) -> 라운드 기준 체력 배수 스케일링 (초반 과잉/후반 무력화 방지)
+        const baseDamage = getScaledDamage(isGradeU ? 'heroU' : 'heroUR');
         const range = 2.5; // 사거리 반경 2.5타일
 
         // 사거리 내 살아있는 적 탐색 (진행도가 가장 높은 선두 적 우선 타겟팅)
         let target = null;
-        let maxProgress = -1;
+        let maxProgress = -Infinity;
 
         for (const enemy of enemies) {
             if (!enemy.alive) continue;
             const dist = Math.hypot(enemy.x - hero.x, enemy.y - hero.y);
             if (dist <= range) {
-                const progress = enemy.pathIndex || 0;
+                const progress = getEnemyProgress(enemy);
                 if (progress > maxProgress) {
                     maxProgress = progress;
                     target = enemy;
@@ -1328,8 +1449,11 @@ function handleHeroAttacks() {
                 }
 
                 if (typeof onEnemyHit === 'function') {
-                    onEnemyHit(target, finalDamage, hitColor, isCrit);
+                    onEnemyHit(target, finalDamage, hitColor, isCrit, null, charId);
                 }
+
+                // [v0.44.0] 히어로 본체 장착 속성 룬(화상/연쇄/관통/시공 붕괴) 부가 효과 적용
+                applyOnHitPassives(target, finalDamage, passives, {}, null, charId);
             }, hitDelay);
         }
     }

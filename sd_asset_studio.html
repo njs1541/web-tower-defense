@@ -1820,6 +1820,10 @@
                 <span id="lbl-target-extra">✂️ 마스크 반경</span>
                 <span id="val-target-extra" style="color: #38bdf8; font-weight: 600;">44%</span>
               </div>
+              <input type="range" id="rng-target-extra" min="20" max="65" value="44" step="1"
+                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
+            </div>
+            <div style="font-size: 10.5px; color: #64748b; line-height: 1.3;">※ 회전·피벗·앵커는 ✨ Live2D 관절 캔버스 뷰에만 반영됩니다 (기존 CSS 리깅 뷰에는 미적용)</div>
             <div>
               <div style="display: flex; justify-content: space-between; color: #94a3b8; margin-bottom: 2px;">
                 <span>🔄 회전각 (Rot)</span>
@@ -1858,9 +1862,6 @@
                 <span id="val-target-anc-y" style="color: #fbbf24; font-weight: 600;">300</span>
               </div>
               <input type="range" id="rng-target-anc-y" min="50" max="550" value="300" step="2"
-                style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
-            </div>
-              <input type="range" id="rng-target-extra" min="20" max="65" value="44" step="1"
                 style="width: 100%; cursor: pointer;" oninput="onUniversalParamChange()">
             </div>
           </div>
@@ -2124,6 +2125,7 @@
 
   </main>
 
+  <script src="js/part_rigging.js"></script>
   <script>
     /**
      * ========================================================================
@@ -2279,7 +2281,6 @@ char_ranger: {
 
       if (preset.sampleSheetA && preset.sampleSheetB) {
         switchSheetUploadMode('dual');
-      initLive2DCanvasRig();
         sampleMap.sheetA = preset.sampleSheetA;
         sampleMap.sheetB = preset.sampleSheetB;
       } else {
@@ -3528,7 +3529,7 @@ char_ranger: {
 
     /* 🎯 전 파츠(표정·상의·하의·헤일로·날개·무기) 실시간 1:1 피팅 & 좌우반전 & 모션 컨트롤러 로직 */
     const DEFAULT_PART_FITS = {
-      expr: { scale: 100, x: 0, y: 0, clip: 44, mask: true, flipX: false },
+      expr: { scale: 100, x: 0, y: 0, clip: 44, mask: true, flipX: false, rot: 0, pivX: 0.5, pivY: 0.5, ancX: 300, ancY: 200 },
       top: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.2, ancX: 300, ancY: 280 },
       bottom: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.1, ancX: 300, ancY: 360 },
       halo: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.8, ancX: 300, ancY: 120 },
@@ -3536,6 +3537,15 @@ char_ranger: {
       weapon: { scale: 100, x: 0, y: 0, flipX: false, rot: -15, pivX: 0.5, pivY: 0.85, ancX: 230, ancY: 330 },
       sub: { scale: 100, x: 0, y: 0, flipX: false, rot: 0, pivX: 0.5, pivY: 0.5, ancX: 370, ancY: 330 }
     };
+
+    // 저장값/프리셋 핏을 파츠 단위로 기본값 위에 덮어씀 (누락 필드는 기본값 유지 → 이전 캐릭터 값 잔존 방지)
+    function mergePartFits(src) {
+      const merged = JSON.parse(JSON.stringify(DEFAULT_PART_FITS));
+      Object.entries(src || {}).forEach(([key, val]) => {
+        if (val && typeof val === 'object') merged[key] = Object.assign(merged[key] || {}, val);
+      });
+      return merged;
+    }
 
     let partFitState = JSON.parse(JSON.stringify(DEFAULT_PART_FITS));
 
@@ -3656,7 +3666,8 @@ char_ranger: {
           scale: { x: scale / 100, y: scale / 100 },
           rotation: rot,
           pivot: { x: pivX, y: pivY },
-          anchor: { x: ancX, y: ancY }
+          anchor: { x: ancX, y: ancY },
+          flipX: !!partFitState[target].flipX
         });
       }
       updateTuningUiLabels(target, partFitState[target]);
@@ -3671,6 +3682,7 @@ char_ranger: {
       if (!partFitState[target]) partFitState[target] = {};
       partFitState[target].flipX = checked;
       applyPartFitToCss(target);
+      syncLive2DRigFromFitState();
       updateTuningUiLabels(target, partFitState[target]);
 
       try {
@@ -3747,12 +3759,15 @@ char_ranger: {
       const target = getCurrentTuningTarget();
       partFitState[target] = JSON.parse(JSON.stringify(DEFAULT_PART_FITS[target]));
       applyPartFitToCss(target);
+      syncLive2DRigFromFitState();
       onSwitchTuningTarget();
     }
 
     function resetAllPartTuning() {
       partFitState = JSON.parse(JSON.stringify(DEFAULT_PART_FITS));
       applyAllPartFitsToCss();
+      syncLive2DRigFromFitState();
+      onSwitchTuningTarget();
       try {
         localStorage.removeItem('sd_studio_part_fits');
       } catch (e) { }
@@ -3820,12 +3835,13 @@ modularCustomFit: ${JSON.stringify(partFitState, null, 2)}`;
         const saved = localStorage.getItem('sd_studio_part_fits');
         if (saved) {
           const loaded = JSON.parse(saved);
-          partFitState = Object.assign({}, DEFAULT_PART_FITS, loaded);
+          partFitState = mergePartFits(loaded);
         }
       } catch (e) { }
       applyAllPartFitsToCss();
       setAttackMotionType('bow');
       switchSheetUploadMode('dual'); // 🌟 기본 디폴트 탭을 '듀얼 시트' 모드로 활성화
+      initLive2DCanvasRig();
     }
 
     // 프리셋 선택 시 프리셋 전용 핏 및 무기 모션이 있으면 자동 주입
@@ -3836,8 +3852,10 @@ modularCustomFit: ${JSON.stringify(partFitState, null, 2)}`;
       const preset = characterPresets[sel];
       if (preset) {
         if (preset.customFit) {
-          partFitState = JSON.parse(JSON.stringify(preset.customFit));
+          partFitState = mergePartFits(preset.customFit);
           applyAllPartFitsToCss();
+          syncLive2DRigFromFitState();
+          onSwitchTuningTarget();
         }
         if (preset.motionType) {
           setAttackMotionType(preset.motionType);
@@ -3846,208 +3864,7 @@ modularCustomFit: ${JSON.stringify(partFitState, null, 2)}`;
     };
 
     
-    /**
-     * ========================================================================
-     * [CORE ENGINE] PartNormalizer & PartRiggingSystem (바닐라 JS Live2D 리깅 시스템)
-     * ========================================================================
-     */
-    class PartNormalizer {
-      static getTrimmedBounds(sourceImage, alphaThreshold = 15) {
-        const canvas = document.createElement('canvas');
-        canvas.width = sourceImage.naturalWidth || sourceImage.width;
-        canvas.height = sourceImage.naturalHeight || sourceImage.height;
-        if (canvas.width <= 0 || canvas.height <= 0) return { minX:0, minY:0, maxX:0, maxY:0, width:1, height:1 };
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(sourceImage, 0, 0);
-        let imgData;
-        try {
-          imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        } catch (e) {
-          return { minX:0, minY:0, maxX:canvas.width, maxY:canvas.height, width:canvas.width, height:canvas.height };
-        }
-        const data = imgData.data;
-        let minX = canvas.width, minY = canvas.height;
-        let maxX = -1, maxY = -1;
-
-        for (let y = 0; y < canvas.height; y++) {
-          for (let x = 0; x < canvas.width; x++) {
-            const alpha = data[(y * canvas.width + x) * 4 + 3];
-            if (alpha > alphaThreshold) {
-              if (x < minX) minX = x;
-              if (x > maxX) maxX = x;
-              if (y < minY) minY = y;
-              if (y > maxY) maxY = y;
-            }
-          }
-        }
-        if (maxX === -1) {
-          return { minX: 0, minY: 0, maxX: canvas.width, maxY: canvas.height, width: canvas.width, height: canvas.height };
-        }
-        return {
-          minX, minY, maxX, maxY,
-          width: maxX - minX + 1,
-          height: maxY - minY + 1
-        };
-      }
-
-      static createNormalizedCanvas(sourceImage, targetWidth, targetHeight, fitMode = 'contain') {
-        const bounds = this.getTrimmedBounds(sourceImage);
-        const normCanvas = document.createElement('canvas');
-        normCanvas.width = targetWidth;
-        normCanvas.height = targetHeight;
-        const ctx = normCanvas.getContext('2d');
-
-        let drawW = targetWidth;
-        let drawH = targetHeight;
-        let drawX = 0;
-        let drawY = 0;
-
-        if (fitMode === 'contain' && bounds.width > 0 && bounds.height > 0) {
-          const scale = Math.min(targetWidth / bounds.width, targetHeight / bounds.height);
-          drawW = bounds.width * scale;
-          drawH = bounds.height * scale;
-          drawX = (targetWidth - drawW) / 2;
-          drawY = (targetHeight - drawH) / 2;
-        }
-
-        ctx.drawImage(
-          sourceImage,
-          bounds.minX, bounds.minY, bounds.width, bounds.height,
-          drawX, drawY, drawW, drawH
-        );
-        return normCanvas;
-      }
-    }
-
-    class PartRiggingSystem {
-      constructor(canvasElement, config) {
-        this.canvas = canvasElement;
-        this.ctx = this.canvas.getContext('2d');
-        this.config = config;
-        this.imageMap = new Map();
-        this.selectedPartId = 'weapon';
-        this.showDebugGizmo = true;
-      }
-
-      render() {
-        if (!this.canvas) return;
-        const { width, height } = this.canvas;
-        this.ctx.clearRect(0, 0, width, height);
-
-        // 체커보드 배경
-        const ctx = this.ctx;
-        ctx.fillStyle = '#151c2c';
-        ctx.fillRect(0, 0, width, height);
-
-        ctx.strokeStyle = '#1e293b';
-        ctx.lineWidth = 1;
-        for (let x = 0; x < width; x += 40) {
-          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-        }
-        for (let y = 0; y < height; y += 40) {
-          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-        }
-
-        // Z-Index 정렬 후 렌더링
-        const sorted = [...this.config.parts].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
-        for (const part of sorted) {
-          this.drawPart(part);
-        }
-
-        if (this.showDebugGizmo && this.selectedPartId) {
-          const selected = this.config.parts.find(p => p.id === this.selectedPartId);
-          if (selected) this.drawGizmo(selected);
-        }
-      }
-
-      drawPart(part) {
-        const asset = this.imageMap.get(part.id);
-        if (!asset || asset.width <= 0 || asset.height <= 0) return;
-
-        const ctx = this.ctx;
-        ctx.save();
-        ctx.globalAlpha = part.opacity !== undefined ? part.opacity : 1.0;
-
-        ctx.translate(part.anchor.x, part.anchor.y);
-        const rad = (part.rotation || 0) * (Math.PI / 180);
-        ctx.rotate(rad);
-
-        const scaleX = (part.scale?.x ?? 1.0) * (part.flipX ? -1 : 1);
-        const scaleY = part.scale?.y ?? 1.0;
-        ctx.scale(scaleX, scaleY);
-
-        const assetW = asset.width;
-        const assetH = asset.height;
-        const pivotX = (part.pivot?.x ?? 0.5) * assetW;
-        const pivotY = (part.pivot?.y ?? 0.5) * assetH;
-
-        ctx.drawImage(asset, -pivotX, -pivotY, assetW, assetH);
-        ctx.restore();
-      }
-
-      drawGizmo(part) {
-        const asset = this.imageMap.get(part.id);
-        if (!asset) return;
-
-        const ctx = this.ctx;
-        const assetW = asset.width;
-        const assetH = asset.height;
-        const rad = (part.rotation || 0) * (Math.PI / 180);
-        const scaleX = (part.scale?.x ?? 1.0) * (part.flipX ? -1 : 1);
-        const scaleY = part.scale?.y ?? 1.0;
-        const pivotX = (part.pivot?.x ?? 0.5) * assetW;
-        const pivotY = (part.pivot?.y ?? 0.5) * assetH;
-
-        ctx.save();
-        ctx.translate(part.anchor.x, part.anchor.y);
-        ctx.rotate(rad);
-        ctx.scale(scaleX, scaleY);
-
-        // 바운딩 박스
-        ctx.strokeStyle = '#00ffff';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 4]);
-        ctx.strokeRect(-pivotX, -pivotY, assetW, assetH);
-
-        // 피벗 포인트 (빨간 원 + 십자)
-        ctx.setLineDash([]);
-        ctx.strokeStyle = '#ef4444';
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.arc(0, 0, 5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(-12, 0); ctx.lineTo(12, 0);
-        ctx.moveTo(0, -12); ctx.lineTo(0, 12);
-        ctx.stroke();
-        ctx.restore();
-
-        // 앵커 포인트 (노란 다이아몬드)
-        ctx.save();
-        ctx.translate(part.anchor.x, part.anchor.y);
-        ctx.fillStyle = '#fbbf24';
-        ctx.beginPath();
-        ctx.moveTo(0, -7); ctx.lineTo(7, 0); ctx.lineTo(0, 7); ctx.lineTo(-7, 0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-      }
-
-      updatePartTransform(partId, updates) {
-        const part = this.config.parts.find(p => p.id === partId);
-        if (!part) return;
-        if (updates.anchor) Object.assign(part.anchor, updates.anchor);
-        if (updates.pivot) Object.assign(part.pivot, updates.pivot);
-        if (updates.scale) Object.assign(part.scale, updates.scale);
-        if (updates.rotation !== undefined) part.rotation = updates.rotation;
-        if (updates.flipX !== undefined) part.flipX = updates.flipX;
-        this.render();
-      }
-
-      exportConfig() {
-        return JSON.stringify(this.config, null, 2);
-      }
-    }
+    // PartNormalizer / PartRiggingSystem 엔진은 js/part_rigging.js 공용 모듈에서 로드
 
     // 01~15 설정시트와 1:1 매핑되는 기획 호환 리깅 설정
     const DEFAULT_LIVE2D_CONFIG = {
@@ -4117,24 +3934,27 @@ modularCustomFit: ${JSON.stringify(partFitState, null, 2)}`;
         }
       });
 
-      // 좌우 반전 및 튜닝 상태 동기화
+      syncLive2DRigFromFitState();
+    }
+
+    // partFitState(튜닝 패널 값) → 리깅 캔버스 파츠 트랜스폼 반영. 렌더는 마지막에 1회만 수행
+    function syncLive2DRigFromFitState() {
+      if (!live2dRigSystem) return;
       Object.keys(partFitState).forEach(target => {
         const fit = partFitState[target];
-        if (fit) {
-          const updates = {};
-          if (fit.scale !== undefined) updates.scale = { x: fit.scale / 100, y: fit.scale / 100 };
-          if (fit.flipX !== undefined) updates.flipX = fit.flipX;
-          if (fit.rot !== undefined) updates.rotation = fit.rot;
-          if (fit.pivX !== undefined || fit.pivY !== undefined) {
-            updates.pivot = { x: fit.pivX ?? 0.5, y: fit.pivY ?? 0.5 };
-          }
-          if (fit.ancX !== undefined || fit.ancY !== undefined) {
-            updates.anchor = { x: fit.ancX ?? 300, y: fit.ancY ?? 300 };
-          }
-          live2dRigSystem.updatePartTransform(target, updates);
+        if (!fit) return;
+        const updates = {};
+        if (fit.scale !== undefined) updates.scale = { x: fit.scale / 100, y: fit.scale / 100 };
+        if (fit.flipX !== undefined) updates.flipX = fit.flipX;
+        if (fit.rot !== undefined) updates.rotation = fit.rot;
+        if (fit.pivX !== undefined || fit.pivY !== undefined) {
+          updates.pivot = { x: fit.pivX ?? 0.5, y: fit.pivY ?? 0.5 };
         }
+        if (fit.ancX !== undefined || fit.ancY !== undefined) {
+          updates.anchor = { x: fit.ancX ?? 300, y: fit.ancY ?? 300 };
+        }
+        live2dRigSystem.updatePartTransform(target, updates, { render: false });
       });
-
       live2dRigSystem.render();
     }
 
