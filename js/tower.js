@@ -136,6 +136,7 @@ function handleCellClick(x, y) {
                 gold -= cost;
             }
             builtBaseCount = (builtBaseCount || 0) + 1;
+            playSfx('build');
 
             // 전역 몬스터 최단 경로 즉시 재계산
             if (typeof recalculateGlobalPath === 'function') {
@@ -197,6 +198,7 @@ function handleCellClick(x, y) {
         // ⚠️ [재정립 필요 - v0.41.0] 타워 설치비(TOWER_DATA.cost) 및 철거 환급 규칙은 추후 재정립 예정.
         //    현재: 설치 0 TP / 판매 시 investedGold × 등급별 환급율(C 100%, UC 80%, 그 외 60%)
         commanderTowerRemaining[selectedTower]--;
+        playSfx('tower');
         cell.tower = selectedTower;
         cell.targeting = 'first'; // 기본 타깃팅: 선두
         cell.inGameLevel = 0;     // 인게임 0강 기본 상태
@@ -415,6 +417,8 @@ function attackFromTowers() {
             }
         }
 
+        playSfx('shoot', cell.tower);
+
         // 배속에 맞춘 투사체 도달 딜레이
         const hitDelay = Math.max(50, Math.floor(200 / (gameSpeed || 1)));
         const towerKey = cell.tower;
@@ -611,6 +615,7 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey 
 
         // 1. 기본 TP(골드) 획득
         gold++;
+        playSfx('kill');
 
         // 2. 마나 포인트(MP) 회복 (처치 기본량 + 마법사 2셋 시너지 반영)
         let mpGain = (typeof MP_CONFIG !== 'undefined') ? MP_CONFIG.perKill : 2;
@@ -630,8 +635,8 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey 
             showFloatingDamage(enemy.x, enemy.y, "💎 보스 격파! PP +1 획득!", "#38bdf8");
             console.log(`[보스 격파] 프리즘 포인트(PP) 1개 획득! (현재 보유: ${USER_DATA.pp}개)`);
         } else {
-            // 일반 몬스터 처치 시 12% 확률로 룬 포인트(RP) 드롭
-            if (Math.random() < 0.12) {
+            // 일반 몬스터 처치 시 RP_DROP_CHANCE(4%) 확률로 룬 포인트(RP) 드롭
+            if (Math.random() < RP_DROP_CHANCE) {
                 USER_DATA.rp = (USER_DATA.rp || 0) + 1;
                 saveData();
                 showFloatingDamage(enemy.x, enemy.y, "🔮 RP +1!", "#c084fc");
@@ -849,6 +854,7 @@ function upgradeSelectedTower() {
 
     gold -= upgradeCost;
     cell.inGameLevel = currentLv + 1;
+    playSfx('upgrade');
     // [v0.44.0] 설치비 0 TP 스톡 체계: 실제 지불한 강화비만 누적 (기존: 미지불 설치비가 가산되어 강화→철거 무한 TP 복사 발생)
     cell.investedGold = (cell.investedGold || 0) + upgradeCost;
 
@@ -1151,6 +1157,8 @@ function castSpellRune(spellItem) {
 
     // 마나 차감
     mp -= rInfo.mpCost;
+    playSfx('spell');
+    notifyTutorialSpellCast();
 
     if (rInfo.usageType === 'single') {
         usedSpellRunes[runeId] = true;

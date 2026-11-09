@@ -1,0 +1,57 @@
+# GitHub Pages 배포 (v0.53.3, 워크플로 P2-1)
+# main에 푸시하면 게임 실행에 필요한 파일만 모아 Pages로 배포한다.
+# 저장소 Settings → Pages → Build and deployment → Source를 "GitHub Actions"로 한 번 설정해야 동작한다.
+#
+# 포함: index.html, style.css, js/, assets/ (게임이 쓰지 않는 참고 이미지는 제외)
+# 제외: 에셋 도구 HTML, 스타일 가이드, 기획/QA 문서, test/, scratch/, docs/
+# index.html의 "<!-- dev-only:start" ~ "<!-- dev-only:end -->" 구간(에셋 스튜디오 링크 등)은 배포본에서 삭제한다.
+name: Deploy game to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect game files
+        run: |
+          set -euo pipefail
+          mkdir -p _site
+          cp index.html style.css _site/
+          cp -r js _site/js
+          cp -r assets _site/assets
+          # 게임이 참조하지 않는 참고 자료 (실바나는 게임에서 제외됨, 스타일·시트 템플릿은 에셋 제작용)
+          rm -f _site/assets/style_*.jpg _site/assets/*template*.png
+          rm -f _site/assets/*sylvana* _site/assets/parts/sylvana_*
+          rm -f _site/assets/ref_ranger_sheet_*.jpg
+          # 개발용 UI 구간 삭제
+          sed -i '/<!-- dev-only:start/,/<!-- dev-only:end -->/d' _site/index.html
+          if grep -q 'dev-only' _site/index.html; then echo "dev-only 구간 삭제 실패"; exit 1; fi
+          touch _site/.nojekyll
+          echo "배포 파일 크기:"; du -sh _site; du -sh _site/assets
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

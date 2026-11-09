@@ -81,6 +81,58 @@ function closeTalentModal() {
 }
 
 /**
+ * [v0.53.4] 세이브 관리 모달 (내보내기/가져오기, 워크플로 P2-4)
+ */
+function openSaveModal() {
+    const overlay = document.getElementById("save-modal-overlay");
+    if (!overlay) return;
+    overlay.style.display = "flex";
+    document.getElementById("save-modal-text").value = "";
+    setSaveModalStatus("", "#334155");
+}
+
+function closeSaveModal() {
+    const overlay = document.getElementById("save-modal-overlay");
+    if (overlay) overlay.style.display = "none";
+}
+
+function setSaveModalStatus(text, color) {
+    const el = document.getElementById("save-modal-status");
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = color;
+}
+
+function fillExportSave() {
+    const box = document.getElementById("save-modal-text");
+    box.value = exportSaveString();
+    box.select();
+    const done = () => setSaveModalStatus("✅ 세이브 문자열을 클립보드에 복사했습니다.", "#16a34a");
+    const manual = () => setSaveModalStatus("문자열을 선택해 두었습니다. Ctrl+C로 복사하세요.", "#334155");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(box.value).then(done, manual);
+    } else {
+        manual();
+    }
+}
+
+function applyImportSave() {
+    const text = document.getElementById("save-modal-text").value;
+    if (!text.trim()) {
+        setSaveModalStatus("가져올 세이브 문자열을 붙여넣어 주세요.", "#dc2626");
+        return;
+    }
+    if (!confirm("현재 세이브를 가져온 세이브로 바꿉니다. 현재 세이브는 백업으로 한 번 보관됩니다. 계속할까요?")) return;
+    try {
+        importSaveString(text);
+    } catch (e) {
+        setSaveModalStatus(`❌ ${e.message}`, "#dc2626");
+        return;
+    }
+    location.reload();
+}
+
+/**
  * 연구소 특성 목록 UI 렌더링
  */
 function updateTalentModalUI() {
@@ -306,7 +358,7 @@ function createSingleCommanderCard(charId, isDeployedSlot = false, slotIndex = 0
         
         <div class="commander-avatar-box">
             <div class="commander-avatar ${baseInfo.image ? 'has-image' : ''}" onclick="viewCommanderIllustration('${charId}')" title="🔍 클릭하여 일러스트 크게 보기">
-                ${baseInfo.image ? `<img src="${baseInfo.image}" alt="${baseInfo.name}" class="commander-thumb-img" onerror="this.parentElement.innerHTML='${baseInfo.avatar || '👑'}'">` : (baseInfo.avatar || '👑')}
+                ${baseInfo.image ? `<img src="${getCharacterThumbSrc(baseInfo)}" data-full="${baseInfo.image}" data-emoji="${baseInfo.avatar || '👑'}" alt="${baseInfo.name}" class="commander-thumb-img" loading="lazy" onerror="onCharThumbError(this, 'emoji')">` : (baseInfo.avatar || '👑')}
             </div>
             <div class="commander-name-box">
                 <div class="commander-name">${baseInfo.name}</div>

@@ -5,7 +5,35 @@ const goldDisplay = document.getElementById("gold");
 const monsterCountDisplay = document.getElementById("monster-count");
 const towerPanel = document.querySelector("#info-panel div");
 
+/**
+ * [v0.53.7] 지휘관 썸네일 (워크플로 P2-2)
+ * 작게 표시하는 곳(로비 목록, 소환 카드, 10+1 결과, 인게임 카드)은 assets/thumbs/<id>.webp(짧은 변 240px)를 쓴다.
+ * 썸네일은 scratch/make_thumbs.mjs로 만든다. 없으면 onCharThumbError가 원화로 한 번 대체한다.
+ */
+function getCharacterThumbSrc(charBase) {
+    return charBase && charBase.id ? `assets/thumbs/${charBase.id}.webp` : '';
+}
+
+/**
+ * 썸네일 로드 실패 처리: 원화(data-full)로 한 번 바꾸고, 그것도 실패하면 finalAction을 따른다.
+ * @param {HTMLImageElement} img
+ * @param {'hide'|'emoji'|'none'} finalAction - emoji는 data-emoji 문자로 부모 내용을 바꾼다
+ */
+function onCharThumbError(img, finalAction) {
+    if (img.dataset.full && !img.dataset.triedFull) {
+        img.dataset.triedFull = '1';
+        img.src = img.dataset.full;
+        return;
+    }
+    img.onerror = null;
+    if (finalAction === 'hide') img.style.display = 'none';
+    else if (finalAction === 'emoji' && img.parentElement) img.parentElement.textContent = img.dataset.emoji || '👑';
+}
+
 function render() {
+    // [v0.53.8] 첫 판 튜토리얼 단계 진행 확인 (tutorial.js)
+    updateTutorial();
+
     // 타워 건설 모드 여부 확인
     const isBuildMode = interactionMode === 'build' && selectedTower;
 
@@ -486,7 +514,7 @@ function updateInGameCommandersBar() {
 
             <div class="ingame-card-body" onclick="interactWithCommanderInGame('${charId}')" title="클릭하여 지휘관 대사 감상">
                 <div class="ingame-card-avatar-box">
-                    <img src="${charBase.image || ''}" alt="${charBase.name}" class="ingame-card-avatar" style="border-color:${isLeader ? '#f59e0b' : gradeInfo.color};" onerror="this.style.display='none'">
+                    <img src="${getCharacterThumbSrc(charBase)}" data-full="${charBase.image || ''}" alt="${charBase.name}" class="ingame-card-avatar" style="border-color:${isLeader ? '#f59e0b' : gradeInfo.color};" onerror="onCharThumbError(this, 'hide')">
                     ${isLeader ? '<span class="ingame-card-crown-float">👑</span>' : ''}
                 </div>
                 <div class="ingame-card-info">

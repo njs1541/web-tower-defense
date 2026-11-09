@@ -253,6 +253,7 @@ function spawnNextMonster() {
         enemyExp.element = wrapper;
         enemyExp.hpFill = hpFill;
         enemies.push(enemyExp);
+        if (enemyExp.isBoss) playSfx('boss');
 
         spawnedCount++;
     } else {
@@ -269,6 +270,8 @@ function findNearestBaseCell(fromX, fromY) {
 
     for (const cell of board) {
         if (!cell.buildable) continue; // 기반이 있는 셀만
+        // [v0.53.2] 히어로 보호 기반은 철거 대상에서 제외 (보호 기반으로 이동해 영원히 머무는 소프트락 방지)
+        if (getCrawlerProtection(cell)) continue;
 
         const dist = Math.abs(cell.x - fromX) + Math.abs(cell.y - fromY);
         if (dist < minDist) {
@@ -425,6 +428,7 @@ function gameLoopTick() {
         clearInterval(spawnInterval);
         gameRunning = false;
         const clearedRound = round;
+        playSfx('waveClear');
         round++;
 
         // [v0.43.0 New] 1) 완막(Perfect Wave Clear) 보너스: 라운드 위험도 비례 프리즘 조각 스케일링 지급 (1R 1개 ~ 20R+ 10개)
@@ -639,7 +643,9 @@ function handleCrawlerMovement(enemy) {
 
     for (const d of adjacentDirs) {
         const checkCell = getCell(enemy.x + d.dx, enemy.y + d.dy);
-        if (checkCell && checkCell.buildable) {
+        // [v0.53.2] 히어로 보호 기반은 건너뛴다. 기존에는 보호 기반을 계속 붙잡고 철거에 실패하며 제자리에 머물러
+        //   라운드가 끝나지 않았다(크롤러 소프트락). 인접 기반이 모두 보호 중이면 아래 이동 단계로 넘어간다.
+        if (checkCell && checkCell.buildable && !getCrawlerProtection(checkCell)) {
             touchingBase = checkCell;
             break;
         }
@@ -698,25 +704,35 @@ function handleCrawlerMovement(enemy) {
 /**
  * 크롤러에 의한 기반(및 타워) 철거 실행
  */
+/**
+ * [v0.53.2] 크롤러 철거 보호 판정 (기존 demolishBase 내부 판정을 분리)
+ * - 'hero': 강림 히어로 본체가 서 있는 기반
+ * - 'aura': protectCrawler 오라(루미나, 티타니아) 히어로의 3x3 범위 안 기반
+ * @returns {'hero'|'aura'|null}
+ */
+function getCrawlerProtection(cell) {
+    if (!cell) return null;
+    for (const [hId, hData] of Object.entries(deployedHeroes)) {
+        if (!hData) continue;
+        if (cell.x === hData.x && cell.y === hData.y) return 'hero';
+        const auraSpec = getHeroAuraSpec(hId);
+        if (auraSpec && auraSpec.protectCrawler && Math.abs(cell.x - hData.x) <= 1 && Math.abs(cell.y - hData.y) <= 1) return 'aura';
+    }
+    return null;
+}
+
 function demolishBase(cell) {
     if (!cell || !cell.buildable) return;
 
     // v0.39.0 강림 히어로 유닛 본체 보호 및 루미나(U) 3x3 성간 결계 오라 크롤러 철거 차단
-    if (typeof deployedHeroes !== 'undefined') {
-        for (const [hId, hData] of Object.entries(deployedHeroes)) {
-            if (!hData) continue;
-            // 1) 히어로 본체가 직접 서 있는 기반은 절대 철거 불가
-            if (cell.x === hData.x && cell.y === hData.y) {
-                showFloatingDamage(cell.x, cell.y, "🛡️ 결전 지휘관! 철거 차단!", "#f59e0b");
-                return;
-            }
-            // 2) 루미나 등 protectCrawler 오라 보유 히어로의 3x3 범위 내 기반/타워 철거 절대 차단
-            const auraSpec = (typeof getHeroAuraSpec === 'function') ? getHeroAuraSpec(hId) : null;
-            if (auraSpec && auraSpec.protectCrawler && Math.abs(cell.x - hData.x) <= 1 && Math.abs(cell.y - hData.y) <= 1) {
-                showFloatingDamage(cell.x, cell.y, "🌌 성간 결계 오라! 철거 차단!", "#a855f7");
-                return;
-            }
-        }
+    const protection = getCrawlerProtection(cell);
+    if (protection === 'hero') {
+        showFloatingDamage(cell.x, cell.y, "🛡️ 결전 지휘관! 철거 차단!", "#f59e0b");
+        return;
+    }
+    if (protection === 'aura') {
+        showFloatingDamage(cell.x, cell.y, "🌌 성간 결계 오라! 철거 차단!", "#a855f7");
+        return;
     }
 
     cell.buildable = false;
@@ -768,6 +784,7 @@ function updateEnemyPosition(enemy) {
 function onEnemyReachGoal(enemy) {
     enemy.alive = false;
     if (enemy.element) enemy.element.remove();
+    playSfx('leak');
 
     if (enemy.isBoss) {
         playerHP = Math.max(0, playerHP - 3);

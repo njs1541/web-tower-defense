@@ -9,6 +9,7 @@ let isOpTransitioning = false;
 function init() {
     loadData();
     updateLobbyUI();
+    updateSfxToggleUI();
 
     // 정적 버튼(기반 건설) 이벤트 바인딩
     const btnUnlock = document.getElementById("btn-unlock");
@@ -152,9 +153,11 @@ function startGame() {
     if (typeof updateWavePreviewUI === 'function') {
         updateWavePreviewUI();
     }
+    startTutorialIfNeeded();
 }
 
 function endGame(isVictory = false) {
+    playSfx(isVictory ? 'victory' : 'gameOver');
     // 인터벌 명확하게 해제
     if (window.gameInterval) clearInterval(window.gameInterval);
     if (window.spawnInterval) clearInterval(window.spawnInterval);

@@ -3,8 +3,8 @@
 미소녀 지휘관 수집, 룬 소켓 덱빌딩, 히어로 컨트롤을 결합한 브라우저 타워 디펜스 게임과 그 에셋 제작 도구 모음이다.
 빌드 도구와 외부 의존성이 없는 바닐라 JS/HTML/CSS 프로젝트다.
 
-- 게임 버전: v0.52.0
-- 이 문서의 행 번호와 현황은 v0.52.0 작업본 기준이다. 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
+- 게임 버전: v0.53.9
+- 이 문서의 행 번호와 현황은 v0.52.0 작업본 기준이다(v0.53.x는 문서, RP 드롭 상수, 크롤러 보호 판정만 변경. enemy.js 행 번호는 약 +15 밀림). 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
 - **커밋은 사용자가 수동으로 한다.** 명시적인 요청이 없으면 커밋이나 푸시를 하지 않는다.
 - 세부 규칙은 [QA_AND_RULES.md](QA_AND_RULES.md), 기획은 [기획문서.md](기획문서.md), 에셋 절차는 [asset_generation_pipeline_guide.html](asset_generation_pipeline_guide.html)을 본다.
 
@@ -17,6 +17,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 - 게임: `/index.html`. 에셋 도구: `/sd_all_in_one_hub.html`(스타일 가이드와 스튜디오를 iframe으로 묶음).
 - `Ctrl+J`: 게임 내 QA 치트 패널(`js/qa.js`). 재화 지급, 전체 해금, 라운드 설정, 하드 리셋. 자동 테스트가 아니다.
 - **게임 자동 테스트는 없다.** `scratch/sim_harness.js`는 게임이 아니라 프롬프트 생성기 스냅샷용이고, 현행 코드와도 어긋나 있다.
+- **밸런스 측정:** `node scratch/balance_sim/run_balance.mjs [--preset starter,mid,strong] [--stage 1,2,3] [--runs 10] [--prep 15]`. 실제 게임을 Edge 헤드리스와 가상 시계로 1배속 그대로 빠르게 돌리고 봇이 플레이한다(90판 약 21분). 요약은 `scratch/balance_sim/report.md`(회귀 확인용 짧은 실행은 `--no-report`로 덮어쓰기를 막는다). 봇은 사람보다 약하니 하한선으로 읽는다. 측정 중에는 `js/`를 수정하지 않는다(판마다 디스크의 코드를 새로 읽는다).
 - 문법 확인: `node -e "const fs=require('fs');for(const f of fs.readdirSync('js'))new Function(fs.readFileSync('js/'+f,'utf8'))"`
 - 게임 동작을 바꾸면 브라우저에서 실제로 확인한다. Edge 헤드리스와 CDP로 `startGame`, `onEnemyHit`을 호출해 흐름을 검증할 수 있다(임시 프로필 사용). 확인하지 못했으면 그렇게 보고한다.
 
@@ -26,7 +27,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 **버전:** "어떠한 내용이든 업데이트가 될 때마다 반드시 버전을 상향"한다. 게임 코드뿐 아니라 에셋 도구(HTML)와 문서만 고친 경우도 포함한다. 다음 위치를 항상 같은 값으로 맞춘다.
 - `js/constants.js:1` (`GAME_VERSION`)
-- `index.html:26, 40, 223` (수동 표기 3곳). 스크립트 캐시 쿼리 `?v=0520`도 함께 올린다
+- `index.html:26, 40, 223` (수동 표기 3곳). 스크립트 캐시 쿼리 `?v=0539`도 함께 올린다
 - `QA_AND_RULES.md:8` (인수인계 절)
 - `기획문서.md:2`
 
@@ -61,6 +62,8 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 | `tower.js` | 클릭 입력, 공격, 피격, 스펠, 히어로 | `handleCellClick`:47, `attackFromTowers`:252, `onEnemyHit`:493 |
 | `enemy.js` | 소환, 이동, 틱 루프, 배속 | `startRound`:674, `gameLoopTick`:229, `restartGameLoops`:70 |
 | `ui.js` | 인게임 DOM 렌더, 보고서, 아바타 | `render`:8, `buildModularCharacterHtml`:668 |
+| `sound.js` | Web Audio 합성 효과음, 음소거·음량 (v0.53.6) | `playSfx(name, arg)`, `SFX_RECIPES` |
+| `tutorial.js` | 첫 판 튜토리얼 5단계 (v0.53.8) | `startTutorialIfNeeded`, `updateTutorial`(render에서 호출) |
 | `lobby.js` | 로비, 덱, 룬 장착, 연구소 | `updateLobbyUI`:9 |
 | `gacha.js` | 소환과 연출 | `rollSingleCommander`:28 |
 | `qa.js` | 디버그 패널 | `qa*` |
@@ -72,17 +75,17 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 - `typeof X === 'function'` 가드가 많아 이름을 잘못 쓰면 오류 없이 기능만 꺼진다. 새 코드에 이 패턴을 늘리지 않는다.
 - 세션 리셋은 `location.reload()`에 의존한다(ui.js:659). `startGame`은 `round`, `enemies`를 초기화하지 않는다.
 - 인게임 `gold`와 영구 `USER_DATA.gold`는 다른 값인데 UI 라벨은 둘 다 TP다.
-- 세이브 키는 `tower_defense_save_v1` 하나이고 스키마 버전이 없다. 필드를 바꾸면 `loadData`의 기본값 채우기(user_data.js:31-70)도 수정한다. 로드 중 예외가 나면 백업 없이 초기화된다.
+- 세이브 키는 `tower_defense_save_v1`이고, v0.53.4부터 `schemaVersion`(`SAVE_SCHEMA_VERSION`)과 백업 키 `_backup`, 손상 보존 키 `_corrupt`가 있다. 필드를 바꾸면 `loadData`의 기본값 채우기를 수정하고, 구조가 바뀌면 `SAVE_SCHEMA_VERSION`을 올리고 `migrateSaveData`에 단계를 추가한다.
 - 파일은 UTF-8이고 행 끝이 파일마다 다르다. `user_data.js`, `기획문서.md`는 LF, `enemy.js`, `main.js`, `QA_AND_RULES.md`는 CRLF, `constants.js`, `state.js`, `index.html`은 섞여 있다. 수정할 때 기존 행 끝을 유지하고, PowerShell 5.1로 쓸 때는 인코딩을 지정한다.
-- 재화 수급 수치는 `constants.js`에 있다. RP는 맨 위 `RP_REWARD_*`, MP는 `MP_CONFIG`(`regenPerSec`, `perKill`). MP 충전은 `gameLoopTick` 안에서 틱당 `regenPerSec/5`씩 돌아서 전투 중에만 동작한다(사용자 확정). v0.52.0 병합에서 로컬 `MP_REGEN_*`는 삭제했다. RP는 처치 12% 드롭, 완막 +1, 스테이지 클리어 +5로 확정되었다.
+- 재화 수급 수치는 `constants.js`에 있다. RP는 맨 위 `RP_DROP_CHANCE`, `RP_REWARD_*`, MP는 `MP_CONFIG`(`regenPerSec`, `perKill`). MP 충전은 `gameLoopTick` 안에서 틱당 `regenPerSec/5`씩 돌아서 전투 중에만 동작한다(사용자 확정). v0.52.0 병합에서 로컬 `MP_REGEN_*`는 삭제했다. RP는 처치 4% 드롭(v0.53.0에서 12%→4%), 완막 +1, 스테이지 클리어 +5로 확정되었다.
 - 스테이지 클리어: `STAGE_DATA[n].clearRound`(현재 전 스테이지 30, 사용자 결정) 이후의 보스를 **처치**하면 `endGame(true)`로 런이 승리 종료되고 RP +5를 준다(50 TP 대신). 보스 누출은 `bossKilledThisRound`로 구분해 격파 보상과 최초 클리어 PP를 주지 않고, 생존하면 런이 계속되어 40R 보스가 다음 기회가 된다. `stageCleared`로 중복 판정을 막는다.
 
 ## 추가 체크리스트
 
 **지휘관**
 1. `CHARACTER_DATA`에 항목 추가: id, name, title, grade, element, role, avatar, image, baseSockets, maxSockets, levelCaps, towerStock, quotes, skillQuote, desc. UR/U는 `isHeroUnit`을 넣고 `towerStock:{}`로 둔다.
-2. `COMMANDER_GACHA_CONFIG.rates`(constants.js:1232)에 추가하고 등급별 합계를 재조정한다. 빠지면 획득할 수 없다.
-3. `assets/char_<id>.jpg` 추가. 선택: `MODULAR_CHARACTER_SPECS`(없으면 `getCharacterModularSpec`이 자동 추론).
+2. 소환 확률은 v0.53.5부터 자동이다. `COMMANDER_GACHA_CONFIG.gradeRates`(등급별 총 %)를 `getCommanderGachaRates()`(gacha.js)가 같은 등급 지휘관에게 균등 분배한다. 소환에서 빼려면 `gachaExcluded: true`.
+3. `assets/char_<id>.jpg` 추가 후 `node scratch/make_thumbs.mjs`로 썸네일(`assets/thumbs/<id>.webp`) 생성. 선택: `MODULAR_CHARACTER_SPECS`(없으면 `getCharacterModularSpec`이 자동 추론).
 4. UR/U 고유 오라: `getHeroAuraSpec`(user_data.js:905-963).
 5. 새 원소/역할군이면 `SYNERGY_DATA`, 시너지 분기(user_data.js:576-600, 624-647), 정렬 가중치(lobby.js:169-180), 필터 버튼(lobby.js:547-556), `elemPalette`(constants.js:1458).
 
@@ -159,10 +162,9 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 표시: **[확인]** 원본 코드를 직접 대조함. **[판독]** 분석 시 코드만 읽고 재대조는 하지 않음. 모두 브라우저에서 재현하지는 않았으니 수정 전에 재현한다.
 
 **게임 로직**
-- 높음 **[확인]** 크롤러 소프트락: 히어로 보호 기반에 인접하면 철거가 계속 실패하고 이동하지 않는다(enemy.js:537-564, 599-608). 타워로 못 잡으면 라운드가 끝나지 않는다.
 - 중간 **[판독]** 원격 커밋 `051119e`/`b8694be`(v0.52.0에 병합)가 무한 TP, 수호자 2셋 `freeBases`, `extraDamageRatio` 이중 적용, 크롤러 A* 추적, 오버킬 방지 `id`, 송환 스펠, 룬 중복 장착을 수정했다고 기록했다. 코드 변경은 들어왔지만 브라우저에서 하나씩 재현해 확인하지는 않았다.
 - 중간 **[판독]** 룬 `cooldownSec` 미사용.
-- 낮음 **[판독]** 판매 버튼 60% 고정 표기(tower.js:770-775 주석 포함), MP 표시 `/ 100`과 실제 최대 120 불일치.
+- 낮음 **[판독]** 판매 버튼 60% 고정 표기(tower.js:770-775 주석 포함). (MP 최대치 표시는 `ui.js:159-161`에서 `maxMp`를 반영하도록 이미 수정됨, v0.53.1 확인)
 
 **에셋 도구**
 - 중간 **[판독]** Tier 1 전용 규격 틀 코드가 없다. 다운로드 버튼은 "12슬롯"이라고 표시하지만 틀 생성 함수(`sheet_a`, `sheet_b`, 그 외 분기)에서는 15슬롯 통합 틀이 나온다.
@@ -189,10 +191,19 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 2. 타워 설치비/철거 환급 규칙 재정립(무한 TP 문제와 연결).
 3. 스테이지 난이도, 엔드게임 구축, 챕터 목표와 무한 모드 분리. 클리어 조건은 v0.52.0에서 30R 보스 처치로 정해졌고(맵 장애물 지형 포함), 30R까지의 밸런스는 아직 플레이로 검증하지 않았다.
 4. 중장기: 호감도와 스토리, Stage 4(번개 폭풍의 협곡), Stage 5(공허의 심연).
+5. 무료 웹 공개 v1.0 (v0.53.0 방향 확정, 기획문서 "[계획] 무료 웹 공개 v1.0"과 3.7절): GitHub Pages + Firebase Spark(로그인·세이브·순위표), 차원석(1 PP = 100) 상점·출석·미션, 출시 지휘관 45명, 연구소 확장. 구현 계획은 [docs/workflow_v1_release.md](docs/workflow_v1_release.md) (P0 크롤러 소프트락(v0.53.2 완료) → P1 측정 시뮬레이터(v0.53.3 완료) → P2-1 Pages 워크플로(v0.53.3 작성, 실행 미확인) → P2-3·2-4 세이브 보호·내보내기(v0.53.4 완료) → P4-1 자동 소환 확률(v0.53.5 완료) → P6-1 효과음(v0.53.6 완료) → P2-2 썸네일(v0.53.7 완료) → P6-3 튜토리얼(v0.53.8 완료). 남은 작업은 아래 "사용자 확인 필요"의 결정이 있어야 진행된다. → P2 배포·세이브·Firebase → P3 차원석·상점 → P4 지휘관 확장 → P5 변조·순위표 → P6 사운드·튜토리얼 → P7 연구소 → P8 출시 준비). 저장소 `njs1541/web-tower-defense`는 공개 상태(2026-11-09 확인).
 
 ## 사용자 확인 필요
 
-- 현재 없음.
+v1.0 워크플로(`docs/workflow_v1_release.md`)에서 결정 없이 할 수 있는 작업은 v0.53.8까지 끝났다. 남은 작업은 다음 결정이 필요하다.
+- **P2 Firebase:** SDK를 `gstatic.com` CDN 스크립트로 불러와도 되는지(외부 의존성 첫 예외), Firebase 프로젝트 생성과 웹 앱 구성값 전달(사용자 작업), 일일 초기화 시각(예: 한국 시간 0시 또는 5시).
+- **P3 차원석:** 기획문서 3.7절의 획득처·상점 "초안" 수치 확정. 일일 초기화를 서버 시간으로 하려면 P2가 먼저다.
+- **P4 지휘관:** 고유 효과 템플릿 유형과 21명 배정안 승인, `race`(종족) 필드의 지휘관별 값, 픽업 배너 천장 규칙, UR/U 파츠가 늦을 때 기존 렌더링으로 출시할지.
+- **P5:** 변조 단계 목록과 보상, 3지선다 보상 후보.
+- **P6-2:** 배경음 출처.
+- **P7:** 연구소 확장 특성과 비용.
+- **밸런스(P1 측정 결과):** 신규 덱은 10R 보스를 막지 못해 보스 PP와 최초 클리어 PP를 받지 못하고, 중반 덱은 20R 보스에서 막힌다. 초반 보스 난이도나 신규 지급을 조정할지.
+- **배포:** GitHub 저장소 Settings → Pages → Source를 "GitHub Actions"로 바꿔야 `.github/workflows/deploy-pages.yml`이 동작한다. 배포본에 QA 치트 패널(Ctrl+J)이 그대로 들어가므로 P8 전에 처리 방식을 정해야 한다.
 
 
 ## 세션 인수인계
@@ -200,3 +211,12 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 - 작업을 시작할 때 이 문서와 `QA_AND_RULES.md` L7-91(인수인계 절)를 읽는다. 전체 문서는 크므로 필요한 부분만 읽는다.
 - `visual_style_guide.html`(약 330KB)은 Grep과 부분 읽기로 다룬다.
 - 작업을 끝내면 해결한 문제를 "알려진 문제"에서 지우고, 구조나 절차가 바뀌었으면 이 문서를 갱신한다.
+
+### 다른 컴퓨터에서 이어서 작업하기 (v0.53.9 기록)
+
+AI 에이전트의 메모리는 PC마다 따로 저장되므로, 이어서 작업할 때 필요한 사용자 결정은 여기와 `기획문서.md`에 남긴다.
+- **사용자 선호:** 모든 대답과 보고는 반드시 한국어로 쓴다(긴 작업 끝의 요약 포함). 사용자가 직접 지시한 규칙이다.
+- **출시 방향(2026-11-09 확정):** 무료 웹 공개, PC 브라우저 대상, 한 판 약 30분. 정적 파일은 GitHub Pages, Firebase 무료(Spark)는 로그인·세이브·순위표만. 순위표 도입. 가챠는 유지하고 상위 재화 `차원석`(1 PP = 100 차원석, 주당 10연 1회 이상)을 출석·미션·업적·순위표로만 지급. 로비 골드 사용처는 연구소 확장. 지휘관 최종 100명, 출시 45명(C 5 / UC 10 / R 12 / SR 10 / UR 5 / U 3).
+- **진행 상태:** 구현 계획은 `docs/workflow_v1_release.md`. 결정 없이 할 수 있는 작업은 v0.53.8까지 끝났고, 남은 작업은 위 "사용자 확인 필요"의 결정을 기다린다. 첫 질문으로 그 결정들을 사용자에게 확인한다.
+- **필요한 환경:** Node.js(시뮬레이터는 내장 `fetch`, `WebSocket`을 쓰므로 22 이상, 작성 환경은 v25), Microsoft Edge(`C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`, 다르면 환경 변수 `EDGE_PATH`). 서버는 `node scratch/serve.js`.
+- **로컬에만 있는 것:** 시뮬레이터 원시 결과 `scratch/balance_sim/results/`는 `.gitignore` 대상이라 올라가지 않는다. 요약 `scratch/balance_sim/report.md`는 저장소에 있다. 원시 결과가 필요하면 `node scratch/balance_sim/run_balance.mjs`로 다시 만든다(90판 약 21분).

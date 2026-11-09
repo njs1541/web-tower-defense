@@ -23,23 +23,48 @@ function toggleShop() {
 }
 
 /**
+ * [v0.53.5] 지휘관 소환 확률표: COMMANDER_GACHA_CONFIG.gradeRates의 등급별 총 확률을
+ * CHARACTER_DATA의 같은 등급 지휘관에게 균등 분배한다. (gachaExcluded: true는 제외)
+ * 지휘관이 없는 등급의 확률은 나머지 등급 비율대로 자연히 재분배된다(가중치 추첨이므로).
+ * @returns {Array<{grade: string, charId: string, weight: number}>}
+ */
+function getCommanderGachaRates() {
+    const gradeRates = COMMANDER_GACHA_CONFIG.gradeRates;
+    const byGrade = {};
+    for (const [charId, info] of Object.entries(CHARACTER_DATA)) {
+        if (!info || info.gachaExcluded || !(info.grade in gradeRates)) continue;
+        (byGrade[info.grade] = byGrade[info.grade] || []).push(charId);
+    }
+    const rates = [];
+    for (const [grade, ids] of Object.entries(byGrade)) {
+        const each = gradeRates[grade] / ids.length;
+        for (const charId of ids) rates.push({ grade, charId, weight: each });
+    }
+    return rates;
+}
+
+/**
  * 1인 지휘관 추첨 헬퍼 함수
  */
 function rollSingleCommander() {
     USER_DATA.commanderPityCount = (USER_DATA.commanderPityCount || 0) + 1;
     const pityCount = USER_DATA.commanderPityCount;
-    const pityCfg = (typeof COMMANDER_PITY_CONFIG !== 'undefined') 
-        ? COMMANDER_PITY_CONFIG 
+    const pityCfg = (typeof COMMANDER_PITY_CONFIG !== 'undefined')
+        ? COMMANDER_PITY_CONFIG
         : { softPityStart: 50, hardPity: 70, bonusPerPull: 5.0 };
 
+    const allRates = getCommanderGachaRates();
+    const isHigh = r => r.grade === 'UR' || r.grade === 'U';
+
     // [v0.42.0] 소프트 피티 적용 판정
-    // 기본 UR+U 확률 = 3.0% (UR 2.5% + U 0.5%)
-    let highGradeChance = 3.0;
+    // 기본 UR+U 확률 = 등급표의 UR + U 합 (현재 2.5% + 0.5% = 3.0%, v0.53.5부터 gradeRates에서 계산)
+    const baseHighChance = allRates.filter(isHigh).reduce((sum, r) => sum + r.weight, 0);
+    let highGradeChance = baseHighChance;
     if (pityCount >= pityCfg.hardPity) {
         highGradeChance = 100.0; // 하드 천장 100%
     } else if (pityCount >= pityCfg.softPityStart) {
         // 50회부터 뽑기당 +5%p 가산
-        highGradeChance = Math.min(100.0, 3.0 + (pityCount - pityCfg.softPityStart + 1) * pityCfg.bonusPerPull);
+        highGradeChance = Math.min(100.0, baseHighChance + (pityCount - pityCfg.softPityStart + 1) * pityCfg.bonusPerPull);
     }
 
     const isHighGradeTriggered = (Math.random() * 100) < highGradeChance;
@@ -47,7 +72,7 @@ function rollSingleCommander() {
 
     if (isHighGradeTriggered) {
         // UR 또는 U 등급 지휘관 풀에서만 추첨
-        const highRates = COMMANDER_GACHA_CONFIG.rates.filter(r => r.grade === 'UR' || r.grade === 'U');
+        const highRates = allRates.filter(isHigh);
         const highWeight = highRates.reduce((sum, r) => sum + r.weight, 0);
         let rand = Math.random() * highWeight;
         for (const r of highRates) {
@@ -63,7 +88,7 @@ function rollSingleCommander() {
         USER_DATA.commanderPityCount = 0;
     } else {
         // C ~ SR 일반 풀에서 추첨
-        const normalRates = COMMANDER_GACHA_CONFIG.rates.filter(r => r.grade !== 'UR' && r.grade !== 'U');
+        const normalRates = allRates.filter(r => !isHigh(r));
         const normalWeight = normalRates.reduce((sum, r) => sum + r.weight, 0);
         let rand = Math.random() * normalWeight;
         for (const r of normalRates) {
@@ -156,6 +181,7 @@ function drawCommanderGacha() {
             badgeType: "card",
             isLegendary: charBase.grade === 'SR' || charBase.grade === 'UR' || charBase.grade === 'U' || charBase.grade === 'R',
             image: charBase.image,
+            thumb: getCharacterThumbSrc(charBase), // [v0.53.7] 76px 카드 문양은 썸네일 사용
             emblem: charBase.avatar || "👑",
             title: `${charBase.name} (${charBase.title})`,
             desc: charBase.desc,
@@ -172,6 +198,7 @@ function drawCommanderGacha() {
             badgeType: "frag",
             isLegendary: result.upgraded,
             image: charBase.image,
+            thumb: getCharacterThumbSrc(charBase),
             emblem: charBase.avatar || "👑",
             title: `${charBase.name} ★${result.star}`,
             desc: charBase.desc,
@@ -333,7 +360,7 @@ function openGachaModal(data) {
     }
     if (emblem) {
         if (data.image) {
-            emblem.innerHTML = `<img src="${data.image}" style="width: 76px; height: 76px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.8);">`;
+            emblem.innerHTML = `<img src="${data.thumb || data.image}" data-full="${data.image}" onerror="onCharThumbError(this, 'none')" style="width: 76px; height: 76px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.25); border: 2px solid rgba(255,255,255,0.8);">`;
         } else {
             emblem.innerText = data.emblem || "🔮";
         }
@@ -448,6 +475,7 @@ function triggerSummonGateOpen() {
     if (circle) circle.classList.remove("waiting-tap");
 
     const grade = summonPendingGrade || 'C';
+    playSfx('summon', grade);
     let auraClass = "aura-normal";
     let hintText = "미지의 푸른 파동이 전장에 공명합니다...";
 
@@ -949,7 +977,7 @@ function openMultiGachaModal(type, results) {
             cardEl.innerHTML = `
                 ${newBadgeHtml}
                 <div class="multi-item-thumb-box">
-                    <img src="${charBase.image || ''}" alt="${charBase.name}" class="multi-item-img">
+                    <img src="${getCharacterThumbSrc(charBase)}" data-full="${charBase.image || ''}" alt="${charBase.name}" class="multi-item-img" onerror="onCharThumbError(this, 'none')">
                     <span class="multi-item-grade" style="background:${gradeInfo.bg}; color:${gradeInfo.color}; border-color:${gradeInfo.border};">
                         ${gradeInfo.name}
                     </span>

@@ -13,3 +13,6 @@ desktop.ini
 # 임시 파일
 *.tmp
 *.bak
+
+# 밸런스 시뮬레이터 원시 결과 (요약은 scratch/balance_sim/report.md에 남음)
+scratch/balance_sim/results/

@@ -17,18 +17,70 @@ const USER_DATA = {
     // 미소녀 지휘관 캐릭터 시스템 (v0.22.0)
     characters: {},
     characterDeck: [], // 출전 캐릭터 덱 (최대 3명)
-    runes: []          // 보유 룬 ID 목록
+    runes: [],         // 보유 룬 ID 목록
+    settings: { sfxMuted: false, sfxVolume: 0.5 }, // [v0.53.6] 효과음 설정 (sound.js)
+    tutorialDone: false // [v0.53.8] 첫 판 튜토리얼 완료 여부 (tutorial.js)
 };
 
 const STORAGE_KEY = "tower_defense_save_v1";
+
+// [v0.53.4] 세이브 스키마 버전과 백업 (워크플로 P2-3)
+// - schemaVersion: 필드 구조가 바뀌면 올리고 migrateSaveData에 단계를 추가한다. (없음 = 0, v0.53.4 이전 세이브)
+// - 백업: 정상 로드에 성공한 원본을 SAVE_BACKUP_KEY에 보관한다. 본 세이브를 읽지 못하면 원본은
+//   SAVE_CORRUPT_KEY에 보존하고(덮어쓰지 않음) 백업으로 복구를 시도한다. 기존에는 바로 초기화되었다.
+const SAVE_SCHEMA_VERSION = 1;
+const SAVE_BACKUP_KEY = STORAGE_KEY + "_backup";
+const SAVE_CORRUPT_KEY = STORAGE_KEY + "_corrupt";
+
+function parseStoredSave(raw) {
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== 'object' || Array.isArray(data)) {
+        throw new Error("세이브 형식이 올바르지 않습니다.");
+    }
+    return data;
+}
+
+/**
+ * 구버전 세이브를 현재 스키마로 올린다. 기본값 채우기는 loadData에서 이어서 처리한다.
+ */
+function migrateSaveData(data) {
+    const from = Number(data.schemaVersion) || 0;
+    // v0 → v1: 구조 변경 없음 (schemaVersion 필드 도입)
+    data.schemaVersion = Math.max(from, SAVE_SCHEMA_VERSION);
+    return data;
+}
 
 // 데이터 로드
 function loadData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
+        let parsed = null;
+        let source = 'main';
         try {
-            const parsed = JSON.parse(saved);
+            parsed = parseStoredSave(saved);
+        } catch (e) {
+            console.error("세이브를 읽지 못했습니다. 원본을 보존하고 백업으로 복구를 시도합니다.", e);
+            try { localStorage.setItem(SAVE_CORRUPT_KEY, saved); } catch (e2) { console.error("손상 세이브 보존 실패", e2); }
+            const backup = localStorage.getItem(SAVE_BACKUP_KEY);
+            if (backup) {
+                try {
+                    parsed = parseStoredSave(backup);
+                    source = 'backup';
+                    console.warn("백업 세이브로 복구했습니다.");
+                } catch (e3) {
+                    console.error("백업 세이브도 읽지 못했습니다.", e3);
+                }
+            }
+        }
+        if (!parsed) {
+            initDefaultData();
+            return;
+        }
+        try {
+            migrateSaveData(parsed);
             Object.assign(USER_DATA, parsed);
+            // [v0.53.8] 튜토리얼 도입 전 세이브는 이미 플레이한 계정이므로 완료로 간주
+            if (typeof parsed.tutorialDone !== 'boolean') USER_DATA.tutorialDone = true;
             
             // 버전 호환성 초기화
             if (!USER_DATA.levels) USER_DATA.levels = {};
@@ -47,6 +99,10 @@ function loadData() {
             if (USER_DATA.prismShards === undefined) USER_DATA.prismShards = 0;
             if (USER_DATA.commanderPityCount === undefined) USER_DATA.commanderPityCount = 0;
             if (!USER_DATA.stageFirstClears) USER_DATA.stageFirstClears = {};
+            // [v0.53.6] 효과음 설정
+            if (!USER_DATA.settings || typeof USER_DATA.settings !== 'object') USER_DATA.settings = {};
+            if (typeof USER_DATA.settings.sfxMuted !== 'boolean') USER_DATA.settings.sfxMuted = false;
+            if (typeof USER_DATA.settings.sfxVolume !== 'number') USER_DATA.settings.sfxVolume = 0.5;
             // v0.44.0 게임에서 제외된 지휘관을 세이브에서 정리 (덱이 비면 아래 기본값으로 복구)
             if (USER_DATA.characters) {
                 for (const charId of Object.keys(USER_DATA.characters)) {
@@ -69,11 +125,17 @@ function loadData() {
             // [v0.44.0] 티타니아(U) 로드 시 강제 지급 제거 -> QA 치트 패널(Ctrl+J)의 qaGrantTitania()로 이전
             // [v0.44.0] 보유 수량을 초과하여 중복 장착된 룬 정리 (구버전 세이브 호환)
             sanitizeRuneEquips();
+            // 정상 로드된 원본을 백업으로 보관 (백업에서 복구한 경우에는 기존 백업 유지)
+            if (source === 'main') {
+                try { localStorage.setItem(SAVE_BACKUP_KEY, saved); } catch (e) { console.error("세이브 백업 실패", e); }
+            }
             saveData();
 
-            console.log("저장된 데이터 로드 완료 (v0.22.0 호환):", USER_DATA);
+            console.log(`저장된 데이터 로드 완료 (출처: ${source}, 스키마 v${USER_DATA.schemaVersion}):`, USER_DATA);
         } catch (e) {
-            console.error("데이터 로드 실패, 초기화합니다.", e);
+            // 기본값 채우기 중 예외: 원본을 보존한 뒤 초기화한다
+            console.error("데이터 로드 실패, 원본을 보존하고 초기화합니다.", e);
+            try { localStorage.setItem(SAVE_CORRUPT_KEY, saved); } catch (e2) { console.error("손상 세이브 보존 실패", e2); }
             initDefaultData();
         }
     } else {
@@ -97,6 +159,7 @@ function initDefaultData() {
     USER_DATA.characters = getDefaultStarterCharacters();
     USER_DATA.characterDeck = ["char_liana", "char_elena"];
     USER_DATA.runes = ["rune_flame", "rune_spell_gold"];
+    USER_DATA.tutorialDone = false; // [v0.53.8] 신규 계정은 첫 판에 튜토리얼
 
     saveData();
 }
@@ -153,7 +216,51 @@ function sanitizeRuneEquips() {
 
 // 데이터 저장
 function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(USER_DATA));
+    USER_DATA.schemaVersion = SAVE_SCHEMA_VERSION;
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(USER_DATA));
+    } catch (e) {
+        // 저장 공간 부족이나 사생활 보호 모드 등. 게임 진행은 막지 않는다.
+        console.error("세이브 저장 실패", e);
+    }
+}
+
+/**
+ * [v0.53.4] 세이브 내보내기 (워크플로 P2-4): 다른 브라우저로 옮길 수 있는 문자열. 형식 "TD1:" + UTF-8 JSON의 Base64
+ */
+function exportSaveString() {
+    saveData();
+    const bytes = new TextEncoder().encode(JSON.stringify(USER_DATA));
+    let bin = "";
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return "TD1:" + btoa(bin);
+}
+
+/**
+ * [v0.53.4] 세이브 가져오기: 문자열을 검증해 본 세이브로 기록한다. 기존 세이브는 백업 키로 옮긴다.
+ * 호출한 쪽에서 location.reload()로 다시 불러온다.
+ * @returns {Object} 가져온 세이브 데이터 (요약 표시용)
+ */
+function importSaveString(text) {
+    const s = String(text || "").trim();
+    if (!s.startsWith("TD1:")) throw new Error("세이브 문자열 형식이 아닙니다. (TD1:로 시작해야 합니다)");
+    let json;
+    try {
+        const bin = atob(s.slice(4));
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        json = new TextDecoder().decode(bytes);
+    } catch (e) {
+        throw new Error("세이브 문자열이 손상되었습니다.");
+    }
+    const data = parseStoredSave(json);
+    if (!data.characters || typeof data.characters !== 'object') {
+        throw new Error("지휘관 정보가 없는 세이브입니다.");
+    }
+    const current = localStorage.getItem(STORAGE_KEY);
+    if (current) localStorage.setItem(SAVE_BACKUP_KEY, current);
+    localStorage.setItem(STORAGE_KEY, json);
+    return data;
 }
 
 // 카드 추가
@@ -349,6 +456,7 @@ function craftCard(towerId) {
  */
 function hardResetGame() {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(SAVE_BACKUP_KEY); // 의도적 초기화이므로 백업도 지운다 (손상 보존본은 남김)
     console.log("게임 세이브 데이터가 완전히 삭제되었습니다.");
     location.reload();
 }

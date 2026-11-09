@@ -23,7 +23,7 @@
           <div class="op-start-sub">CLICK ANYWHERE TO START</div>
         </div>
 
-        <div class="op-footer-version">v0.52.0</div>
+        <div class="op-footer-version">v0.53.9</div>
       </div>
     </div>
 
@@ -35,9 +35,11 @@
           style="background: #e2e8f0; border: 1px solid #cbd5e1; color: #475569; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s;">◀
           타이틀 화면</button>
         <div style="display: flex; gap: 10px; align-items: center;">
+          <!-- dev-only:start (GitHub Pages 배포본에서는 이 구간을 삭제: .github/workflows/deploy-pages.yml) -->
           <a href="sd_asset_studio.html" target="_blank"
             style="background: linear-gradient(135deg, #7c3aed, #6366f1); border: 1px solid #a78bfa; color: #ffffff; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; text-decoration: none; box-shadow: 0 2px 6px rgba(124, 58, 237, 0.35);">🎨 SD 에셋 스튜디오 열기</a>
-          <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.52.0</span>
+          <!-- dev-only:end -->
+          <span style="font-size: 12px; color: #94a3b8; font-weight: bold;">v0.53.9</span>
         </div>
       </div>
       <h1 style="margin-top: 0; font-size: 28px; color: #0f172a;">🏰 Tower Defense : Card & Commander</h1>
@@ -68,6 +70,9 @@
         <button onclick="openTalentModal()"
           style="margin-left: 8px; background: #f8fafc; border: 1.5px solid #6366f1; color: #4338ca; font-weight: bold; padding: 10px 18px; border-radius: 8px; font-size: 14px; cursor: pointer;">🔬
           연구소 (특성)</button>
+        <button onclick="openSaveModal()"
+          style="margin-left: 8px; background: #f8fafc; border: 1.5px solid #64748b; color: #334155; font-weight: bold; padding: 10px 18px; border-radius: 8px; font-size: 14px; cursor: pointer;">💾
+          세이브 관리</button>
       </div>
 
       <!-- 스테이지 선택기 (Phase D) -->
@@ -220,7 +225,7 @@
           </div>
         </div>
         <div id="version-info" style="position: absolute; bottom: 10px; right: 10px; opacity: 0.5; font-size: 12px;">
-          v0.52.0</div>
+          v0.53.9</div>
       </div>
     </div>
   </div>
@@ -406,6 +411,25 @@
     </div>
   </div>
 
+  <!-- 세이브 관리 모달 (v0.53.4 New: 내보내기/가져오기) -->
+  <div id="save-modal-overlay"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center;">
+    <div class="talent-modal-box" style="width: 520px;">
+      <h3 style="margin: 0 0 6px; font-size: 18px;">💾 세이브 관리</h3>
+      <p style="font-size: 12px; color: #64748b; margin: 0 0 12px;">세이브는 이 브라우저에만 저장됩니다. 다른 브라우저나 PC로 옮기려면 내보낸 문자열을 복사해 그곳에서 가져오기 하세요.</p>
+      <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+        <button onclick="fillExportSave()" style="flex: 1; padding: 8px; font-weight: bold; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">📤 내보내기 (복사)</button>
+        <button onclick="applyImportSave()" style="flex: 1; padding: 8px; font-weight: bold; background: #f59e0b; color: white; border: none; border-radius: 6px; cursor: pointer;">📥 가져오기</button>
+      </div>
+      <textarea id="save-modal-text" spellcheck="false" placeholder="내보내기를 누르면 세이브 문자열이 여기에 표시됩니다. 가져오려면 문자열을 붙여넣고 가져오기를 누르세요."
+        style="width: 100%; height: 110px; box-sizing: border-box; font-family: monospace; font-size: 11px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+      <div id="save-modal-status" style="font-size: 12px; min-height: 18px; margin-top: 6px; color: #334155;"></div>
+      <button
+        style="width: 100%; margin-top: 10px; padding: 10px; font-weight: bold; background: #334155; color: white; border: none; border-radius: 6px; cursor: pointer;"
+        onclick="closeSaveModal()">닫기</button>
+    </div>
+  </div>
+
   <!-- 룬 장착 선택 모달 (v0.23.0 New) -->
   <div id="rune-equip-modal" style="display: none;" class="modal-overlay">
     <div class="rune-modal-box">
@@ -515,26 +539,37 @@
     </div>
   </div>
 
+  <!-- 효과음 설정 (v0.53.6, js/sound.js) -->
+  <div id="sfx-control"
+    style="position: fixed; left: 12px; bottom: 12px; z-index: 3000; display: flex; align-items: center; gap: 6px; background: rgba(15, 23, 42, 0.75); border: 1px solid #334155; border-radius: 18px; padding: 4px 10px 4px 4px;">
+    <button id="sfx-toggle-btn" onclick="toggleSfxMute()" title="효과음 끄기"
+      style="width: 28px; height: 28px; border: none; border-radius: 50%; background: #1e293b; color: white; font-size: 14px; cursor: pointer;">🔊</button>
+    <input id="sfx-volume-slider" type="range" min="0" max="100" value="50" oninput="setSfxVolume(this.value)"
+      title="효과음 음량" style="width: 80px; cursor: pointer;">
+  </div>
+
   <!-- 1. 상수 및 데이터/저장소 모듈 -->
-  <script src="js/constants.js?v=0520"></script>
-  <script src="js/user_data.js?v=0520"></script>
-  <script src="js/state.js?v=0520"></script>
+  <script src="js/constants.js?v=0539"></script>
+  <script src="js/user_data.js?v=0539"></script>
+  <script src="js/state.js?v=0539"></script>
 
   <!-- 2. 인게임 시스템 모듈 -->
-  <script src="js/board.js?v=0520"></script>
-  <script src="js/tower.js?v=0520"></script>
-  <script src="js/enemy.js?v=0520"></script>
-  <script src="js/ui.js?v=0520"></script>
+  <script src="js/board.js?v=0539"></script>
+  <script src="js/tower.js?v=0539"></script>
+  <script src="js/enemy.js?v=0539"></script>
+  <script src="js/ui.js?v=0539"></script>
+  <script src="js/sound.js?v=0539"></script>
+  <script src="js/tutorial.js?v=0539"></script>
 
   <!-- 3. 메타 / 로비 / 가챠 모듈 -->
-  <script src="js/lobby.js?v=0520"></script>
-  <script src="js/gacha.js?v=0520"></script>
+  <script src="js/lobby.js?v=0539"></script>
+  <script src="js/gacha.js?v=0539"></script>
 
   <!-- 4. QA / 디버그 도구 모듈 -->
-  <script src="js/qa.js?v=0520"></script>
+  <script src="js/qa.js?v=0539"></script>
 
   <!-- 5. 게임 초기화 진입점 -->
-  <script src="js/main.js?v=0520"></script>
+  <script src="js/main.js?v=0539"></script>
 </body>
 
 </html>

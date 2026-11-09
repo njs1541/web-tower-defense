@@ -1,6 +1,7 @@
-const GAME_VERSION = "v0.52.0";
+const GAME_VERSION = "v0.53.9";
 
 // 재화 수급 (기획문서 3.1). MP 충전/처치 수치는 아래 MP_CONFIG, 클리어 라운드는 STAGE_DATA[n].clearRound
+const RP_DROP_CHANCE = 0.04;          // [v0.53.0] 일반 몬스터 처치 시 RP +1 드롭 확률 (12% → 4%, 사용자 결정)
 const RP_REWARD_PERFECT_WAVE = 1;     // 웨이브 완막 보너스 RP
 const RP_REWARD_STAGE_CLEAR = 5;      // 스테이지 클리어 RP
 const boardSize = 20;
@@ -1339,35 +1340,10 @@ const COMMANDER_GACHA_CONFIG = {
     multiCostPP: 10, // 10회 소환 시 10 PP 소모
     multiCount: 11,  // 10회 소환 시 보너스로 총 11장 지급
     // [v0.42.0 가챠 확률 하향 리밸런싱: 최고등급 도파민 극대화 (UR+U: 총 3.0%)]
-    rates: [
-        // C 등급 (총 35.0%)
-        { grade: "C", charId: "char_liana", weight: 11.666 },
-        { grade: "C", charId: "char_mia", weight: 11.667 },
-        { grade: "C", charId: "char_hana", weight: 11.667 },
-        // UC 등급 (총 35.0%)
-        { grade: "UC", charId: "char_elena", weight: 5.833 },
-        { grade: "UC", charId: "char_chloe", weight: 5.833 },
-        { grade: "UC", charId: "char_charlotte", weight: 5.833 },
-        { grade: "UC", charId: "char_cecilia", weight: 5.833 },
-        { grade: "UC", charId: "char_greta", weight: 5.834 },
-        { grade: "UC", charId: "char_ada", weight: 5.834 },
-        // R 등급 (총 18.0%)
-        { grade: "R", charId: "char_freya", weight: 4.5 },
-        { grade: "R", charId: "char_valeria", weight: 4.5 },
-        { grade: "R", charId: "char_sylvia", weight: 4.5 },
-        { grade: "R", charId: "char_camilla", weight: 4.5 },
-        // SR 등급 (총 9.0%)
-        { grade: "SR", charId: "char_scarlet", weight: 2.25 },
-        { grade: "SR", charId: "char_aurelia", weight: 2.25 },
-        { grade: "SR", charId: "char_selena", weight: 2.25 },
-        { grade: "SR", charId: "char_eleanor", weight: 2.25 },
-        // UR 등급 (총 2.5% - 결전 히어로)
-        { grade: "UR", charId: "char_seraphina", weight: 1.25 },
-        { grade: "UR", charId: "char_veronica", weight: 1.25 },
-        // U 등급 (총 0.5% - 창세 여신 최고 도파민)
-        { grade: "U", charId: "char_lumina", weight: 0.25 },
-        { grade: "U", charId: "char_titania", weight: 0.25 }
-    ]
+    // [v0.53.5] 등급별 총 확률(%)만 둔다. 지휘관별 확률은 getCommanderGachaRates()(gacha.js)가
+    //  CHARACTER_DATA에서 등급별로 균등 분배해 계산한다. 지휘관을 추가할 때 이 표를 고치지 않는다.
+    //  소환에서 빼려면 CHARACTER_DATA 항목에 gachaExcluded: true를 넣는다.
+    gradeRates: { C: 35.0, UC: 35.0, R: 18.0, SR: 9.0, UR: 2.5, U: 0.5 }
 };
 
 /**
