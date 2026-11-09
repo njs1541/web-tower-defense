@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.54.1";
+const GAME_VERSION = "v0.54.2";
 
 // 재화 수급 (기획문서 3.1). MP 충전/처치 수치는 아래 MP_CONFIG, 클리어 라운드는 STAGE_DATA[n].clearRound
 const RP_DROP_CHANCE = 0.04;          // [v0.53.0] 일반 몬스터 처치 시 RP +1 드롭 확률 (12% → 4%, 사용자 결정)
