@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.55.2";
+const GAME_VERSION = "v0.55.7";
 
 // 재화 수급 (기획문서 3.1). MP 충전/처치 수치는 아래 MP_CONFIG, 클리어 라운드는 STAGE_DATA[n].clearRound
 const RP_DROP_CHANCE = 0.04;          // [v0.53.0] 일반 몬스터 처치 시 RP +1 드롭 확률 (12% → 4%, 사용자 결정)
@@ -1384,48 +1384,76 @@ const COMMANDER_PITY_CONFIG = {
  *   웨이브 재생 applySignatureWaveRegen, 기반 수호 getBaseGuardBonus(enemy.js 크롤러), 기절·약점 노출 상태는 gameLoopTick/dealDamage.
  */
 const SIGNATURE_TYPES = {
-    rapidFire: { name: "연타 강화", icon: "🎯",
+    rapidFire: {
+        name: "연타 강화", icon: "🎯",
         values: { C: { every: 4, mult: 1.5 }, UC: { every: 4, mult: 2 }, R: { every: 3, mult: 2 }, SR: { every: 3, mult: 2.5 } },
-        describe: v => `${v.every}발마다 피해 ×${v.mult}` },
-    firstSlow: { name: "첫 타 둔화", icon: "🧊",
+        describe: v => `${v.every}발마다 피해 ×${v.mult}`
+    },
+    firstSlow: {
+        name: "첫 타 둔화", icon: "🧊",
         values: { C: 0.4, UC: 0.6, R: 0.8, SR: 1.0 },
-        describe: v => `처음 맞힌 적을 ${v}초간 50% 감속` },
-    plunder: { name: "약탈", icon: "💰",
+        describe: v => `처음 맞힌 적을 ${v}초간 50% 감속`
+    },
+    plunder: {
+        name: "약탈", icon: "💰",
         values: { C: 0.10, UC: 0.15, R: 0.20, SR: 0.25 },
-        describe: v => `처치 시 ${Math.round(v * 100)}% 확률로 TP +1` },
-    manaDrain: { name: "마력 흡수", icon: "💧",
+        describe: v => `처치 시 ${Math.round(v * 100)}% 확률로 TP +1`
+    },
+    manaDrain: {
+        name: "마력 흡수", icon: "💧",
         values: { C: 1, UC: 1, R: 2, SR: 2 },
-        describe: v => `처치 시 MP +${v}` },
-    bossHunter: { name: "보스 사냥", icon: "👑",
+        describe: v => `처치 시 MP +${v}`
+    },
+    bossHunter: {
+        name: "보스 사냥", icon: "👑",
         values: { C: 0.15, UC: 0.25, R: 0.35, SR: 0.5 },
-        describe: v => `보스에게 주는 피해 +${Math.round(v * 100)}%` },
-    antiAir: { name: "대공", icon: "🪽",
+        describe: v => `보스에게 주는 피해 +${Math.round(v * 100)}%`
+    },
+    antiAir: {
+        name: "대공", icon: "🪽",
         values: { C: 0.15, UC: 0.25, R: 0.35, SR: 0.5 },
-        describe: v => `비행 적에게 주는 피해 +${Math.round(v * 100)}%` },
-    execute: { name: "처형", icon: "🗡️",
+        describe: v => `비행 적에게 주는 피해 +${Math.round(v * 100)}%`
+    },
+    execute: {
+        name: "처형", icon: "🗡️",
         values: { C: 0.25, UC: 0.40, R: 0.55, SR: 0.75 },
-        describe: v => `체력 30% 이하 적에게 피해 +${Math.round(v * 100)}%` },
-    exposeWeakness: { name: "약점 노출", icon: "🔻",
+        describe: v => `체력 30% 이하 적에게 피해 +${Math.round(v * 100)}%`
+    },
+    exposeWeakness: {
+        name: "약점 노출", icon: "🔻",
         values: { C: 0.05, UC: 0.08, R: 0.12, SR: 0.15 },
-        describe: v => `맞은 적이 2초간 받는 모든 피해 +${Math.round(v * 100)}%` },
-    extraChain: { name: "연쇄 추가", icon: "⚡",
+        describe: v => `맞은 적이 2초간 받는 모든 피해 +${Math.round(v * 100)}%`
+    },
+    extraChain: {
+        name: "연쇄 추가", icon: "⚡",
         values: { C: 1, UC: 1, R: 2, SR: 2 },
-        describe: v => `전격 연쇄 대상 +${v}` },
-    cornerAmbush: { name: "코너 매복", icon: "↩️",
+        describe: v => `전격 연쇄 대상 +${v}`
+    },
+    cornerAmbush: {
+        name: "코너 매복", icon: "↩️",
         values: { C: 0.20, UC: 0.30, R: 0.40, SR: 0.50 },
-        describe: v => `경로 코너 칸의 적에게 피해 +${Math.round(v * 100)}%` },
-    baseGuard: { name: "기반 수호", icon: "🛡️",
+        describe: v => `경로 코너 칸의 적에게 피해 +${Math.round(v * 100)}%`
+    },
+    baseGuard: {
+        name: "기반 수호", icon: "🛡️",
         values: { C: 0.30, UC: 0.50, R: 0.75, SR: 1.0 },
-        describe: v => `관장 타워 주변(3x3) 기반의 크롤러 철거 시간 +${Math.round(v * 100)}%` },
-    stun: { name: "기절", icon: "💫",
+        describe: v => `관장 타워 주변(3x3) 기반의 크롤러 철거 시간 +${Math.round(v * 100)}%`
+    },
+    stun: {
+        name: "기절", icon: "💫",
         values: { C: 0.05, UC: 0.08, R: 0.10, SR: 0.12 },
-        describe: v => `타격 시 ${Math.round(v * 100)}% 확률로 0.4초 기절` },
-    emberBurst: { name: "잔불 폭발", icon: "💥",
+        describe: v => `타격 시 ${Math.round(v * 100)}% 확률로 0.4초 기절`
+    },
+    emberBurst: {
+        name: "잔불 폭발", icon: "💥",
         values: { C: 0.15, UC: 0.20, R: 0.25, SR: 0.35 },
-        describe: v => `처치 시 주변 1칸 적에게 처치 대상 최대 체력의 ${Math.round(v * 100)}% 피해` },
-    regen: { name: "재생", icon: "💚",
+        describe: v => `처치 시 주변 1칸 적에게 처치 대상 최대 체력의 ${Math.round(v * 100)}% 피해`
+    },
+    regen: {
+        name: "재생", icon: "💚",
         values: { C: 0.25, UC: 0.35, R: 0.50, SR: 1.0 },
-        describe: v => `무피해 웨이브 클리어 시 ${Math.round(v * 100)}% 확률로 기지 HP +1` }
+        describe: v => `무피해 웨이브 클리어 시 ${Math.round(v * 100)}% 확률로 기지 HP +1`
+    }
 };
 
 const RUNE_GACHA_CONFIG = {

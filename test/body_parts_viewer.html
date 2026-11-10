@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인간족 바디 파츠 계층형(FK) 스켈레톤 & 모션 검증 뷰어</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --border: #334155;
+      --joint: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Pretendard", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+    aside {
+      width: 460px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+    }
+    h1 { font-size: 1.15rem; color: var(--accent); margin-bottom: 4px; }
+    p.desc { font-size: 0.8rem; color: var(--muted); line-height: 1.4; }
+    .badge {
+      display: inline-block; padding: 2px 6px; border-radius: 4px;
+      background: #0369a1; color: #fff; font-size: 0.72rem; font-weight: 700;
+    }
+    .badge.fk { background: #15803d; }
+    .panel-box {
+      background: #090d16; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+    }
+    .panel-title {
+      font-size: 0.84rem; font-weight: 700; margin-bottom: 8px; color: #e2e8f0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .anim-bar {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+    }
+    .anim-btn {
+      padding: 7px 6px; border: 1px solid var(--border); border-radius: 6px;
+      background: #1e293b; color: var(--text); font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .anim-btn:hover { background: #334155; }
+    .anim-btn.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+    .layer-list { display: flex; flex-direction: column; gap: 6px; }
+    .layer-card {
+      background: #1e293b; border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .layer-top {
+      display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem;
+    }
+    .layer-top label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600; }
+    .parent-tag {
+      font-size: 0.68rem; color: #94a3b8; background: #0f172a; padding: 1px 5px; border-radius: 4px;
+      font-weight: normal;
+    }
+    .controls-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.75rem; color: var(--muted);
+    }
+    .controls-row input[type="range"] { flex: 1; }
+    .coord-inputs {
+      display: flex; gap: 4px; align-items: center;
+    }
+    .coord-inputs input[type="number"] {
+      width: 46px; background: #0f172a; border: 1px solid var(--border); color: #fff;
+      padding: 2px 3px; border-radius: 4px; font-size: 0.73rem; text-align: center;
+    }
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    button.action-btn {
+      flex: 1; min-width: 85px; padding: 7px 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 0.78rem;
+      cursor: pointer; background: var(--accent); color: #0f172a; transition: background 0.15s;
+    }
+    button.action-btn:hover { background: var(--accent-hover); }
+    button.action-btn.secondary { background: #334155; color: #f1f5f9; }
+    button.action-btn.secondary:hover { background: #475569; }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: radial-gradient(circle, #1e293b 0%, #090d16 100%);
+    }
+    .viewport {
+      width: 680px;
+      height: 680px;
+      position: relative;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      background-size: 20px 20px;
+      background-image: linear-gradient(to right, #1e293b 1px, transparent 1px),
+                        linear-gradient(to bottom, #1e293b 1px, transparent 1px);
+      overflow: hidden;
+      cursor: crosshair;
+    }
+    .info-bar {
+      margin-top: 10px; font-size: 0.8rem; color: var(--muted); display: flex; gap: 16px; align-items: center;
+    }
+    .cursor-coord {
+      font-family: monospace; color: var(--accent); font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<aside>
+  <div>
+    <h1>🧍‍♀️ 인간족 바디 계층형(FK) 리깅 뷰어</h1>
+    <p class="desc">
+      <span class="badge fk">부모-자식 본(FK) 연동</span>
+      <span class="badge">동심원 볼 조인트</span>
+      <span class="badge">가려진 팔 복원</span><br>
+      상체를 돌리면 머리·양팔이 따라가고, 위팔을 돌리면 아래팔이 팔꿈치에 붙어서 함께 움직입니다.
+    </p>
+  </div>
+
+  <!-- 모션 프리셋 시뮬레이터 -->
+  <div class="panel-box">
+    <div class="panel-title">
+      <span>🎬 실시간 모션 시뮬레이터 (사양서 7절)</span>
+    </div>
+    <div class="anim-bar">
+      <button class="anim-btn active" id="anim-none" onclick="setAnimMode('none')">⏹️ 수동 조작</button>
+      <button class="anim-btn" id="anim-idle" onclick="setAnimMode('idle')">🌬️ 대기 (호흡)</button>
+      <button class="anim-btn" id="anim-walk" onclick="setAnimMode('walk')">🏃 이동 (걷기)</button>
+      <button class="anim-btn" id="anim-attack" onclick="setAnimMode('attack')">⚔️ 근접 공격</button>
+      <button class="anim-btn" id="anim-hit" onclick="setAnimMode('hit')">💥 피격 모션</button>
+      <button class="anim-btn" id="anim-explode" onclick="setAnimMode('explode')">🧩 파츠 분해도</button>
+    </div>
+  </div>
+
+  <div class="panel-box">
+    <div class="panel-title">
+      <span>뷰어 표시 옵션</span>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.78rem;">
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+        <input type="checkbox" id="chk-show-pivots" checked onchange="render()">
+        <span style="color: #f87171; font-weight: 600;">🔴 관절 축 & 뼈대선 표시</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+        <input type="checkbox" id="chk-fk-mode" checked onchange="render()">
+        <span style="color: #4ade80; font-weight: 600;">🔗 부모-자식 연동 (FK)</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; grid-column: span 2;">
+        <input type="checkbox" id="chk-limit-rot" checked onchange="toggleRotationLimits()">
+        <span style="color: #38bdf8; font-weight: 600;">🔒 관절별 실제 가동범위 제한 (상체 ±10°, 다리 ±25° 등)</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+        <input type="checkbox" id="chk-b00" onchange="render()">
+        <span>b00 원본 겹쳐보기</span>
+      </label>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <span style="color: var(--muted);">투명도:</span>
+        <input type="range" id="op-b00" min="0" max="100" value="35" style="width: 70px;" oninput="render()">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-box" style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+    <div class="panel-title">
+      <span>파츠별 관절 회전 제어 (아래 → 위 렌더링 순)</span>
+      <span style="font-size: 0.7rem; color: var(--muted);">피벗 X, Y</span>
+    </div>
+    <div class="layer-list" id="parts-container" style="overflow-y: auto; padding-right: 4px;"></div>
+  </div>
+
+  <div class="btn-group">
+    <button class="action-btn" onclick="resetRotations()">🔄 각도 초기화</button>
+    <button class="action-btn secondary" onclick="toggleAll(true)">전체 켜기</button>
+    <button class="action-btn secondary" onclick="toggleAll(false)">전체 끄기</button>
+    <button class="action-btn secondary" onclick="copyCurrentPivots()">📋 피벗 JSON 복사</button>
+  </div>
+</aside>
+
+<main>
+  <div class="viewport" id="viewport" onmousemove="updateCursorCoord(event)">
+    <canvas id="view-canvas" width="1024" height="1024" style="width: 100%; height: 100%;"></canvas>
+  </div>
+  <div class="info-bar">
+    <span>마우스: <span class="cursor-coord" id="cursor-pos">X: -, Y: -</span></span>
+    <span>Near(가까운 쪽) = 화면 왼쪽(오른팔·오른다리) / Far(먼 쪽) = 화면 오른쪽(왼팔·왼다리)</span>
+  </div>
+</main>
+
+<script>
+/**
+ * 사양서 6절 레이어 겹침 순서(아래 -> 위) 및 계층형 본(Parent-Child Bone Tree) 정의
+ * - 오른쪽(3/4 측면)을 바라보는 캐릭터이므로:
+ *   * 가까운 쪽(Near, 캐릭터의 우측) = 화면 왼쪽 (X < 520)
+ *   * 먼 쪽(Far, 캐릭터의 좌측) = 화면 오른쪽 (X > 520)
+ */
+const PARTS_CONFIG = [
+  { id: "b06", parent: "b02", file: "b06_arm_far_upper.png",  name: "b06. 먼 팔 위",     parentLabel: "상체(어깨)",   pivot: [580, 485], minRot: -40, maxRot: 35, rot: 0, color: "#f43f5e", explodeOffset: [70, -30] },
+  { id: "b07", parent: "b06", file: "b07_arm_far_lower.png",  name: "b07. 먼 팔 아래",   parentLabel: "b06(팔꿈치)", pivot: [612, 565], minRot: -45, maxRot: 20, rot: 0, color: "#fb7185", explodeOffset: [110, 30] },
+  { id: "b09", parent: "b03", file: "b09_leg_far.png",        name: "b09. 먼 다리",      parentLabel: "골반(고관절)", pivot: [566, 680], minRot: -25, maxRot: 25, rot: 0, color: "#a855f7", explodeOffset: [55, 80] },
+  { id: "b08", parent: "b03", file: "b08_leg_near.png",       name: "b08. 가까운 다리",  parentLabel: "골반(고관절)", pivot: [481, 680], minRot: -25, maxRot: 25, rot: 0, color: "#c084fc", explodeOffset: [-55, 80] },
+  { id: "b03", parent: null,  file: "b03_pelvis.png",         name: "b03. 골반 (Root)",  parentLabel: "최상위 루트",  pivot: [520, 650], minRot: -8,  maxRot: 8,  rot: 0, color: "#eab308", explodeOffset: [0, 20] },
+  { id: "b02", parent: "b03", file: "b02_torso_upper.png",    name: "b02. 상체",         parentLabel: "골반(허리)",   pivot: [520, 620], minRot: -10, maxRot: 10, rot: 0, color: "#38bdf8", explodeOffset: [0, -25] },
+  { id: "b01", parent: "b02", file: "b01_head_base.png",      name: "b01. 머리 소체",    parentLabel: "상체(목)",     pivot: [513, 395], minRot: -15, maxRot: 15, rot: 0, color: "#22c55e", explodeOffset: [0, -95] },
+  { id: "b04", parent: "b02", file: "b04_arm_near_upper.png", name: "b04. 가까운 팔 위", parentLabel: "상체(어깨)",   pivot: [451, 480], minRot: -40, maxRot: 35, rot: 0, color: "#f97316", explodeOffset: [-70, -30] },
+  { id: "b05", parent: "b04", file: "b05_arm_near_lower.png", name: "b05. 가까운 팔 아래",parentLabel: "b04(팔꿈치)", pivot: [415, 565], minRot: -45, maxRot: 20, rot: 0, color: "#fb923c", explodeOffset: [-110, 30] }
+];
+
+const partMap = {};
+PARTS_CONFIG.forEach(p => { partMap[p.id] = p; });
+
+const loadedImages = {};
+let b00Image = null;
+let animMode = "none";
+let animFrameId = null;
+let rootOffsetY = 0;
+
+function loadChromaImage(url) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const off = document.createElement("canvas");
+      off.width = img.width;
+      off.height = img.height;
+      const ctx = off.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      const idata = ctx.getImageData(0, 0, off.width, off.height);
+      const d = idata.data;
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i+1], b = d[i+2];
+        if (g > 150 && r < 100 && b < 100) {
+          d[i+3] = 0;
+        }
+      }
+      ctx.putImageData(idata, 0, 0);
+      resolve(off);
+    };
+    img.src = url;
+  });
+}
+
+async function init() {
+  const container = document.getElementById("parts-container");
+  container.innerHTML = PARTS_CONFIG.map(p => `
+    <div class="layer-card">
+      <div class="layer-top">
+        <label>
+          <input type="checkbox" id="chk-${p.id}" checked onchange="render()">
+          <span style="color: ${p.color};">${p.name}</span>
+          <span class="parent-tag">🔗 ${p.parentLabel}</span>
+        </label>
+        <div class="coord-inputs">
+          <input type="number" id="pivX-${p.id}" value="${p.pivot[0]}" onchange="onPivotChange('${p.id}')">
+          <input type="number" id="pivY-${p.id}" value="${p.pivot[1]}" onchange="onPivotChange('${p.id}')">
+        </div>
+      </div>
+      <div class="controls-row">
+        <span id="range-lbl-${p.id}" style="font-size: 0.68rem; color: var(--muted); min-width: 56px;">[${p.minRot}°~+${p.maxRot}°]</span>
+        <input type="range" id="rot-${p.id}" min="${p.minRot}" max="${p.maxRot}" value="0" oninput="onRotate('${p.id}', this.value)">
+        <span id="rot-val-${p.id}" style="width: 34px; text-align: right; font-family: monospace;">0°</span>
+      </div>
+    </div>
+  `).join('');
+
+  const ts = Date.now();
+  b00Image = await loadChromaImage(`incoming/body_human/b00_master.png?v=${ts}`);
+  for (const p of PARTS_CONFIG) {
+    loadedImages[p.id] = await loadChromaImage(`incoming/body_human/${p.file}?v=${ts}`);
+  }
+  render();
+}
+
+function toggleRotationLimits() {
+  const limited = document.getElementById("chk-limit-rot")?.checked ?? true;
+  for (const p of PARTS_CONFIG) {
+    const rEl = document.getElementById(`rot-${p.id}`);
+    const lblEl = document.getElementById(`range-lbl-${p.id}`);
+    const minV = limited ? p.minRot : -60;
+    const maxV = limited ? p.maxRot : 60;
+    if (rEl) {
+      rEl.min = minV;
+      rEl.max = maxV;
+      if (p.rot < minV) p.rot = minV;
+      if (p.rot > maxV) p.rot = maxV;
+    }
+    if (lblEl) {
+      lblEl.textContent = `[${minV}°~+${maxV}°]`;
+    }
+  }
+  syncSlidersFromState();
+  render();
+}
+
+function syncSlidersFromState() {
+  for (const p of PARTS_CONFIG) {
+    const rEl = document.getElementById(`rot-${p.id}`);
+    const vEl = document.getElementById(`rot-val-${p.id}`);
+    const deg = Math.round(p.rot);
+    if (rEl) rEl.value = deg;
+    if (vEl) vEl.textContent = `${deg}°`;
+  }
+}
+
+function setAnimMode(mode) {
+  animMode = mode;
+  document.querySelectorAll('.anim-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`anim-${mode}`)?.classList.add('active');
+
+  if (animFrameId) {
+    cancelAnimationFrame(animFrameId);
+    animFrameId = null;
+  }
+
+  rootOffsetY = 0;
+  if (mode === 'none' || mode === 'explode') {
+    resetRotations();
+    return;
+  }
+
+  const startTime = performance.now();
+  function tick(now) {
+    if (animMode !== mode) return;
+    const t = (now - startTime) / 1000;
+
+    if (mode === 'idle') {
+      // 대기 모션: 부드러운 호흡, 머리 까딱임, 양팔 미세 흔들림
+      rootOffsetY = Math.sin(t * 2.5) * 3;
+      partMap.b03.rot = 0;
+      partMap.b02.rot = Math.sin(t * 2.5) * 2.5;
+      partMap.b01.rot = Math.sin(t * 2.5 - 0.5) * 4;
+      partMap.b04.rot = Math.sin(t * 2.5) * 5;
+      partMap.b05.rot = Math.sin(t * 2.5 - 0.4) * 6 - 5;
+      partMap.b06.rot = -Math.sin(t * 2.5) * 5;
+      partMap.b07.rot = -Math.sin(t * 2.5 - 0.4) * 6 - 5;
+      partMap.b08.rot = 0;
+      partMap.b09.rot = 0;
+    } else if (mode === 'walk') {
+      // 이동 모션: 다리 교차, 팔 교차 흔들기, 상하 바운스
+      const w = t * 6.5;
+      rootOffsetY = Math.abs(Math.sin(w)) * -10;
+      partMap.b03.rot = Math.sin(w) * 3;
+      partMap.b02.rot = 4 + Math.sin(w * 2) * 2;
+      partMap.b01.rot = -2 + Math.sin(w * 2) * 3;
+      partMap.b08.rot = Math.sin(w) * 24;
+      partMap.b09.rot = -Math.sin(w) * 24;
+      partMap.b04.rot = -Math.sin(w) * 22;
+      partMap.b05.rot = -15 - Math.max(0, Math.sin(w)) * 18;
+      partMap.b06.rot = Math.sin(w) * 22;
+      partMap.b07.rot = -15 - Math.max(0, -Math.sin(w)) * 18;
+    } else if (mode === 'attack') {
+      // 근접 공격 모션: 준비(뒤로 젖힘) -> 내려베기(스윙) -> 복귀
+      const cycle = (t * 1.4) % 1.0;
+      let swing = 0;
+      if (cycle < 0.35) {
+        // 준비 동작 (팔 들어올림)
+        const p = cycle / 0.35;
+        swing = -p;
+      } else if (cycle < 0.55) {
+        // 강하게 내려베기
+        const p = (cycle - 0.35) / 0.2;
+        swing = -1 + p * 2.2;
+      } else {
+        // 자세 복귀
+        const p = (cycle - 0.55) / 0.45;
+        swing = 1.2 * (1 - p);
+      }
+      rootOffsetY = swing > 0 ? swing * 6 : 0;
+      partMap.b03.rot = swing * 5;
+      partMap.b02.rot = swing * 12;
+      partMap.b01.rot = -swing * 6;
+      partMap.b04.rot = swing < 0 ? swing * 50 : swing * 38;
+      partMap.b05.rot = swing < 0 ? swing * 35 : -10 + swing * 20;
+      partMap.b06.rot = -swing * 18;
+      partMap.b07.rot = -20;
+      partMap.b08.rot = -swing * 10;
+      partMap.b09.rot = swing * 12;
+    } else if (mode === 'hit') {
+      // 피격 모션: 뒤로 젖혀지며 방어
+      const cycle = (t * 1.8) % 1.0;
+      const impact = cycle < 0.2 ? (cycle / 0.2) : Math.max(0, 1 - (cycle - 0.2) / 0.8);
+      rootOffsetY = impact * 5;
+      partMap.b03.rot = -impact * 8;
+      partMap.b02.rot = -impact * 16;
+      partMap.b01.rot = -impact * 14;
+      partMap.b04.rot = -impact * 28;
+      partMap.b05.rot = -impact * 35;
+      partMap.b06.rot = impact * 25;
+      partMap.b07.rot = -impact * 40;
+      partMap.b08.rot = impact * 12;
+      partMap.b09.rot = -impact * 8;
+    }
+
+    syncSlidersFromState();
+    render();
+    animFrameId = requestAnimationFrame(tick);
+  }
+  animFrameId = requestAnimationFrame(tick);
+}
+
+function onRotate(id, val) {
+  if (animMode !== 'none' && animMode !== 'explode') {
+    setAnimMode('none');
+  }
+  const p = partMap[id];
+  if (p) p.rot = parseFloat(val);
+  const valEl = document.getElementById(`rot-val-${id}`);
+  if (valEl) valEl.textContent = `${Math.round(val)}°`;
+  render();
+}
+
+function onPivotChange(id) {
+  const p = partMap[id];
+  if (!p) return;
+  const px = parseInt(document.getElementById(`pivX-${id}`).value, 10) || p.pivot[0];
+  const py = parseInt(document.getElementById(`pivY-${id}`).value, 10) || p.pivot[1];
+  p.pivot = [px, py];
+  render();
+}
+
+function resetRotations() {
+  for (const p of PARTS_CONFIG) {
+    p.rot = 0;
+  }
+  syncSlidersFromState();
+  render();
+}
+
+function toggleAll(show) {
+  for (const p of PARTS_CONFIG) {
+    const el = document.getElementById(`chk-${p.id}`);
+    if (el) el.checked = show;
+  }
+  render();
+}
+
+function updateCursorCoord(e) {
+  const rect = document.getElementById("viewport").getBoundingClientRect();
+  const scale = 1024 / rect.width;
+  const x = Math.round((e.clientX - rect.left) * scale);
+  const y = Math.round((e.clientY - rect.top) * scale);
+  document.getElementById("cursor-pos").textContent = `X: ${x}, Y: ${y}`;
+}
+
+function copyCurrentPivots() {
+  const obj = {};
+  PARTS_CONFIG.forEach(p => { obj[p.id] = { name: p.name, parent: p.parent, pivot: p.pivot }; });
+  navigator.clipboard.writeText(JSON.stringify(obj, null, 2)).then(() => {
+    alert("계층형 피벗 좌표가 클립보드에 복사되었습니다!");
+  });
+}
+
+// 부모-자식 체인을 배열로 반환 (Root -> ... -> Self)
+function getBoneChain(part) {
+  const useFK = document.getElementById("chk-fk-mode")?.checked;
+  if (!useFK) return [part];
+  const chain = [];
+  let cur = part;
+  while (cur) {
+    chain.unshift(cur);
+    cur = cur.parent ? partMap[cur.parent] : null;
+  }
+  return chain;
+}
+
+// Canvas 2D Context에 부모->자식 누적 회전 변환 적용
+function applyChainTransform(ctx, part) {
+  if (animMode === 'explode') {
+    const [ox, oy] = part.explodeOffset;
+    ctx.translate(ox, oy);
+  } else if (rootOffsetY !== 0) {
+    ctx.translate(0, rootOffsetY);
+  }
+  const chain = getBoneChain(part);
+  for (const node of chain) {
+    if (node.rot !== 0) {
+      const [px, py] = node.pivot;
+      ctx.translate(px, py);
+      ctx.rotate((node.rot * Math.PI) / 180);
+      ctx.translate(-px, -py);
+    }
+  }
+}
+
+// 점 (x, y)가 부모->자식 체인 변환을 거친 뒤의 실제 화면 좌표 계산
+function getTransformedPoint(part, x, y) {
+  let ptX = x, ptY = y;
+  const useFK = document.getElementById("chk-fk-mode")?.checked;
+  const chain = useFK ? getBoneChain(part) : [part];
+  // 역순(자식 -> 부모)으로 점 회전 적용
+  for (let i = chain.length - 1; i >= 0; i--) {
+    const node = chain[i];
+    if (node.rot !== 0) {
+      const [px, py] = node.pivot;
+      const rad = (node.rot * Math.PI) / 180;
+      const cos = Math.cos(rad), sin = Math.sin(rad);
+      const dx = ptX - px, dy = ptY - py;
+      ptX = px + dx * cos - dy * sin;
+      ptY = py + dx * sin + dy * cos;
+    }
+  }
+  if (animMode === 'explode') {
+    ptX += part.explodeOffset[0];
+    ptY += part.explodeOffset[1];
+  } else {
+    ptY += rootOffsetY;
+  }
+  return [ptX, ptY];
+}
+
+function render() {
+  const canvas = document.getElementById("view-canvas");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, 1024, 1024);
+
+  // 1. 기준 소체 (b00)
+  const showB00 = document.getElementById("chk-b00")?.checked;
+  if (showB00 && b00Image) {
+    const alpha = parseFloat(document.getElementById("op-b00").value) / 100;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(b00Image, 0, 0);
+    ctx.restore();
+  }
+
+  // 2. 파츠 레이어 조립 렌더 (아래 -> 위)
+  for (const p of PARTS_CONFIG) {
+    const isVisible = document.getElementById(`chk-${p.id}`)?.checked;
+    const img = loadedImages[p.id];
+    if (isVisible && img) {
+      ctx.save();
+      applyChainTransform(ctx, p);
+      ctx.drawImage(img, 0, 0);
+      ctx.restore();
+    }
+  }
+
+  // 3. 관절 피벗 마커 & 뼈대 연결선(Bone Lines) 오버레이
+  const showPivots = document.getElementById("chk-show-pivots")?.checked;
+  if (showPivots) {
+    ctx.save();
+    const worldPivots = {};
+    for (const p of PARTS_CONFIG) {
+      worldPivots[p.id] = getTransformedPoint(p, p.pivot[0], p.pivot[1]);
+    }
+
+    // 부모-자식 뼈대 연결선 그리기
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(74, 222, 128, 0.65)";
+    for (const p of PARTS_CONFIG) {
+      const isVisible = document.getElementById(`chk-${p.id}`)?.checked;
+      if (!isVisible || !p.parent) continue;
+      const [x1, y1] = worldPivots[p.parent];
+      const [x2, y2] = worldPivots[p.id];
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    }
+
+    // 각 관절 피벗 점과 라벨 그리기
+    for (const p of PARTS_CONFIG) {
+      const isVisible = document.getElementById(`chk-${p.id}`)?.checked;
+      if (!isVisible) continue;
+      const [wx, wy] = worldPivots[p.id];
+
+      ctx.strokeStyle = "#ef4444";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(wx - 8, wy); ctx.lineTo(wx + 8, wy);
+      ctx.moveTo(wx, wy - 8); ctx.lineTo(wx, wy + 8);
+      ctx.stroke();
+
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(wx, wy, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px monospace";
+      ctx.fillText(p.id, wx + 7, wy - 5);
+    }
+    ctx.restore();
+  }
+}
+
+window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
