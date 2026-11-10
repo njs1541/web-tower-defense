@@ -188,7 +188,9 @@ function spawnNextMonster() {
 
         // 기본 체력 계산
         const baseHP = Math.floor(balance.baseHp * Math.pow(balance.hpGrowthRate, round - 1));
-        const finalHP = Math.max(1, Math.floor(baseHP * (typeDef.hpMulti || 1.0) * (stage.hpMulti || 1.0)));
+        // [v0.55.1] 스테이지별 보스 체력 배율 (STAGE_DATA[n].bossHpMulti, 없으면 1.0)
+        const bossStageMulti = typeDef.isBoss ? (stage.bossHpMulti || 1.0) : 1.0;
+        const finalHP = Math.max(1, Math.floor(baseHP * (typeDef.hpMulti || 1.0) * (stage.hpMulti || 1.0) * bossStageMulti));
 
         // [v0.44.0] 스테이지 속도 배율은 틱 누적 배율(speedMulti)로 적용
         //  (기존: round(2 / 1.15) = 2 로 반올림되어 Stage 2 '속도 +15%'가 일반/탱커에 무효)
@@ -344,6 +346,13 @@ function gameLoopTick() {
             }
         }
 
+        // [v0.55.0] 고유 효과 상태: 약점 노출 지속시간 차감, 기절 중에는 이동하지 않음 (화상·지형 효과는 위에서 이미 처리)
+        if (enemy.vulnTicks > 0) enemy.vulnTicks--;
+        if (enemy.stunTicks > 0) {
+            enemy.stunTicks--;
+            continue;
+        }
+
         // [v0.44.0] 스테이지 속도 배율(speedMulti)을 소수 누적으로 반영 (v0.45.0: 지형 배율 곱연산)
         enemy.currentTick += (enemy.speedMulti || 1) * terrainSpeedMulti;
         if (enemy.currentTick < enemy.speedTick) {
@@ -437,6 +446,8 @@ function gameLoopTick() {
             USER_DATA.prismShards = (USER_DATA.prismShards || 0) + earnedShards;
             // [v0.44.0 New] 웨이브 완막 RP 보너스
             USER_DATA.rp = (USER_DATA.rp || 0) + RP_REWARD_PERFECT_WAVE;
+            // [v0.55.0] 고유 효과 '재생': 무피해 웨이브 클리어 시 확률로 기지 HP +1
+            applySignatureWaveRegen();
             showFloatingDamage(10, 11, `🔮 완막 보너스 RP +${RP_REWARD_PERFECT_WAVE}!`, "#c084fc");
             if (USER_DATA.prismShards >= 100) {
                 USER_DATA.prismShards -= 100;
@@ -664,6 +675,8 @@ function handleCrawlerMovement(enemy) {
                 requiredDemolishTicks = Math.round(requiredDemolishTicks * syn.bonusStats.crawlerDemolishTimeMulti);
             }
         }
+        // [v0.55.0] 고유 효과 '기반 수호': 주변 3x3에 해당 지휘관의 타워가 있으면 철거 시간 증가
+        requiredDemolishTicks = Math.round(requiredDemolishTicks * (1 + getBaseGuardBonus(touchingBase)));
 
         if (enemy.channelingTicks >= requiredDemolishTicks) {
             demolishBase(touchingBase);

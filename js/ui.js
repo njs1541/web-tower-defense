@@ -30,6 +30,15 @@ function onCharThumbError(img, finalAction) {
     else if (finalAction === 'emoji' && img.parentElement) img.parentElement.textContent = img.dataset.emoji || '👑';
 }
 
+/**
+ * [v0.55.0] 지휘관 고유 효과 한 줄 HTML (로비 카드, 인게임 카드, 소환 결과 공용). 없으면 빈 문자열.
+ */
+function getSignatureHtmlLine(charId, style = '') {
+    const sig = getCommanderSignature(charId);
+    if (!sig) return '';
+    return `<div class="signature-line" style="${style}" title="고유 효과: 관장 타워에 적용">${sig.icon} <strong>${sig.name}</strong>: ${sig.text}</div>`;
+}
+
 function render() {
     // [v0.53.8] 첫 판 튜토리얼 단계 진행 확인 (tutorial.js)
     updateTutorial();
@@ -523,6 +532,7 @@ function updateInGameCommandersBar() {
                         ${tagsHtml}
                     </div>
                     <div class="ingame-card-tower-spec">🛡️ 관장: <strong>${capsText}</strong></div>
+                    ${getSignatureHtmlLine(charBase.id, 'font-size: 10px; color: #7c3aed; margin-top: 2px; line-height: 1.35;')}
                 </div>
             </div>
 

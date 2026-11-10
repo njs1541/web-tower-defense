@@ -1194,3 +1194,18 @@ function getHeroAuraSpec(charId) {
 
 
 
+
+/**
+ * [v0.55.0] 지휘관 고유 효과 조회 (워크플로 P4-3)
+ * CHARACTER_DATA[charId].signature 유형과 등급별 수치를 묶어 돌려준다. 고유 효과가 없으면 null.
+ * @returns {{type: string, v: *, name: string, icon: string, text: string} | null}
+ */
+function getCommanderSignature(charId) {
+    const info = CHARACTER_DATA[charId];
+    if (!info || !info.signature) return null;
+    const def = SIGNATURE_TYPES[info.signature];
+    if (!def) return null;
+    const v = def.values[info.grade];
+    if (v === undefined) return null;
+    return { type: info.signature, v, name: def.name, icon: def.icon, text: def.describe(v) };
+}

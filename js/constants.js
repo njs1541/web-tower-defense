@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.54.2";
+const GAME_VERSION = "v0.55.2";
 
 // 재화 수급 (기획문서 3.1). MP 충전/처치 수치는 아래 MP_CONFIG, 클리어 라운드는 STAGE_DATA[n].clearRound
 const RP_DROP_CHANCE = 0.04;          // [v0.53.0] 일반 몬스터 처치 시 RP +1 드롭 확률 (12% → 4%, 사용자 결정)
@@ -281,6 +281,7 @@ const STAGE_DATA = {
         desc: "기본 난이도 · 🌿 가시 덤불(건설 불가) 지형",
         boardBg: "#94a3b8",
         hpMulti: 1.0,
+        bossHpMulti: 0.6, // [v0.55.1] 입문 스테이지는 보스 체력만 0.6배 (사용자 승인안 A, 신규 덱 10R 보스 대응). 다른 스테이지는 없음 = 1.0
         speedMulti: 1.0,
         rewardMulti: 1.0,
         clearRound: 30, // v0.44.0: 30R 보스 격파 시 스테이지 클리어(승리)
@@ -605,6 +606,7 @@ const CHARACTER_DATA = {
         grade: "C",
         element: "holy",
         role: "guardian",
+        signature: "baseGuard", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "🛡️",
         image: "assets/char_liana.jpg",
         maxSockets: 2,
@@ -631,6 +633,7 @@ const CHARACTER_DATA = {
         grade: "UC",
         element: "frost",
         role: "ranger",
+        signature: "rapidFire", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "🏹",
         image: "assets/char_elena.jpg",
         maxSockets: 2,
@@ -658,6 +661,7 @@ const CHARACTER_DATA = {
         grade: "UC",
         element: "fire",
         role: "guardian",
+        signature: "cornerAmbush", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "⚔️",
         image: "assets/char_chloe.jpg",
         maxSockets: 2,
@@ -684,6 +688,7 @@ const CHARACTER_DATA = {
         grade: "UC",
         element: "shock",
         role: "ranger",
+        signature: "bossHunter", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "🎯",
         image: "assets/char_charlotte.jpg",
         maxSockets: 2,
@@ -710,6 +715,7 @@ const CHARACTER_DATA = {
         grade: "UC",
         element: "frost",
         role: "mage",
+        signature: "exposeWeakness", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "❄️",
         image: "assets/char_cecilia.jpg",
         maxSockets: 2,
@@ -736,6 +742,7 @@ const CHARACTER_DATA = {
         grade: "UC",
         element: "fire",
         role: "tactician",
+        signature: "emberBurst", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "💣",
         image: "assets/char_greta.jpg",
         maxSockets: 2,
@@ -762,6 +769,7 @@ const CHARACTER_DATA = {
         grade: "UC",
         element: "shock",
         role: "mage",
+        signature: "extraChain", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "⚡",
         image: "assets/char_ada.jpg",
         maxSockets: 2,
@@ -788,6 +796,7 @@ const CHARACTER_DATA = {
         grade: "R",
         element: "frost",
         role: "mage",
+        signature: "exposeWeakness", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "❄️",
         image: "assets/char_freya.jpg",
         maxSockets: 3,
@@ -816,6 +825,7 @@ const CHARACTER_DATA = {
         grade: "SR",
         element: "fire",
         role: "tactician",
+        signature: "emberBurst", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "💣",
         image: "assets/char_scarlet.jpg",
         maxSockets: 4,
@@ -901,6 +911,7 @@ const CHARACTER_DATA = {
         grade: "C",
         element: "frost",
         role: "ranger",
+        signature: "firstSlow", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "🏹",
         image: "assets/char_mia.jpg",
         maxSockets: 2,
@@ -927,6 +938,7 @@ const CHARACTER_DATA = {
         grade: "C",
         element: "fire",
         role: "tactician",
+        signature: "plunder", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "💣",
         image: "assets/char_hana.jpg",
         maxSockets: 2,
@@ -953,6 +965,7 @@ const CHARACTER_DATA = {
         grade: "R",
         element: "shock",
         role: "guardian",
+        signature: "stun", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "⚡",
         image: "assets/char_valeria.jpg",
         maxSockets: 3,
@@ -981,6 +994,7 @@ const CHARACTER_DATA = {
         grade: "R",
         element: "holy",
         role: "ranger",
+        signature: "execute", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "✨",
         image: "assets/char_sylvia.jpg",
         maxSockets: 3,
@@ -1009,6 +1023,7 @@ const CHARACTER_DATA = {
         grade: "R",
         element: "fire",
         role: "tactician",
+        signature: "plunder", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "⚙️",
         image: "assets/char_camilla.jpg",
         maxSockets: 3,
@@ -1037,6 +1052,7 @@ const CHARACTER_DATA = {
         grade: "SR",
         element: "holy",
         role: "guardian",
+        signature: "regen", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "🛡️",
         image: "assets/char_aurelia.jpg",
         maxSockets: 4,
@@ -1064,6 +1080,7 @@ const CHARACTER_DATA = {
         grade: "SR",
         element: "frost",
         role: "ranger",
+        signature: "antiAir", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "❄️",
         image: "assets/char_selena.jpg",
         maxSockets: 4,
@@ -1092,6 +1109,7 @@ const CHARACTER_DATA = {
         grade: "SR",
         element: "shock",
         role: "mage",
+        signature: "manaDrain", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "⚡",
         image: "assets/char_eleanor.jpg",
         maxSockets: 4,
@@ -1355,6 +1373,59 @@ const COMMANDER_PITY_CONFIG = {
     softPityStart: 50,
     hardPity: 70,
     bonusPerPull: 5.0
+};
+
+/**
+ * [v0.55.0] 지휘관 고유 효과 (C~SR, 워크플로 P4-3)
+ * - CHARACTER_DATA[id].signature에 유형 키를 넣는다. 수치는 지휘관 등급(C/UC/R/SR)에 따라 values에서 고른다.
+ * - 효과는 그 지휘관이 관장하는 타워(cell.towerOwner)에만 적용된다. 'regen'만 덱 편성 자체로 발동한다.
+ * - UR/U는 고유 효과 대신 히어로 오라(getHeroAuraSpec)를 쓴다(사용자 결정: 하위 지휘관 적용 결과를 보고 정함).
+ * - 처리 위치: 조준 시 피해 배수 getSignatureDamageMulti, 적중 시 applySignatureOnHit, 처치 시 applySignatureOnKill(tower.js),
+ *   웨이브 재생 applySignatureWaveRegen, 기반 수호 getBaseGuardBonus(enemy.js 크롤러), 기절·약점 노출 상태는 gameLoopTick/dealDamage.
+ */
+const SIGNATURE_TYPES = {
+    rapidFire: { name: "연타 강화", icon: "🎯",
+        values: { C: { every: 4, mult: 1.5 }, UC: { every: 4, mult: 2 }, R: { every: 3, mult: 2 }, SR: { every: 3, mult: 2.5 } },
+        describe: v => `${v.every}발마다 피해 ×${v.mult}` },
+    firstSlow: { name: "첫 타 둔화", icon: "🧊",
+        values: { C: 0.4, UC: 0.6, R: 0.8, SR: 1.0 },
+        describe: v => `처음 맞힌 적을 ${v}초간 50% 감속` },
+    plunder: { name: "약탈", icon: "💰",
+        values: { C: 0.10, UC: 0.15, R: 0.20, SR: 0.25 },
+        describe: v => `처치 시 ${Math.round(v * 100)}% 확률로 TP +1` },
+    manaDrain: { name: "마력 흡수", icon: "💧",
+        values: { C: 1, UC: 1, R: 2, SR: 2 },
+        describe: v => `처치 시 MP +${v}` },
+    bossHunter: { name: "보스 사냥", icon: "👑",
+        values: { C: 0.15, UC: 0.25, R: 0.35, SR: 0.5 },
+        describe: v => `보스에게 주는 피해 +${Math.round(v * 100)}%` },
+    antiAir: { name: "대공", icon: "🪽",
+        values: { C: 0.15, UC: 0.25, R: 0.35, SR: 0.5 },
+        describe: v => `비행 적에게 주는 피해 +${Math.round(v * 100)}%` },
+    execute: { name: "처형", icon: "🗡️",
+        values: { C: 0.25, UC: 0.40, R: 0.55, SR: 0.75 },
+        describe: v => `체력 30% 이하 적에게 피해 +${Math.round(v * 100)}%` },
+    exposeWeakness: { name: "약점 노출", icon: "🔻",
+        values: { C: 0.05, UC: 0.08, R: 0.12, SR: 0.15 },
+        describe: v => `맞은 적이 2초간 받는 모든 피해 +${Math.round(v * 100)}%` },
+    extraChain: { name: "연쇄 추가", icon: "⚡",
+        values: { C: 1, UC: 1, R: 2, SR: 2 },
+        describe: v => `전격 연쇄 대상 +${v}` },
+    cornerAmbush: { name: "코너 매복", icon: "↩️",
+        values: { C: 0.20, UC: 0.30, R: 0.40, SR: 0.50 },
+        describe: v => `경로 코너 칸의 적에게 피해 +${Math.round(v * 100)}%` },
+    baseGuard: { name: "기반 수호", icon: "🛡️",
+        values: { C: 0.30, UC: 0.50, R: 0.75, SR: 1.0 },
+        describe: v => `관장 타워 주변(3x3) 기반의 크롤러 철거 시간 +${Math.round(v * 100)}%` },
+    stun: { name: "기절", icon: "💫",
+        values: { C: 0.05, UC: 0.08, R: 0.10, SR: 0.12 },
+        describe: v => `타격 시 ${Math.round(v * 100)}% 확률로 0.4초 기절` },
+    emberBurst: { name: "잔불 폭발", icon: "💥",
+        values: { C: 0.15, UC: 0.20, R: 0.25, SR: 0.35 },
+        describe: v => `처치 시 주변 1칸 적에게 처치 대상 최대 체력의 ${Math.round(v * 100)}% 피해` },
+    regen: { name: "재생", icon: "💚",
+        values: { C: 0.25, UC: 0.35, R: 0.50, SR: 1.0 },
+        describe: v => `무피해 웨이브 클리어 시 ${Math.round(v * 100)}% 확률로 기지 HP +1` }
 };
 
 const RUNE_GACHA_CONFIG = {

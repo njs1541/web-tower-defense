@@ -621,6 +621,7 @@ function openNewCommanderModal(charId, result) {
             <div>🏗️ <strong>인가 타워 한도</strong>: ${capsText}</div>
             <div style="margin-top: 4px;">🏰 <strong>타워 설치 스톡</strong>: ${stocksText} (철거 환급 ${refundRateText})</div>
             <div style="margin-top: 4px; color: #a5b4fc;">🔮 <strong>기본 룬 소켓</strong>: ${result.sockets || 1}칸 개방</div>
+            ${getSignatureHtmlLine(charBase.id, 'margin-top: 4px; color: #f0abfc;')}
         `;
     }
 
@@ -846,6 +847,7 @@ function showNextShowcaseItem() {
                 <div style="margin-bottom: 4px;">${statusText}</div>
                 <div>🏗️ <strong>인가 타워 한도</strong>: ${capsText}</div>
                 <div style="margin-top: 3px;">🏰 <strong>타워 설치 스톡</strong>: ${stocksText} (환급 ${refundRateText})</div>
+                ${getSignatureHtmlLine(charBase.id, 'margin-top: 3px; color: #f0abfc;')}
                 <div style="margin-top: 3px; color: #a5b4fc;">🔮 <strong>소켓 정보</strong>: ${res.sockets || 1}칸 개방</div>
             `;
         }

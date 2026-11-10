@@ -389,6 +389,10 @@ function attackFromTowers() {
             baseDmg *= (1 + synStats.damageToSlowedRatio);
         }
 
+        // [v0.55.0] 관장 지휘관 고유 효과: 조준 시 피해 배수 (연타 강화, 보스 사냥, 대공, 처형, 코너 매복)
+        const sig = ownerId ? getCommanderSignature(ownerId) : null;
+        if (sig) baseDmg *= getSignatureDamageMulti(sig, cell, targetEnemy);
+
         let isCrit = false;
         if (totalCritChance > 0 && Math.random() < totalCritChance) {
             isCrit = true;
@@ -467,7 +471,9 @@ function attackFromTowers() {
             else if (towerKey === 'shock') {
                 dealDamage(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#f59e0b", isCrit, towerKey, ownerId);
 
-                const chainMax = Math.max(0, (towerStats.chainCount || 3) - 1); // 주 대상 포함 총 chainCount기
+                // 주 대상 포함 총 chainCount기 (+ [v0.55.0] 고유 효과 '연쇄 추가')
+                const sigChain = (sig && sig.type === 'extraChain') ? sig.v : 0;
+                const chainMax = Math.max(0, (towerStats.chainCount || 3) - 1) + sigChain;
                 const chainTargets = enemies.filter(e => e.alive && e !== targetEnemy && Math.abs(e.x - targetEnemy.x) <= 2 && Math.abs(e.y - targetEnemy.y) <= 2).slice(0, chainMax);
                 for (const chain of chainTargets) {
                     dealDamage(chain, finalDamage * 0.7, "#fbbf24", false, towerKey, ownerId);
@@ -477,6 +483,9 @@ function attackFromTowers() {
             else {
                 dealDamage(targetEnemy, finalDamage, isCrit ? "#ef4444" : (towerStats.color || "#ffeb3b"), isCrit, towerKey, ownerId);
             }
+
+            // [v0.55.0] 관장 지휘관 고유 효과: 적중 시 (첫 타 둔화, 약점 노출, 기절)
+            if (sig) applySignatureOnHit(sig, targetEnemy);
 
             // [속성 룬 패시브 및 원소 시너지 추가 발동]
             applyOnHitPassives(targetEnemy, finalDamage, passives, synStats, towerKey, ownerId);
@@ -493,6 +502,9 @@ function attackFromTowers() {
  */
 function dealDamage(enemy, damage, color, isCrit = false, sourceKey = null, ownerId = null) {
     if (!enemy || !enemy.alive || !(damage > 0)) return;
+
+    // [v0.55.0] 고유 효과 '약점 노출': 지속 중에는 받는 모든 피해 증가
+    if (enemy.vulnTicks > 0) damage *= (1 + (enemy.vulnRatio || 0));
 
     if (typeof battleStats !== 'undefined' && battleStats) {
         const effectiveDmg = Math.min(enemy.hp, damage);
@@ -650,6 +662,10 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey 
             gold += loot;
             showFloatingDamage(enemy.x, enemy.y, `🪙 +${loot} TP 약탈!`, "#f59e0b");
         }
+
+        // 5. [v0.55.0] 관장 지휘관 고유 효과: 처치 시 (약탈, 마력 흡수, 잔불 폭발). 타워 피해로 처치한 경우만.
+        const killSig = (ownerId && TOWER_DATA[sourceKey]) ? getCommanderSignature(ownerId) : null;
+        if (killSig) applySignatureOnKill(killSig, enemy, sourceKey, ownerId);
 
         if (typeof render === "function") render();
     }
@@ -1467,3 +1483,99 @@ function handleHeroAttacks() {
     }
 }
 
+
+// ============================================================================
+// [v0.55.0] 지휘관 고유 효과 처리 (워크플로 P4-3, 정의는 constants.js SIGNATURE_TYPES)
+// ============================================================================
+
+// 경로 코너 칸 캐시: 전역 path 배열이 바뀌면(recalculateGlobalPath) 다시 계산한다
+let signatureCornerCache = { pathRef: null, set: new Set() };
+
+/** 전역 몬스터 경로에서 방향이 꺾이는 칸인지 */
+function isPathCornerTile(x, y) {
+    if (signatureCornerCache.pathRef !== path) {
+        const set = new Set();
+        for (let i = 1; i < path.length - 1; i++) {
+            const a = path[i - 1], c = path[i + 1];
+            if (a.x !== c.x && a.y !== c.y) set.add(`${path[i].x},${path[i].y}`);
+        }
+        signatureCornerCache = { pathRef: path, set };
+    }
+    return signatureCornerCache.set.has(`${x},${y}`);
+}
+
+/** 조준 시 피해 배수 (연타 강화, 보스 사냥, 대공, 처형, 코너 매복) */
+function getSignatureDamageMulti(sig, cell, enemy) {
+    switch (sig.type) {
+        case 'rapidFire':
+            cell.sigShotCount = (cell.sigShotCount || 0) + 1;
+            return (cell.sigShotCount % sig.v.every === 0) ? sig.v.mult : 1;
+        case 'bossHunter': return enemy.isBoss ? 1 + sig.v : 1;
+        case 'antiAir': return enemy.moveType === 'flying' ? 1 + sig.v : 1;
+        case 'execute': return (enemy.hp <= enemy.maxHp * 0.3) ? 1 + sig.v : 1;
+        case 'cornerAmbush': return isPathCornerTile(enemy.x, enemy.y) ? 1 + sig.v : 1;
+        default: return 1;
+    }
+}
+
+/** 적중 시 부가 효과 (첫 타 둔화, 약점 노출, 기절). 연쇄 추가는 전격 분기에서 처리한다. */
+function applySignatureOnHit(sig, enemy) {
+    if (!enemy || !enemy.alive) return;
+    if (sig.type === 'firstSlow') {
+        if (!enemy.sigFirstSlowed) {
+            enemy.sigFirstSlowed = true;
+            applySlowEffect(enemy, Math.round(sig.v * 5), 0.5);
+        }
+    } else if (sig.type === 'exposeWeakness') {
+        enemy.vulnRatio = (enemy.vulnTicks > 0) ? Math.max(enemy.vulnRatio || 0, sig.v) : sig.v;
+        enemy.vulnTicks = 10; // 2초
+    } else if (sig.type === 'stun') {
+        if (Math.random() < sig.v) {
+            enemy.stunTicks = Math.max(enemy.stunTicks || 0, 2); // 0.4초
+            showFloatingDamage(enemy.x, enemy.y, "💫", "#fde047");
+        }
+    }
+}
+
+/** 처치 시 효과 (약탈, 마력 흡수, 잔불 폭발). 타워 피해로 처치했을 때만 호출된다. */
+function applySignatureOnKill(sig, enemy, sourceKey, ownerId) {
+    if (sig.type === 'plunder') {
+        if (Math.random() < sig.v) {
+            gold += 1;
+            showFloatingDamage(enemy.x, enemy.y, "💰 +1 TP", "#f59e0b");
+        }
+    } else if (sig.type === 'manaDrain') {
+        mp = Math.min(maxMp || 100, (mp || 0) + sig.v);
+    } else if (sig.type === 'emberBurst') {
+        const dmg = Math.round(enemy.maxHp * sig.v * 10) / 10;
+        const victims = enemies.filter(e => e.alive && e !== enemy && Math.abs(e.x - enemy.x) <= 1 && Math.abs(e.y - enemy.y) <= 1);
+        if (victims.length) createSplashEffect(enemy.x, enemy.y);
+        for (const v of victims) dealDamage(v, dmg, "#fb923c", false, sourceKey, ownerId);
+    }
+}
+
+/** 웨이브 무피해 클리어 시 '재생' (덱 편성 지휘관 기준, 지휘관마다 1회 판정) */
+function applySignatureWaveRegen() {
+    for (const charId of USER_DATA.characterDeck || []) {
+        const sig = getCommanderSignature(charId);
+        if (!sig || sig.type !== 'regen') continue;
+        if (playerHP < maxPlayerHP && Math.random() < sig.v) {
+            playerHP += 1;
+            showFloatingDamage(10, 9, `💚 ${CHARACTER_DATA[charId].name}: 기지 HP +1`, "#22c55e");
+        }
+    }
+}
+
+/** '기반 수호': 기반 주변 3x3에 이 효과를 가진 지휘관의 타워가 있으면 철거 시간 증가율(가장 큰 값) */
+function getBaseGuardBonus(baseCell) {
+    let best = 0;
+    for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+            const c = getCell(baseCell.x + dx, baseCell.y + dy);
+            if (!c || !c.tower || !c.towerOwner) continue;
+            const sig = getCommanderSignature(c.towerOwner);
+            if (sig && sig.type === 'baseGuard') best = Math.max(best, sig.v);
+        }
+    }
+    return best;
+}

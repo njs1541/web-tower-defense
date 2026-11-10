@@ -3,7 +3,7 @@
 미소녀 지휘관 수집, 룬 소켓 덱빌딩, 히어로 컨트롤을 결합한 브라우저 타워 디펜스 게임과 그 에셋 제작 도구 모음이다.
 빌드 도구와 외부 의존성이 없는 바닐라 JS/HTML/CSS 프로젝트다.
 
-- 게임 버전: v0.54.2
+- 게임 버전: v0.55.2
 - 이 문서의 행 번호와 현황은 v0.52.0 작업본 기준이다(v0.53.x는 문서, RP 드롭 상수, 크롤러 보호 판정만 변경. enemy.js 행 번호는 약 +15 밀림). 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
 - **커밋은 사용자가 수동으로 한다.** 명시적인 요청이 없으면 커밋이나 푸시를 하지 않는다.
 - 세부 규칙은 [QA_AND_RULES.md](QA_AND_RULES.md), 기획은 [기획문서.md](기획문서.md), 에셋 절차는 [asset_generation_pipeline_guide.html](asset_generation_pipeline_guide.html)을 본다.
@@ -29,7 +29,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 **버전:** "어떠한 내용이든 업데이트가 될 때마다 반드시 버전을 상향"한다. 게임 코드뿐 아니라 에셋 도구(HTML)와 문서만 고친 경우도 포함한다. 다음 위치를 항상 같은 값으로 맞춘다.
 - `js/constants.js:1` (`GAME_VERSION`)
-- `index.html:26, 40, 223` (수동 표기 3곳). 스크립트 캐시 쿼리 `?v=0542`도 함께 올린다
+- `index.html:26, 40, 223` (수동 표기 3곳). 스크립트 캐시 쿼리 `?v=0552`도 함께 올린다
 - `QA_AND_RULES.md:8` (인수인계 절)
 - `기획문서.md:2`
 
@@ -85,7 +85,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 ## 추가 체크리스트
 
 **지휘관**
-1. `CHARACTER_DATA`에 항목 추가: id, name, title, grade, element, role, avatar, image, baseSockets, maxSockets, levelCaps, towerStock, quotes, skillQuote, desc. UR/U는 `isHeroUnit`을 넣고 `towerStock:{}`로 둔다.
+1. `CHARACTER_DATA`에 항목 추가: id, name, title, grade, element, role, signature(C~SR), avatar, image, baseSockets, maxSockets, levelCaps, towerStock, quotes, skillQuote, desc. UR/U는 `isHeroUnit`을 넣고 `towerStock:{}`로 둔다. `signature`는 `SIGNATURE_TYPES`(constants.js)의 유형 키 하나이며 수치는 등급으로 정해진다(v0.55.0, 기획문서 3.8절). 새 유형이 필요하면 `SIGNATURE_TYPES`와 처리 함수(tower.js 끝의 `getSignatureDamageMulti`, `applySignatureOnHit`, `applySignatureOnKill` 등)에 추가한다.
 2. 소환 확률은 v0.53.5부터 자동이다. `COMMANDER_GACHA_CONFIG.gradeRates`(등급별 총 %)를 `getCommanderGachaRates()`(gacha.js)가 같은 등급 지휘관에게 균등 분배한다. 소환에서 빼려면 `gachaExcluded: true`.
 3. `assets/char_<id>.jpg` 추가 후 `node scratch/make_thumbs.mjs`로 썸네일(`assets/thumbs/<id>.webp`) 생성. 선택: `MODULAR_CHARACTER_SPECS`(없으면 `getCharacterModularSpec`이 자동 추론).
 4. UR/U 고유 오라: `getHeroAuraSpec`(user_data.js:905-963).
@@ -94,7 +94,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 **타워:** `TOWER_DATA`, `TOWER_EMBLEMS`, 타격 분기(tower.js:398-436), 효과 문구(tower.js:828-831), `.cell.<id>` CSS, U 대장 한도(user_data.js:354), 제공 지휘관의 `towerStock`.
 **적:** `ENEMY_TYPES`, `determineEnemyType`(enemy.js:88-114), `.monster-body.<id>` CSS.
 **룬:** `RUNE_DATA`, `RUNE_GACHA_CONFIG`, 패시브 체인(user_data.js:857-888) 또는 스펠 체인(tower.js:1052-1110).
-**스테이지:** `STAGE_DATA`, 버튼(index.html:75-77).
+**스테이지:** `STAGE_DATA`(보스만 따로 조정하려면 `bossHpMulti`, v0.55.1부터 Stage 1 = 0.6), 버튼(index.html:75-77).
 
 ## 새 에셋 파이프라인 (진행 중, `test/`)
 
@@ -200,11 +200,11 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 v1.0 워크플로(`docs/workflow_v1_release.md`)에서 결정 없이 할 수 있는 작업은 v0.53.8까지 끝났다. 남은 작업은 다음 결정이 필요하다.
 - **P2 Firebase:** SDK를 `gstatic.com` CDN 스크립트로 불러와도 되는지(외부 의존성 첫 예외), Firebase 프로젝트 생성과 웹 앱 구성값 전달(사용자 작업), 일일 초기화 시각(예: 한국 시간 0시 또는 5시).
 - **P3 차원석:** 기획문서 3.7절의 획득처·상점 "초안" 수치 확정. 일일 초기화를 서버 시간으로 하려면 P2가 먼저다.
-- **P4 지휘관:** 고유 효과 템플릿 유형과 21명 배정안 승인, `race`(종족) 필드의 지휘관별 값, 픽업 배너 천장 규칙, UR/U 파츠가 늦을 때 기존 렌더링으로 출시할지.
+- **P4 지휘관:** 고유 효과는 v0.55.0에 C~SR 17명 적용 완료(유형·수치는 시험값). UR/U에 고유 효과를 줄지는 적용 결과를 보고 정한다. 남은 결정: `race`(종족) 필드의 지휘관별 값, 픽업 배너 천장 규칙, UR/U 파츠가 늦을 때 기존 렌더링으로 출시할지.
 - **P5:** 변조 단계 목록과 보상, 3지선다 보상 후보.
 - **P6-2:** 배경음 출처.
 - **P7:** 연구소 확장 특성과 비용.
-- **밸런스(P1 측정 결과):** 신규 덱은 10R 보스를 막지 못해 보스 PP와 최초 클리어 PP를 받지 못하고, 중반 덱은 20R 보스에서 막힌다. 초반 보스 난이도나 신규 지급을 조정할지.
+- **밸런스:** v0.55.1에서 고유 효과와 Stage 1 보스 체력 0.6배로 초반 목표(신규 덱 10R 보스 8/10, 중반 덱 20R 보스 9/10)를 달성했다. 30R 도달 곡선(신규 덱 19-23R, 중반 덱 27-32R에서 패배, 최강 덱 클리어)은 의도된 성장 곡선으로 확정해 유지한다(사용자 결정, 2026-11-10). 이 곡선을 바꾸는 밸런스 수정은 사용자 확인 후에 한다. 남은 판단(사용자가 직접 플레이해 보고 알려 주기로 함): UR/U에 고유 효과를 줄지, 효과 유형·수치(시험값)를 확정할지. `scratch/balance_sim/report.md`는 v0.55.0 전체 측정이라 Stage 1 행은 보스 조정 전 값이다.
 - **배포:** 공개 배포 여부와 시점은 사용자가 확정한다(확정 전 배포 금지, 위 "반드시 지킬 규칙"). 확정 후에 Settings → Pages → Source를 "GitHub Actions"로 바꾸고 워크플로를 수동 실행("배포 확정" 입력)한다. 배포본에 QA 치트 패널(Ctrl+J)이 그대로 들어가므로 배포 전에 처리 방식을 정해야 한다.
   - 현황(2026-11-09 확인): 저장소에는 원래 "main 브랜치에서 배포" 방식의 Pages가 켜져 있어 늦어도 11-03부터 저장소 전체(에셋 도구 포함)가 `njs1541.github.io/web-tower-defense`에 공개되고 있었고, `1f80e5b` 푸시 때 배포 워크플로도 한 번 실행되었다. 사용자가 Pages 게시를 중단해 사이트는 404, API `has_pages: false`. 저장소(소스 페이지)는 공개로 유지한다(사용자 결정, 2026-11-09). 게임 사이트 게시만 꺼진 상태이고, 배포를 확정하면 Pages를 다시 켜서 쓸 수 있다.
 

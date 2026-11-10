@@ -372,6 +372,7 @@ function createSingleCommanderCard(charId, isDeployedSlot = false, slotIndex = 0
         <div class="commander-cap-info">
             <div>🛡️ 타워 강화 한도: <strong>${capsSummary}</strong></div>
             <div style="margin-top: 3px; color: #0284c7;">🏰 타워 설치 스톡: <strong>${stocksSummary}</strong></div>
+            ${getSignatureHtmlLine(charId, 'margin-top: 3px; color: #7c3aed;')}
         </div>
 
         <div class="commander-sockets-container">
