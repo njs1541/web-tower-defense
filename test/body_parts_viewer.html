@@ -165,6 +165,15 @@
         <input type="checkbox" id="chk-limit-rot" checked onchange="toggleRotationLimits()">
         <span style="color: #38bdf8; font-weight: 600;">🔒 관절별 실제 가동범위 제한 (상체 ±10°, 다리 ±25° 등)</span>
       </label>
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; grid-column: span 2;">
+        <input type="checkbox" id="chk-joint-fix" checked onchange="render()">
+        <span style="color: #facc15; font-weight: 600;">🩹 관절 끝 자동 연장 (회전 시 빈틈 메우기)</span>
+      </label>
+      <div style="display: flex; align-items: center; gap: 4px; grid-column: span 2;">
+        <span style="color: var(--muted);">연장 반경 (관절 폭 대비):</span>
+        <input type="range" id="cap-scale" min="80" max="160" value="110" style="flex: 1;" onchange="rebuildJointCaps(); render();" oninput="document.getElementById('cap-scale-val').textContent = this.value + '%'">
+        <span id="cap-scale-val" style="font-family: monospace; width: 38px; text-align: right;">110%</span>
+      </div>
       <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
         <input type="checkbox" id="chk-b00" onchange="render()">
         <span>b00 원본 겹쳐보기</span>
@@ -189,7 +198,10 @@
     <button class="action-btn secondary" onclick="toggleAll(true)">전체 켜기</button>
     <button class="action-btn secondary" onclick="toggleAll(false)">전체 끄기</button>
     <button class="action-btn secondary" onclick="copyCurrentPivots()">📋 피벗 JSON 복사</button>
+    <button class="action-btn secondary" onclick="autoFixPivots()">📐 피벗 자동 보정</button>
+    <button class="action-btn secondary" onclick="resetPivotsToDefault()">🎯 피벗 기본값</button>
   </div>
+  <div id="fix-status" style="font-size: 0.72rem; color: var(--muted); line-height: 1.4; white-space: pre-line;"></div>
 </aside>
 
 <main>
@@ -209,22 +221,42 @@
  *   * 가까운 쪽(Near, 캐릭터의 우측) = 화면 왼쪽 (X < 520)
  *   * 먼 쪽(Far, 캐릭터의 좌측) = 화면 오른쪽 (X > 520)
  */
+const DEFAULT_PIVOTS = {
+  b06: [582, 460], // 먼 팔 위 (어깨 꼭대기 관절 볼 중심)
+  b07: [612, 565], // 먼 팔 아래 (팔꿈치)
+  b09: [566, 680], // 먼 다리 (고관절)
+  b08: [481, 680], // 가까운 다리 (고관절)
+  b03: [520, 650], // 골반 (Root)
+  b02: [520, 620], // 상체 (허리)
+  b01: [513, 395], // 머리 (목)
+  b04: [446, 458], // 가까운 팔 위 (어깨 꼭대기 견봉-삼각근 볼 정중앙)
+  b05: [415, 565]  // 가까운 팔 아래 (팔꿈치)
+};
+
 const PARTS_CONFIG = [
-  { id: "b06", parent: "b02", file: "b06_arm_far_upper.png",  name: "b06. 먼 팔 위",     parentLabel: "상체(어깨)",   pivot: [580, 485], minRot: -40, maxRot: 35, rot: 0, color: "#f43f5e", explodeOffset: [70, -30] },
-  { id: "b07", parent: "b06", file: "b07_arm_far_lower.png",  name: "b07. 먼 팔 아래",   parentLabel: "b06(팔꿈치)", pivot: [612, 565], minRot: -45, maxRot: 20, rot: 0, color: "#fb7185", explodeOffset: [110, 30] },
-  { id: "b09", parent: "b03", file: "b09_leg_far.png",        name: "b09. 먼 다리",      parentLabel: "골반(고관절)", pivot: [566, 680], minRot: -25, maxRot: 25, rot: 0, color: "#a855f7", explodeOffset: [55, 80] },
-  { id: "b08", parent: "b03", file: "b08_leg_near.png",       name: "b08. 가까운 다리",  parentLabel: "골반(고관절)", pivot: [481, 680], minRot: -25, maxRot: 25, rot: 0, color: "#c084fc", explodeOffset: [-55, 80] },
-  { id: "b03", parent: null,  file: "b03_pelvis.png",         name: "b03. 골반 (Root)",  parentLabel: "최상위 루트",  pivot: [520, 650], minRot: -8,  maxRot: 8,  rot: 0, color: "#eab308", explodeOffset: [0, 20] },
-  { id: "b02", parent: "b03", file: "b02_torso_upper.png",    name: "b02. 상체",         parentLabel: "골반(허리)",   pivot: [520, 620], minRot: -10, maxRot: 10, rot: 0, color: "#38bdf8", explodeOffset: [0, -25] },
-  { id: "b01", parent: "b02", file: "b01_head_base.png",      name: "b01. 머리 소체",    parentLabel: "상체(목)",     pivot: [513, 395], minRot: -15, maxRot: 15, rot: 0, color: "#22c55e", explodeOffset: [0, -95] },
-  { id: "b04", parent: "b02", file: "b04_arm_near_upper.png", name: "b04. 가까운 팔 위", parentLabel: "상체(어깨)",   pivot: [451, 480], minRot: -40, maxRot: 35, rot: 0, color: "#f97316", explodeOffset: [-70, -30] },
-  { id: "b05", parent: "b04", file: "b05_arm_near_lower.png", name: "b05. 가까운 팔 아래",parentLabel: "b04(팔꿈치)", pivot: [415, 565], minRot: -45, maxRot: 20, rot: 0, color: "#fb923c", explodeOffset: [-110, 30] }
+  { id: "b06", parent: "b02", file: "b06_arm_far_upper.png",  name: "b06. 먼 팔 위",     parentLabel: "상체(어깨)",   pivot: [...DEFAULT_PIVOTS.b06], minRot: -40, maxRot: 35, rot: 0, color: "#f43f5e", explodeOffset: [70, -30] },
+  { id: "b07", parent: "b06", file: "b07_arm_far_lower.png",  name: "b07. 먼 팔 아래",   parentLabel: "b06(팔꿈치)", pivot: [...DEFAULT_PIVOTS.b07], minRot: -45, maxRot: 20, rot: 0, color: "#fb7185", explodeOffset: [110, 30] },
+  { id: "b09", parent: "b03", file: "b09_leg_far.png",        name: "b09. 먼 다리",      parentLabel: "골반(고관절)", pivot: [...DEFAULT_PIVOTS.b09], minRot: -25, maxRot: 25, rot: 0, color: "#a855f7", explodeOffset: [55, 80] },
+  { id: "b08", parent: "b03", file: "b08_leg_near.png",       name: "b08. 가까운 다리",  parentLabel: "골반(고관절)", pivot: [...DEFAULT_PIVOTS.b08], minRot: -25, maxRot: 25, rot: 0, color: "#c084fc", explodeOffset: [-55, 80] },
+  { id: "b03", parent: null,  file: "b03_pelvis.png",         name: "b03. 골반 (Root)",  parentLabel: "최상위 루트",  pivot: [...DEFAULT_PIVOTS.b03], minRot: -8,  maxRot: 8,  rot: 0, color: "#eab308", explodeOffset: [0, 20] },
+  { id: "b02", parent: "b03", file: "b02_torso_upper.png",    name: "b02. 상체",         parentLabel: "골반(허리)",   pivot: [...DEFAULT_PIVOTS.b02], minRot: -10, maxRot: 10, rot: 0, color: "#38bdf8", explodeOffset: [0, -25] },
+  { id: "b01", parent: "b02", file: "b01_head_base.png",      name: "b01. 머리 소체",    parentLabel: "상체(목)",     pivot: [...DEFAULT_PIVOTS.b01], minRot: -15, maxRot: 15, rot: 0, color: "#22c55e", explodeOffset: [0, -95] },
+  { id: "b04", parent: "b02", file: "b04_arm_near_upper.png", name: "b04. 가까운 팔 위", parentLabel: "상체(어깨)",   pivot: [...DEFAULT_PIVOTS.b04], minRot: -40, maxRot: 35, rot: 0, color: "#f97316", explodeOffset: [-70, -30] },
+  { id: "b05", parent: "b04", file: "b05_arm_near_lower.png", name: "b05. 가까운 팔 아래",parentLabel: "b04(팔꿈치)", pivot: [...DEFAULT_PIVOTS.b05], minRot: -45, maxRot: 20, rot: 0, color: "#fb923c", explodeOffset: [-110, 30] }
 ];
 
 const partMap = {};
-PARTS_CONFIG.forEach(p => { partMap[p.id] = p; });
+PARTS_CONFIG.forEach(p => { partMap[p.id] = p; p.sy = 1; });
+
+// 자식 목록과 루트부터의 깊이 (회전 분산 처리 순서에 사용)
+const CHILDREN = {};
+PARTS_CONFIG.forEach(p => { if (p.parent) (CHILDREN[p.parent] = CHILDREN[p.parent] || []).push(p); });
+function getDepth(p) { let d = 0; for (let c = p; c.parent; c = partMap[c.parent]) d++; return d; }
+const PARTS_BY_DEPTH = [...PARTS_CONFIG].sort((a, b) => getDepth(a) - getDepth(b));
 
 const loadedImages = {};
+const capImages = {};   // 관절 끝을 연장한 이미지 (관절 보정 켜짐일 때 사용)
+const jointInfo = {};   // 자식 파츠 id → 관절 단면 측정값
 let b00Image = null;
 let animMode = "none";
 let animFrameId = null;
@@ -283,7 +315,329 @@ async function init() {
   for (const p of PARTS_CONFIG) {
     loadedImages[p.id] = await loadChromaImage(`incoming/body_human/${p.file}?v=${ts}`);
   }
+  rebuildJointCaps();
   render();
+}
+
+/* ==========================================================================
+ * 관절 보정
+ * - 관절 단면 측정: 뼈 방향에 수직인 선을 따라 부모·자식 합집합의 폭과 중앙을 잰다.
+ * - 관절 끝 자동 연장: 관절 원(반지름 = 단면 폭의 절반 × 배율) 안에서, 이웃 파츠가
+ *   차지하던 자리를 이 파츠의 가장 가까운 픽셀 색으로 채운다. 정지 상태에서는 이웃
+ *   파츠 아래나 위에 겹쳐 보이지 않고, 회전해 틈이 벌어지면 그 자리를 메운다.
+ * ========================================================================== */
+const maskCache = {};
+function getMask(id) {
+  if (maskCache[id]) return maskCache[id];
+  const c = loadedImages[id];
+  const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+  const w = c.width, h = c.height, a = new Uint8Array(w * h);
+  let sx = 0, sy = 0, n = 0;
+  for (let i = 0; i < a.length; i++) {
+    if (d[i * 4 + 3] > 0) { a[i] = 1; sx += i % w; sy += (i / w) | 0; n++; }
+  }
+  maskCache[id] = { a, w, h, centroid: n ? [sx / n, sy / n] : [w / 2, h / 2] };
+  return maskCache[id];
+}
+function isOpaque(m, x, y) {
+  x = Math.round(x); y = Math.round(y);
+  return x >= 0 && y >= 0 && x < m.w && y < m.h && m.a[y * m.w + x] === 1;
+}
+
+function measureJoint(parent, child) {
+  const J = child.pivot;
+  const A = getMask(parent.id), B = getMask(child.id);
+  let dx = B.centroid[0] - J[0], dy = B.centroid[1] - J[1];
+  const len = Math.hypot(dx, dy) || 1;
+  dx /= len; dy /= len;
+  const nx = -dy, ny = dx;
+  // 자식 파츠의 단면만 잰다. 부모(몸통, 골반)까지 합치면 어깨·고관절에서 몸통 전체 폭이 잡힌다.
+  // 절단선이 비스듬하거나 1-2px 비어 있어도 잡히도록 자식 쪽으로 2-10px 안쪽까지 본다.
+  const filled = (t) => {
+    for (const s of [2, 4, 6, 8, 10]) {
+      const x = J[0] + nx * t + dx * s, y = J[1] + ny * t + dy * s;
+      if (isOpaque(B, x, y)) return true;
+    }
+    return false;
+  };
+  const reach = (sign) => {
+    let last = 0, miss = 0;
+    for (let t = 1; t <= 240; t++) {
+      if (filled(sign * t)) { last = t; miss = 0; } else if (++miss > 3) break;
+    }
+    return last;
+  };
+  const tPos = reach(1), tNeg = reach(-1);
+  return {
+    dir: [dx, dy],
+    width: tPos + tNeg,
+    mid: [J[0] + nx * (tPos - tNeg) / 2, J[1] + ny * (tPos - tNeg) / 2]
+  };
+}
+
+/**
+ * 피부색 유효성 검사 (어울리는 피부색 필터링)
+ * - 크로마키 녹색 잔여 틴트, 어두운 외곽선/선화 라인을 철저히 제외하고,
+ * - 순수 피부 톤(빛 받는 밝은 살구색, 음영 살구색)만 유효한 색상 소스로 인정.
+ */
+function isValidSkin(r, g, b, a) {
+  if (a < 180) return false;
+  // 크로마키 녹색 및 녹색 잔여 노이즈 배제
+  if (g > 130 && r < 120 && b < 120) return false;
+  if (g > r && g > b) return false;
+  if (g > r * 0.95 && g > b + 20) return false;
+  
+  // 어두운 외곽선/선화 배제 (명도 lum < 145, 짙은 갈색/검정)
+  const lum = r * 0.299 + g * 0.587 + b * 0.114;
+  if (lum < 145) return false;
+  
+  // 피부색(웜톤 살구색) 특성: R이 가장 높고, G가 그 다음, B가 가장 낮음
+  if (r < 165 || g < 125 || b < 95) return false;
+  if (r < g || g < b * 0.78) return false;
+  
+  return true;
+}
+
+// part 이미지(imgData)의 관절 J 주변을 이웃(neighbor) 파츠 자리까지 연장한다.
+function extendAtJoint(imgData, src, part, neighbor, J, radius) {
+  const W = imgData.width, H = imgData.height;
+  const mp = getMask(part.id), mn = getMask(neighbor.id);
+  const x0 = Math.max(0, Math.floor(J[0] - radius - 4)), x1 = Math.min(W - 1, Math.ceil(J[0] + radius + 4));
+  const y0 = Math.max(0, Math.floor(J[1] - radius - 4)), y1 = Math.min(H - 1, Math.ceil(J[1] + radius + 4));
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1;
+  const owner = new Int32Array(bw * bh).fill(-1);
+  const r2 = radius * radius;
+
+  // 1. 관절 주변 파츠 내부의 유효한 피부색(Skin) 픽셀들을 수집 및 평균 피부색 계산
+  let sumR = 0, sumG = 0, sumB = 0, skinCount = 0;
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (isOpaque(mp, x, y)) {
+        const idx = (y * W + x) * 4;
+        const r = src[idx], g = src[idx + 1], b = src[idx + 2], a = src[idx + 3];
+        if (isValidSkin(r, g, b, a)) {
+          sumR += r; sumG += g; sumB += b; skinCount++;
+        }
+      }
+    }
+  }
+
+  // 만약 관절 주변에 피부색 픽셀이 부족하면 인간 소체 표준 살구색 fallback 사용
+  let fallbackR = 248, fallbackG = 212, fallbackB = 192;
+  if (skinCount > 0) {
+    fallbackR = Math.round(sumR / skinCount);
+    fallbackG = Math.round(sumG / skinCount);
+    fallbackB = Math.round(sumB / skinCount);
+  }
+
+  // 2. 이웃 파츠가 실제로 있던 자리이면서 현재 파츠에 비어 있는 곳을 채움 대상(Target)으로 지정
+  const isTarget = (x, y) => {
+    const ddx = x - J[0], ddy = y - J[1];
+    return ddx * ddx + ddy * ddy <= r2 && !isOpaque(mp, x, y) && isOpaque(mn, x, y);
+  };
+
+  // 3. BFS 큐 등록: 오직 "유효한 피부색 픽셀"만 출발점으로 등록!
+  //    (어두운 외곽선이나 크로마키 녹색 노이즈가 바깥으로 번지는 것을 100% 원천 차단)
+  const queue = new Int32Array(bw * bh);
+  let head = 0, tail = 0;
+
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      if (isOpaque(mp, x, y)) {
+        const idx = (y * W + x) * 4;
+        const r = src[idx], g = src[idx + 1], b = src[idx + 2], a = src[idx + 3];
+        if (isValidSkin(r, g, b, a)) {
+          const k = (y - y0) * bw + (x - x0);
+          owner[k] = y * W + x;
+          queue[tail++] = k;
+        }
+      }
+    }
+  }
+
+  // 만약 유효한 피부 픽셀이 하나도 없다면 fallback 피부색으로 채움
+  let filledCount = 0;
+  if (tail === 0) {
+    for (let y = y0; y <= y1; y++) {
+      for (let x = x0; x <= x1; x++) {
+        if (isTarget(x, y)) {
+          const t = (y * W + x) * 4;
+          imgData.data[t] = fallbackR;
+          imgData.data[t + 1] = fallbackG;
+          imgData.data[t + 2] = fallbackB;
+          imgData.data[t + 3] = 255;
+          filledCount++;
+        }
+      }
+    }
+    return filledCount;
+  }
+
+  // 4. 피부색 픽셀에서부터 타겟 영역으로 BFS 전파 (가장 가까운 본체 피부 그라데이션 이어받기)
+  while (head < tail) {
+    const k = queue[head++];
+    const kx = k % bw, ky = (k / bw) | 0;
+    for (const [ox, oy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const qx = kx + ox, qy = ky + oy;
+      if (qx < 0 || qy < 0 || qx >= bw || qy >= bh) continue;
+      const q = qy * bw + qx;
+      if (owner[q] !== -1) continue;
+      const gx = qx + x0, gy = qy + y0;
+      if (!isTarget(gx, gy)) continue;
+      owner[q] = owner[k];
+      queue[tail++] = q;
+      const s = owner[k] * 4, t = (gy * W + gx) * 4;
+      imgData.data[t] = src[s];
+      imgData.data[t + 1] = src[s + 1];
+      imgData.data[t + 2] = src[s + 2];
+      imgData.data[t + 3] = 255;
+      filledCount++;
+    }
+  }
+
+  // 혹시라도 타겟 영역 중 고립되어 BFS가 닿지 못한 픽셀은 fallback 피부색으로 채움
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const q = (y - y0) * bw + (x - x0);
+      if (owner[q] === -1 && isTarget(x, y)) {
+        const t = (y * W + x) * 4;
+        imgData.data[t] = fallbackR;
+        imgData.data[t + 1] = fallbackG;
+        imgData.data[t + 2] = fallbackB;
+        imgData.data[t + 3] = 255;
+        filledCount++;
+      }
+    }
+  }
+
+  return filledCount;
+}
+
+function rebuildJointCaps() {
+  const scale = (parseFloat(document.getElementById("cap-scale")?.value) || 110) / 100;
+  const work = {};
+  for (const p of PARTS_CONFIG) {
+    const img = loadedImages[p.id];
+    if (!img) return;
+    const c = document.createElement("canvas");
+    c.width = img.width; c.height = img.height;
+    const ctx = c.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    const data = ctx.getImageData(0, 0, c.width, c.height);
+    work[p.id] = { c, ctx, data, src: new Uint8ClampedArray(data.data) };
+  }
+
+  // 각 관절별 물리적 최대 캡 반경(px) 제한 (머리/어깨 회전 시 빈 공간 완벽 차단)
+  const MAX_RADIUS = {
+    b01: 30, // 목 (머리 갸우뚱 시 턱선 밑 커버)
+    b04: 32, // 가까운 어깨 (어깨 회전 시 소켓 완전 커버)
+    b05: 28, // 가까운 팔꿈치
+    b06: 30, // 먼 어깨
+    b07: 28, // 먼 팔꿈치
+    b08: 42, // 가까운 고관절
+    b09: 42, // 먼 고관절
+    b02: 46  // 허리
+  };
+
+  for (const child of PARTS_CONFIG) {
+    if (!child.parent) continue;
+    const parent = partMap[child.parent];
+    const m = measureJoint(parent, child);
+    
+    // 관절 폭 측정치 기반 반경 계산 및 상한선 클램핑
+    const rawR = (m.width / 2) * scale;
+    const maxR = MAX_RADIUS[child.id] || 30;
+    const radius = Math.min(maxR, Math.max(12, rawR));
+
+    jointInfo[child.id] = { ...m, radius, filledChild: 0, filledParent: 0 };
+    if (m.width < 6) continue;
+
+    // ★★★ 핵심 황금률: 연장 부위는 반드시 '아래 레이어(Behind)' 파츠에만 생성되어 위 파츠 뒤로 숨어 들어간다!
+    // PARTS_CONFIG 렌더링 순서(인덱스)가 작을수록 아래 레이어, 클수록 위 레이어.
+    const childIdx = PARTS_CONFIG.findIndex(p => p.id === child.id);
+    const parentIdx = PARTS_CONFIG.findIndex(p => p.id === parent.id);
+
+    if (childIdx < parentIdx) {
+      // 자식 파츠가 아래 레이어 (예: 먼팔 b06 < 상체 b02, 다리 b08/b09 < 골반 b03)
+      // -> 자식 파츠만 부모 뒤로 들어가는 둥근 볼 캡으로 연장!
+      jointInfo[child.id].filledChild = extendAtJoint(work[child.id].data, work[child.id].src, child, parent, child.pivot, radius);
+      jointInfo[child.id].filledParent = 0;
+    } else {
+      // 부모 파츠가 아래 레이어 (예: 상체 b02 < 머리 b01, 골반 b03 < 상체 b02, 상체 b02 < 가까운팔 b04, 팔위 b04 < 팔아래 b05)
+      // -> 부모 파츠만 자식 뒤로 들어가는 둥근 볼 캡으로 연장!
+      // (머리 b01이나 골반 b03 등 위 레이어 파츠는 절대로 아래 파츠를 덮지 않음!)
+      jointInfo[child.id].filledChild = 0;
+      jointInfo[child.id].filledParent = extendAtJoint(work[parent.id].data, work[parent.id].src, parent, child, child.pivot, radius);
+    }
+  }
+  for (const p of PARTS_CONFIG) {
+    work[p.id].ctx.putImageData(work[p.id].data, 0, 0);
+    capImages[p.id] = work[p.id].c;
+  }
+}
+
+// 피벗을 관절 단면의 중앙으로 옮긴다 (오차 방어: 사선 왜곡 시 기본값 유지)
+function autoFixPivots() {
+  const lines = [];
+  for (const child of PARTS_CONFIG) {
+    if (!child.parent) continue;
+    const m = measureJoint(partMap[child.parent], child);
+    if (m.width < 6) { lines.push(`${child.id}: 관절 단면을 찾지 못해 유지`); continue; }
+    
+    const def = DEFAULT_PIVOTS[child.id] || child.pivot;
+    const next = [Math.round(m.mid[0]), Math.round(m.mid[1])];
+    const shiftFromDef = Math.hypot(next[0] - def[0], next[1] - def[1]);
+    
+    // 만약 사선 측정 오차 등으로 기본 정밀 피벗에서 8px 이상 벗어나면 이상치(Outlier)로 판단하고 기본값 유지!
+    if (shiftFromDef > 8) {
+      lines.push(`${child.id}: 측정치(${next})가 어깨/관절 볼 중심에서 벗어나 기본값 [${def}] 유지`);
+      child.pivot = [...def];
+    } else {
+      const moved = Math.hypot(next[0] - child.pivot[0], next[1] - child.pivot[1]);
+      if (moved >= 1) {
+        lines.push(`${child.id}: [${child.pivot}] → [${next}] (${moved.toFixed(1)}px 보정, 단면 폭 ${m.width}px)`);
+        child.pivot = next;
+      }
+    }
+    const xEl = document.getElementById(`pivX-${child.id}`), yEl = document.getElementById(`pivY-${child.id}`);
+    if (xEl) xEl.value = child.pivot[0];
+    if (yEl) yEl.value = child.pivot[1];
+  }
+  rebuildJointCaps();
+  render();
+  const status = document.getElementById("fix-status");
+  if (status) status.textContent = lines.length ? `피벗 자동 보정 결과:\n${lines.join("\n")}` : "피벗 자동 보정: 모든 관절이 이미 최적 중심에 있습니다.";
+  return lines;
+}
+
+// 피벗 좌표를 정밀 측정 기본값으로 즉시 복원
+function resetPivotsToDefault() {
+  for (const p of PARTS_CONFIG) {
+    const def = DEFAULT_PIVOTS[p.id];
+    if (def) {
+      p.pivot = [...def];
+      const xEl = document.getElementById(`pivX-${p.id}`), yEl = document.getElementById(`pivY-${p.id}`);
+      if (xEl) xEl.value = def[0];
+      if (yEl) yEl.value = def[1];
+    }
+  }
+  rebuildJointCaps();
+  render();
+  const status = document.getElementById("fix-status");
+  if (status) status.textContent = "피벗 좌표가 정밀 기본값으로 초기화되었습니다.";
+}
+
+// 관절 가동범위 적용. 범위를 넘는 각도는 자식이 하나뿐인 관절(팔)이면 자식에게 넘겨 나눠 돌린다.
+function applyRotationLimits() {
+  const limited = document.getElementById("chk-limit-rot")?.checked ?? true;
+  if (!limited) return;
+  for (const p of PARTS_BY_DEPTH) {
+    const clamped = Math.max(p.minRot, Math.min(p.maxRot, p.rot));
+    const overflow = p.rot - clamped;
+    p.rot = clamped;
+    const kids = CHILDREN[p.id];
+    if (overflow !== 0 && kids && kids.length === 1) kids[0].rot += overflow;
+  }
 }
 
 function toggleRotationLimits() {
@@ -338,11 +692,13 @@ function setAnimMode(mode) {
     if (animMode !== mode) return;
     const t = (now - startTime) / 1000;
 
+    PARTS_CONFIG.forEach(p => { p.sy = 1; });
     if (mode === 'idle') {
-      // 대기 모션: 부드러운 호흡, 머리 까딱임, 양팔 미세 흔들림
+      // 대기 모션: 호흡은 상체 회전 대신 세로 크기 변화로 표현 (관절이 벌어지지 않음)
       rootOffsetY = Math.sin(t * 2.5) * 3;
       partMap.b03.rot = 0;
-      partMap.b02.rot = Math.sin(t * 2.5) * 2.5;
+      partMap.b02.rot = Math.sin(t * 2.5) * 1;
+      partMap.b02.sy = 1 + Math.sin(t * 2.5) * 0.015;
       partMap.b01.rot = Math.sin(t * 2.5 - 0.5) * 4;
       partMap.b04.rot = Math.sin(t * 2.5) * 5;
       partMap.b05.rot = Math.sin(t * 2.5 - 0.4) * 6 - 5;
@@ -384,8 +740,9 @@ function setAnimMode(mode) {
       partMap.b03.rot = swing * 5;
       partMap.b02.rot = swing * 12;
       partMap.b01.rot = -swing * 6;
-      partMap.b04.rot = swing < 0 ? swing * 50 : swing * 38;
-      partMap.b05.rot = swing < 0 ? swing * 35 : -10 + swing * 20;
+      // 큰 스윙은 어깨와 팔꿈치에 나눠 준다 (관절 하나가 크게 벌어지지 않게)
+      partMap.b04.rot = swing < 0 ? swing * 35 : swing * 30;
+      partMap.b05.rot = swing < 0 ? swing * 30 : -10 + swing * 18;
       partMap.b06.rot = -swing * 18;
       partMap.b07.rot = -20;
       partMap.b08.rot = -swing * 10;
@@ -395,9 +752,10 @@ function setAnimMode(mode) {
       const cycle = (t * 1.8) % 1.0;
       const impact = cycle < 0.2 ? (cycle / 0.2) : Math.max(0, 1 - (cycle - 0.2) / 0.8);
       rootOffsetY = impact * 5;
-      partMap.b03.rot = -impact * 8;
-      partMap.b02.rot = -impact * 16;
-      partMap.b01.rot = -impact * 14;
+      // 젖힘을 골반·상체·머리에 나눠 준다 (상체 가동범위 ±10° 안)
+      partMap.b03.rot = -impact * 7;
+      partMap.b02.rot = -impact * 10;
+      partMap.b01.rot = -impact * 10;
       partMap.b04.rot = -impact * 28;
       partMap.b05.rot = -impact * 35;
       partMap.b06.rot = impact * 25;
@@ -406,6 +764,7 @@ function setAnimMode(mode) {
       partMap.b09.rot = -impact * 8;
     }
 
+    applyRotationLimits();
     syncSlidersFromState();
     render();
     animFrameId = requestAnimationFrame(tick);
@@ -430,12 +789,14 @@ function onPivotChange(id) {
   const px = parseInt(document.getElementById(`pivX-${id}`).value, 10) || p.pivot[0];
   const py = parseInt(document.getElementById(`pivY-${id}`).value, 10) || p.pivot[1];
   p.pivot = [px, py];
+  rebuildJointCaps();
   render();
 }
 
 function resetRotations() {
   for (const p of PARTS_CONFIG) {
     p.rot = 0;
+    p.sy = 1;
   }
   syncSlidersFromState();
   render();
@@ -488,10 +849,11 @@ function applyChainTransform(ctx, part) {
   }
   const chain = getBoneChain(part);
   for (const node of chain) {
-    if (node.rot !== 0) {
+    if (node.rot !== 0 || node.sy !== 1) {
       const [px, py] = node.pivot;
       ctx.translate(px, py);
       ctx.rotate((node.rot * Math.PI) / 180);
+      ctx.scale(1, node.sy);
       ctx.translate(-px, -py);
     }
   }
@@ -505,11 +867,11 @@ function getTransformedPoint(part, x, y) {
   // 역순(자식 -> 부모)으로 점 회전 적용
   for (let i = chain.length - 1; i >= 0; i--) {
     const node = chain[i];
-    if (node.rot !== 0) {
+    if (node.rot !== 0 || node.sy !== 1) {
       const [px, py] = node.pivot;
       const rad = (node.rot * Math.PI) / 180;
       const cos = Math.cos(rad), sin = Math.sin(rad);
-      const dx = ptX - px, dy = ptY - py;
+      const dx = ptX - px, dy = (ptY - py) * node.sy;
       ptX = px + dx * cos - dy * sin;
       ptY = py + dx * sin + dy * cos;
     }
@@ -541,7 +903,9 @@ function render() {
   // 2. 파츠 레이어 조립 렌더 (아래 -> 위)
   for (const p of PARTS_CONFIG) {
     const isVisible = document.getElementById(`chk-${p.id}`)?.checked;
-    const img = loadedImages[p.id];
+    // 분해도 모드에서는 원본 파츠의 고유 외형을 보여주고, 조립/모션 상태에서만 관절 캡 연장 적용
+    const useCaps = (animMode !== 'explode') && document.getElementById("chk-joint-fix")?.checked && capImages[p.id];
+    const img = useCaps ? capImages[p.id] : loadedImages[p.id];
     if (isVisible && img) {
       ctx.save();
       applyChainTransform(ctx, p);
