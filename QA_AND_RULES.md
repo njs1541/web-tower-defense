@@ -5,7 +5,19 @@
 Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 하면 아래 내용을 기억할 수 있습니다.
 
 ## 🚀 다음 작업 인수인계 및 체크포인트 (Next Session Task Handoff)
-- **현재 완료 상태 (v0.55.17 기준)**:
+- **현재 완료 상태 (v0.55.18 기준)**:
+    1. **pixelfx 픽셀 전투 이펙트 도입 (`js/pixel_fx.js`, `js/pixel_fx_data.js`, `assets/fx/`)**:
+        - **출처**: [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx) (MIT, 커밋 `5294518`). 필요한 코어와 이펙트 16개 파일만 `scratch/pixelfx/`에 LICENSE, NOTICE와 함께 두었다. Patch Pixel 폰트(MIT 아님)는 가져오지 않았다.
+        - **방식**: pixelfx는 ES 모듈 + Canvas 런타임이라 게임(클래식 스크립트, DOM 렌더링)에 그대로 싣지 않고, `node scratch/build_pixel_fx.mjs`가 이펙트를 가로 스트립 PNG로 구워 `assets/fx/`에 저장한다. 게임은 div 하나에 CSS `steps()` 애니메이션으로 재생한다. 새 Canvas, rAF, setInterval은 없다.
+        - **빌드 처리**: 이펙트별 구간 자르기(from/to), 끝 페이드, 내용 영역 자르기, 반투명 알파·색 단계화(용량 절반). 17종 합계 약 1.9MB. 이미지는 전투 시작 시(`startGame`의 `preloadPixelFx`) 미리 받는다.
+        - **연동 지점**: 타워 타격(원거리 `hit_ranged`, 근거리 `hit_melee`, 저격 `hit_sniper`, 얼음 `hit_ice`, 전격 `hit_shock`과 연쇄 대상, 치명타 `hit_crit`), 폭탄·잔불 폭발 `createSplashEffect` → `explosion`(기존 CSS 원형 그라데이션 `.splash-effect` 삭제), 시공 붕괴 룬 `implosion`, 연쇄 번개 룬 `hit_shock`, 처치 `death`/보스 `boss_death`, 히어로 타격(U 등급은 보라색 `hit_hero_u`), 스펠 룬 6종(보급 `spell_gold`, 돌풍 `spell_tornado` 최대 4곳, 낙뢰 `spell_thunder` 최대 10기, 송환 `spell_warp`, 축복 `spell_bless` 타워 최대 12곳, 아마겟돈 `spell_meteor` 최대 8기).
+        - **배속/일시정지**: 재생 시간은 시작 시점의 `gameSpeed`로 나눈다. `updateSpeedUI`가 `body.game-paused`를 토글해 재생 중 이펙트도 멈춘다. 동시 재생은 `PIXEL_FX_MAX_ACTIVE`(40)개로 제한하고 넘치면 생략한다.
+        - **방향**: 방향성 타격 이펙트는 오른쪽으로 맞는 모양이 기본이라 공격자가 대상보다 오른쪽이면 좌우 반전한다. 칸 피치는 31px(30px + 간격 1px)로 계산한다.
+        - **검증 (Edge 헤드리스 + CDP)**: 17종 이미지 크기 일치, 재생 후 DOM 정리(0개 잔류), 일시정지 중 유지와 재개 후 정리, 타워 6종을 각각 배치한 실제 라운드에서 해당 타격·처치 이펙트 발생, 스펠 6종 발동, 콘솔 오류 없음을 확인했다. 사람이 직접 플레이하며 본 체감(잦은 타격 시 화면 번잡함, 빛 번짐이 밝은 보드에서 보이는 정도)은 아직 확인하지 않았다.
+        - **이펙트 추가/변경**: `scratch/build_pixel_fx.mjs`의 `EFFECTS`에 항목을 추가하고(원본 파일은 pixelfx 저장소에서 `scratch/pixelfx/src/fx/<범주>/`에 `_lib.js`와 함께 복사) 다시 실행한 뒤 `playPixelFx(키, 칸X, 칸Y, {flip, delayMs})`로 호출한다. `js/pixel_fx_data.js`는 자동 생성 파일이라 직접 고치지 않는다.
+        - **참고**: `TOWER_EMBLEMS`에 있는 `power`는 `TOWER_DATA`에 없는 타워라 타격 이펙트를 두지 않았다.
+    2. **버전 동기화**: `constants.js`, `index.html`(표기 3곳, 스크립트 쿼리 `?v=05518`), `QA_AND_RULES.md`, `기획문서.md`, `CLAUDE.md` 모두 **`v0.55.18`** 일괄 동기화 완료.
+- **이전 완료 상태 (v0.55.17 기준)**:
     1. **대화형 계층형(FK) 뷰어에 리아나 의상/무기/표정 파츠 완벽 연동 (`test/body_parts_viewer.html`)**:
         - **21개 복합 레이어 파이프라인 실장**: 사양서 6절 겹침 순서(뒷머리 → 먼 팔/소매 → 방패 → 튜닉 뒷자락 → 다리 의상 → 골반/상체 → 흉갑 → 벨트/튜닉 앞자락 → 머리 소체/표정/앞머리 → 칼 → 가까운 팔/소매)대로 캔버스 렌더링 파이프라인 구현 완료.
         - **FK 부모-자식 본 체인 계층 상속**: 바디 관절 회전 변환 시 의상 파츠(`c01`~`c14`)가 부모 바디 관절(머리, 상체, 골반, 팔, 다리)의 피벗과 회전/스케일을 100% 동기화하여 자연스럽게 일체화되어 회전하도록 구현.

@@ -3,7 +3,7 @@
 미소녀 지휘관 수집, 룬 소켓 덱빌딩, 히어로 컨트롤을 결합한 브라우저 타워 디펜스 게임과 그 에셋 제작 도구 모음이다.
 빌드 도구와 외부 의존성이 없는 바닐라 JS/HTML/CSS 프로젝트다.
 
-- 게임 버전: v0.55.17
+- 게임 버전: v0.55.18
 - 이 문서의 행 번호와 현황은 v0.52.0 작업본 기준이다(v0.53.x는 문서, RP 드롭 상수, 크롤러 보호 판정만 변경. enemy.js 행 번호는 약 +15 밀림). 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
 - **커밋은 사용자가 수동으로 한다.** 명시적인 요청이 없으면 커밋이나 푸시를 하지 않는다.
 - 세부 규칙은 [QA_AND_RULES.md](QA_AND_RULES.md), 기획은 [기획문서.md](기획문서.md), 에셋 절차는 [asset_generation_pipeline_guide.html](asset_generation_pipeline_guide.html)을 본다.
@@ -29,7 +29,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 **버전:** "어떠한 내용이든 업데이트가 될 때마다 반드시 버전을 상향"한다. 게임 코드뿐 아니라 에셋 도구(HTML)와 문서만 고친 경우도 포함한다. 다음 위치를 항상 같은 값으로 맞춘다.
 - `js/constants.js:1` (`GAME_VERSION`)
-- `index.html:26, 40, 223` (수동 표기 3곳). 스크립트 캐시 쿼리 `?v=0558`도 함께 올린다
+- `index.html:26, 42, 228` (수동 표기 3곳). 스크립트 캐시 쿼리 `?v=05518`도 함께 올린다
 - `QA_AND_RULES.md:8` (인수인계 절)
 - `기획문서.md:2`
 
@@ -60,6 +60,8 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 | `constants.js` | 정적 데이터 전부 | `TOWER_DATA`:142, `CHARACTER_DATA`:489, `MODULAR_CHARACTER_SPECS`:1303 |
 | `user_data.js` | 세이브, 덱, 시너지, 룬 계산 | `loadData`:26, `saveData`:108, `calculateDeckSynergies`:469, `getHeroAuraSpec`:900 |
 | `state.js` | 런타임 전역 상태 | `board, enemies, round, gold, mp, deployedHeroes` |
+| `pixel_fx_data.js` | 픽셀 이펙트 프레임 정보 (자동 생성, v0.55.18) | `PIXEL_FX_SHEETS` |
+| `pixel_fx.js` | 픽셀 이펙트 재생 (DOM + CSS steps) | `playPixelFx(key, x, y, {flip, delayMs})`, `preloadPixelFx` |
 | `board.js` | 보드 생성, A*, 건설 검증 | `generateBoard`:32, `findAStarPath`:83 |
 | `tower.js` | 클릭 입력, 공격, 피격, 스펠, 히어로 | `handleCellClick`:47, `attackFromTowers`:252, `onEnemyHit`:493 |
 | `enemy.js` | 소환, 이동, 틱 루프, 배속 | `startRound`:674, `gameLoopTick`:229, `restartGameLoops`:70 |
@@ -73,6 +75,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 **구현 시 주의점**
 - 새 최상위 `let/const`가 기존 전역과 겹치면 그 스크립트 전체가 SyntaxError로 실패한다. `path, round, board, gold, mp`가 이미 전역이다.
+- 픽셀 전투 이펙트(v0.55.18)는 [patch-gg/pixelfx](https://github.com/patch-gg/pixelfx)(MIT)를 `node scratch/build_pixel_fx.mjs`로 `assets/fx/*.png` 스트립에 구워 쓴다. 원본 일부는 `scratch/pixelfx/`(LICENSE, NOTICE 포함). 이펙트를 바꾸면 스크립트의 `EFFECTS`를 고치고 다시 실행한다. `pixel_fx_data.js`는 직접 고치지 않는다.
 - 렌더링은 전부 DOM이다. Canvas와 rAF는 쓰지 않는다. 소환 1000ms, 틱 200ms의 `setInterval` 두 개가 돌고, 모두 배속으로 나눈다. 틱마다 400칸을 다시 그린다.
 - `typeof X === 'function'` 가드가 많아 이름을 잘못 쓰면 오류 없이 기능만 꺼진다. 새 코드에 이 패턴을 늘리지 않는다.
 - 세션 리셋은 `location.reload()`에 의존한다(ui.js:659). `startGame`은 `round`, `enemies`를 초기화하지 않는다.

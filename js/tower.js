@@ -445,7 +445,10 @@ function attackFromTowers() {
             }
 
             // 1. 얼음 타워 (Ice): 슬로우 효과 부여 (빙결 2셋 감속률/지속시간 보너스 반영)
+            // [v0.55.18] 픽셀 타격 이펙트 (방향성 이펙트는 오른쪽으로 맞는 모양이 기본이라 타워가 오른쪽이면 반전)
+            const hitFlip = cellX > targetEnemy.x;
             if (towerKey === 'ice') {
+                playPixelFx(isCrit ? 'hit_crit' : 'hit_ice', targetEnemy.x, targetEnemy.y, { flip: hitFlip });
                 dealDamage(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#00e5ff", isCrit, towerKey, ownerId);
                 let slowTicks = towerStats.slowTicks || 10;
                 if (synStats.slowDurationBonusSec > 0) {
@@ -469,6 +472,7 @@ function attackFromTowers() {
             }
             // 3. 전격 타워 (Shock): 연쇄 번개 피해 (v0.44.0: 데이터 chainCount 기준 연쇄)
             else if (towerKey === 'shock') {
+                playPixelFx(isCrit ? 'hit_crit' : 'hit_shock', targetEnemy.x, targetEnemy.y, { flip: hitFlip });
                 dealDamage(targetEnemy, finalDamage, isCrit ? "#ef4444" : "#f59e0b", isCrit, towerKey, ownerId);
 
                 // 주 대상 포함 총 chainCount기 (+ [v0.55.0] 고유 효과 '연쇄 추가')
@@ -476,11 +480,13 @@ function attackFromTowers() {
                 const chainMax = Math.max(0, (towerStats.chainCount || 3) - 1) + sigChain;
                 const chainTargets = enemies.filter(e => e.alive && e !== targetEnemy && Math.abs(e.x - targetEnemy.x) <= 2 && Math.abs(e.y - targetEnemy.y) <= 2).slice(0, chainMax);
                 for (const chain of chainTargets) {
+                    playPixelFx('hit_shock', chain.x, chain.y, { flip: targetEnemy.x > chain.x });
                     dealDamage(chain, finalDamage * 0.7, "#fbbf24", false, towerKey, ownerId);
                 }
             }
             // 4. 일반/저격 타워 (Ranged / Melee / Sniper)
             else {
+                playPixelFx(isCrit ? 'hit_crit' : (PIXEL_FX_TOWER_HIT[towerKey] || 'hit_ranged'), targetEnemy.x, targetEnemy.y, { flip: hitFlip });
                 dealDamage(targetEnemy, finalDamage, isCrit ? "#ef4444" : (towerStats.color || "#ffeb3b"), isCrit, towerKey, ownerId);
             }
 
@@ -576,6 +582,7 @@ function applyOnHitPassives(targetEnemy, finalDamage, passives, synStats, source
 function triggerRuneChainLightning(sourceEnemy, chainDmg, maxChains = 2, sourceKey = null, ownerId = null) {
     const chainTargets = enemies.filter(e => e.alive && e !== sourceEnemy && Math.abs(e.x - sourceEnemy.x) <= 2 && Math.abs(e.y - sourceEnemy.y) <= 2).slice(0, maxChains);
     for (const chain of chainTargets) {
+        playPixelFx('hit_shock', chain.x, chain.y, { flip: sourceEnemy.x > chain.x });
         dealDamage(chain, chainDmg, "#38bdf8", false, sourceKey, ownerId);
     }
 }
@@ -584,7 +591,7 @@ function triggerRuneChainLightning(sourceEnemy, chainDmg, maxChains = 2, sourceK
  * 룬 속성 효과: 시공 붕괴 광역 왜곡 폭발
  */
 function triggerRuneVoidCollapse(sourceEnemy, collapseDmg = 35, sourceKey = null, ownerId = null) {
-    createSplashEffect(sourceEnemy.x, sourceEnemy.y);
+    playPixelFx('implosion', sourceEnemy.x, sourceEnemy.y);
     showFloatingDamage(sourceEnemy.x, sourceEnemy.y, "🌌 시공 붕괴!", "#a855f7");
 
     const victims = enemies.filter(e => e.alive && Math.abs(e.x - sourceEnemy.x) <= 1 && Math.abs(e.y - sourceEnemy.y) <= 1);
@@ -616,6 +623,7 @@ function onEnemyHit(enemy, damage, color = "#ffeb3b", isCrit = false, sourceKey 
     if (enemy.hp <= 0 && enemy.alive) {
         enemy.alive = false;
         if (enemy.element) enemy.element.remove();
+        playPixelFx(enemy.isBoss ? 'boss_death' : 'death', enemy.x, enemy.y);
 
         // v0.36.0 전투 통계 킬수 집계
         if (typeof battleStats !== 'undefined') {
@@ -739,22 +747,11 @@ function applySlowEffect(enemy, durationTicks, slowRatio = 0.5) {
 }
 
 /**
- * 폭탄 타워 광역 폭발 이펙트 생성
+ * 폭탄 타워 광역 폭발 이펙트 생성 (폭탄 타워, 잔불 폭발 고유 효과)
+ * [v0.55.18] 기존 CSS 원형 그라데이션 대신 픽셀 폭발 이펙트를 재생한다.
  */
 function createSplashEffect(gridX, gridY) {
-    const boardDom = document.getElementById("game-board");
-    if (!boardDom) return;
-
-    const splash = document.createElement("div");
-    splash.className = "splash-effect";
-    splash.style.left = `${gridX * 30 + 15}px`;
-    splash.style.top = `${gridY * 30 + 15}px`;
-
-    boardDom.appendChild(splash);
-
-    setTimeout(() => {
-        splash.remove();
-    }, 350);
+    playPixelFx('explosion', gridX, gridY);
 }
 
 /**
@@ -1192,10 +1189,12 @@ function castSpellRune(spellItem) {
         // 1. 긴급 보급: +8 TP
         const supply = Math.round((rInfo.effectValue || 8) * spellPower);
         gold += supply;
+        playPixelFx('spell_gold', 9.5, 9.5);
         showFloatingDamage(10, 10, `+${supply} TP 보급!`, "#eab308");
     } else if (runeId === 'rune_spell_gust') {
         // 2. 돌풍의 결계: 모든 살아있는 적 4초간 40% 감속 (v0.44.0: 데이터의 감속률/지속시간 정확 반영)
         const gustTicks = Math.round((rInfo.durationSec || 4) * 5 * spellPower);
+        pickPixelFxTargets(enemies.filter(e => e.alive), 4).forEach((e, i) => playPixelFx('spell_tornado', e.x, e.y, { delayMs: i * 120 }));
         for (const enemy of enemies) {
             if (enemy.alive && typeof applySlowEffect === 'function') {
                 applySlowEffect(enemy, gustTicks, rInfo.slowRatio || 0.4);
@@ -1205,6 +1204,7 @@ function castSpellRune(spellItem) {
     } else if (runeId === 'rune_spell_thunder') {
         // 3. 천벌의 낙뢰: 전장의 모든 적에게 라운드 스케일링 피해
         const thunderDmg = Math.round(getScaledDamage('thunder') * spellPower);
+        pickPixelFxTargets(enemies.filter(e => e.alive), 10).forEach((e, i) => playPixelFx('spell_thunder', e.x, e.y, { delayMs: i * 60 }));
         let hitCount = 0;
         for (const enemy of enemies.slice()) {
             if (enemy.alive) {
@@ -1216,6 +1216,8 @@ function castSpellRune(spellItem) {
     } else if (runeId === 'rune_spell_teleport') {
         // 4. 시공의 왜곡 (궁극기): 모든 적을 스폰 입구로 강제 송환
         //  v0.44.0: 경로 진행도(pathIndex)까지 초기화하여 다음 틱에 원래 위치로 되돌아가던 버그 수정
+        pickPixelFxTargets(enemies.filter(e => e.alive), 10).forEach(e => playPixelFx('spell_warp', e.x, e.y));
+        playPixelFx('spell_warp', startPos.x, startPos.y);
         for (const enemy of enemies) {
             if (enemy.alive) {
                 enemy.x = startPos.x;
@@ -1238,10 +1240,12 @@ function castSpellRune(spellItem) {
         // 5. 성스러운 축복 (UR): 6초간 아군 타워 공격속도 2배
         //  v0.44.0: 기존 600ms 추가 사격(실제 +33%)을 게임 틱 기반 2배 사격으로 교체 (배속/일시정지 연동)
         frenzyTicksRemaining = Math.round((rInfo.durationSec || 6) * 5 * spellPower);
+        pickPixelFxTargets(board.filter(c => c.tower), 12).forEach((c, i) => playPixelFx('spell_bless', c.x, c.y, { delayMs: i * 50 }));
         showFloatingDamage(10, 10, "✨ 성스러운 축복: 전 타워 공격속도 2배!", "#eab308");
     } else if (runeId === 'rune_spell_armageddon') {
         // 6. 아마겟돈 (U): 전 필드 거대 메테오 낙하 (라운드 스케일링 파멸 피해)
         const meteorDmg = Math.round(getScaledDamage('armageddon') * spellPower);
+        pickPixelFxTargets(enemies.filter(e => e.alive), 8).forEach((e, i) => playPixelFx('spell_meteor', e.x, e.y, { delayMs: i * 90 }));
         let meteorHits = 0;
         for (const enemy of enemies.slice()) {
             if (enemy.alive) {
@@ -1461,6 +1465,8 @@ function handleHeroAttacks() {
             const hitDelay = Math.max(50, Math.floor(180 / (gameSpeed || 1)));
             setTimeout(() => {
                 if (!target.alive) return;
+
+                playPixelFx(isCrit ? 'hit_crit' : (isGradeU ? 'hit_hero_u' : 'hit_ranged'), target.x, target.y, { flip: hero.x > target.x });
 
                 const effectiveDmg = Math.min(target.hp, finalDamage);
                 target.hp -= finalDamage;

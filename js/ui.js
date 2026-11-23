@@ -237,6 +237,9 @@ function updateSpeedUI() {
     const btnSpeed1 = document.getElementById("btn-speed-1");
     const btnSpeed2 = document.getElementById("btn-speed-2");
 
+    // [v0.55.18] 픽셀 이펙트(.pixel-fx) 애니메이션 일시정지 연동
+    document.body.classList.toggle("game-paused", !!isPaused);
+
     if (btnPause) {
         if (isPaused) {
             btnPause.classList.add("active");

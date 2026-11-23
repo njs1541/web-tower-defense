@@ -112,6 +112,9 @@ function startGame() {
     deployedHeroes = {};
     heroDeployingCharId = null;
 
+    // [v0.55.18] 픽셀 이펙트 스프라이트 미리 받기 (첫 타격 때 빈 프레임 방지)
+    preloadPixelFx();
+
     // 3-3. v0.36.0 지휘관 고정 타워 스톡(Stock) 및 전투 통계 초기화
     if (typeof calculateDeckTowerStocks === 'function') {
         commanderTowerStocks = calculateDeckTowerStocks();
