@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>DOM 리그 시제품 (리아나) - 회의 R01 A-01/A-05/A-06</title>
+<style>
+  body { margin: 0; font-family: "Malgun Gothic", sans-serif; background: #0f172a; color: #e2e8f0; }
+  body.bake { background: transparent; }
+  header { padding: 12px 16px; border-bottom: 1px solid #334155; }
+  header h1 { font-size: 16px; margin: 0 0 4px; }
+  header p { margin: 0; font-size: 12px; color: #94a3b8; }
+  main { display: flex; gap: 16px; padding: 16px; }
+  .stage-wrap { width: 614px; height: 614px; background: repeating-conic-gradient(#1e293b 0 25%, #273449 0 50%) 0 0 / 32px 32px; border: 1px solid #334155; position: relative; overflow: hidden; flex: none; }
+  #stage { width: 1024px; height: 1024px; transform: scale(0.6); transform-origin: 0 0; position: relative; }
+  #ref { position: absolute; left: 0; top: 0; width: 1024px; height: 1024px; pointer-events: none; z-index: 1000; opacity: 0; }
+  body.bake .stage-wrap { width: 1024px; height: 1024px; background: none; border: 0; }
+  body.bake #stage { transform: none; }
+  body.bake header, body.bake .panel { display: none; }
+  body.bake main { padding: 0; }
+  .panel { flex: 1; font-size: 13px; }
+  .panel section { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; }
+  .panel h2 { font-size: 13px; margin: 0 0 8px; color: #93c5fd; }
+  button { background: #334155; color: #e2e8f0; border: 1px solid #475569; border-radius: 4px; padding: 5px 10px; margin: 2px; cursor: pointer; font-size: 12px; }
+  button.on { background: #2563eb; border-color: #3b82f6; }
+  #gap-out { white-space: pre-wrap; font-family: Consolas, monospace; font-size: 12px; color: #fde68a; }
+  .note { color: #94a3b8; font-size: 12px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<header>
+  <h1>DOM 리그 시제품 - 리아나 (형제 div + 누적 행렬 + Web Animations API)</h1>
+  <p>Canvas, requestAnimationFrame 없음. 파츠는 test/tools/export_rig.mjs가 만든 아틀라스(WebP)와 rig.json을 쓴다. 현재 바디는 사양 밖 임시본이다(B-01).</p>
+</header>
+<main>
+  <div class="stage-wrap"><div id="stage"><img id="ref" src="../incoming/char_liana/c00_complete.png" alt=""></div></div>
+  <div class="panel">
+    <section>
+      <h2>모션</h2>
+      <div id="motions"></div>
+    </section>
+    <section>
+      <h2>키프레임 밀도 (A-05 조건 확인)</h2>
+      <button data-keys="dense" class="on">촘촘히 (30fps 샘플)</button>
+      <button data-keys="sparse">성기게 (한 바퀴 6개)</button>
+      <div class="note">키프레임 사이는 브라우저가 matrix()를 분해 보간한다. 성기게 두면 회전 중간에 관절이 벌어진다.</div>
+    </section>
+    <section>
+      <h2>재생 (게임 배속, 일시정지 연동 방식)</h2>
+      <button data-speed="1" class="on">1배속</button><button data-speed="2">2배속</button><button data-speed="3">3배속</button>
+      <button id="pause">일시정지</button>
+    </section>
+    <section>
+      <h2>겹쳐 보기</h2>
+      <label>c00 완성본 투명도 <input id="ref-op" type="range" min="0" max="100" value="0"></label>
+    </section>
+    <section>
+      <h2>관절 벌어짐 측정</h2>
+      <button id="measure">현재 모션 측정</button>
+      <div id="gap-out"></div>
+    </section>
+  </div>
+</main>
+<script src="rig_runtime.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const BAKE = params.has('bake');
+if (BAKE) document.body.classList.add('bake');
+
+const state = { motion: 'idle', keys: 'dense', speed: 1, paused: false, anims: [] };
+let model, els;
+
+function keysFor(motion, mode) {
+  return mode === 'dense' ? Math.round(TDRig.MOTIONS[motion].cycle * 30) : 6;
+}
+
+function play() {
+  state.anims.forEach(a => a.cancel());
+  state.anims = TDRig.animate(model, els, state.motion, keysFor(state.motion, state.keys));
+  state.anims.forEach(a => { a.playbackRate = state.speed; if (state.paused) a.pause(); });
+}
+
+function setGroup(sel, btn) {
+  document.querySelectorAll(sel).forEach(b => b.classList.toggle('on', b === btn));
+}
+
+async function main() {
+  model = await TDRig.load('../build/liana/rig.json');
+  els = TDRig.build(model, document.getElementById('stage'));
+  window.__rig = { model, els, TDRig, ready: true };
+  if (BAKE) { TDRig.renderStatic(model, els, 'idle', 0); return; }
+
+  const mBox = document.getElementById('motions');
+  for (const [k, m] of Object.entries(TDRig.MOTIONS)) {
+    const b = document.createElement('button');
+    b.textContent = `${m.label} (${m.cycle.toFixed(2)}초)`;
+    b.dataset.motion = k;
+    if (k === state.motion) b.classList.add('on');
+    b.onclick = () => { state.motion = k; setGroup('[data-motion]', b); play(); };
+    mBox.appendChild(b);
+  }
+  document.querySelectorAll('[data-keys]').forEach(b => b.onclick = () => { state.keys = b.dataset.keys; setGroup('[data-keys]', b); play(); });
+  document.querySelectorAll('[data-speed]').forEach(b => b.onclick = () => {
+    state.speed = +b.dataset.speed; setGroup('[data-speed]', b);
+    state.anims.forEach(a => { a.playbackRate = state.speed; });
+  });
+  document.getElementById('pause').onclick = e => {
+    state.paused = !state.paused;
+    e.target.classList.toggle('on', state.paused);
+    state.anims.forEach(a => state.paused ? a.pause() : a.play());
+  };
+  document.getElementById('ref-op').oninput = e => { document.getElementById('ref').style.opacity = e.target.value / 100; };
+  document.getElementById('measure').onclick = () => {
+    const r = TDRig.measureJointGap(model, els, state.anims);
+    if (state.paused) state.anims.forEach(a => a.pause());
+    document.getElementById('gap-out').textContent =
+      `${TDRig.MOTIONS[state.motion].label} / ${state.keys === 'dense' ? '촘촘히' : '성기게'} (키 ${keysFor(state.motion, state.keys)}개)\n` +
+      `최대 ${r.maxPx}px, 평균 ${r.meanPx}px (1024px 캔버스 기준)\n가장 큰 곳: ${r.worst ? r.worst.bone + ' @ ' + r.worst.timeMs + 'ms' : '-'}`;
+  };
+  play();
+}
+main().catch(e => { document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f87171">${e.stack}</pre>`); });
+</script>
+</body>
+</html>

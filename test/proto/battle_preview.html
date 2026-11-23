@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>전장 36px 스트립 미리보기 (리아나) - 회의 R01 A-03</title>
+<style>
+  body { margin: 0; font-family: "Malgun Gothic", sans-serif; background: #0f172a; color: #e2e8f0; font-size: 13px; }
+  header { padding: 12px 16px; border-bottom: 1px solid #334155; }
+  header h1 { font-size: 16px; margin: 0 0 4px; }
+  header p { margin: 0; color: #94a3b8; font-size: 12px; }
+  main { padding: 16px; display: flex; gap: 24px; flex-wrap: wrap; }
+  section { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 12px; }
+  h2 { font-size: 13px; margin: 0 0 10px; color: #93c5fd; }
+  button { background: #334155; color: #e2e8f0; border: 1px solid #475569; border-radius: 4px; padding: 5px 10px; margin: 2px; cursor: pointer; font-size: 12px; }
+  button.on { background: #2563eb; border-color: #3b82f6; }
+
+  /* 게임 보드 흉내: 칸 30px + 간격 1px(피치 31px), 유닛 36px */
+  .board { display: grid; grid-template-columns: repeat(8, 30px); grid-auto-rows: 30px; gap: 1px; background: #0b1220; padding: 1px; position: relative; }
+  .cell { background: #3f6212; }
+  .cell.path { background: #a16207; }
+  .unit-slot { position: absolute; width: 36px; height: 36px; }
+
+  /* 스트립 재생: div 하나 + steps(). 배속은 animation-duration을 나누고, 일시정지는 play-state */
+  .unit { width: var(--size, 36px); height: var(--size, 36px); background-repeat: no-repeat;
+          background-size: calc(var(--n) * var(--size, 36px)) var(--size, 36px);
+          animation: strip-play calc(var(--dur) / var(--speed, 1)) steps(var(--n)) infinite; }
+  @keyframes strip-play { from { background-position-x: 0; } to { background-position-x: calc(var(--n) * var(--size, 36px) * -1); } }
+  body.game-paused .unit { animation-play-state: paused; }
+  .zoom .unit { image-rendering: pixelated; }
+
+  .row { display: flex; gap: 16px; align-items: flex-end; }
+  .cap { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 4px; }
+  .ref36 { width: 36px; height: 36px; object-fit: contain; display: block; }
+  .checker .unit { display: block; }
+  .checker { background: repeating-conic-gradient(#334155 0 25%, #475569 0 50%) 0 0 / 12px 12px; }
+  #stats { font-family: Consolas, monospace; font-size: 12px; white-space: pre; color: #fde68a; }
+</style>
+</head>
+<body>
+<header>
+  <h1>전장 36px 스트립 미리보기 - 리아나</h1>
+  <p>test/tools/bake_strips.mjs가 구운 72px 스트립을 36px로 재생한다. 게임과 같은 div 하나 + CSS steps() 방식이고 Canvas, rAF를 쓰지 않는다.</p>
+</header>
+<main>
+  <section>
+    <h2>재생</h2>
+    <div id="motion-btns"></div>
+    <div>
+      <button data-speed="1" class="on">1배속</button><button data-speed="2">2배속</button><button data-speed="3">3배속</button>
+      <button id="pause">일시정지</button>
+    </div>
+    <div id="stats"></div>
+  </section>
+  <section>
+    <h2>보드 위 (칸 30px, 유닛 36px, 실제 크기)</h2>
+    <div class="board" id="board"></div>
+  </section>
+  <section class="zoom">
+    <h2>크기 비교</h2>
+    <div class="row" id="compare"></div>
+  </section>
+</main>
+<script>
+const BASE = '../build/liana/strips/';
+const state = { motion: 'idle', speed: 1 };
+let data;
+
+function applyUnit(el, m, size) {
+  const info = data.motions[m];
+  el.style.backgroundImage = `url("${BASE}${info.webp}")`;
+  el.style.setProperty('--n', info.frames);
+  el.style.setProperty('--dur', info.durationMs + 'ms');
+  el.style.setProperty('--speed', state.speed);
+  if (size) el.style.setProperty('--size', size + 'px');
+  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; // 다시 시작
+}
+
+function refresh() {
+  document.querySelectorAll('.unit').forEach(el => applyUnit(el, el.dataset.motion || state.motion, el.dataset.size ? +el.dataset.size : 0));
+}
+
+async function main() {
+  data = await (await fetch(BASE + 'strips.json')).json();
+
+  // 모션 버튼
+  const box = document.getElementById('motion-btns');
+  for (const k of Object.keys(data.motions)) {
+    const b = document.createElement('button');
+    b.textContent = { idle: '대기', walk: '이동', attack: '공격', hit: '피격' }[k] || k;
+    if (k === state.motion) b.classList.add('on');
+    b.onclick = () => { state.motion = k; box.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); refresh(); };
+    box.appendChild(b);
+  }
+  document.querySelectorAll('[data-speed]').forEach(b => b.onclick = () => {
+    state.speed = +b.dataset.speed; document.querySelectorAll('[data-speed]').forEach(x => x.classList.toggle('on', x === b)); refresh();
+  });
+  document.getElementById('pause').onclick = e => { document.body.classList.toggle('game-paused'); e.target.classList.toggle('on'); };
+
+  // 보드: 8x6칸, 길 한 줄, 유닛 몇 기(모션은 각자 고정 + 선택 모션)
+  const board = document.getElementById('board');
+  for (let i = 0; i < 48; i++) { const c = document.createElement('div'); c.className = 'cell' + (Math.floor(i / 8) === 3 ? ' path' : ''); board.appendChild(c); }
+  const units = [[1, 1, null], [3, 1, 'idle'], [5, 1, 'attack'], [2, 3, 'walk'], [4, 3, 'walk'], [6, 4, 'hit']];
+  for (const [cx, cy, m] of units) {
+    const slot = document.createElement('div'); slot.className = 'unit-slot';
+    slot.style.left = (1 + cx * 31 + 15 - 18) + 'px'; slot.style.top = (1 + cy * 31 + 15 - 18 - 4) + 'px';
+    const u = document.createElement('div'); u.className = 'unit'; if (m) u.dataset.motion = m;
+    slot.appendChild(u); board.appendChild(slot);
+  }
+
+  // 크기 비교: c00 정지 이미지 36px / 스트립 36px / 72px / 144px(확대, 픽셀 그대로)
+  const cmp = document.getElementById('compare');
+  const addCap = (el, text) => { const w = document.createElement('div'); const bg = document.createElement('div'); bg.className = 'checker'; bg.style.display = 'inline-block'; bg.appendChild(el); w.appendChild(bg); const c = document.createElement('div'); c.className = 'cap'; c.textContent = text; w.appendChild(c); cmp.appendChild(w); };
+  const img = document.createElement('img'); img.src = '../build/verify/rest_pose.png'; img.className = 'ref36'; addCap(img, '정지 자세 1024→36px');
+  for (const s of [36, 72, 144]) { const u = document.createElement('div'); u.className = 'unit'; u.dataset.size = s; addCap(u, `스트립 ${s}px`); }
+
+  const st = Object.entries(data.motions).map(([k, v]) => `${k.padEnd(7)} ${String(v.frames).padStart(2)}프레임 ${v.durationMs}ms  WebP ${(v.webpBytes / 1024).toFixed(1)}KB`).join('\n');
+  document.getElementById('stats').textContent = `${st}\n합계 WebP ${(data.totalWebpBytes / 1024).toFixed(1)}KB, 프레임 ${data.framePx}px, ${data.fps}fps`;
+  refresh();
+}
+main();
+</script>
+</body>
+</html>

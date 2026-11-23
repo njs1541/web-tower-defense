@@ -1,0 +1,94 @@
+{
+ "generatedAt": "2026-11-23T08:38:07.931Z",
+ "restVsC00": {
+  "tolerancePx": 5,
+  "pixelsA": 248752,
+  "pixelsB": 259525,
+  "aOutsideBpct": 0.03,
+  "bOutsideApct": 3.54,
+  "note": "A = DOM 조립(정지 자세), B = c00 완성본"
+ },
+ "jointGap": {
+  "idle": {
+   "dense": {
+    "keys": 151,
+    "maxPx": 0,
+    "meanPx": 0.001,
+    "worst": {
+     "bone": "b01",
+     "timeMs": 52
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "maxPx": 0.96,
+    "meanPx": 0.11,
+    "worst": {
+     "bone": "b05",
+     "timeMs": 1267
+    }
+   }
+  },
+  "walk": {
+   "dense": {
+    "keys": 29,
+    "maxPx": 0.23,
+    "meanPx": 0.021,
+    "worst": {
+     "bone": "b05",
+     "timeMs": 449
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "maxPx": 3.57,
+    "meanPx": 0.438,
+    "worst": {
+     "bone": "b05",
+     "timeMs": 401
+    }
+   }
+  },
+  "attack": {
+   "dense": {
+    "keys": 23,
+    "maxPx": 3.49,
+    "meanPx": 0.099,
+    "worst": {
+     "bone": "b05",
+     "timeMs": 319
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "maxPx": 29.7,
+    "meanPx": 1.093,
+    "worst": {
+     "bone": "b05",
+     "timeMs": 319
+    }
+   }
+  },
+  "hit": {
+   "dense": {
+    "keys": 17,
+    "maxPx": 1.81,
+    "meanPx": 0.063,
+    "worst": {
+     "bone": "b05",
+     "timeMs": 82
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "maxPx": 12.93,
+    "meanPx": 0.452,
+    "worst": {
+     "bone": "b05",
+     "timeMs": 47
+    }
+   }
+  }
+ },
+ "pageErrors": []
+}
