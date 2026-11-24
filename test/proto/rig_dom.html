@@ -13,7 +13,7 @@
   .stage-wrap { width: 614px; height: 614px; background: repeating-conic-gradient(#1e293b 0 25%, #273449 0 50%) 0 0 / 32px 32px; border: 1px solid #334155; position: relative; overflow: hidden; flex: none; }
   #stage { width: 1024px; height: 1024px; transform: scale(0.6); transform-origin: 0 0; position: relative; }
   #ref { position: absolute; left: 0; top: 0; width: 1024px; height: 1024px; pointer-events: none; z-index: 1000; opacity: 0; }
-  body.bake .stage-wrap { width: 1024px; height: 1024px; background: none; border: 0; }
+  body.bake .stage-wrap { width: 1024px; height: 1024px; background: none; border: 0; overflow: visible; }
   body.bake #stage { transform: none; }
   body.bake header, body.bake .panel { display: none; }
   body.bake main { padding: 0; }
@@ -29,7 +29,7 @@
 <body>
 <header>
   <h1>DOM 리그 시제품 - 리아나 (형제 div + 누적 행렬 + Web Animations API)</h1>
-  <p>Canvas, requestAnimationFrame 없음. 파츠는 test/tools/export_rig.mjs가 만든 아틀라스(WebP)와 rig.json을 쓴다. 현재 바디는 사양 밖 임시본이다(B-01).</p>
+  <p>Canvas, requestAnimationFrame 없음. 기본은 v1 리그(export_rig.mjs). <code>?rig=리그경로&amp;c00=완성본경로</code>로 v2 리그(export_rig_v2.mjs)도 연다. 현재 파츠는 임시본이다(B-01).</p>
 </header>
 <main>
   <div class="stage-wrap"><div id="stage"><img id="ref" src="../incoming/char_liana/c00_complete.png" alt=""></div></div>
@@ -40,7 +40,8 @@
     </section>
     <section>
       <h2>키프레임 밀도 (A-05 조건 확인)</h2>
-      <button data-keys="dense" class="on">촘촘히 (30fps 샘플)</button>
+      <button data-keys="dense" class="on">기준 (30fps + 빠른 구간 추가)</button>
+      <button data-keys="flat">30fps 고정</button>
       <button data-keys="sparse">성기게 (한 바퀴 6개)</button>
       <div class="note">키프레임 사이는 브라우저가 matrix()를 분해 보간한다. 성기게 두면 회전 중간에 관절이 벌어진다.</div>
     </section>
@@ -60,22 +61,26 @@
     </section>
   </div>
 </main>
-<script src="rig_runtime.js"></script>
+<script src="../../js/rig_runtime.js"></script>
 <script>
 const params = new URLSearchParams(location.search);
 const BAKE = params.has('bake');
 if (BAKE) document.body.classList.add('bake');
+// 굽기 여백(px): 무기가 1024 캔버스 밖으로 나가도 잘리지 않게 무대를 오른쪽 아래로 민다(bake_strips.mjs가 사용)
+const PAD = BAKE ? (+params.get('pad') || 0) : 0;
+if (PAD) document.getElementById('stage').style.transform = `translate(${PAD}px, ${PAD}px)`;
 
 const state = { motion: 'idle', keys: 'dense', speed: 1, paused: false, anims: [] };
+const ADAPTIVE = { maxDeg: 3, depth: 2 }; // R02 A-15: 기본 30fps, 각도 변화가 빠른 구간은 더 촘촘히
 let model, els;
 
 function keysFor(motion, mode) {
-  return mode === 'dense' ? Math.round(TDRig.MOTIONS[motion].cycle * 30) : 6;
+  return mode === 'sparse' ? 6 : Math.round(TDRig.MOTIONS[motion].cycle * 30);
 }
 
 function play() {
   state.anims.forEach(a => a.cancel());
-  state.anims = TDRig.animate(model, els, state.motion, keysFor(state.motion, state.keys));
+  state.anims = TDRig.animate(model, els, state.motion, keysFor(state.motion, state.keys), state.keys === 'dense' ? { adaptive: ADAPTIVE } : {});
   state.anims.forEach(a => { a.playbackRate = state.speed; if (state.paused) a.pause(); });
 }
 
@@ -84,7 +89,8 @@ function setGroup(sel, btn) {
 }
 
 async function main() {
-  model = await TDRig.load('../build/liana/rig.json');
+  if (params.get('c00')) document.getElementById('ref').src = params.get('c00');
+  model = await TDRig.load(params.get('rig') || '../build/liana/rig.json');
   els = TDRig.build(model, document.getElementById('stage'));
   window.__rig = { model, els, TDRig, ready: true };
   if (BAKE) { TDRig.renderStatic(model, els, 'idle', 0); return; }
@@ -113,7 +119,7 @@ async function main() {
     const r = TDRig.measureJointGap(model, els, state.anims);
     if (state.paused) state.anims.forEach(a => a.pause());
     document.getElementById('gap-out').textContent =
-      `${TDRig.MOTIONS[state.motion].label} / ${state.keys === 'dense' ? '촘촘히' : '성기게'} (키 ${keysFor(state.motion, state.keys)}개)\n` +
+      `${TDRig.MOTIONS[state.motion].label} / ${{ dense: '기준', flat: '30fps 고정', sparse: '성기게' }[state.keys]} (키 ${state.anims[0].effect.getKeyframes().length}개)\n` +
       `최대 ${r.maxPx}px, 평균 ${r.meanPx}px (1024px 캔버스 기준)\n가장 큰 곳: ${r.worst ? r.worst.bone + ' @ ' + r.worst.timeMs + 'ms' : '-'}`;
   };
   play();

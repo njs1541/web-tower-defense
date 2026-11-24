@@ -1,5 +1,8 @@
 /*
- * DOM 리그 런타임 시제품 (v0.55.23, 회의 안건 A-01, A-05, A-06)
+ * DOM 리그 런타임 (v0.55.23 시제품, v0.55.32 게임 연동. 회의 안건 A-01, A-05, A-06, A-17)
+ *
+ * 게임(index.html, 도감 일러스트 창의 "대기 모션" 탭)과 시험 화면(test/proto/rig_dom.html)이 이 파일 하나를 같이 쓴다.
+ * 리그 형식 v1(잘라내기 시험본)과 v2(따로 그리기, td-rig-char/2)를 모두 읽으므로, 정식 파츠가 오면 CHARACTER_DATA의 rig 경로만 바꾼다.
  *
  * - 파츠는 모두 한 컨테이너 안의 형제 div다(평면 구조). 겹침은 z-index, 관절 상속은 JS가 계산한 누적 행렬로 처리한다.
  *   중첩 div로 만들면 z-index가 부모 쌓임 맥락에 갇혀 칼(c13)처럼 계층과 겹침이 엇갈리는 파츠를 그릴 수 없다.
@@ -8,7 +11,7 @@
  *   모션 함수(poseAt)를 일정 간격으로 샘플링해 레이어별 matrix() 키프레임을 만든다.
  * - 굽기 도구(test/tools/bake_strips.mjs)는 같은 poseAt으로 정지 자세를 직접 그린다(renderStatic).
  *
- * 게임 연동 전 시제품이라 test/ 밖에서 쓰지 않는다. 전역 이름은 TDRig 하나만 만든다.
+ * 전역 이름은 TDRig 하나만 만든다(게임 전역과 겹치지 않게 즉시 실행 함수 안에 둔다).
  */
 (function () {
     'use strict';
@@ -82,18 +85,45 @@
     const css = m => `matrix(${m.map(v => +v.toFixed(5)).join(',')})`;
 
     // ---------- 데이터 읽기 ----------
+    /**
+     * 리그 읽기. 두 형식을 받는다.
+     *  - td-rig-char/1 (v1, 잘라내기): 캐릭터 rig.json + 공통 바디 body.json(뼈대 + 바디 그림 레이어)
+     *  - td-rig-char/2 (v2, R02 A-06 변경): 캐릭터 rig.json(그림 레이어 전부) + 종족 뼈대 skeleton(td-skeleton/1)
+     * v2 뼈대의 뼈 이름(head, torso 등)은 모션이 쓰는 v1 이름(b01 등)을 v1 필드로 함께 가진다.
+     */
     async function load(charRigUrl) {
-        const rig = await (await fetch(charRigUrl)).json();
-        const bodyUrl = new URL(rig.body, new URL(charRigUrl, location.href)).href;
-        const body = await (await fetch(bodyUrl)).json();
+        const rigUrl = new URL(charRigUrl, location.href).href;
+        const rig = await (await fetch(rigUrl)).json();
         const base = u => new URL('.', u).href;
         const bones = {};
-        body.bones.forEach(b => { bones[b.id] = b; });
-        const layers = [
-            ...body.layers.map(l => ({ ...l, atlas: base(bodyUrl) + body.atlas.webp, atlasW: body.atlas.w, atlasH: body.atlas.h })),
-            ...rig.layers.map(l => ({ ...l, atlas: base(new URL(charRigUrl, location.href).href) + rig.atlas.webp, atlasW: rig.atlas.w, atlasH: rig.atlas.h })),
-        ].sort((a, b) => a.z - b.z);
+        let layers, body = null;
+        if (rig.format === 'td-rig-char/2') {
+            const skel = await (await fetch(new URL(rig.skeleton, rigUrl).href)).json();
+            skel.bones.forEach(b => { bones[b.id] = b; });
+            layers = rig.layers.map(l => ({ ...l, atlas: base(rigUrl) + rig.atlas.webp, atlasW: rig.atlas.w, atlasH: rig.atlas.h }));
+            body = { skeleton: skel };
+        } else {
+            const bodyUrl = new URL(rig.body, rigUrl).href;
+            body = await (await fetch(bodyUrl)).json();
+            body.bones.forEach(b => { bones[b.id] = b; });
+            layers = [
+                ...body.layers.map(l => ({ ...l, atlas: base(bodyUrl) + body.atlas.webp, atlasW: body.atlas.w, atlasH: body.atlas.h })),
+                ...rig.layers.map(l => ({ ...l, atlas: base(rigUrl) + rig.atlas.webp, atlasW: rig.atlas.w, atlasH: rig.atlas.h })),
+            ];
+        }
+        layers.sort((a, b) => a.z - b.z);
         return { rig, body, bones, layers, faces: rig.faces, canvas: rig.canvas };
+    }
+
+    /** 자세에서 뼈의 회전값. 모션은 v1 이름으로 적혀 있어 v2 뼈는 v1 별칭으로 찾는다 */
+    const rotOf = (pose, b) => (pose.rot[b.id] ?? (b.v1 ? pose.rot[b.v1] : 0)) || 0;
+    const syOf = (pose, b) => (pose.sy && (pose.sy[b.id] ?? (b.v1 ? pose.sy[b.v1] : 1))) || 1;
+
+    /** 뼈의 대표 레이어(관절 벌어짐 측정용): v1은 바디 레이어, v2는 뼈와 이름이 같은 파츠(머리는 head_base) */
+    function layerOfBone(model, boneId) {
+        return model.layers.find(l => l.kind === 'body' && l.bone === boneId)
+            || model.layers.find(l => l.id === boneId)
+            || (boneId === 'head' ? model.layers.find(l => l.id === 'head_base') : null);
     }
 
     /** 뼈 체인(루트 → 자신) */
@@ -107,9 +137,8 @@
     function boneMatrix(model, pose, boneId) {
         let m = T(0, pose.rootY || 0);
         for (const b of chainOf(model, boneId)) {
-            let r = pose.rot[b.id] || 0;
-            r = Math.max(b.minRot, Math.min(b.maxRot, r)); // 뷰어의 가동범위 제한과 동일
-            const sy = (pose.sy && pose.sy[b.id]) || 1;
+            const r = Math.max(b.minRot, Math.min(b.maxRot, rotOf(pose, b))); // 뷰어의 가동범위 제한과 동일
+            const sy = syOf(pose, b);
             const [px, py] = b.pivot;
             m = mul(m, mul(T(px, py), mul(R(r), mul(S(1, sy), T(-px, -py)))));
         }
@@ -149,18 +178,51 @@
         }
     }
 
+    /** 두 자세 사이 관절 각도 변화의 최댓값(도). 가동 범위 제한을 적용한 값으로 비교한다. */
+    function maxAngleDelta(model, a, b) {
+        let m = Math.abs((a.rootY || 0) - (b.rootY || 0)) * 0.5; // 몸 전체 상하 이동도 조금 반영
+        for (const bone of Object.values(model.bones)) {
+            const clamp = r => Math.max(bone.minRot, Math.min(bone.maxRot, r || 0));
+            m = Math.max(m, Math.abs(clamp(rotOf(a, bone)) - clamp(rotOf(b, bone))));
+        }
+        return m;
+    }
+
     /**
-     * WAAPI 애니메이션 생성. keysPerCycle: 한 바퀴의 키프레임 수(촘촘할수록 관절 벌어짐이 줄어든다).
+     * 키프레임 시점 목록(0-1). 기본은 한 바퀴를 keysPerCycle등분한다.
+     * adaptive를 주면 이웃 시점 사이 관절 각도 변화가 maxDeg를 넘는 구간을 반으로 더 나눈다(최대 depth번, R02 A-15).
+     */
+    function keyTimes(model, M, keysPerCycle, adaptive) {
+        const n = Math.max(2, keysPerCycle);
+        let ts = [];
+        for (let i = 0; i <= n; i++) ts.push(i / n);
+        if (!adaptive) return ts;
+        const { maxDeg = 3, depth = 2 } = adaptive;
+        for (let d = 0; d < depth; d++) {
+            const out = [ts[0]];
+            for (let i = 1; i < ts.length; i++) {
+                const a = M.pose(ts[i - 1] * M.cycle), b = M.pose(ts[i] * M.cycle);
+                if (maxAngleDelta(model, a, b) > maxDeg) out.push((ts[i - 1] + ts[i]) / 2);
+                out.push(ts[i]);
+            }
+            if (out.length === ts.length) break;
+            ts = out;
+        }
+        return ts;
+    }
+
+    /**
+     * WAAPI 애니메이션 생성. keysPerCycle: 한 바퀴의 기본 키프레임 수(촘촘할수록 관절 벌어짐이 줄어든다).
+     * opts.adaptive = { maxDeg, depth }: 각도 변화가 빠른 구간만 더 촘촘히 나눈다(R02 A-15: 기본 30fps + 빠른 구간 60fps 이상).
      * 표정은 opacity 키프레임에 step-end 이징을 걸어 중간값 없이 바뀐다.
      */
-    function animate(model, els, motion, keysPerCycle) {
+    function animate(model, els, motion, keysPerCycle, opts = {}) {
         const M = MOTIONS[motion];
-        const n = Math.max(2, keysPerCycle);
-        const poses = [];
-        for (let i = 0; i <= n; i++) poses.push(M.pose((i / n) * M.cycle));
+        const ts = keyTimes(model, M, keysPerCycle, opts.adaptive);
+        const poses = ts.map(t => M.pose(t * M.cycle));
         const anims = [];
         for (const l of model.layers) {
-            const kf = poses.map((p, i) => ({ offset: i / n, transform: css(layerMatrix(model, p, l)), opacity: faceVisible(model, l, p.face) ? 1 : 0, easing: 'linear' }));
+            const kf = poses.map((p, i) => ({ offset: ts[i], transform: css(layerMatrix(model, p, l)), opacity: faceVisible(model, l, p.face) ? 1 : 0, easing: 'linear' }));
             if (l.kind === 'face') kf.forEach(k => { k.easing = 'step-end'; });
             els[l.id].style.transform = '';
             els[l.id].style.opacity = '';
@@ -176,8 +238,6 @@
     function measureJointGap(model, els, anims, samples = 240) {
         const dur = anims[0].effect.getTiming().duration;
         const toArr = s => { const m = new DOMMatrixReadOnly(s); return [m.a, m.b, m.c, m.d, m.e, m.f]; };
-        const layerOfBone = {};
-        model.layers.forEach(l => { if (l.kind === 'body') layerOfBone[l.bone] = l; });
         anims.forEach(a => a.pause());
         let max = 0, sum = 0, cnt = 0, worst = null;
         for (let i = 0; i < samples; i++) {
@@ -185,7 +245,8 @@
             anims.forEach(a => { a.currentTime = t; });
             for (const b of Object.values(model.bones)) {
                 if (!b.parent) continue;
-                const cl = layerOfBone[b.id], pl = layerOfBone[b.parent];
+                const cl = layerOfBone(model, b.id), pl = layerOfBone(model, b.parent);
+                if (!cl || !pl) continue;
                 const cm = mul(toArr(getComputedStyle(els[cl.id]).transform), T(-cl.x, -cl.y));
                 const pm = mul(toArr(getComputedStyle(els[pl.id]).transform), T(-pl.x, -pl.y));
                 const [x1, y1] = apply(cm, b.pivot[0], b.pivot[1]);
@@ -199,5 +260,5 @@
         return { maxPx: +max.toFixed(2), meanPx: +(sum / cnt).toFixed(3), worst };
     }
 
-    window.TDRig = { MOTIONS, load, build, renderStatic, animate, measureJointGap, boneMatrix, layerMatrix };
+    window.TDRig = { MOTIONS, load, build, renderStatic, animate, keyTimes, measureJointGap, boneMatrix, layerMatrix };
 })();

@@ -801,6 +801,11 @@ function viewCommanderIllustration(charId, initialTabKey = 'main') {
     const assetTabs = [
         { key: 'main', label: '🖼️ 스탠딩 원화', src: charBase.image || '' }
     ];
+    // [v0.55.32] DOM 리그가 있는 지휘관은 "대기 모션" 탭을 맨 앞에 두고 기본으로 연다(사용자 결정: 선택하면 대기 모션 재생)
+    if (charBase.rig) {
+        assetTabs.unshift({ key: 'motion', label: '🎞️ 대기 모션', rig: charBase.rig });
+        if (initialTabKey === 'main') initialTabKey = 'motion';
+    }
     if (spec && spec.refSheet) {
         assetTabs.push({ key: 'ref', label: '📐 캐릭터 설정 시트', src: spec.refSheet });
     }
@@ -816,9 +821,11 @@ function viewCommanderIllustration(charId, initialTabKey = 'main') {
 
     const activeTab = assetTabs.find(t => t.key === initialTabKey) || assetTabs[0];
 
+    stopViewerRig();
     if (imgEl) {
-        imgEl.src = activeTab.src;
         imgEl.alt = charBase.name;
+        if (activeTab.rig) showViewerRig(charId, null);
+        else imgEl.src = activeTab.src;
     }
 
     if (tabsEl) {
@@ -826,7 +833,7 @@ function viewCommanderIllustration(charId, initialTabKey = 'main') {
             tabsEl.style.display = "flex";
             tabsEl.innerHTML = assetTabs.map(t => `
                 <button class="btn-viewer-tab ${t.key === activeTab.key ? 'active' : ''}"
-                        onclick="switchViewerAssetTab('${t.src}', this)">
+                        onclick="${t.rig ? `showViewerRig('${charId}', this)` : `switchViewerAssetTab('${t.src}', this)`}">
                     ${t.label}
                 </button>
             `).join('');
@@ -856,6 +863,7 @@ function viewCommanderIllustration(charId, initialTabKey = 'main') {
  * 일러스트 뷰어 모달 내 에셋 탭 전환 핸들러
  */
 function switchViewerAssetTab(src, btnEl) {
+    stopViewerRig();
     const imgEl = document.getElementById("viewer-img");
     if (imgEl && src) {
         imgEl.src = src;
@@ -873,6 +881,63 @@ function switchViewerAssetTab(src, btnEl) {
 function closeIllustrationViewer() {
     const modal = document.getElementById("illustration-viewer-modal");
     if (modal) modal.style.display = "none";
+    stopViewerRig();
+}
+
+/**
+ * [v0.55.32] 도감 대기 모션 (회의 안건 A-17, js/rig_runtime.js)
+ * 창을 열거나 탭을 누를 때 그 지휘관의 리그만 불러와 대기 모션을 Web Animations API로 재생한다.
+ * 다른 탭으로 가거나 창을 닫으면 애니메이션을 멈추고 레이어를 지운다.
+ */
+let viewerRigState = { token: 0, anims: [] };
+
+/** 1024 무대를 상자 폭에 맞춰 줄인다 */
+function fitViewerRigStage() {
+    const box = document.getElementById("viewer-rig");
+    const stage = box && box.querySelector(".viewer-rig-stage");
+    if (stage) stage.style.transform = `scale(${box.clientWidth / 1024})`;
+}
+window.addEventListener("resize", fitViewerRigStage);
+
+function stopViewerRig() {
+    viewerRigState.token++;
+    viewerRigState.anims.forEach(a => a.cancel());
+    viewerRigState.anims = [];
+    const box = document.getElementById("viewer-rig");
+    if (box) { box.innerHTML = ""; box.style.display = "none"; }
+    const imgEl = document.getElementById("viewer-img");
+    if (imgEl) imgEl.style.display = "";
+}
+
+function showViewerRig(charId, btnEl) {
+    const charBase = CHARACTER_DATA[charId];
+    const box = document.getElementById("viewer-rig");
+    const imgEl = document.getElementById("viewer-img");
+    if (!charBase || !charBase.rig || !box || !window.TDRig) return;
+    stopViewerRig();
+    const token = viewerRigState.token;
+    if (btnEl) {
+        const tabsEl = document.getElementById("viewer-asset-tabs");
+        tabsEl.querySelectorAll(".btn-viewer-tab").forEach(b => b.classList.remove("active"));
+        btnEl.classList.add("active");
+    }
+    if (imgEl) imgEl.style.display = "none";
+    box.style.display = "block";
+    const stage = document.createElement("div");
+    stage.className = "viewer-rig-stage";
+    box.appendChild(stage);
+    TDRig.load(charBase.rig).then(model => {
+        if (token !== viewerRigState.token) return; // 그사이 다른 탭으로 갔다
+        fitViewerRigStage(); // 창이 화면에 뜬 뒤에 크기를 잰다(열리는 중에는 0)
+        const els = TDRig.build(model, stage);
+        const keys = Math.round(TDRig.MOTIONS.idle.cycle * 30);
+        viewerRigState.anims = TDRig.animate(model, els, "idle", keys, { adaptive: { maxDeg: 3, depth: 2 } });
+    }).catch(err => {
+        console.warn("대기 모션을 불러오지 못해 원화로 표시한다:", err);
+        if (token !== viewerRigState.token) return;
+        stopViewerRig();
+        if (imgEl) imgEl.src = charBase.image || "";
+    });
 }
 
 /**

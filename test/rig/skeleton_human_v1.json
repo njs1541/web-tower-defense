@@ -1,0 +1,96 @@
+{
+ "format": "td-skeleton/1",
+ "race": "human",
+ "canvas": 1024,
+ "note": "v1 비율 뼈대(시험용). 현재 test/incoming의 리아나(v1 바디 비율, 2.83등신)로 v2 도구를 시험하기 위한 것이다. 정식 캐릭터는 skeleton_human.json(새 b00 실측)을 쓴다. pivot은 body_parts_viewer.html의 DEFAULT_PIVOTS 그대로.",
+ "guide": {
+  "headTop": 110,
+  "chin": 413,
+  "foot": 965,
+  "centerX": 512,
+  "tolerance": 10
+ },
+ "bones": [
+  {
+   "id": "pelvis",
+   "parent": null,
+   "pivot": [ 520, 650 ],
+   "minRot": -8,
+   "maxRot": 8,
+   "label": "골반(루트)",
+   "v1": "b03"
+  },
+  {
+   "id": "torso",
+   "parent": "pelvis",
+   "pivot": [ 520, 620 ],
+   "minRot": -10,
+   "maxRot": 10,
+   "label": "허리",
+   "v1": "b02"
+  },
+  {
+   "id": "head",
+   "parent": "torso",
+   "pivot": [ 513, 395 ],
+   "minRot": -15,
+   "maxRot": 15,
+   "label": "목",
+   "v1": "b01"
+  },
+  {
+   "id": "arm_near_upper",
+   "parent": "torso",
+   "pivot": [ 446, 458 ],
+   "minRot": -40,
+   "maxRot": 35,
+   "label": "가까운 어깨",
+   "v1": "b04"
+  },
+  {
+   "id": "arm_near_lower",
+   "parent": "arm_near_upper",
+   "pivot": [ 415, 565 ],
+   "minRot": -45,
+   "maxRot": 20,
+   "label": "가까운 팔꿈치",
+   "v1": "b05"
+  },
+  {
+   "id": "arm_far_upper",
+   "parent": "torso",
+   "pivot": [ 582, 460 ],
+   "minRot": -40,
+   "maxRot": 35,
+   "label": "먼 어깨",
+   "v1": "b06"
+  },
+  {
+   "id": "arm_far_lower",
+   "parent": "arm_far_upper",
+   "pivot": [ 612, 565 ],
+   "minRot": -45,
+   "maxRot": 20,
+   "label": "먼 팔꿈치",
+   "v1": "b07"
+  },
+  {
+   "id": "leg_near",
+   "parent": "pelvis",
+   "pivot": [ 481, 680 ],
+   "minRot": -25,
+   "maxRot": 25,
+   "label": "가까운 고관절",
+   "v1": "b08"
+  },
+  {
+   "id": "leg_far",
+   "parent": "pelvis",
+   "pivot": [ 566, 680 ],
+   "minRot": -25,
+   "maxRot": 25,
+   "label": "먼 고관절",
+   "v1": "b09"
+  }
+ ]
+}

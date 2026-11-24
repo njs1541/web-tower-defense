@@ -145,3 +145,43 @@ export function saveDataUrl(dataUrl, file) {
     fs.writeFileSync(file, buf);
     return buf.length;
 }
+
+// ---------- 연결 덩어리 (v0.55.29, A-07 변경·A-21 공용) ----------
+/** 전경 마스크(Uint8Array, 1 = 그림)를 8방향 연결 덩어리로 나눈다. 반환: { labels(Int32Array), comps: [{id, area, x0, y0, x1, y1}] } */
+export function components(mask, w, h) {
+    const labels = new Int32Array(w * h).fill(-1), comps = [], stack = new Int32Array(w * h);
+    for (let s = 0; s < w * h; s++) {
+        if (!mask[s] || labels[s] >= 0) continue;
+        const id = comps.length; let sp = 0, area = 0, x0 = w, y0 = h, x1 = -1, y1 = -1;
+        stack[sp++] = s; labels[s] = id;
+        while (sp) {
+            const p = stack[--sp], x = p % w, y = (p / w) | 0; area++;
+            if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+            for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+                const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+                const q = yy * w + xx; if (mask[q] && labels[q] < 0) { labels[q] = id; stack[sp++] = q; }
+            }
+        }
+        comps.push({ id, area, x0, y0, x1, y1 });
+    }
+    return { labels, comps };
+}
+
+/** 두 덩어리 사이 최소 거리(px). 경계 픽셀끼리 비교하며 limit 이상이면 limit을 돌려준다. */
+export function componentGap(labels, w, a, b, limit = 200) {
+    const bx = Math.max(a.x0 - b.x1, b.x0 - a.x1, 0), by = Math.max(a.y0 - b.y1, b.y0 - a.y1, 0);
+    if (Math.hypot(bx, by) >= limit) return limit;
+    const edge = c => {
+        const pts = [];
+        for (let y = c.y0; y <= c.y1; y++) for (let x = c.x0; x <= c.x1; x++) {
+            const i = y * w + x; if (labels[i] !== c.id) continue;
+            if (x === c.x0 || x === c.x1 || y === c.y0 || y === c.y1 || labels[i - 1] !== c.id || labels[i + 1] !== c.id || labels[i - w] !== c.id || labels[i + w] !== c.id) pts.push(x, y);
+        }
+        return pts;
+    };
+    const pa = edge(a), pb = edge(b); let best = limit * limit;
+    for (let i = 0; i < pa.length; i += 2) for (let j = 0; j < pb.length; j += 2) {
+        const d = (pa[i] - pb[j]) ** 2 + (pa[i + 1] - pb[j + 1]) ** 2; if (d < best) best = d;
+    }
+    return Math.sqrt(best);
+}

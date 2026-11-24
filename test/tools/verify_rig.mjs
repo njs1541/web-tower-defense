@@ -3,17 +3,20 @@
  *
  * 헤드리스 Edge로 test/proto/rig_dom.html을 열어 다음을 측정한다.
  *   1) 정지 자세(모든 관절 0도) 조립 결과와 c00 완성본의 위치 일치(5px 허용)
- *   2) 모션별 관절 벌어짐: 키프레임 촘촘히(30fps 샘플) / 성기게(한 바퀴 6개)
+ *   2) 모션별 관절 벌어짐: adaptive(30fps + 빠른 구간 추가, R02 A-15) / dense(30fps 고정) / sparse(한 바퀴 6개)
  *   3) 페이지 오류 여부, 확인용 스크린샷(test/build/verify/)
  * 결과: test/build/verify/verify_report.json
  *
- * 사용법 (프로젝트 루트): node test/tools/verify_rig.mjs
+ * 사용법 (프로젝트 루트): node test/tools/verify_rig.mjs [--rig test/build/rig_v2/이름/rig.json] [--c00 완성본.png] [--out 폴더 이름]
+ *   인수가 없으면 v1 리아나(test/build/liana/rig.json)를 검증한다.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, ensureServer, launchEdge, waitFor, decodePNG, isBackground, saveDataUrl } from './lib.mjs';
 
-const OUT = path.join(ROOT, 'test', 'build', 'verify');
+const argv = process.argv.slice(2), opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i + 1] : d; };
+const RIG = opt('rig', null), C00 = path.resolve(opt('c00', path.join(ROOT, 'test', 'incoming', 'char_liana', 'c00_complete.png')));
+const OUT = path.join(ROOT, 'test', 'build', opt('out', 'verify'));
 fs.mkdirSync(OUT, { recursive: true });
 
 async function shot(cdp, file) {
@@ -48,7 +51,7 @@ const report = { generatedAt: new Date().toISOString() };
 try {
     await cdp.send('Emulation.setDeviceMetricsOverride', { width: 1024, height: 1024, deviceScaleFactor: 1, mobile: false });
     await cdp.send('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } });
-    await cdp.navigate('http://localhost:8085/test/proto/rig_dom.html?bake');
+    await cdp.navigate('http://localhost:8085/test/proto/rig_dom.html?bake' + (RIG ? '&rig=' + encodeURIComponent('/' + path.relative(ROOT, path.resolve(RIG)).split(path.sep).join('/')) : ''));
     await waitFor(cdp, `window.__rig && window.__rig.ready`);
     await cdp.evaluate(`document.fonts.ready.then(() => Promise.all([...new Set(__rig.model.layers.map(l => l.atlas))].map(u => new Promise(r => { const i = new Image(); i.onload = i.onerror = r; i.src = u; }))))`);
 
@@ -60,7 +63,7 @@ try {
     await new Promise(r => setTimeout(r, 300));
     const restFile = path.join(OUT, 'rest_pose.png');
     await shot(cdp, restFile);
-    const rest = decodePNG(restFile), ref = decodePNG(path.join(ROOT, 'test', 'incoming', 'char_liana', 'c00_complete.png'));
+    const rest = decodePNG(restFile), ref = decodePNG(C00);
     const ma = new Uint8Array(1024 * 1024), mb = new Uint8Array(1024 * 1024);
     for (let i = 0; i < 1024 * 1024; i++) {
         ma[i] = rest.rgba[i * 4 + 3] > 128 ? 1 : 0;
@@ -72,13 +75,15 @@ try {
     report.jointGap = {};
     for (const motion of ['idle', 'walk', 'attack', 'hit']) {
         report.jointGap[motion] = {};
-        for (const mode of ['dense', 'sparse']) {
+        // adaptive: 30fps + 빠른 구간 추가(R02 A-15 기준), dense: 30fps 고정, sparse: 한 바퀴 6개
+        for (const mode of ['adaptive', 'dense', 'sparse']) {
             report.jointGap[motion][mode] = await cdp.evaluate(`(() => { const { model, els, TDRig } = __rig;
-              const keys = ${mode === 'dense' ? `Math.round(TDRig.MOTIONS['${motion}'].cycle * 30)` : 6};
-              const anims = TDRig.animate(model, els, '${motion}', keys);
+              const keys = ${mode === 'sparse' ? 6 : `Math.round(TDRig.MOTIONS['${motion}'].cycle * 30)`};
+              const anims = TDRig.animate(model, els, '${motion}', keys, ${mode === 'adaptive' ? '{ adaptive: { maxDeg: 3, depth: 2 } }' : '{}'});
+              const frames = anims[0].effect.getKeyframes().length;
               const r = TDRig.measureJointGap(model, els, anims);
               anims.forEach(a => a.cancel());
-              return { keys, ...r };
+              return { keys, frames, ...r };
             })()`);
         }
     }

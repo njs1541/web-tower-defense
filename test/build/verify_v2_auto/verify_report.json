@@ -1,0 +1,142 @@
+{
+ "generatedAt": "2026-11-24T02:30:12.261Z",
+ "restVsC00": {
+  "tolerancePx": 5,
+  "pixelsA": 251283,
+  "pixelsB": 259525,
+  "aOutsideBpct": 0.34,
+  "bOutsideApct": 3.37,
+  "note": "A = DOM 조립(정지 자세), B = c00 완성본"
+ },
+ "jointGap": {
+  "idle": {
+   "adaptive": {
+    "keys": 151,
+    "frames": 152,
+    "maxPx": 0.01,
+    "meanPx": 0.001,
+    "worst": {
+     "bone": "arm_far_lower",
+     "timeMs": 115
+    }
+   },
+   "dense": {
+    "keys": 151,
+    "frames": 152,
+    "maxPx": 0.01,
+    "meanPx": 0.001,
+    "worst": {
+     "bone": "arm_far_lower",
+     "timeMs": 115
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "frames": 7,
+    "maxPx": 1.84,
+    "meanPx": 0.2,
+    "worst": {
+     "bone": "arm_far_lower",
+     "timeMs": 1246
+    }
+   }
+  },
+  "walk": {
+   "adaptive": {
+    "keys": 29,
+    "frames": 47,
+    "maxPx": 0.18,
+    "meanPx": 0.016,
+    "worst": {
+     "bone": "arm_far_lower",
+     "timeMs": 650
+    }
+   },
+   "dense": {
+    "keys": 29,
+    "frames": 30,
+    "maxPx": 0.71,
+    "meanPx": 0.045,
+    "worst": {
+     "bone": "arm_far_lower",
+     "timeMs": 949
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "frames": 7,
+    "maxPx": 10.69,
+    "meanPx": 0.951,
+    "worst": {
+     "bone": "arm_far_lower",
+     "timeMs": 884
+    }
+   }
+  },
+  "attack": {
+   "adaptive": {
+    "keys": 23,
+    "frames": 57,
+    "maxPx": 0.36,
+    "meanPx": 0.017,
+    "worst": {
+     "bone": "arm_near_lower",
+     "timeMs": 296
+    }
+   },
+   "dense": {
+    "keys": 23,
+    "frames": 24,
+    "maxPx": 5.52,
+    "meanPx": 0.151,
+    "worst": {
+     "bone": "arm_near_lower",
+     "timeMs": 319
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "frames": 7,
+    "maxPx": 47.48,
+    "meanPx": 1.668,
+    "worst": {
+     "bone": "arm_near_lower",
+     "timeMs": 319
+    }
+   }
+  },
+  "hit": {
+   "adaptive": {
+    "keys": 17,
+    "frames": 27,
+    "maxPx": 0.17,
+    "meanPx": 0.024,
+    "worst": {
+     "bone": "arm_near_lower",
+     "timeMs": 115
+    }
+   },
+   "dense": {
+    "keys": 17,
+    "frames": 18,
+    "maxPx": 2.66,
+    "meanPx": 0.087,
+    "worst": {
+     "bone": "arm_near_lower",
+     "timeMs": 82
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "frames": 7,
+    "maxPx": 19.62,
+    "meanPx": 0.627,
+    "worst": {
+     "bone": "arm_near_lower",
+     "timeMs": 47
+    }
+   }
+  }
+ },
+ "pageErrors": []
+}

@@ -1,251 +1,252 @@
 {
- "generatedAt": "2026-11-23T08:39:13.269Z",
+ "generatedAt": "2026-11-24T02:09:20.381Z",
  "webpQuality": 0.9,
- "despilledPixels": 18671,
+ "despilledPixels": 0,
+ "softenedPixels": 42083,
  "parts": [
   {
    "id": "b06",
    "group": "body",
-   "w": 74,
-   "h": 130,
-   "areaPct": 0.92,
+   "w": 76,
+   "h": 132,
+   "areaPct": 0.96,
    "original": 16657,
-   "trimPng": 8278,
-   "trimWebp": 2328
+   "trimPng": 8813,
+   "trimWebp": 3178
   },
   {
    "id": "b07",
    "group": "body",
-   "w": 95,
-   "h": 147,
-   "areaPct": 1.33,
+   "w": 97,
+   "h": 149,
+   "areaPct": 1.38,
    "original": 24329,
-   "trimPng": 14443,
-   "trimWebp": 3274
+   "trimPng": 15191,
+   "trimWebp": 4306
   },
   {
    "id": "b09",
    "group": "body",
-   "w": 107,
-   "h": 316,
-   "areaPct": 3.22,
+   "w": 109,
+   "h": 318,
+   "areaPct": 3.31,
    "original": 57044,
-   "trimPng": 39585,
-   "trimWebp": 5228
+   "trimPng": 40806,
+   "trimWebp": 7580
   },
   {
    "id": "b08",
    "group": "body",
-   "w": 103,
-   "h": 332,
-   "areaPct": 3.26,
+   "w": 105,
+   "h": 334,
+   "areaPct": 3.34,
    "original": 59184,
-   "trimPng": 41413,
-   "trimWebp": 4982
+   "trimPng": 42818,
+   "trimWebp": 7314
   },
   {
    "id": "b03",
    "group": "body",
-   "w": 173,
-   "h": 123,
-   "areaPct": 2.03,
+   "w": 175,
+   "h": 125,
+   "areaPct": 2.09,
    "original": 40334,
-   "trimPng": 27198,
-   "trimWebp": 3334
+   "trimPng": 28059,
+   "trimWebp": 4938
   },
   {
    "id": "b02",
    "group": "body",
-   "w": 177,
-   "h": 288,
-   "areaPct": 4.86,
+   "w": 179,
+   "h": 290,
+   "areaPct": 4.95,
    "original": 72617,
-   "trimPng": 58327,
-   "trimWebp": 6200
+   "trimPng": 59918,
+   "trimWebp": 8630
   },
   {
    "id": "b01",
    "group": "body",
-   "w": 270,
-   "h": 299,
-   "areaPct": 7.7,
+   "w": 272,
+   "h": 301,
+   "areaPct": 7.81,
    "original": 119645,
-   "trimPng": 109378,
-   "trimWebp": 7348
+   "trimPng": 111801,
+   "trimWebp": 10130
   },
   {
    "id": "b04",
    "group": "body",
-   "w": 91,
-   "h": 159,
-   "areaPct": 1.38,
+   "w": 93,
+   "h": 161,
+   "areaPct": 1.43,
    "original": 22638,
-   "trimPng": 13942,
-   "trimWebp": 2982
+   "trimPng": 14726,
+   "trimWebp": 4206
   },
   {
    "id": "b05",
    "group": "body",
-   "w": 101,
-   "h": 153,
-   "areaPct": 1.47,
+   "w": 103,
+   "h": 155,
+   "areaPct": 1.52,
    "original": 25317,
-   "trimPng": 16423,
-   "trimWebp": 3586
+   "trimPng": 17212,
+   "trimWebp": 4796
   },
   {
    "id": "c01",
    "group": "char",
-   "w": 315,
-   "h": 323,
-   "areaPct": 9.7,
+   "w": 317,
+   "h": 325,
+   "areaPct": 9.83,
    "original": 161375,
-   "trimPng": 147612,
-   "trimWebp": 21240
+   "trimPng": 151568,
+   "trimWebp": 27322
   },
   {
    "id": "c02",
    "group": "char",
-   "w": 315,
-   "h": 313,
-   "areaPct": 9.4,
+   "w": 317,
+   "h": 315,
+   "areaPct": 9.52,
    "original": 147213,
-   "trimPng": 134065,
-   "trimWebp": 19178
+   "trimPng": 139101,
+   "trimWebp": 27324
   },
   {
    "id": "c06",
    "group": "char",
-   "w": 299,
-   "h": 191,
-   "areaPct": 5.45,
+   "w": 301,
+   "h": 193,
+   "areaPct": 5.54,
    "original": 717803,
-   "trimPng": 93859,
-   "trimWebp": 13410
+   "trimPng": 102174,
+   "trimWebp": 18022
   },
   {
    "id": "c07",
    "group": "char",
-   "w": 208,
-   "h": 163,
-   "areaPct": 3.23,
+   "w": 210,
+   "h": 165,
+   "areaPct": 3.3,
    "original": 85132,
-   "trimPng": 68073,
-   "trimWebp": 9440
+   "trimPng": 69690,
+   "trimWebp": 12056
   },
   {
    "id": "c08",
    "group": "char",
-   "w": 165,
-   "h": 61,
-   "areaPct": 0.96,
+   "w": 167,
+   "h": 63,
+   "areaPct": 1,
    "original": 15723,
-   "trimPng": 10186,
-   "trimWebp": 1544
+   "trimPng": 10641,
+   "trimWebp": 2552
   },
   {
    "id": "c09",
    "group": "char",
-   "w": 111,
-   "h": 188,
-   "areaPct": 1.99,
+   "w": 113,
+   "h": 190,
+   "areaPct": 2.05,
    "original": 29190,
-   "trimPng": 20900,
-   "trimWebp": 4056
+   "trimPng": 22403,
+   "trimWebp": 6428
   },
   {
    "id": "c10",
    "group": "char",
-   "w": 25,
-   "h": 163,
-   "areaPct": 0.39,
+   "w": 27,
+   "h": 165,
+   "areaPct": 0.42,
    "original": 18573,
-   "trimPng": 9038,
-   "trimWebp": 1928
+   "trimPng": 9510,
+   "trimWebp": 2598
   },
   {
    "id": "c11",
    "group": "char",
-   "w": 148,
-   "h": 333,
-   "areaPct": 4.7,
+   "w": 150,
+   "h": 335,
+   "areaPct": 4.79,
    "original": 72515,
-   "trimPng": 58026,
-   "trimWebp": 7010
+   "trimPng": 60583,
+   "trimWebp": 11446
   },
   {
    "id": "c12",
    "group": "char",
-   "w": 123,
-   "h": 324,
-   "areaPct": 3.8,
+   "w": 125,
+   "h": 326,
+   "areaPct": 3.89,
    "original": 72586,
-   "trimPng": 58561,
-   "trimWebp": 6632
+   "trimPng": 61119,
+   "trimWebp": 10630
   },
   {
    "id": "c13",
    "group": "char",
-   "w": 304,
-   "h": 330,
-   "areaPct": 9.57,
+   "w": 306,
+   "h": 332,
+   "areaPct": 9.69,
    "original": 782288,
-   "trimPng": 48970,
-   "trimWebp": 8760
+   "trimPng": 58495,
+   "trimWebp": 13932
   },
   {
    "id": "c14",
    "group": "char",
-   "w": 212,
-   "h": 341,
-   "areaPct": 6.89,
+   "w": 214,
+   "h": 343,
+   "areaPct": 7,
    "original": 746604,
-   "trimPng": 124221,
-   "trimWebp": 16148
+   "trimPng": 130943,
+   "trimWebp": 20954
   },
   {
    "id": "c03",
    "group": "char",
-   "w": 178,
-   "h": 108,
-   "areaPct": 1.83,
+   "w": 180,
+   "h": 110,
+   "areaPct": 1.89,
    "original": 19481,
-   "trimPng": 12453,
-   "trimWebp": 4022
+   "trimPng": 13509,
+   "trimWebp": 5158
   },
   {
    "id": "c04",
    "group": "char",
-   "w": 178,
-   "h": 108,
-   "areaPct": 1.83,
+   "w": 180,
+   "h": 110,
+   "areaPct": 1.89,
    "original": 12911,
-   "trimPng": 7183,
-   "trimWebp": 3098
+   "trimPng": 8443,
+   "trimWebp": 4714
   },
   {
    "id": "c05",
    "group": "char",
-   "w": 178,
-   "h": 108,
-   "areaPct": 1.83,
+   "w": 180,
+   "h": 110,
+   "areaPct": 1.89,
    "original": 19912,
-   "trimPng": 12746,
-   "trimWebp": 4082
+   "trimPng": 14011,
+   "trimWebp": 6000
   }
  ],
  "atlases": {
   "body": {
-   "w": 1209,
-   "h": 332,
-   "png": 332852,
-   "webp": 33118
+   "w": 1227,
+   "h": 334,
+   "png": 343197,
+   "webp": 49560
   },
   "char": {
-   "w": 1843,
-   "h": 506,
-   "png": 692772,
-   "webp": 108416
+   "w": 1859,
+   "h": 510,
+   "png": 735077,
+   "webp": 162070
   }
  }
 }

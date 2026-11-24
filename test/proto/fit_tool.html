@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>자리 맞춤 도구 - 회의 R02 A-21</title>
+<style>
+  body { margin: 0; font-family: "Malgun Gothic", sans-serif; background: #0f172a; color: #e2e8f0; font-size: 12px; }
+  header { padding: 10px 14px; border-bottom: 1px solid #334155; }
+  header h1 { font-size: 15px; margin: 0 0 3px; }
+  header p { margin: 0; color: #94a3b8; }
+  main { display: flex; gap: 12px; padding: 12px; align-items: flex-start; }
+  #view { background: repeating-conic-gradient(#1e293b 0 25%, #273449 0 50%) 0 0 / 24px 24px; border: 1px solid #334155; cursor: crosshair; flex: none; }
+  .side { flex: 1; min-width: 520px; }
+  section { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 8px 10px; margin-bottom: 8px; }
+  h2 { font-size: 12px; margin: 0 0 6px; color: #93c5fd; }
+  button { background: #334155; color: #e2e8f0; border: 1px solid #475569; border-radius: 4px; padding: 4px 8px; margin: 2px; cursor: pointer; font-size: 12px; }
+  button.on { background: #2563eb; border-color: #3b82f6; }
+  table { border-collapse: collapse; width: 100%; }
+  td, th { border-bottom: 1px solid #334155; padding: 3px 4px; text-align: left; vertical-align: middle; }
+  tr.sel { background: #1d4ed8; }
+  tr.warn td.score { color: #fca5a5; font-weight: bold; }
+  img.thumb { width: 40px; height: 40px; object-fit: contain; background: #475569; }
+  select, input[type=number] { background: #0f172a; color: #e2e8f0; border: 1px solid #475569; font-size: 12px; }
+  input[type=number] { width: 64px; }
+  .flags { color: #fde68a; font-size: 11px; }
+  .keys { color: #94a3b8; line-height: 1.6; }
+  #msg { color: #86efac; }
+</style>
+</head>
+<body>
+<header>
+  <h1>자리 맞춤 도구 (따로 그린 파츠 → c00 위치)</h1>
+  <p>prepare_fit.mjs가 만든 fit_auto.json을 연다. 표에서 슬롯 이름과 값을 고치거나, 그림에서 파츠를 끌어 옮긴다. 저장한 fit.json을 export_rig_v2.mjs에 넣는다.</p>
+</header>
+<main>
+  <canvas id="view" width="768" height="768"></canvas>
+  <div class="side">
+    <section>
+      <h2>보기</h2>
+      c00 투명도 <input id="refOp" type="range" min="0" max="100" value="40">
+      <button id="onlySel">선택 파츠만</button>
+      <button id="showPivot" class="on">관절 표시</button>
+      <button id="showGuide">기준선</button>
+    </section>
+    <section>
+      <h2>선택 파츠</h2>
+      <div id="selInfo">파츠를 누르거나 그림에서 클릭한다.</div>
+      <div>
+        x <input id="tx" type="number" step="1"> y <input id="ty" type="number" step="1">
+        회전 <input id="rot" type="number" step="0.5"> 크기 <input id="scale" type="number" step="0.01"> 겹침 <input id="z" type="number" step="1">
+        <button id="refit">주변에서 다시 자동 맞춤</button>
+      </div>
+      <div class="keys">끌기: 이동 · 방향키: 1px(Shift 10px) · Q/E: 회전 0.5도(Shift 5도) · Z/X: 크기 -/+0.01 · Tab: 다음 파츠</div>
+    </section>
+    <section>
+      <h2>파츠 목록 (점수 0.4 미만은 빨간색: 가려진 파츠이거나 잘못 맞춘 것)</h2>
+      <table><thead><tr><th></th><th>파츠</th><th>슬롯</th><th>점수</th><th>확인할 점</th></tr></thead><tbody id="rows"></tbody></table>
+    </section>
+    <section>
+      <h2>저장</h2>
+      <button id="save">fit.json 내려받기</button> <button id="copy">클립보드에 복사</button> <span id="msg"></span>
+      <div class="keys">브라우저에도 자동 저장된다. 내려받은 파일은 예: <code>node test/tools/export_rig_v2.mjs 받은파일.json</code></div>
+    </section>
+  </div>
+</main>
+<script src="fit_core.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const FIT_URL = params.get('fit') || '../build/fit/liana_fake/fit_auto.json';
+const ROOT = '../../'; // 저장소 루트(이 파일은 test/proto/)
+const V = 768 / 1024;
+const cv = document.getElementById('view'), ctx = cv.getContext('2d');
+let fit, skel, c00, refData, refPyr, sel = -1, imgs = {}, view = { onlySel: false, pivot: true, guide: false };
+const storeKey = () => 'fit_tool:' + FIT_URL;
+
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => rej(new Error('그림을 못 읽음: ' + src)); i.src = src; });
+function imageData(img) { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return g.getImageData(0, 0, img.width, img.height).data; }
+
+async function main() {
+  fit = await (await fetch(FIT_URL)).json();
+  const saved = localStorage.getItem(storeKey());
+  if (saved && confirm('브라우저에 저장된 작업이 있다. 이어서 할까? (취소하면 파일 내용으로 시작)')) fit = JSON.parse(saved);
+  skel = await (await fetch(ROOT + fit.skeleton)).json();
+  c00 = await loadImg(ROOT + fit.c00);
+  const d = imageData(c00);
+  refData = { w: c00.width, h: c00.height, rgba: d, bg: FitCore.bgMask(d, c00.width, c00.height) };
+  refPyr = FitCore.pyramid(refData);
+  for (const p of fit.parts) { imgs[p.id] = await loadImg(ROOT + p.src); p._rgba = imageData(imgs[p.id]); }
+  buildRows(); bind(); draw();
+}
+
+function slotOptions(cur) {
+  return ['<option value="">(빼기)</option>', ...Object.entries(FitCore.SLOTS).map(([k, s]) => `<option value="${k}" ${k === cur ? 'selected' : ''}>${s.label} (${k})</option>`)].join('');
+}
+function buildRows() {
+  const tb = document.getElementById('rows'); tb.innerHTML = '';
+  fit.parts.forEach((p, i) => {
+    const tr = document.createElement('tr');
+    tr.className = (i === sel ? 'sel ' : '') + (p.score < 0.4 ? 'warn' : '');
+    tr.innerHTML = `<td><img class="thumb" src="${ROOT + p.src}"></td><td>${p.id}<br><span class="keys">${p.sheet}</span></td>
+      <td><select data-i="${i}">${slotOptions(p.slot)}</select></td><td class="score">${(p.score ?? 0).toFixed(2)}</td><td class="flags">${(p.flags || []).join(', ')}</td>`;
+    tr.onclick = e => { if (e.target.tagName !== 'SELECT') select(i); };
+    tr.querySelector('select').onchange = e => {
+      const s = e.target.value || null; p.slot = s;
+      if (s) { p.bone = FitCore.SLOTS[s].bone; p.z = FitCore.SLOTS[s].z; p.face = FitCore.SLOTS[s].face; }
+      p.flags = (p.flags || []).filter(f => !f.includes('이름')).concat(['이름 사람이 지정']);
+      changed();
+    };
+    tb.appendChild(tr);
+  });
+}
+function select(i) { sel = i; buildRows(); syncInputs(); draw(); }
+function syncInputs() {
+  const p = fit.parts[sel];
+  document.getElementById('selInfo').textContent = p ? `${p.id} → ${p.slot ? FitCore.SLOTS[p.slot].label : '(슬롯 없음)'}, 뼈 ${p.bone}, 점수 ${(p.score ?? 0).toFixed(3)}` : '';
+  for (const k of ['tx', 'ty', 'rot', 'scale', 'z']) document.getElementById(k).value = p ? p[k] : '';
+}
+function rescore(p) {
+  const pts = FitCore.partPoints({ w: imgs[p.id].width, h: imgs[p.id].height, rgba: p._rgba }, 2);
+  p.score = +FitCore.score(refData, pts, p.tx, p.ty, p.rot, p.scale).toFixed(3);
+}
+function changed() {
+  const p = fit.parts[sel]; if (p) rescore(p);
+  localStorage.setItem(storeKey(), JSON.stringify(fit, (k, v) => k.startsWith('_') ? undefined : v));
+  buildRows(); syncInputs(); draw();
+}
+
+function draw() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.globalAlpha = document.getElementById('refOp').value / 100;
+  ctx.drawImage(c00, 0, 0, 1024 * V, 1024 * V);
+  ctx.globalAlpha = 1;
+  const order = fit.parts.map((p, i) => i).filter(i => fit.parts[i].slot).sort((a, b) => fit.parts[a].z - fit.parts[b].z);
+  for (const i of order) {
+    const p = fit.parts[i];
+    if (view.onlySel && i !== sel) continue;
+    if (p.face && p.face !== 'neutral' && i !== sel) continue; // 표정은 기본만(선택하면 그 표정)
+    const m = FitCore.partMatrix(p, imgs[p.id].width, imgs[p.id].height);
+    ctx.setTransform(m[0] * V, m[1] * V, m[2] * V, m[3] * V, m[4] * V, m[5] * V);
+    ctx.drawImage(imgs[p.id], 0, 0);
+    if (i === sel) { ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2 / V / (p.scale || 1); ctx.strokeRect(0, 0, imgs[p.id].width, imgs[p.id].height); }
+  }
+  ctx.setTransform(V, 0, 0, V, 0, 0);
+  if (view.guide && skel.guide) {
+    ctx.strokeStyle = 'rgba(239,68,68,.8)'; ctx.lineWidth = 1.5 / V;
+    for (const y of [skel.guide.headTop, skel.guide.chin, skel.guide.foot]) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(1024, y); ctx.stroke(); }
+    ctx.strokeStyle = 'rgba(59,130,246,.8)'; ctx.beginPath(); ctx.moveTo(skel.guide.centerX, 0); ctx.lineTo(skel.guide.centerX, 1024); ctx.stroke();
+  }
+  if (view.pivot) for (const b of skel.bones) {
+    ctx.fillStyle = '#facc15'; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(b.pivot[0], b.pivot[1], 6, 0, 7); ctx.fill(); ctx.stroke();
+  }
+}
+
+// 그림 위 클릭: 맨 위에 보이는 파츠 선택, 끌어서 이동
+function hit(wx, wy) {
+  const order = fit.parts.map((p, i) => i).filter(i => fit.parts[i].slot).sort((a, b) => fit.parts[b].z - fit.parts[a].z);
+  for (const i of order) {
+    const p = fit.parts[i], w = imgs[p.id].width, h = imgs[p.id].height, m = FitCore.partMatrix(p, w, h);
+    const det = m[0] * m[3] - m[1] * m[2], dx = wx - m[4], dy = wy - m[5];
+    const u = Math.floor((m[3] * dx - m[2] * dy) / det), v = Math.floor((-m[1] * dx + m[0] * dy) / det);
+    if (u >= 0 && v >= 0 && u < w && v < h && p._rgba[(v * w + u) * 4 + 3] > 40) return i;
+  }
+  return -1;
+}
+let drag = null;
+cv.onmousedown = e => {
+  const r = cv.getBoundingClientRect(), wx = (e.clientX - r.left) / V, wy = (e.clientY - r.top) / V;
+  const i = hit(wx, wy); if (i < 0) return;
+  select(i); drag = { wx, wy, tx: fit.parts[i].tx, ty: fit.parts[i].ty };
+};
+window.onmousemove = e => {
+  if (!drag) return; const r = cv.getBoundingClientRect(), p = fit.parts[sel];
+  p.tx = Math.round(drag.tx + (e.clientX - r.left) / V - drag.wx); p.ty = Math.round(drag.ty + (e.clientY - r.top) / V - drag.wy);
+  syncInputs(); draw();
+};
+window.onmouseup = () => { if (drag) { drag = null; changed(); } };
+window.onkeydown = e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  const p = fit.parts[sel];
+  if (e.key === 'Tab') { e.preventDefault(); select((sel + 1) % fit.parts.length); return; }
+  if (!p) return;
+  const k = e.shiftKey ? 10 : 1, rk = e.shiftKey ? 5 : 0.5;
+  const act = { ArrowLeft: () => p.tx -= k, ArrowRight: () => p.tx += k, ArrowUp: () => p.ty -= k, ArrowDown: () => p.ty += k,
+    q: () => p.rot = +(p.rot - rk).toFixed(2), e: () => p.rot = +(p.rot + rk).toFixed(2), z: () => p.scale = +(p.scale - 0.01).toFixed(3), x: () => p.scale = +(p.scale + 0.01).toFixed(3) }[e.key.length === 1 ? e.key.toLowerCase() : e.key];
+  if (act) { e.preventDefault(); act(); changed(); }
+};
+
+function bind() {
+  document.getElementById('refOp').oninput = draw;
+  const tog = (id, key) => document.getElementById(id).onclick = e => { view[key] = !view[key]; e.target.classList.toggle('on', view[key]); draw(); };
+  tog('onlySel', 'onlySel'); tog('showPivot', 'pivot'); tog('showGuide', 'guide');
+  for (const k of ['tx', 'ty', 'rot', 'scale', 'z']) document.getElementById(k).onchange = e => { const p = fit.parts[sel]; if (!p) return; p[k] = +e.target.value; changed(); };
+  document.getElementById('refit').onclick = () => {
+    const p = fit.parts[sel]; if (!p) return;
+    const r = FitCore.autoFit(refData, { w: imgs[p.id].width, h: imgs[p.id].height, rgba: p._rgba }, [p.tx, p.ty],
+      { win: 40, pyr: refPyr, rots: [p.rot - 6, p.rot - 3, p.rot, p.rot + 3, p.rot + 6], scales: [p.scale * 0.94, p.scale, p.scale * 1.06] });
+    Object.assign(p, { tx: +r.tx.toFixed(1), ty: +r.ty.toFixed(1), rot: r.rot, scale: r.scale });
+    p.flags = (p.flags || []).concat(['주변 다시 맞춤']);
+    changed();
+  };
+  const out = () => JSON.stringify({ ...fit, editedAt: new Date().toISOString() }, (k, v) => k.startsWith('_') ? undefined : v, 1);
+  document.getElementById('save').onclick = () => {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([out()], { type: 'application/json' }));
+    a.download = 'fit.json'; a.click(); msg('내려받았다');
+  };
+  document.getElementById('copy').onclick = async () => { await navigator.clipboard.writeText(out()); msg('복사했다'); };
+}
+function msg(t) { const m = document.getElementById('msg'); m.textContent = t; setTimeout(() => m.textContent = '', 2000); }
+window.__fit = { get fit() { return fit; }, select, changed };
+main().catch(e => document.body.insertAdjacentHTML('beforeend', `<pre style="color:#f87171">${e.stack}</pre>`));
+</script>
+</body>
+</html>

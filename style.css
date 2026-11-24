@@ -2109,6 +2109,24 @@ body.game-paused .pixel-fx {
   display: block;
 }
 
+/* [v0.55.32] 도감 대기 모션(DOM 리그, js/rig_runtime.js). 1024 무대를 상자 크기에 맞춰 줄인다 */
+.viewer-rig {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 70vh;
+  overflow: hidden;
+}
+
+.viewer-rig-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1024px;
+  height: 1024px;
+  transform-origin: 0 0;
+}
+
 .viewer-info-bar {
   padding: 14px 20px;
   background: #0f172a;

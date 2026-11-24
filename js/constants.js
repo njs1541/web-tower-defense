@@ -1,4 +1,4 @@
-const GAME_VERSION = "v0.55.23";
+const GAME_VERSION = "v0.55.36";
 
 // 재화 수급 (기획문서 3.1). MP 충전/처치 수치는 아래 MP_CONFIG, 클리어 라운드는 STAGE_DATA[n].clearRound
 const RP_DROP_CHANCE = 0.04;          // [v0.53.0] 일반 몬스터 처치 시 RP +1 드롭 확률 (12% → 4%, 사용자 결정)
@@ -609,6 +609,7 @@ const CHARACTER_DATA = {
         signature: "baseGuard", // [v0.55.0] 고유 효과 (SIGNATURE_TYPES)
         avatar: "🛡️",
         image: "assets/char_liana.jpg",
+        rig: "assets/rig/liana/rig.json", // [v0.55.32] 도감 대기 모션(DOM 리그). 현재는 잘라내기 시험본(v1), 정식 파츠가 오면 경로만 바꾼다
         maxSockets: 2,
         baseSockets: 1,
         levelCaps: {

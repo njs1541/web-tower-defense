@@ -1,46 +1,54 @@
 {
- "fps": 12,
- "framePx": 72,
- "displayPx": 36,
+ "frameW": 92,
+ "frameH": 72,
+ "displayH": 36,
+ "displayW": 46,
+ "anchorX": 46,
+ "footY": 71.6,
  "region": {
-  "x": -16,
+  "x": -108,
   "y": 94,
-  "side": 933
+  "w": 1256,
+  "h": 983
  },
- "footY": 71.7,
+ "pad": 256,
  "motions": {
   "idle": {
-   "frames": 30,
+   "frames": 20,
+   "fps": 8,
    "durationMs": 2513,
    "png": "idle.png",
    "webp": "idle.webp",
-   "pngBytes": 159850,
-   "webpBytes": 69202
+   "pngBytes": 107236,
+   "webpBytes": 45058
   },
   "walk": {
    "frames": 12,
+   "fps": 12,
    "durationMs": 967,
    "png": "walk.png",
    "webp": "walk.webp",
-   "pngBytes": 65576,
-   "webpBytes": 28120
+   "pngBytes": 62899,
+   "webpBytes": 26626
   },
   "attack": {
    "frames": 9,
+   "fps": 12,
    "durationMs": 769,
    "png": "attack.png",
    "webp": "attack.webp",
-   "pngBytes": 57510,
-   "webpBytes": 22246
+   "pngBytes": 56299,
+   "webpBytes": 20910
   },
   "hit": {
    "frames": 7,
+   "fps": 12,
    "durationMs": 556,
    "png": "hit.png",
    "webp": "hit.webp",
-   "pngBytes": 36774,
-   "webpBytes": 15664
+   "pngBytes": 36616,
+   "webpBytes": 15674
   }
  },
- "totalWebpBytes": 135232
+ "totalWebpBytes": 108268
 }

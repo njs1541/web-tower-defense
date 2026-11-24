@@ -3,7 +3,7 @@
 미소녀 지휘관 수집, 룬 소켓 덱빌딩, 히어로 컨트롤을 결합한 브라우저 타워 디펜스 게임과 그 에셋 제작 도구 모음이다.
 빌드 도구와 외부 의존성이 없는 바닐라 JS/HTML/CSS 프로젝트다.
 
-- 게임 버전: v0.55.23
+- 게임 버전: v0.55.36
 - 이 문서의 행 번호와 현황은 v0.52.0 작업본 기준이다(v0.53.x는 문서, RP 드롭 상수, 크롤러 보호 판정만 변경. enemy.js 행 번호는 약 +15 밀림). 코드가 바뀌면 행 번호는 어긋날 수 있으니 함수명으로 다시 찾는다.
 - **커밋은 사용자가 수동으로 한다.** 명시적인 요청이 없으면 커밋이나 푸시를 하지 않는다.
 - 세부 규칙은 [QA_AND_RULES.md](QA_AND_RULES.md), 기획은 [기획문서.md](기획문서.md), 에셋 절차는 [asset_generation_pipeline_guide.html](asset_generation_pipeline_guide.html)을 본다.
@@ -29,7 +29,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 
 **버전:** "어떠한 내용이든 업데이트가 될 때마다 반드시 버전을 상향"한다. 게임 코드뿐 아니라 에셋 도구(HTML)와 문서만 고친 경우도 포함한다. 다음 위치를 항상 같은 값으로 맞춘다.
 - `js/constants.js:1` (`GAME_VERSION`)
-- `index.html:26, 42, 228` (수동 표기 3곳). 스크립트 캐시 쿼리 `?v=05523`도 함께 올린다
+- `index.html:26, 42, 228` (수동 표기 3곳). 스크립트 캐시 쿼리 `?v=05536`도 함께 올린다
 - `QA_AND_RULES.md:8` (인수인계 절)
 - `기획문서.md:2`
 
@@ -66,6 +66,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 | `tower.js` | 클릭 입력, 공격, 피격, 스펠, 히어로 | `handleCellClick`:47, `attackFromTowers`:252, `onEnemyHit`:493 |
 | `enemy.js` | 소환, 이동, 틱 루프, 배속 | `startRound`:674, `gameLoopTick`:229, `restartGameLoops`:70 |
 | `ui.js` | 인게임 DOM 렌더, 보고서, 아바타 | `render`:8, `buildModularCharacterHtml`:668 |
+| `rig_runtime.js` | DOM 리그 런타임(v0.55.32, 전역 `TDRig`). 리그 v1·v2를 읽고 WAAPI로 재생. 시험 화면과 공용 | `TDRig.load/build/animate/renderStatic` |
 | `sound.js` | Web Audio 합성 효과음, 음소거·음량 (v0.53.6) | `playSfx(name, arg)`, `SFX_RECIPES` |
 | `tutorial.js` | 첫 판 튜토리얼 5단계 (v0.53.8) | `startTutorialIfNeeded`, `updateTutorial`(render에서 호출) |
 | `lobby.js` | 로비, 덱, 룬 장착, 연구소 | `updateLobbyUI`:9 |
@@ -81,7 +82,7 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 - 세션 리셋은 `location.reload()`에 의존한다(ui.js:659). `startGame`은 `round`, `enemies`를 초기화하지 않는다.
 - 인게임 `gold`와 영구 `USER_DATA.gold`는 다른 값인데 UI 라벨은 둘 다 TP다.
 - 세이브 키는 `tower_defense_save_v1`이고, v0.53.4부터 `schemaVersion`(`SAVE_SCHEMA_VERSION`)과 백업 키 `_backup`, 손상 보존 키 `_corrupt`가 있다. 필드를 바꾸면 `loadData`의 기본값 채우기를 수정하고, 구조가 바뀌면 `SAVE_SCHEMA_VERSION`을 올리고 `migrateSaveData`에 단계를 추가한다.
-- 파일은 UTF-8이고 행 끝이 파일마다 다르다. `user_data.js`, `기획문서.md`는 LF, `enemy.js`, `main.js`, `QA_AND_RULES.md`는 CRLF, `constants.js`, `state.js`, `index.html`은 섞여 있다. 수정할 때 기존 행 끝을 유지하고, PowerShell 5.1로 쓸 때는 인코딩을 지정한다.
+- 파일은 UTF-8이고 행 끝이 파일마다 다르다. `user_data.js`, `기획문서.md`, `constants.js`, `index.html`, `CLAUDE.md`는 LF, `enemy.js`, `main.js`, `lobby.js`, `style.css`, `QA_AND_RULES.md`는 CRLF(2026-11-24 확인), `state.js`는 섞여 있다. 수정할 때 기존 행 끝을 유지하고, PowerShell 5.1로 쓸 때는 인코딩을 지정한다.
 - 재화 수급 수치는 `constants.js`에 있다. RP는 맨 위 `RP_DROP_CHANCE`, `RP_REWARD_*`, MP는 `MP_CONFIG`(`regenPerSec`, `perKill`). MP 충전은 `gameLoopTick` 안에서 틱당 `regenPerSec/5`씩 돌아서 전투 중에만 동작한다(사용자 확정). v0.52.0 병합에서 로컬 `MP_REGEN_*`는 삭제했다. RP는 처치 4% 드롭(v0.53.0에서 12%→4%), 완막 +1, 스테이지 클리어 +5로 확정되었다.
 - 스테이지 클리어: `STAGE_DATA[n].clearRound`(현재 전 스테이지 30, 사용자 결정) 이후의 보스를 **처치**하면 `endGame(true)`로 런이 승리 종료되고 RP +5를 준다(50 TP 대신). 보스 누출은 `bossKilledThisRound`로 구분해 격파 보상과 최초 클리어 PP를 주지 않고, 생존하면 런이 계속되어 40R 보스가 다음 기회가 된다. `stageCleared`로 중복 판정을 막는다.
 
@@ -104,17 +105,19 @@ node scratch/serve.js      # http://localhost:8085/ (no-store 응답이라 캐�
 전신 원화 이후의 작업은 처음부터 다시 만든다(사용자 결정). **아래 "기존 에셋 파이프라인"의 시트, 슬라이스, 리깅 과정은 새 작업의 전제로 삼지 않는다.** 기존 파일은 삭제하지 않는다.
 
 - **목적:** 많은 캐릭터 추가에 대비해 로딩을 줄이고, 인게임에서 Live2D 같은 움직임을 낸다. 로비는 크게 움직이지 않아도 되고, 인게임 이동과 공격 모션은 필수다.
-- **구조:** 종족별 공통 바디 1벌 + 캐릭터 파츠(얼굴, 머리카락, 의상, 무기). 투명 파츠를 겹치고 관절을 코드로 회전한다. 규격은 [test/ASSET_SPEC.md](test/ASSET_SPEC.md).
+- **구조 (R02 결정, 2026-11-24):** 종족별로 공통인 것은 **뼈대(관절 비율, 가동 범위)와 모션**뿐이다. 그림은 캐릭터마다 메인 원화(c00) 1장을 만들고, 움직일 파츠를 c00을 참고해 **따로 그린다**(몸·옷 일체형, 가려진 부분 완성, 시트에 흩어 그림). 파츠 자리는 Claude의 자리 맞춤 도구가 맞춘다. 기준 바디 b00은 게임에 쓰지 않는 회색 마네킹 기준 이미지다. 결정 전문은 [DECISIONS.md](docs/meetings/asset_flow/DECISIONS.md). 규격은 [test/ASSET_SPEC.md](test/ASSET_SPEC.md) v2.1(v0.55.35, R03 반영. 옛 v1은 `ASSET_SPEC_v1.md`). 표준 뼈대는 `test/rig/skeleton_human.json`, 기준선 가이드는 `test/guide/guide_template.png`(`make_guide.mjs`로 생성).
 - **역할 분담:** 프롬프트와 이미지 생성은 사용자가 다른 AI와 나노바나나로 진행해 납품한다. 여기서는 사양, 조립, 모션, 게임 연동을 맡고 프롬프트는 작성하지 않는다.
 - **납품 위치:** `test/incoming/body_human/`(b00 원본과, b00에서 잘라 낸 바디 파츠 b01-b09), `test/incoming/char_liana/`(c00 완성본과 파츠 c01-c14, 2026-11-10). 배경 제거, 관절 지정, 모션 뷰어까지 진행되었다(v0.55.3-v0.55.17).
-- **등급별 범위(사용자 결정):** UR/U는 전장에 출전하고 전체 모션(파츠 15장). C~SR은 전장에 나오지 않고 도감과 지휘관 선택에서 대기 모션만(파츠 11장).
+- **등급별 범위(사용자 결정):** UR/U는 전장에 출전하고 전체 모션. C~SR은 전장에 나오지 않고 도감과 지휘관 선택에서 대기 모션만. 파츠 수는 사양 v2에서 전체형 15-17개(+선택 2), 대기형 10-11개로 바뀌었다(R03 A-27 조건부 승인: 리아나 파츠 시트 제작 전에 세부 검토).
 - **도감 동작(사용자 결정):** 목록은 정지 이미지로 표시하고, 지휘관을 선택하면 그 캐릭터의 파츠만 불러와 대기 모션을 재생한다.
 - **구조상 확인할 점:** 현재 전장 유닛은 36px이다. 리아나(C)는 전체 모션 시험용으로 15장을 만들고 뷰어에서 먼저 시험한다. `CHARACTER_DATA`에 종족 필드가 없어 게임 연동 시 추가가 필요하다.
 - **납품 검수 기준:** 바디는 회색 바디슈트와 신발을 입은 것이 분명해야 한다. 벗은 몸처럼 보이는 바디는 파츠 분할, 조립, 뷰어 작업에 쓰지 않고 재제작을 요청한다. `test/GENERATION_PROMPTS.md`, `test/prompt_hub.html`은 다른 AI가 쓴 프롬프트 문서로, 피부색 바디슈트를 지시하는 부분이 사양과 다르다.
 - **바디 뷰어 (`test/body_parts_viewer.html`, v0.55.8-v0.55.17):** 관절 끝 자동 연장(관절 원 안에서 이웃 파츠 자리를 가장 가까운 색으로 채움, 정지 윤곽 불변), 피벗 자동 보정 버튼(자식 단면 가로 중앙), 가동범위 제한과 남는 각도의 자식 관절 분산, 대기 호흡은 세로 크기 변화. v0.55.17에서 리아나 의상·무기·표정 14장을 얹은 21개 레이어 조립, 표정 자동 전환(깜빡임, 공격, 피격), c00 겹쳐 보기, 분해도를 추가했다. 원리상 단면 근처 색을 늘리는 방식이라 원본에 없던 그림(몸통에 가려졌던 부분)은 만들지 못한다. **Canvas와 rAF로 그리는 시험 도구라 게임에 그대로 옮길 수 없다**(게임 연동 방식은 3인 회의 R01 안건).
-- **3인 회의(v0.55.19):** 에셋 플로우는 사용자, Claude, Gemini가 회차별로 다듬는다. 운영 방법과 회의록은 [docs/meetings/asset_flow/](docs/meetings/asset_flow/README.md), 승인된 결정은 `DECISIONS.md`. 승인 전 안건으로 시제품이나 게임 코드를 만들지 않는다.
-- **시제품 (v0.55.23, R01 A-10):** `test/proto/rig_dom.html`(DOM 리그, WAAPI), `test/proto/battle_preview.html`(36px 스트립). 스크립트는 `test/tools/`: `export_rig.mjs`(뷰어를 헤드리스로 열어 투명화·관절 끝 연장·녹색 번짐 제거·트림·아틀라스·`body.json`/`rig.json`), `verify_rig.mjs`(c00 정합·관절 벌어짐), `bake_strips.mjs`(전장 스트립), `check_delivery.mjs`(납품 자동 검사, 실패 시 종료 코드 1). 결과는 `test/build/`. 파츠가 바뀌면 export → verify → bake 순으로 다시 돌린다.
-- **현재 상태 (v0.55.23 확인):** 리아나 전체 모션은 뷰어에서 시험할 수 있다. 다만 기준 바디 `b00_master.png`는 재제작되지 않았다(파일 날짜 2026-11-04 그대로). 머리 꼭대기 약 110(사양 180), 발바닥 약 965(사양 880)로 규격 밖이고 피부색 맨몸이라 위 납품 검수 기준을 통과하지 못하는데, v0.55.3-v0.55.15에서 이 b00으로 바디 파츠 b01-b09를 잘라 썼고 리아나 c00과 파츠도 같은 위치에 맞춰져 있다. 따라서 현재 바디 파츠와 리아나 파츠는 시험용 임시본이다. 규격에 맞는 b00이 오면 바디 파츠를 다시 자르고 리아나 파츠의 위치를 맞춰야 한다. b00은 사양대로 새로 만들기로 결정되었다(R01 B-01, 2026-11-23). 재제작 절차와 b01-b09 제작 주체는 R02 A-13에서 정한다. 리아나 파츠의 `c11_pants_near`에는 손·칼자루가 섞여 있다(R02 조사 보고서 3.5).
+- **게임 연동(v0.55.32, A-17):** `CHARACTER_DATA`의 `rig` 경로가 있으면 도감 일러스트 창에 "대기 모션" 탭이 기본으로 열린다(`lobby.js` `showViewerRig`). 자산은 `node test/tools/publish_rig.mjs <rig.json> <이름>`으로 `assets/rig/`에 내보낸다. 현재 리아나만 v1 임시본. 전장 스트립 교체는 UR/U 파츠가 생기면 한다.
+- **자리 맞춤(v0.55.31, A-21):** 파츠 시트 납품 → `node test/tools/prepare_fit.mjs <폴더>`(분리, 읽는 순서로 이름, 자동 맞춤) → `test/proto/fit_tool.html?fit=...`(사람 조정, fit.json 저장) → `node test/tools/export_rig_v2.mjs <fit.json>` → `verify_rig.mjs --rig`, `bake_strips.mjs --rig` → `publish_rig.mjs`. 공용 계산은 `test/proto/fit_core.js`. 가짜 납품 시험은 `make_fake_v2.mjs`.
+- **3인 회의(v0.55.19, R03에서 종료 v0.55.35):** 에셋 플로우는 사용자, Claude, Gemini가 회차별로 다듬었다. 이후는 `DECISIONS.md` 기준으로 진행하고 사양 변경만 안건으로 올린다. 다음 일은 Gemini의 새 b00 마네킹 납품(A-28)이다. 운영 방법과 회의록은 [docs/meetings/asset_flow/](docs/meetings/asset_flow/README.md), 승인된 결정은 `DECISIONS.md`. 승인 전 안건으로 시제품이나 게임 코드를 만들지 않는다.
+- **시제품 (v0.55.23, R01 A-10):** `test/proto/rig_dom.html`(DOM 리그, WAAPI), `test/proto/battle_preview.html`(36px 스트립). 스크립트는 `test/tools/`: `export_rig.mjs`(뷰어를 헤드리스로 열어 투명화·관절 끝 연장·녹색 번짐 제거·트림·아틀라스·`body.json`/`rig.json`), `verify_rig.mjs`(c00 정합·관절 벌어짐), `bake_strips.mjs`(전장 스트립), `check_delivery.mjs`(납품 자동 검사, 실패 시 종료 코드 1. v0.55.29부터 `body`/`char`는 사양 v2, 옛 방식은 `body-v1`/`char-v1`). 결과는 `test/build/`. 파츠가 바뀌면 export → verify → bake 순으로 다시 돌린다.
+- **현재 상태 (v0.55.28 확인):** 리아나 전체 모션은 뷰어에서 시험할 수 있다. 다만 기준 바디 `b00_master.png`는 재제작되지 않았다(파일 날짜 2026-11-04 그대로). 머리 꼭대기 약 110(사양 180), 발바닥 약 965(사양 880)로 규격 밖이고 피부색 맨몸이라 위 납품 검수 기준을 통과하지 못하는데, v0.55.3-v0.55.15에서 이 b00으로 바디 파츠 b01-b09를 잘라 썼고 리아나 c00과 파츠도 같은 위치에 맞춰져 있다. 따라서 현재 바디 파츠와 리아나 파츠는 시험용 임시본이다. 규격에 맞는 b00이 오면 바디 파츠를 다시 자르고 리아나 파츠의 위치를 맞춰야 한다. b00은 사양대로 새로 만들기로 결정되었다(R01 B-01, 2026-11-23). 재제작 절차와 b01-b09 제작 주체는 R02 A-13에서 정한다. 리아나 파츠의 `c11_pants_near`에는 손·칼자루가 섞여 있다(R02 조사 보고서 3.5). **R02 결정(v0.55.28):** 따로 그리기(A-19), 뼈대·모션만 공통(A-20), 자리 맞춤 도구(A-21), 얼굴 패치 표정(A-23), 빌드 보완 3종(A-24), 가이드 이미지(A-25)가 승인되어 위 "구조"로 바뀌었다. 현재 `test/incoming/`의 바디 b01-b09와 리아나 파츠는 옛 방식(잘라내기) 시험본이고, 게임 연동은 이 임시본으로 먼저 시작한다(A-17 사용자 의견). 외부에서 받은 분할 원화 예시는 저장소에 넣지 않는다(A-22). `test/build/`는 여러 기기 작업 동안 저장소에 둔다(A-18 보류).
 
 ## 기존 에셋 파이프라인 (새 작업의 전제가 아님)
 

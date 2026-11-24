@@ -18,13 +18,15 @@
   .board { display: grid; grid-template-columns: repeat(8, 30px); grid-auto-rows: 30px; gap: 1px; background: #0b1220; padding: 1px; position: relative; }
   .cell { background: #3f6212; }
   .cell.path { background: #a16207; }
-  .unit-slot { position: absolute; width: 36px; height: 36px; }
+  .unit-slot { position: absolute; }
+  body.flip #board .unit { transform: scaleX(-1); } /* 좌우 반전: 몸통 루트가 프레임 가로 중앙이라 제자리에서 뒤집힌다 */
 
   /* 스트립 재생: div 하나 + steps(). 배속은 animation-duration을 나누고, 일시정지는 play-state */
-  .unit { width: var(--size, 36px); height: var(--size, 36px); background-repeat: no-repeat;
-          background-size: calc(var(--n) * var(--size, 36px)) var(--size, 36px);
+  /* 프레임은 직사각형(높이 --h, 가로 = 높이 x --r). v0.55.30, R02 A-14 */
+  .unit { width: calc(var(--h, 36px) * var(--r, 1)); height: var(--h, 36px); background-repeat: no-repeat;
+          background-size: calc(var(--n) * var(--h, 36px) * var(--r, 1)) var(--h, 36px);
           animation: strip-play calc(var(--dur) / var(--speed, 1)) steps(var(--n)) infinite; }
-  @keyframes strip-play { from { background-position-x: 0; } to { background-position-x: calc(var(--n) * var(--size, 36px) * -1); } }
+  @keyframes strip-play { from { background-position-x: 0; } to { background-position-x: calc(var(--n) * var(--h, 36px) * var(--r, 1) * -1); } }
   body.game-paused .unit { animation-play-state: paused; }
   .zoom .unit { image-rendering: pixelated; }
 
@@ -48,6 +50,7 @@
     <div>
       <button data-speed="1" class="on">1배속</button><button data-speed="2">2배속</button><button data-speed="3">3배속</button>
       <button id="pause">일시정지</button>
+      <button id="flip">좌우 반전</button>
     </div>
     <div id="stats"></div>
   </section>
@@ -69,9 +72,10 @@ function applyUnit(el, m, size) {
   const info = data.motions[m];
   el.style.backgroundImage = `url("${BASE}${info.webp}")`;
   el.style.setProperty('--n', info.frames);
+  el.style.setProperty('--r', data.frameW / data.frameH);
   el.style.setProperty('--dur', info.durationMs + 'ms');
   el.style.setProperty('--speed', state.speed);
-  if (size) el.style.setProperty('--size', size + 'px');
+  if (size) el.style.setProperty('--h', size + 'px');
   el.style.animation = 'none'; void el.offsetWidth; el.style.animation = ''; // 다시 시작
 }
 
@@ -94,6 +98,7 @@ async function main() {
   document.querySelectorAll('[data-speed]').forEach(b => b.onclick = () => {
     state.speed = +b.dataset.speed; document.querySelectorAll('[data-speed]').forEach(x => x.classList.toggle('on', x === b)); refresh();
   });
+  document.getElementById('flip').onclick = e => { document.body.classList.toggle('flip'); e.target.classList.toggle('on'); };
   document.getElementById('pause').onclick = e => { document.body.classList.toggle('game-paused'); e.target.classList.toggle('on'); };
 
   // 보드: 8x6칸, 길 한 줄, 유닛 몇 기(모션은 각자 고정 + 선택 모션)
@@ -102,7 +107,7 @@ async function main() {
   const units = [[1, 1, null], [3, 1, 'idle'], [5, 1, 'attack'], [2, 3, 'walk'], [4, 3, 'walk'], [6, 4, 'hit']];
   for (const [cx, cy, m] of units) {
     const slot = document.createElement('div'); slot.className = 'unit-slot';
-    slot.style.left = (1 + cx * 31 + 15 - 18) + 'px'; slot.style.top = (1 + cy * 31 + 15 - 18 - 4) + 'px';
+    slot.style.left = (1 + cx * 31 + 15 - data.displayW / 2) + 'px'; slot.style.top = (1 + cy * 31 + 15 - data.displayH / 2 - 4) + 'px';
     const u = document.createElement('div'); u.className = 'unit'; if (m) u.dataset.motion = m;
     slot.appendChild(u); board.appendChild(slot);
   }
@@ -111,10 +116,10 @@ async function main() {
   const cmp = document.getElementById('compare');
   const addCap = (el, text) => { const w = document.createElement('div'); const bg = document.createElement('div'); bg.className = 'checker'; bg.style.display = 'inline-block'; bg.appendChild(el); w.appendChild(bg); const c = document.createElement('div'); c.className = 'cap'; c.textContent = text; w.appendChild(c); cmp.appendChild(w); };
   const img = document.createElement('img'); img.src = '../build/verify/rest_pose.png'; img.className = 'ref36'; addCap(img, '정지 자세 1024→36px');
-  for (const s of [36, 72, 144]) { const u = document.createElement('div'); u.className = 'unit'; u.dataset.size = s; addCap(u, `스트립 ${s}px`); }
+  for (const s of [36, 72, 144]) { const u = document.createElement('div'); u.className = 'unit'; u.dataset.size = s; addCap(u, `스트립 높이 ${s}px`); }
 
-  const st = Object.entries(data.motions).map(([k, v]) => `${k.padEnd(7)} ${String(v.frames).padStart(2)}프레임 ${v.durationMs}ms  WebP ${(v.webpBytes / 1024).toFixed(1)}KB`).join('\n');
-  document.getElementById('stats').textContent = `${st}\n합계 WebP ${(data.totalWebpBytes / 1024).toFixed(1)}KB, 프레임 ${data.framePx}px, ${data.fps}fps`;
+  const st = Object.entries(data.motions).map(([k, v]) => `${k.padEnd(7)} ${String(v.frames).padStart(2)}프레임 ${v.fps}fps ${v.durationMs}ms  WebP ${(v.webpBytes / 1024).toFixed(1)}KB`).join('\n');
+  document.getElementById('stats').textContent = `${st}\n합계 WebP ${(data.totalWebpBytes / 1024).toFixed(1)}KB, 프레임 ${data.frameW}x${data.frameH}, 표시 ${data.displayW}x${data.displayH}`;
   refresh();
 }
 main();
