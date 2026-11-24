@@ -1,0 +1,164 @@
+{
+ "format": "td-rig-char/2",
+ "id": "liana_fake_idle_truth",
+ "type": "idle",
+ "skeleton": "../../../rig/skeleton_human_v1.json",
+ "canvas": 1024,
+ "note": "파츠는 정지 자세 좌표로 미리 구웠다(R02 A-24 ①). x, y는 1024 캔버스 기준(음수 가능).",
+ "atlas": {
+  "png": "atlas.png",
+  "webp": "atlas.webp",
+  "w": 1843,
+  "h": 724
+ },
+ "faces": {
+  "neutral": "face_neutral",
+  "blink": "face_blink"
+ },
+ "layers": [
+  {
+   "id": "hair_back",
+   "kind": "part",
+   "bone": "head",
+   "z": 1,
+   "x": 346,
+   "y": 108,
+   "w": 317,
+   "h": 325,
+   "ax": 789,
+   "ay": 0
+  },
+  {
+   "id": "arm_far",
+   "kind": "part",
+   "bone": "arm_far_upper",
+   "z": 2,
+   "x": 562,
+   "y": 398,
+   "w": 123,
+   "h": 290,
+   "ax": 303,
+   "ay": 434
+  },
+  {
+   "id": "weapon_sub",
+   "kind": "part",
+   "bone": "arm_far_lower",
+   "z": 4,
+   "x": 602,
+   "y": 434,
+   "w": 214,
+   "h": 343,
+   "ax": 265,
+   "ay": 0
+  },
+  {
+   "id": "skirt_back",
+   "kind": "part",
+   "bone": "pelvis",
+   "z": 5,
+   "x": 463,
+   "y": 638,
+   "w": 130,
+   "h": 63,
+   "ax": 976,
+   "ay": 434
+  },
+  {
+   "id": "lower",
+   "kind": "part",
+   "bone": "pelvis",
+   "z": 7,
+   "x": 368,
+   "y": 536,
+   "w": 263,
+   "h": 432,
+   "ax": 0,
+   "ay": 0
+  },
+  {
+   "id": "torso",
+   "kind": "part",
+   "bone": "torso",
+   "z": 9,
+   "x": 360,
+   "y": 363,
+   "w": 301,
+   "h": 290,
+   "ax": 0,
+   "ay": 434
+  },
+  {
+   "id": "head_base",
+   "kind": "part",
+   "bone": "head",
+   "z": 10,
+   "x": 372,
+   "y": 108,
+   "w": 271,
+   "h": 301,
+   "ax": 1427,
+   "ay": 0
+  },
+  {
+   "id": "face_neutral",
+   "kind": "face",
+   "bone": "head",
+   "z": 11,
+   "x": 371,
+   "y": 247,
+   "w": 272,
+   "h": 162,
+   "ax": 428,
+   "ay": 434
+  },
+  {
+   "id": "face_blink",
+   "kind": "face",
+   "bone": "head",
+   "z": 11,
+   "x": 371,
+   "y": 247,
+   "w": 272,
+   "h": 162,
+   "ax": 702,
+   "ay": 434
+  },
+  {
+   "id": "hair_front",
+   "kind": "part",
+   "bone": "head",
+   "z": 12,
+   "x": 346,
+   "y": 108,
+   "w": 317,
+   "h": 315,
+   "ax": 1108,
+   "ay": 0
+  },
+  {
+   "id": "weapon_main",
+   "kind": "part",
+   "bone": "arm_near_lower",
+   "z": 13,
+   "x": 116,
+   "y": 625,
+   "w": 306,
+   "h": 332,
+   "ax": 481,
+   "ay": 0
+  },
+  {
+   "id": "arm_near",
+   "kind": "part",
+   "bone": "arm_near_upper",
+   "z": 14,
+   "x": 340,
+   "y": 398,
+   "w": 141,
+   "h": 295,
+   "ax": 1700,
+   "ay": 0
+  }
+ ]
+}

@@ -1,0 +1,292 @@
+{
+ "format": "td-fit/1",
+ "name": "liana_fake_idle",
+ "type": "idle",
+ "source": "test/build/fake_v2_idle",
+ "c00": "test/build/fake_v2_idle/c00_complete.png",
+ "skeleton": "test/rig/skeleton_human_v1.json",
+ "generatedAt": "2026-11-24T06:41:46.113Z",
+ "parts": [
+  {
+   "id": "s1_1",
+   "src": "test/build/fit/liana_fake_idle/src/s1_1.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    90,
+    90,
+    280,
+    310
+   ],
+   "w": 280,
+   "h": 310,
+   "slot": "head_base",
+   "bone": "head",
+   "z": 10,
+   "tx": 516,
+   "ty": 303.5,
+   "rot": 13,
+   "scale": 0.884,
+   "score": 0.358,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s1_2",
+   "src": "test/build/fit/liana_fake_idle/src/s1_2.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    987,
+    110,
+    310,
+    314
+   ],
+   "w": 310,
+   "h": 314,
+   "slot": "hair_back",
+   "bone": "head",
+   "z": 1,
+   "tx": 503,
+   "ty": 276.5,
+   "rot": -9,
+   "scale": 1.075,
+   "score": 0.763,
+   "flags": []
+  },
+  {
+   "id": "s1_3",
+   "src": "test/build/fit/liana_fake_idle/src/s1_3.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    504,
+    119,
+    374,
+    374
+   ],
+   "w": 374,
+   "h": 374,
+   "slot": "hair_front",
+   "bone": "head",
+   "z": 12,
+   "tx": 519,
+   "ty": 271.5,
+   "rot": 11.5,
+   "scale": 0.87,
+   "score": 0.856,
+   "flags": [
+    "조각 2개를 묶음"
+   ]
+  },
+  {
+   "id": "s1_4",
+   "src": "test/build/fit/liana_fake_idle/src/s1_4.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    89,
+    603,
+    274,
+    176
+   ],
+   "w": 274,
+   "h": 176,
+   "slot": "face_neutral",
+   "bone": "head",
+   "z": 11,
+   "face": "neutral",
+   "tx": 499.7,
+   "ty": 312.4,
+   "rot": 10,
+   "scale": 1.01,
+   "score": 0.672,
+   "flags": [
+    "표정 종류 확인"
+   ]
+  },
+  {
+   "id": "s1_5",
+   "src": "test/build/fit/liana_fake_idle/src/s1_5.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    490,
+    603,
+    295,
+    204
+   ],
+   "w": 295,
+   "h": 204,
+   "slot": "face_blink",
+   "bone": "head",
+   "z": 11,
+   "face": "blink",
+   "tx": 514.7,
+   "ty": 317.4,
+   "rot": -9.5,
+   "scale": 0.935,
+   "score": 0.856,
+   "flags": [
+    "기본 표정 패치에 맞춤",
+    "표정 종류 확인"
+   ]
+  },
+  {
+   "id": "s2_1",
+   "src": "test/build/fit/liana_fake_idle/src/s2_1.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    94,
+    93,
+    260,
+    250
+   ],
+   "w": 260,
+   "h": 250,
+   "slot": "torso",
+   "bone": "torso",
+   "z": 9,
+   "tx": 511.5,
+   "ty": 507.5,
+   "rot": 2,
+   "scale": 1.165,
+   "score": 0.614,
+   "flags": []
+  },
+  {
+   "id": "s2_2",
+   "src": "test/build/fit/liana_fake_idle/src/s2_2.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    913,
+    93,
+    143,
+    82
+   ],
+   "w": 143,
+   "h": 82,
+   "slot": "skirt_back",
+   "bone": "pelvis",
+   "z": 5,
+   "tx": 526,
+   "ty": 673.8,
+   "rot": 11,
+   "scale": 0.875,
+   "score": 0.949,
+   "flags": []
+  },
+  {
+   "id": "s2_3",
+   "src": "test/build/fit/liana_fake_idle/src/s2_3.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    454,
+    91,
+    324,
+    497
+   ],
+   "w": 324,
+   "h": 497,
+   "slot": "lower",
+   "bone": "pelvis",
+   "z": 7,
+   "tx": 502,
+   "ty": 748.5,
+   "rot": 5,
+   "scale": 0.895,
+   "score": 0.883,
+   "flags": [
+    "조각 3개를 묶음"
+   ]
+  },
+  {
+   "id": "s2_4",
+   "src": "test/build/fit/liana_fake_idle/src/s2_4.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    1180,
+    95,
+    136,
+    334
+   ],
+   "w": 136,
+   "h": 334,
+   "slot": "arm_near",
+   "bone": "arm_near_upper",
+   "z": 14,
+   "tx": 425,
+   "ty": 519,
+   "rot": 9,
+   "scale": 0.785,
+   "score": 0.42,
+   "flags": [
+    "조각 3개를 묶음"
+   ]
+  },
+  {
+   "id": "s2_5",
+   "src": "test/build/fit/liana_fake_idle/src/s2_5.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    96,
+    701,
+    184,
+    326
+   ],
+   "w": 184,
+   "h": 326,
+   "slot": "arm_far",
+   "bone": "arm_far_upper",
+   "z": 2,
+   "tx": 625,
+   "ty": 542,
+   "rot": 8.5,
+   "scale": 0.85,
+   "score": 0.352,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s3_1",
+   "src": "test/build/fit/liana_fake_idle/src/s3_1.png",
+   "sheet": "sheet3_weapons.png",
+   "sheetBox": [
+    89,
+    102,
+    317,
+    316
+   ],
+   "w": 317,
+   "h": 316,
+   "slot": "weapon_main",
+   "bone": "arm_near_lower",
+   "z": 13,
+   "tx": 271.1,
+   "ty": 786.3,
+   "rot": -3,
+   "scale": 0.975,
+   "score": 0.429,
+   "flags": []
+  },
+  {
+   "id": "s3_2",
+   "src": "test/build/fit/liana_fake_idle/src/s3_2.png",
+   "sheet": "sheet3_weapons.png",
+   "sheetBox": [
+    504,
+    105,
+    251,
+    359
+   ],
+   "w": 251,
+   "h": 359,
+   "slot": "weapon_sub",
+   "bone": "arm_far_lower",
+   "z": 4,
+   "tx": 700,
+   "ty": 598.5,
+   "rot": 10,
+   "scale": 0.935,
+   "score": 0.77,
+   "flags": []
+  }
+ ]
+}

@@ -2,17 +2,23 @@
  "format": "td-skeleton/1",
  "race": "human",
  "canvas": 1024,
- "note": "인간족 표준 뼈대(R02 A-20, A-25). pivot은 임시값: v1 바디(b00_master, 2.83등신)의 관절을 ASSET_SPEC v2 비율(머리 꼭대기 180, 턱 460, 발바닥 880)로 환산했다. 새 b00 마네킹을 받으면 실측값으로 바꾼다.",
- "guide": { "headTop": 180, "chin": 460, "foot": 880, "centerX": 512, "tolerance": 10 },
+ "note": "인간족 표준 뼈대(R02 A-20, A-25). pivot은 새 b00 마네킹(2026-11-24 납품, test/incoming/body_human/b00_master.png)에서 실측했다(v0.55.41). 가동 범위는 v1 값 그대로다.",
+ "guide": {
+  "headTop": 180,
+  "chin": 460,
+  "foot": 880,
+  "centerX": 512,
+  "tolerance": 10
+ },
  "bones": [
-  { "id": "pelvis", "parent": null, "pivot": [518, 640], "minRot": -8, "maxRot": 8, "label": "골반(루트)", "v1": "b03" },
-  { "id": "torso", "parent": "pelvis", "pivot": [518, 618], "minRot": -10, "maxRot": 10, "label": "허리", "v1": "b02" },
-  { "id": "head", "parent": "torso", "pivot": [513, 443], "minRot": -15, "maxRot": 15, "label": "목", "v1": "b01" },
-  { "id": "arm_near_upper", "parent": "torso", "pivot": [462, 494], "minRot": -40, "maxRot": 35, "label": "가까운 어깨", "v1": "b04" },
-  { "id": "arm_near_lower", "parent": "arm_near_upper", "pivot": [438, 576], "minRot": -45, "maxRot": 20, "label": "가까운 팔꿈치", "v1": "b05" },
-  { "id": "arm_far_upper", "parent": "torso", "pivot": [565, 496], "minRot": -40, "maxRot": 35, "label": "먼 어깨", "v1": "b06" },
-  { "id": "arm_far_lower", "parent": "arm_far_upper", "pivot": [588, 576], "minRot": -45, "maxRot": 20, "label": "먼 팔꿈치", "v1": "b07" },
-  { "id": "leg_near", "parent": "pelvis", "pivot": [488, 663], "minRot": -25, "maxRot": 25, "label": "가까운 고관절", "v1": "b08" },
-  { "id": "leg_far", "parent": "pelvis", "pivot": [553, 663], "minRot": -25, "maxRot": 25, "label": "먼 고관절", "v1": "b09" }
+  {"id": "pelvis", "parent": null, "pivot": [520,642], "minRot": -8, "maxRot": 8, "label": "골반(루트)", "v1": "b03"},
+  {"id": "torso", "parent": "pelvis", "pivot": [520,622], "minRot": -10, "maxRot": 10, "label": "허리", "v1": "b02"},
+  {"id": "head", "parent": "torso", "pivot": [513,462], "minRot": -15, "maxRot": 15, "label": "목", "v1": "b01"},
+  {"id": "arm_near_upper", "parent": "torso", "pivot": [448,505], "minRot": -40, "maxRot": 35, "label": "가까운 어깨", "v1": "b04"},
+  {"id": "arm_near_lower", "parent": "arm_near_upper", "pivot": [423,570], "minRot": -45, "maxRot": 20, "label": "가까운 팔꿈치", "v1": "b05"},
+  {"id": "arm_far_upper", "parent": "torso", "pivot": [587,510], "minRot": -40, "maxRot": 35, "label": "먼 어깨", "v1": "b06"},
+  {"id": "arm_far_lower", "parent": "arm_far_upper", "pivot": [603,573], "minRot": -45, "maxRot": 20, "label": "먼 팔꿈치", "v1": "b07"},
+  {"id": "leg_near", "parent": "pelvis", "pivot": [485,668], "minRot": -25, "maxRot": 25, "label": "가까운 고관절", "v1": "b08"},
+  {"id": "leg_far", "parent": "pelvis", "pivot": [562,668], "minRot": -25, "maxRot": 25, "label": "먼 고관절", "v1": "b09"}
  ]
 }

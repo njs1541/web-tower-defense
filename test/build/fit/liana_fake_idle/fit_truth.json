@@ -1,0 +1,302 @@
+{
+ "format": "td-fit/1",
+ "name": "liana_fake_idle",
+ "type": "idle",
+ "source": "test/build/fake_v2_idle",
+ "c00": "test/build/fake_v2_idle/c00_complete.png",
+ "skeleton": "test/rig/skeleton_human_v1.json",
+ "generatedAt": "2026-11-24T06:41:46.113Z",
+ "parts": [
+  {
+   "id": "s1_1",
+   "src": "test/build/fit/liana_fake_idle/src/s1_1.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    90,
+    90,
+    280,
+    310
+   ],
+   "w": 280,
+   "h": 310,
+   "slot": "head_base",
+   "bone": "head",
+   "z": 10,
+   "tx": 506.9,
+   "ty": 258.5,
+   "rot": 0.4,
+   "scale": 0.9709,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s1_2",
+   "src": "test/build/fit/liana_fake_idle/src/s1_2.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    987,
+    110,
+    310,
+    314
+   ],
+   "w": 310,
+   "h": 314,
+   "slot": "hair_back",
+   "bone": "head",
+   "z": 1,
+   "tx": 503.12,
+   "ty": 276.92,
+   "rot": -9,
+   "scale": 1.0753,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s1_3",
+   "src": "test/build/fit/liana_fake_idle/src/s1_3.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    504,
+    119,
+    374,
+    374
+   ],
+   "w": 374,
+   "h": 374,
+   "slot": "hair_front",
+   "bone": "head",
+   "z": 12,
+   "tx": 519.08,
+   "ty": 271.96,
+   "rot": 11.3,
+   "scale": 0.8696,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s1_4",
+   "src": "test/build/fit/liana_fake_idle/src/s1_4.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    89,
+    603,
+    274,
+    176
+   ],
+   "w": 274,
+   "h": 176,
+   "slot": "face_neutral",
+   "bone": "head",
+   "z": 11,
+   "face": "neutral",
+   "tx": 500.32,
+   "ty": 313.47,
+   "rot": 9.5,
+   "scale": 1.0101,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s1_5",
+   "src": "test/build/fit/liana_fake_idle/src/s1_5.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    490,
+    603,
+    295,
+    204
+   ],
+   "w": 295,
+   "h": 204,
+   "slot": "face_blink",
+   "bone": "head",
+   "z": 11,
+   "face": "blink",
+   "tx": 515.69,
+   "ty": 319.01,
+   "rot": -9.8,
+   "scale": 0.9346,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s2_1",
+   "src": "test/build/fit/liana_fake_idle/src/s2_1.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    94,
+    93,
+    260,
+    250
+   ],
+   "w": 260,
+   "h": 250,
+   "slot": "torso",
+   "bone": "torso",
+   "z": 9,
+   "tx": 512.13,
+   "ty": 508.05,
+   "rot": 1.9,
+   "scale": 1.1628,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s2_2",
+   "src": "test/build/fit/liana_fake_idle/src/s2_2.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    913,
+    93,
+    143,
+    82
+   ],
+   "w": 143,
+   "h": 82,
+   "slot": "skirt_back",
+   "bone": "pelvis",
+   "z": 5,
+   "tx": 529.52,
+   "ty": 671.44,
+   "rot": 7.9,
+   "scale": 0.9259,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s2_3",
+   "src": "test/build/fit/liana_fake_idle/src/s2_3.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    454,
+    91,
+    324,
+    497
+   ],
+   "w": 324,
+   "h": 497,
+   "slot": "lower",
+   "bone": "pelvis",
+   "z": 7,
+   "tx": 502.81,
+   "ty": 749.07,
+   "rot": 5.2,
+   "scale": 0.8929,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s2_4",
+   "src": "test/build/fit/liana_fake_idle/src/s2_4.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    1180,
+    95,
+    136,
+    334
+   ],
+   "w": 136,
+   "h": 334,
+   "slot": "arm_near",
+   "bone": "arm_near_upper",
+   "z": 14,
+   "tx": 415.81,
+   "ty": 548.38,
+   "rot": 7.3,
+   "scale": 0.9091,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s2_5",
+   "src": "test/build/fit/liana_fake_idle/src/s2_5.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    96,
+    701,
+    184,
+    326
+   ],
+   "w": 184,
+   "h": 326,
+   "slot": "arm_far",
+   "bone": "arm_far_upper",
+   "z": 2,
+   "tx": 625.28,
+   "ty": 542.58,
+   "rot": 8.6,
+   "scale": 0.8475,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s3_1",
+   "src": "test/build/fit/liana_fake_idle/src/s3_1.png",
+   "sheet": "sheet3_weapons.png",
+   "sheetBox": [
+    89,
+    102,
+    317,
+    316
+   ],
+   "w": 317,
+   "h": 316,
+   "slot": "weapon_main",
+   "bone": "arm_near_lower",
+   "z": 13,
+   "tx": 268.48,
+   "ty": 790.72,
+   "rot": -2.7,
+   "scale": 1.0101,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  },
+  {
+   "id": "s3_2",
+   "src": "test/build/fit/liana_fake_idle/src/s3_2.png",
+   "sheet": "sheet3_weapons.png",
+   "sheetBox": [
+    504,
+    105,
+    251,
+    359
+   ],
+   "w": 251,
+   "h": 359,
+   "slot": "weapon_sub",
+   "bone": "arm_far_lower",
+   "z": 4,
+   "tx": 700.68,
+   "ty": 599.38,
+   "rot": 10,
+   "scale": 0.9346,
+   "score": 1,
+   "flags": [
+    "정답"
+   ]
+  }
+ ],
+ "note": "가짜 납품 정답으로 만든 배치(export 흐름 시험용)"
+}

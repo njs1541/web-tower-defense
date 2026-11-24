@@ -1,0 +1,54 @@
+{
+ "frameW": 88,
+ "frameH": 72,
+ "displayH": 36,
+ "displayW": 44,
+ "anchorX": 44,
+ "footY": 71.6,
+ "region": {
+  "x": 26,
+  "y": 165,
+  "w": 989,
+  "h": 809
+ },
+ "pad": 256,
+ "motions": {
+  "idle": {
+   "frames": 20,
+   "fps": 8,
+   "durationMs": 2513,
+   "png": "idle.png",
+   "webp": "idle.webp",
+   "pngBytes": 123933,
+   "webpBytes": 48980
+  },
+  "walk": {
+   "frames": 12,
+   "fps": 12,
+   "durationMs": 967,
+   "png": "walk.png",
+   "webp": "walk.webp",
+   "pngBytes": 73039,
+   "webpBytes": 28392
+  },
+  "attack": {
+   "frames": 9,
+   "fps": 12,
+   "durationMs": 769,
+   "png": "attack.png",
+   "webp": "attack.webp",
+   "pngBytes": 62829,
+   "webpBytes": 21782
+  },
+  "hit": {
+   "frames": 7,
+   "fps": 12,
+   "durationMs": 556,
+   "png": "hit.png",
+   "webp": "hit.webp",
+   "pngBytes": 41535,
+   "webpBytes": 16580
+  }
+ },
+ "totalWebpBytes": 115734
+}

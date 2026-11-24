@@ -5,7 +5,7 @@
  "source": "test/build/fake_v2",
  "c00": "test/build/fake_v2/c00_complete.png",
  "skeleton": "test/rig/skeleton_human_v1.json",
- "generatedAt": "2026-11-24T02:31:40.754Z",
+ "generatedAt": "2026-11-24T06:32:58.061Z",
  "parts": [
   {
    "id": "s1_1",

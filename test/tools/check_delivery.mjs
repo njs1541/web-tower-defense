@@ -29,7 +29,7 @@ const B00 = { top: [170, 190], foot: [870, 890], head: [260, 300], height: [680,
 const ALIGN_TOL = 5;
 // 사양 v2 파츠 시트(5절): 시트 이름 → 기대 파츠 수 [최소, 최대]
 const SHEETS_FULL = { sheet1_head: [6, 6], sheet2_body: [2, 3], sheet3_arms: [4, 4], sheet4_legs_weapons: [3, 4] };
-const SHEETS_IDLE = { sheet1_head: [5, 5], sheet2_body_arms: [4, 4], sheet3_weapons: [1, 2] }; // 5.2절 (R03 A-32)
+const SHEETS_IDLE = { sheet1_head: [5, 5], sheet2_body_arms: [4, 5], sheet3_weapons: [1, 2] }; // 5.2절 (R03 A-32, 뒷자락 선택 A-27 G2)
 const SHEETS = typeArg === 'idle' ? SHEETS_IDLE : SHEETS_FULL;
 const PART_MIN_AREA = 150; // 이보다 작은 덩어리는 부스러기로 본다
 const PART_GAP = 40;       // 파츠 사이 최소 간격(2.2절)

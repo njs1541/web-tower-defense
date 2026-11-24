@@ -1,5 +1,5 @@
 /*
- * 파츠 시트 분리 + 자동 맞춤 (v0.55.31, 회의 안건 A-21)
+ * 파츠 시트 분리 + 자동 맞춤 (v0.55.31, 회의 안건 A-21. v0.55.37 머리 소체 시작 위치 보정)
  *
  * 1) 파츠 시트(sheet<번호>_*.png)를 소프트 알파로 투명화(A-24 ②)하고, 연결 덩어리로 파츠를 떼어 낸다.
  *    칸 좌표를 쓰지 않는다. 가까운 조각(기본 15px 이내)은 한 파츠로 묶고, 아주 작은 조각은 가까운 파츠에 붙이거나 버린다.
@@ -134,7 +134,11 @@ for (const p of sorted) {
         r = Fit.autoFit(faceFit.ref, p.img, [faceFit.tx, faceFit.ty], { win: 60, pyr: faceFit.pyr });
         r.viaNeutral = true;
     }
-    else if (slot === 'head_base' && faceFit) r = Fit.autoFit(ref, p.img, [faceFit.tx, faceFit.ty], { win: 40, pyr, rots: [faceFit.rot - 5, faceFit.rot, faceFit.rot + 5], scales: [faceFit.scale * 0.95, faceFit.scale, faceFit.scale * 1.05] });
+    else if (slot === 'head_base' && faceFit) {
+        // 머리 소체는 c00에서 머리카락에 가려져 맞출 그림이 적다. 기본 표정 위치에서 뼈대상 머리-얼굴 거리만큼 옮긴 곳부터 찾는다(R03 4.3 정리안 3)
+        const ph = Fit.priorCenter(skel, 'head_base'), pf = Fit.priorCenter(skel, 'face_neutral');
+        r = Fit.autoFit(ref, p.img, [faceFit.tx + ph[0] - pf[0], faceFit.ty + ph[1] - pf[1]], { win: 60, pyr, rots: [faceFit.rot - 5, faceFit.rot, faceFit.rot + 5], scales: [faceFit.scale * 0.95, faceFit.scale, faceFit.scale * 1.05] });
+    }
     else r = Fit.autoFit(ref, p.img, Fit.priorCenter(skel, slot), { win: S.win, pyr });
     if (slot === 'face_neutral') faceFit = { tx: r.tx, ty: r.ty, rot: r.rot, scale: r.scale, score: r.score };
     fitted[p.id] = r;

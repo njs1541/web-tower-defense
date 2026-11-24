@@ -16,21 +16,21 @@
     const SLOTS = {
         hair_back:      { label: '뒷머리', sheet: 1, bone: 'head', prior: 'head', win: 110, z: 1 },
         arm_far_upper:  { label: '먼 위팔', sheet: 3, bone: 'arm_far_upper', prior: 'arm_far_upper', win: 110, z: 2 },
-        arm_far_lower:  { label: '먼 아래팔', sheet: 3, bone: 'arm_far_lower', prior: 'arm_far_lower', win: 120, z: 3 },
+        arm_far_lower:  { label: '먼 아래팔', sheet: 3, bone: 'arm_far_lower', prior: 'arm_far_lower', win: 120, z: 1.5 }, // 위팔 아래(소매가 덮음, v0.55.46)
         weapon_sub:     { label: '보조무기', sheet: 4, bone: 'arm_far_lower', prior: 'hand_far', win: 220, z: 4 },
         skirt_back:     { label: '뒷자락', sheet: 2, bone: 'pelvis', prior: 'skirt', win: 110, z: 5 },
         leg_far:        { label: '먼 다리', sheet: 4, bone: 'leg_far', prior: 'leg_far', win: 120, z: 6 },
         leg_near:       { label: '가까운 다리', sheet: 4, bone: 'leg_near', prior: 'leg_near', win: 120, z: 7 },
         pelvis:         { label: '골반', sheet: 2, bone: 'pelvis', prior: 'pelvis', win: 110, z: 8 },
         torso:          { label: '상체', sheet: 2, bone: 'torso', prior: 'torso', win: 110, z: 9 },
-        head_base:      { label: '머리 소체', sheet: 1, bone: 'head', prior: 'head', win: 90, z: 10 },
+        head_base:      { label: '머리 소체', sheet: 1, bone: 'head', prior: 'head', win: 90, z: 8.5 }, // 상체 아래(깃이 목을 덮음, v0.55.46)
         face_neutral:   { label: '표정: 기본', sheet: 1, bone: 'head', prior: 'face', win: 90, z: 11, face: 'neutral' },
         face_blink:     { label: '표정: 눈 감음', sheet: 1, bone: 'head', prior: 'face', win: 90, z: 11, face: 'blink' },
         face_attack:    { label: '표정: 공격', sheet: 1, bone: 'head', prior: 'face', win: 90, z: 11, face: 'attack' },
         hair_front:     { label: '앞·옆머리', sheet: 1, bone: 'head', prior: 'head', win: 90, z: 12 },
         weapon_main:    { label: '주무기', sheet: 4, bone: 'arm_near_lower', prior: 'hand_near', win: 260, z: 13 },
         arm_near_upper: { label: '가까운 위팔', sheet: 3, bone: 'arm_near_upper', prior: 'arm_near_upper', win: 110, z: 14 },
-        arm_near_lower: { label: '가까운 아래팔', sheet: 3, bone: 'arm_near_lower', prior: 'arm_near_lower', win: 120, z: 15 },
+        arm_near_lower: { label: '가까운 아래팔', sheet: 3, bone: 'arm_near_lower', prior: 'arm_near_lower', win: 120, z: 13.5 }, // 주무기 위, 위팔 아래(v0.55.46)
         hand_cap:       { label: '손가락 덮개(선택)', sheet: 4, bone: 'arm_near_lower', prior: 'hand_near', win: 120, z: 16 },
         // 대기형(5.2)
         lower:          { label: '하체(대기형)', sheet: 2, bone: 'pelvis', prior: 'lower', win: 140, z: 7 },
@@ -55,7 +55,7 @@
         },
         idle: {
             1: { order: ['head_base', 'hair_front', 'hair_back', 'face_neutral', 'face_blink'], optional: [] },
-            2: { order: ['torso', 'lower', 'arm_near', 'arm_far'], optional: [] },
+            2: { order: ['torso', 'lower', 'skirt_back', 'arm_near', 'arm_far'], optional: ['skirt_back'] }, // 뒷자락은 v0.55.38(A-27 G2)
             3: { order: ['weapon_main', 'weapon_sub'], optional: ['weapon_sub'] },
         },
     };

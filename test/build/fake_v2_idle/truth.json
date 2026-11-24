@@ -1,0 +1,137 @@
+{
+ "note": "가짜 v2 납품의 정답. tx, ty는 정지 자세에서 파츠 중심, rot·scale은 시트 그림을 정지 자세로 돌리는 값",
+ "truth": {
+  "head_base": {
+   "sheet": "sheet1_head",
+   "sheetCenter": [
+    230.1,
+    245
+   ],
+   "tx": 507,
+   "ty": 258.5,
+   "rot": 0.4,
+   "scale": 0.9709
+  },
+  "hair_front": {
+   "sheet": "sheet1_head",
+   "sheetCenter": [
+    673.1,
+    302
+   ],
+   "tx": 504.5,
+   "ty": 265.5,
+   "rot": 11.3,
+   "scale": 0.8696
+  },
+  "hair_back": {
+   "sheet": "sheet1_head",
+   "sheetCenter": [
+    1144.2,
+    261.3
+   ],
+   "tx": 504.5,
+   "ty": 270.5,
+   "rot": -9,
+   "scale": 1.0753
+  },
+  "face_neutral": {
+   "sheet": "sheet1_head",
+   "sheetCenter": [
+    234.9,
+    704.1
+   ],
+   "tx": 507,
+   "ty": 328,
+   "rot": 9.5,
+   "scale": 1.0101
+  },
+  "face_blink": {
+   "sheet": "sheet1_head",
+   "sheetCenter": [
+    626.7,
+    712.9
+   ],
+   "tx": 507,
+   "ty": 328,
+   "rot": -9.8,
+   "scale": 0.9346
+  },
+  "torso": {
+   "sheet": "sheet2_body_arms",
+   "sheetCenter": [
+    222.6,
+    218
+   ],
+   "tx": 510.5,
+   "ty": 508,
+   "rot": 1.9,
+   "scale": 1.1628
+  },
+  "lower": {
+   "sheet": "sheet2_body_arms",
+   "sheetCenter": [
+    612.6,
+    343.1
+   ],
+   "tx": 499.5,
+   "ty": 752,
+   "rot": 5.2,
+   "scale": 0.8929
+  },
+  "skirt_back": {
+   "sheet": "sheet2_body_arms",
+   "sheetCenter": [
+    962.8,
+    134.9
+   ],
+   "tx": 509.5,
+   "ty": 669.5,
+   "rot": 7.9,
+   "scale": 0.9259
+  },
+  "arm_near": {
+   "sheet": "sheet2_body_arms",
+   "sheetCenter": [
+    1241.8,
+    259.6
+   ],
+   "tx": 410.5,
+   "ty": 545.5,
+   "rot": 7.3,
+   "scale": 0.9091
+  },
+  "arm_far": {
+   "sheet": "sheet2_body_arms",
+   "sheetCenter": [
+    186,
+    864.8
+   ],
+   "tx": 623.5,
+   "ty": 543,
+   "rot": 8.6,
+   "scale": 0.8475
+  },
+  "weapon_main": {
+   "sheet": "sheet3_weapons",
+   "sheetCenter": [
+    248,
+    260.3
+   ],
+   "tx": 269,
+   "ty": 791,
+   "rot": -2.7,
+   "scale": 1.0101
+  },
+  "weapon_sub": {
+   "sheet": "sheet3_weapons",
+   "sheetCenter": [
+    639.4,
+    289.4
+   ],
+   "tx": 709,
+   "ty": 605.5,
+   "rot": 10,
+   "scale": 0.9346
+  }
+ }
+}

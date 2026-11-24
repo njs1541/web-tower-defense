@@ -1,0 +1,187 @@
+{
+ "checkedAt": "2026-11-24T06:41:38.376Z",
+ "kind": "char",
+ "type": "idle",
+ "results": [
+  {
+   "file": "c00_complete",
+   "item": "캔버스 1024x1024",
+   "level": "통과",
+   "detail": "1024x1024"
+  },
+  {
+   "file": "c00_complete",
+   "item": "색 형식",
+   "level": "정보",
+   "detail": "RGB(알파 없음)"
+  },
+  {
+   "file": "c00_complete",
+   "item": "가장자리 비움",
+   "level": "통과",
+   "detail": "정상"
+  },
+  {
+   "file": "c00_complete",
+   "item": "배경 단색",
+   "level": "통과",
+   "detail": "평균 rgb(19,222,28), 편차 4.7"
+  },
+  {
+   "file": "c00_complete",
+   "item": "외곽 녹색 번짐",
+   "level": "경고",
+   "detail": "외곽 픽셀 중 녹색 기운 4711개 (빌드 전처리로 보정 가능)"
+  },
+  {
+   "file": "sheet1_head",
+   "item": "캔버스 (최대 2048)",
+   "level": "통과",
+   "detail": "1403x912"
+  },
+  {
+   "file": "sheet1_head",
+   "item": "색 형식",
+   "level": "정보",
+   "detail": "RGBA"
+  },
+  {
+   "file": "sheet1_head",
+   "item": "가장자리 비움",
+   "level": "통과",
+   "detail": "정상"
+  },
+  {
+   "file": "sheet1_head",
+   "item": "배경 단색",
+   "level": "통과",
+   "detail": "평균 rgb(0,255,0), 편차 4.1"
+  },
+  {
+   "file": "sheet1_head",
+   "item": "외곽 녹색 번짐",
+   "level": "경고",
+   "detail": "외곽 픽셀 중 녹색 기운 3792개 (빌드 전처리로 보정 가능)"
+  },
+  {
+   "file": "sheet2_body_arms",
+   "item": "캔버스 (최대 2048)",
+   "level": "통과",
+   "detail": "1429x1134"
+  },
+  {
+   "file": "sheet2_body_arms",
+   "item": "색 형식",
+   "level": "정보",
+   "detail": "RGBA"
+  },
+  {
+   "file": "sheet2_body_arms",
+   "item": "가장자리 비움",
+   "level": "통과",
+   "detail": "정상"
+  },
+  {
+   "file": "sheet2_body_arms",
+   "item": "배경 단색",
+   "level": "통과",
+   "detail": "평균 rgb(0,255,0), 편차 3.4"
+  },
+  {
+   "file": "sheet2_body_arms",
+   "item": "외곽 녹색 번짐",
+   "level": "경고",
+   "detail": "외곽 픽셀 중 녹색 기운 3866개 (빌드 전처리로 보정 가능)"
+  },
+  {
+   "file": "sheet3_weapons",
+   "item": "캔버스 (최대 2048)",
+   "level": "통과",
+   "detail": "873x579"
+  },
+  {
+   "file": "sheet3_weapons",
+   "item": "색 형식",
+   "level": "정보",
+   "detail": "RGBA"
+  },
+  {
+   "file": "sheet3_weapons",
+   "item": "가장자리 비움",
+   "level": "통과",
+   "detail": "정상"
+  },
+  {
+   "file": "sheet3_weapons",
+   "item": "배경 단색",
+   "level": "통과",
+   "detail": "평균 rgb(0,255,0), 편차 5.4"
+  },
+  {
+   "file": "sheet3_weapons",
+   "item": "외곽 녹색 번짐",
+   "level": "경고",
+   "detail": "외곽 픽셀 중 녹색 기운 1927개 (빌드 전처리로 보정 가능)"
+  },
+  {
+   "file": "sheet1_head",
+   "item": "파츠 개수",
+   "level": "경고",
+   "detail": "7개 (기대 5). 많으면 떨어진 조각이 있거나 추가 파츠"
+  },
+  {
+   "file": "sheet1_head",
+   "item": "부스러기",
+   "level": "경고",
+   "detail": "150px 미만 조각 3개 (떨어진 장식이나 배경 얼룩)"
+  },
+  {
+   "file": "sheet1_head",
+   "item": "파츠 사이 간격",
+   "level": "실패",
+   "detail": "가장 가까운 두 파츠 3px (최소 40px)"
+  },
+  {
+   "file": "sheet2_body_arms",
+   "item": "파츠 개수",
+   "level": "경고",
+   "detail": "9개 (기대 4-5). 많으면 떨어진 조각이 있거나 추가 파츠"
+  },
+  {
+   "file": "sheet2_body_arms",
+   "item": "부스러기",
+   "level": "경고",
+   "detail": "150px 미만 조각 8개 (떨어진 장식이나 배경 얼룩)"
+  },
+  {
+   "file": "sheet2_body_arms",
+   "item": "파츠 사이 간격",
+   "level": "실패",
+   "detail": "가장 가까운 두 파츠 7px (최소 40px)"
+  },
+  {
+   "file": "sheet3_weapons",
+   "item": "파츠 개수",
+   "level": "통과",
+   "detail": "2개 (기대 1-2). "
+  },
+  {
+   "file": "sheet3_weapons",
+   "item": "부스러기",
+   "level": "통과",
+   "detail": "150px 미만 조각 0개 (떨어진 장식이나 배경 얼룩)"
+  },
+  {
+   "file": "sheet3_weapons",
+   "item": "파츠 사이 간격",
+   "level": "통과",
+   "detail": "가장 가까운 두 파츠 117px (최소 40px)"
+  },
+  {
+   "file": "(전체)",
+   "item": "사람 확인 필요",
+   "level": "정보",
+   "detail": "다른 부위가 섞였는지(예: 다리 파츠에 손·칼자루), 관절 끝이 둥근지, 표정 패치끼리 윤곽이 같은지. 자리 맞춤 후 모션 화면에서 확인한다"
+  }
+ ]
+}

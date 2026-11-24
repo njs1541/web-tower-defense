@@ -1,13 +1,14 @@
 /*
- * 시험용 가짜 v2 납품 만들기 (v0.55.31, 회의 안건 A-21 시험)
+ * 시험용 가짜 v2 납품 만들기 (v0.55.31, 회의 안건 A-21 시험. v0.55.37 대기형 추가)
  *
  * 새 방식(따로 그린 파츠 시트) 도구를 정식 납품 전에 시험하기 위해, 지금 리아나 파츠(v1, export_rig.mjs 결과)를
  * 사양 v2 슬롯(몸·옷 일체형)으로 합친 뒤, 무작위로 돌리고 크기를 바꿔 파츠 시트 4장에 흩어 놓는다.
  * 원래 자리(정답)를 truth.json에 남겨 자동 맞춤의 정확도를 잴 수 있다.
  * 진짜 납품이 아니므로 그림 품질(잘라내기 결함)은 v1 그대로다.
  *
- * 사용법 (프로젝트 루트): node test/tools/export_rig.mjs 후 node test/tools/make_fake_v2.mjs
- * 출력: test/build/fake_v2/ (c00_complete.png, sheet1_head.png ~ sheet4_legs_weapons.png, truth.json)
+ * 사용법 (프로젝트 루트): node test/tools/export_rig.mjs 후 node test/tools/make_fake_v2.mjs [--type idle]
+ * 출력: 전체형 test/build/fake_v2/ (c00_complete.png, sheet1_head.png - sheet4_legs_weapons.png, truth.json)
+ *       대기형 test/build/fake_v2_idle/ (사양 5.2절 시트 3장)
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -17,17 +18,25 @@ import { encodePNG } from '../../scratch/pixelfx/tools/lib/png.mjs';
 
 const require = createRequire(import.meta.url);
 const Fit = require('../proto/fit_core.js');
-const OUT = path.join(ROOT, 'test', 'build', 'fake_v2');
+const TYPE = process.argv.includes('--type') ? process.argv[process.argv.indexOf('--type') + 1] : 'full';
+const OUT = path.join(ROOT, 'test', 'build', TYPE === 'idle' ? 'fake_v2_idle' : 'fake_v2');
 const B = path.join(ROOT, 'test', 'build');
 
 // v2 슬롯 = v1 파츠 조합(아래 → 위)
-const COMPOSE = {
+const COMPOSE_FULL = {
     // 시트 안 순서는 사양 v2 2.2절(5절 표 순서, 읽는 순서)
     sheet1_head: { head_base: ['b01'], hair_front: ['c02'], hair_back: ['c01'], face_neutral: ['b01', 'c03'], face_blink: ['b01', 'c04'], face_attack: ['b01', 'c05'] },
     sheet2_body: { torso: ['b02', 'c06'], pelvis: ['b03', 'c07'], skirt_back: ['c08'] },
     sheet3_arms: { arm_near_upper: ['b04', 'c09'], arm_near_lower: ['b05'], arm_far_upper: ['b06', 'c10'], arm_far_lower: ['b07'] },
     sheet4_legs_weapons: { leg_near: ['b08', 'c11'], leg_far: ['b09', 'c12'], weapon_main: ['c13'], weapon_sub: ['c14'] },
 };
+// 대기형(사양 5.2절): 하체 1개, 팔은 어깨-손끝 한 덩어리, 표정 2종
+const COMPOSE_IDLE = {
+    sheet1_head: { head_base: ['b01'], hair_front: ['c02'], hair_back: ['c01'], face_neutral: ['b01', 'c03'], face_blink: ['b01', 'c04'] },
+    sheet2_body_arms: { torso: ['b02', 'c06'], lower: ['b09', 'c12', 'b08', 'c11', 'b03', 'c07'], skirt_back: ['c08'], arm_near: ['b04', 'c09', 'b05'], arm_far: ['b06', 'c10', 'b07'] },
+    sheet3_weapons: { weapon_main: ['c13'], weapon_sub: ['c14'] },
+};
+const COMPOSE = TYPE === 'idle' ? COMPOSE_IDLE : COMPOSE_FULL;
 
 // 결정적 난수(매번 같은 시트)
 let seed = 20261124;
