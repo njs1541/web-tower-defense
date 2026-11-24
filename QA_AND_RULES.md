@@ -5,7 +5,10 @@
 Agent에게 작업을 요청할 때 "QA_AND_RULES.md 파일을 읽어줘"라고 하면 아래 내용을 기억할 수 있습니다.
 
 ## 🚀 다음 작업 인수인계 및 체크포인트 (Next Session Task Handoff)
-- **현재 완료 상태 (v0.55.47 기준)**:
+- **현재 완료 상태 (v0.55.48 기준)**:
+    1. **원격 기준 정리 (사용자 결정)**: v0.55.47에서 올린 로컬 조립 시안 `test/incoming/body_human_new/`와 `test/build/check/body_human_new.json`을 저장소와 로컬에서 모두 삭제. 기준 바디는 원격의 정식 마네킹 `test/incoming/body_human/b00_master.png`뿐이다.
+    2. **버전 동기화**: v0.55.48 (`?v=05548`).
+- **이전 완료 상태 (v0.55.47 기준)**:
     1. **로컬 작업분 병합**: 원격 v0.55.46을 받으면서 로컬에만 있던 `test/incoming/body_human_new/`(b00 조립 시안과 b01-b09, 2026-11-23)와 납품 검사 결과 `test/build/check/body_human_new.json`을 저장소에 보관. 회색 바디슈트와 신발 착용으로 검수 기준은 통과하지만 정식 마네킹은 `test/incoming/body_human/b00_master.png`(v0.55.37 이후)이므로 참고용이다. 로컬의 `test/proto/battle_preview.html` 변경은 공백·줄바꿈 정리뿐이라 원격본을 유지.
     2. **버전 동기화**: v0.55.47 (`?v=05547`).
 - **이전 완료 상태 (v0.55.46 기준)**:
