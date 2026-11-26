@@ -44,18 +44,26 @@
             },
         },
         attack: {
+            // v0.55.52: 캐릭터 정면(화면 오른쪽)으로 내려베기. 팔을 뒤로 들어 칼을 등 뒤 위로 젖혔다가, 손목(hand_near)을 크게 돌려
+            // 칼끝이 머리 위를 지나 앞쪽 아래로 떨어지게 한다. 회전 부호: 양수 = 시계 방향(팔은 뒤 = 화면 왼쪽), 음수 = 반시계(앞).
+            // 칼날 각도 = 정지 각도 + 어깨 + 팔꿈치 + 손목. 손목 뼈가 없는 옛 리그에서는 손목 키가 무시된다.
             label: '공격', cycle: 1 / 1.3,
+            keys: [
+                [0.00, { rootY: 0, b03: 0, b02: 0, b01: 0, b04: 0, b05: 0, hand_near: 0, b06: 0, b07: -20, b08: 0, b09: 0 }],
+                [0.40, { rootY: -2, b03: -3, b02: -8, b01: 4, b04: 100, b05: -60, hand_near: -122, b06: 10, b07: -20, b08: 4, b09: -4 }],   // 들어 올리기: 칼끝이 뒤 위
+                [0.55, { rootY: 6, b03: 4, b02: 10, b01: -5, b04: -40, b05: 0, hand_near: 103, b06: -14, b07: -25, b08: -12, b09: 10 }],    // 내려치기: 칼끝이 앞쪽 아래
+                [0.65, { rootY: 6, b03: 4, b02: 10, b01: -5, b04: -40, b05: 0, hand_near: 103, b06: -14, b07: -25, b08: -12, b09: 10 }],    // 멈춤
+                [1.00, { rootY: 0, b03: 0, b02: 0, b01: 0, b04: 0, b05: 0, hand_near: 0, b06: 0, b07: -20, b08: 0, b09: 0 }],
+            ],
             pose(t) {
-                const cyc = (t * 1.3) % 1.0;
-                let sw;
-                if (cyc < 0.35) sw = -(cyc / 0.35);
-                else if (cyc < 0.58) sw = -1 + ((cyc - 0.35) / 0.23) * 2.2;
-                else sw = 1.2 * (1 - (cyc - 0.58) / 0.42);
-                return {
-                    rootY: sw > 0 ? sw * 6 : 0,
-                    rot: { b03: sw * 5, b02: sw * 12, b01: -sw * 6, b04: sw < 0 ? sw * 35 : sw * 30, b05: sw < 0 ? sw * 30 : -10 + sw * 18, b06: -sw * 18, b07: -20, b08: -sw * 10, b09: sw * 12 },
-                    sy: {}, face: (cyc >= 0.30 && cyc <= 0.65) ? 'attack' : 'neutral',
-                };
+                const cyc = (t * 1.3) % 1.0, K = this.keys;
+                let i = 0; while (i < K.length - 2 && cyc >= K[i + 1][0]) i++;
+                const [t0, a] = K[i], [t1, b] = K[i + 1];
+                let u = Math.min(1, Math.max(0, (cyc - t0) / (t1 - t0)));
+                u = i === 1 ? 1 - (1 - u) * (1 - u) : u * u * (3 - 2 * u); // 내려치기는 빠르게 시작, 나머지는 부드럽게
+                const v = k => a[k] + (b[k] - a[k]) * u, rot = {};
+                for (const k of ['b03', 'b02', 'b01', 'b04', 'b05', 'hand_near', 'b06', 'b07', 'b08', 'b09']) rot[k] = v(k);
+                return { rootY: v('rootY'), rot, sy: {}, face: (cyc >= 0.30 && cyc <= 0.75) ? 'attack' : 'neutral' };
             },
         },
         hit: {
@@ -99,7 +107,8 @@
         let layers, body = null;
         if (rig.format === 'td-rig-char/2') {
             const skel = await (await fetch(new URL(rig.skeleton, rigUrl).href)).json();
-            skel.bones.forEach(b => { bones[b.id] = b; });
+            // 캐릭터별 관절 축 보정(v0.55.53): 그림의 관절(아래 파츠의 둥근 끝 중심)이 종족 표준 위치와 다를 때 rig.pivots가 덮어쓴다
+            skel.bones.forEach(b => { bones[b.id] = rig.pivots && rig.pivots[b.id] ? { ...b, pivot: rig.pivots[b.id] } : b; });
             layers = rig.layers.map(l => ({ ...l, atlas: base(rigUrl) + rig.atlas.webp, atlasW: rig.atlas.w, atlasH: rig.atlas.h }));
             body = { skeleton: skel };
         } else {
@@ -155,18 +164,19 @@
     function build(model, container) {
         container.style.position = 'relative';
         const els = {};
-        for (const l of model.layers) {
+        // z-index는 정수만 받는다(13.5 같은 소수는 무시되어 그 레이어가 맨 아래로 깔린다). 정렬된 순번을 쓴다(v0.55.49)
+        model.layers.forEach((l, rank) => {
             const d = document.createElement('div');
             d.className = 'rig-layer';
             d.dataset.id = l.id;
             Object.assign(d.style, {
                 position: 'absolute', left: '0', top: '0', width: l.w + 'px', height: l.h + 'px',
                 backgroundImage: `url("${l.atlas}")`, backgroundPosition: `-${l.ax}px -${l.ay}px`,
-                backgroundSize: `${l.atlasW}px ${l.atlasH}px`, transformOrigin: '0 0', zIndex: String(l.z), willChange: 'transform',
+                backgroundSize: `${l.atlasW}px ${l.atlasH}px`, transformOrigin: '0 0', zIndex: String(rank + 1), willChange: 'transform',
             });
             container.appendChild(d);
             els[l.id] = d;
-        }
+        });
         return els;
     }
 

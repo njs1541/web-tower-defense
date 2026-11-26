@@ -28,7 +28,7 @@ const CHAR_IDLE = ['c00_complete', 'c01_hair_back', 'c02_hair_front', 'c03_face_
 const B00 = { top: [170, 190], foot: [870, 890], head: [260, 300], height: [680, 720] };
 const ALIGN_TOL = 5;
 // 사양 v2 파츠 시트(5절): 시트 이름 → 기대 파츠 수 [최소, 최대]
-const SHEETS_FULL = { sheet1_head: [6, 6], sheet2_body: [2, 3], sheet3_arms: [4, 4], sheet4_legs_weapons: [3, 4] };
+const SHEETS_FULL = { sheet1_head: [6, 6], sheet2_body: [2, 3], sheet3_arms: [4, 4], sheet4_legs_weapons: [3, 5] }; // 시트 4: 가까운 손(선택, v0.55.54) 포함 최대 5
 const SHEETS_IDLE = { sheet1_head: [5, 5], sheet2_body_arms: [4, 5], sheet3_weapons: [1, 2] }; // 5.2절 (R03 A-32, 뒷자락 선택 A-27 G2)
 const SHEETS = typeArg === 'idle' ? SHEETS_IDLE : SHEETS_FULL;
 const PART_MIN_AREA = 150; // 이보다 작은 덩어리는 부스러기로 본다
@@ -60,7 +60,7 @@ let expected;
 if (V1) expected = IS_BODY ? BODY_FILES : (typeArg === 'idle' ? CHAR_IDLE : CHAR_FULL);
 else if (IS_BODY) expected = ['b00_master'];
 else {
-    const sheets = fs.readdirSync(dir).filter(x => /^sheet\d+_.*\.png$/i.test(x)).map(x => x.replace(/\.png$/i, '')).sort();
+    const sheets = fs.readdirSync(dir).filter(x => /^sheet\d+_.*\.png$/i.test(x) && !/_(v\d+|old)\.png$/i.test(x)).map(x => x.replace(/\.png$/i, '')).sort();
     expected = ['c00_complete', ...new Set([...Object.keys(SHEETS), ...sheets])];
     for (const x of sheets) if (!SHEETS[x]) add(x, '시트 이름', false, `사양 5절(${typeArg === 'idle' ? '대기형' : '전체형'})에 없는 시트 이름. 기대: ${Object.keys(SHEETS).join(', ')}`);
 }

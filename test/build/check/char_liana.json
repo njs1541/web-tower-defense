@@ -1,5 +1,5 @@
 {
- "checkedAt": "2026-11-24T08:13:05.756Z",
+ "checkedAt": "2026-11-26T07:02:43.728Z",
  "kind": "char",
  "type": "full",
  "results": [
@@ -211,7 +211,7 @@
    "file": "sheet4_legs_weapons",
    "item": "파츠 개수",
    "level": "통과",
-   "detail": "4개 (기대 3-4). "
+   "detail": "5개 (기대 3-5). "
   },
   {
    "file": "sheet4_legs_weapons",
@@ -223,7 +223,7 @@
    "file": "sheet4_legs_weapons",
    "item": "파츠 사이 간격",
    "level": "통과",
-   "detail": "가장 가까운 두 파츠 200px 이상 (최소 40px)"
+   "detail": "가장 가까운 두 파츠 162px (최소 40px)"
   },
   {
    "file": "(전체)",

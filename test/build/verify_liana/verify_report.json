@@ -1,11 +1,11 @@
 {
- "generatedAt": "2026-11-24T08:18:11.028Z",
+ "generatedAt": "2026-11-26T07:17:25.308Z",
  "restVsC00": {
   "tolerancePx": 5,
-  "pixelsA": 214234,
+  "pixelsA": 205211,
   "pixelsB": 213575,
-  "aOutsideBpct": 1.19,
-  "bOutsideApct": 0.81,
+  "aOutsideBpct": 1.37,
+  "bOutsideApct": 4.94,
   "note": "A = DOM 조립(정지 자세), B = c00 완성본"
  },
  "jointGap": {
@@ -34,7 +34,7 @@
     "keys": 6,
     "frames": 7,
     "maxPx": 0.76,
-    "meanPx": 0.099,
+    "meanPx": 0.078,
     "worst": {
      "bone": "head",
      "timeMs": 1267
@@ -45,50 +45,50 @@
    "adaptive": {
     "keys": 29,
     "frames": 47,
-    "maxPx": 0.06,
-    "meanPx": 0.008,
+    "maxPx": 0.05,
+    "meanPx": 0.007,
     "worst": {
-     "bone": "arm_far_lower",
-     "timeMs": 940
+     "bone": "head",
+     "timeMs": 252
     }
    },
    "dense": {
     "keys": 29,
     "frames": 30,
-    "maxPx": 0.24,
-    "meanPx": 0.022,
+    "maxPx": 0.16,
+    "meanPx": 0.018,
     "worst": {
      "bone": "arm_far_lower",
-     "timeMs": 949
+     "timeMs": 18
     }
    },
    "sparse": {
     "keys": 6,
     "frames": 7,
-    "maxPx": 3.62,
-    "meanPx": 0.449,
+    "maxPx": 2.21,
+    "meanPx": 0.366,
     "worst": {
      "bone": "arm_far_lower",
-     "timeMs": 884
+     "timeMs": 83
     }
    }
   },
   "attack": {
    "adaptive": {
     "keys": 23,
-    "frames": 57,
-    "maxPx": 0.15,
-    "meanPx": 0.008,
+    "frames": 81,
+    "maxPx": 0.89,
+    "meanPx": 0.01,
     "worst": {
      "bone": "arm_near_lower",
-     "timeMs": 296
+     "timeMs": 313
     }
    },
    "dense": {
     "keys": 23,
     "frames": 24,
-    "maxPx": 2.21,
-    "meanPx": 0.073,
+    "maxPx": 8.14,
+    "meanPx": 0.136,
     "worst": {
      "bone": "arm_near_lower",
      "timeMs": 319
@@ -97,8 +97,8 @@
    "sparse": {
     "keys": 6,
     "frames": 7,
-    "maxPx": 18.48,
-    "meanPx": 0.811,
+    "maxPx": 31.41,
+    "meanPx": 1.184,
     "worst": {
      "bone": "arm_near_lower",
      "timeMs": 319
@@ -109,8 +109,8 @@
    "adaptive": {
     "keys": 17,
     "frames": 27,
-    "maxPx": 0.07,
-    "meanPx": 0.013,
+    "maxPx": 0.05,
+    "meanPx": 0.011,
     "worst": {
      "bone": "arm_near_lower",
      "timeMs": 115
@@ -119,8 +119,8 @@
    "dense": {
     "keys": 17,
     "frames": 18,
-    "maxPx": 1.14,
-    "meanPx": 0.048,
+    "maxPx": 0.79,
+    "meanPx": 0.04,
     "worst": {
      "bone": "arm_near_lower",
      "timeMs": 82
@@ -129,8 +129,8 @@
    "sparse": {
     "keys": 6,
     "frames": 7,
-    "maxPx": 8.22,
-    "meanPx": 0.347,
+    "maxPx": 5.25,
+    "meanPx": 0.291,
     "worst": {
      "bone": "arm_near_lower",
      "timeMs": 47

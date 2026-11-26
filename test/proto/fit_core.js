@@ -28,10 +28,11 @@
         face_blink:     { label: '표정: 눈 감음', sheet: 1, bone: 'head', prior: 'face', win: 90, z: 11, face: 'blink' },
         face_attack:    { label: '표정: 공격', sheet: 1, bone: 'head', prior: 'face', win: 90, z: 11, face: 'attack' },
         hair_front:     { label: '앞·옆머리', sheet: 1, bone: 'head', prior: 'head', win: 90, z: 12 },
-        weapon_main:    { label: '주무기', sheet: 4, bone: 'arm_near_lower', prior: 'hand_near', win: 260, z: 13 },
+        weapon_main:    { label: '주무기', sheet: 4, bone: 'hand_near', // 손목 뼈(v0.55.52). 칼이 손목에서 따로 돈다
+                          prior: 'hand_near', win: 260, z: 13 },
         arm_near_upper: { label: '가까운 위팔', sheet: 3, bone: 'arm_near_upper', prior: 'arm_near_upper', win: 110, z: 14 },
         arm_near_lower: { label: '가까운 아래팔', sheet: 3, bone: 'arm_near_lower', prior: 'arm_near_lower', win: 120, z: 13.5 }, // 주무기 위, 위팔 아래(v0.55.46)
-        hand_cap:       { label: '손가락 덮개(선택)', sheet: 4, bone: 'arm_near_lower', prior: 'hand_near', win: 120, z: 16 },
+        hand_cap:       { label: '가까운 손(선택)', sheet: 4, bone: 'hand_near', prior: 'hand_near', win: 120, z: 13.7 }, // v0.55.54: 무기를 쥔 손 전체. 아래팔 위, 위팔 아래
         // 대기형(5.2)
         lower:          { label: '하체(대기형)', sheet: 2, bone: 'pelvis', prior: 'lower', win: 140, z: 7 },
         arm_near:       { label: '가까운 팔(대기형)', sheet: 2, bone: 'arm_near_upper', prior: 'arm_near_whole', win: 140, z: 14 },
@@ -51,7 +52,7 @@
             1: { order: ['head_base', 'hair_front', 'hair_back', 'face_neutral', 'face_blink', 'face_attack'], optional: [] },
             2: { order: ['torso', 'pelvis', 'skirt_back'], optional: ['skirt_back'] },
             3: { order: ['arm_near_upper', 'arm_near_lower', 'arm_far_upper', 'arm_far_lower'], optional: [] },
-            4: { order: ['leg_near', 'leg_far', 'weapon_main', 'weapon_sub'], optional: ['weapon_sub'] },
+            4: { order: ['leg_near', 'leg_far', 'weapon_main', 'weapon_sub', 'hand_cap'], optional: ['weapon_sub', 'hand_cap'] },
         },
         idle: {
             1: { order: ['head_base', 'hair_front', 'hair_back', 'face_neutral', 'face_blink'], optional: [] },
@@ -80,12 +81,10 @@
     function slotsByOrder(type, sheetNo, boxes) {
         const rule = (SHEET_ORDER[type] || {})[sheetNo];
         if (!rule) return null;
-        let order = rule.order;
-        if (boxes.length !== order.length) {
-            const reduced = order.filter(s => !rule.optional.includes(s));
-            if (boxes.length !== reduced.length) return null;
-            order = reduced;
-        }
+        // 개수가 모자라면 뒤쪽 선택 슬롯부터 하나씩 뺀다(v0.55.54: 시트 4는 보조무기, 가까운 손 두 개가 선택)
+        let order = rule.order.slice();
+        for (let i = order.length - 1; i >= 0 && order.length > boxes.length; i--) if (rule.optional.includes(order[i])) order.splice(i, 1);
+        if (order.length !== boxes.length) return null;
         const res = new Array(boxes.length);
         readingOrder(boxes).forEach((bi, k) => { res[bi] = order[k]; });
         return res;

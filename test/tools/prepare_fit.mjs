@@ -40,7 +40,7 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'src'), { recursive: true });
 
 // 1) 시트 분리
-const sheets = fs.readdirSync(dir).filter(f => /^sheet(\d+)_.*\.png$/i.test(f)).sort();
+const sheets = fs.readdirSync(dir).filter(f => /^sheet(\d+)_.*\.png$/i.test(f) && !/_(v\d+|old)\.png$/i.test(f)).sort();
 const parts = [];
 for (const sf of sheets) {
     const sheetNo = +sf.match(/^sheet(\d+)_/i)[1];

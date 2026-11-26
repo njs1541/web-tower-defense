@@ -80,6 +80,7 @@ const faces = {};
 for (const l of layers) if (l.kind === 'face') faces[Fit.SLOTS[l.id].face] = l.id;
 const rig = {
     format: 'td-rig-char/2', id: name, type: fit.type || 'full', skeleton: skelRel, canvas: 1024,
+    ...(fit.pivots ? { pivots: fit.pivots } : {}), // 캐릭터별 관절 축 보정(v0.55.53)
     note: '파츠는 정지 자세 좌표로 미리 구웠다(R02 A-24 ①). x, y는 1024 캔버스 기준(음수 가능).',
     atlas: { png: 'atlas.png', webp: 'atlas.webp', w: AW, h: AH }, faces,
     layers: layers.sort((a, b) => a.z - b.z).map(({ crop, from, ...l }) => l),

@@ -5,7 +5,7 @@
  "source": "test/incoming/char_liana",
  "c00": "test/incoming/char_liana/c00_complete.png",
  "skeleton": "test/rig/skeleton_human.json",
- "generatedAt": "2026-11-24T08:13:14.206Z",
+ "generatedAt": "2026-11-26T01:21:07.080Z",
  "parts": [
   {
    "id": "s1_1",
@@ -21,7 +21,7 @@
    "h": 318,
    "slot": "head_base",
    "bone": "head",
-   "z": 10,
+   "z": 8.5,
    "tx": 524,
    "ty": 391,
    "rot": 3.5,
@@ -158,20 +158,20 @@
    "sheet": "sheet2_body.png",
    "sheetBox": [
     186,
-    143,
+    145,
     188,
-    234
+    203
    ],
    "w": 188,
-   "h": 234,
+   "h": 203,
    "slot": "torso",
    "bone": "torso",
    "z": 9,
    "tx": 515.5,
-   "ty": 577,
+   "ty": 565,
    "rot": 0,
-   "scale": 0.87,
-   "score": 0.595,
+   "scale": 0.865,
+   "score": 0.666,
    "flags": []
   },
   {
@@ -228,18 +228,18 @@
     211,
     143,
     137,
-    232
+    181
    ],
    "w": 137,
-   "h": 232,
+   "h": 181,
    "slot": "arm_near_upper",
    "bone": "arm_near_upper",
    "z": 14,
-   "tx": 436.5,
-   "ty": 583.5,
-   "rot": 1,
+   "tx": 434.5,
+   "ty": 570.5,
+   "rot": 0,
    "scale": 0.725,
-   "score": 0.527,
+   "score": 0.435,
    "flags": []
   },
   {
@@ -256,7 +256,7 @@
    "h": 174,
    "slot": "arm_near_lower",
    "bone": "arm_near_lower",
-   "z": 15,
+   "z": 13.5,
    "tx": 411.3,
    "ty": 636.8,
    "rot": -14.5,
@@ -271,21 +271,21 @@
    "src": "test/build/fit/liana/src/s3_3.png",
    "sheet": "sheet3_arms.png",
    "sheetBox": [
-    213,
-    625,
-    135,
-    226
+    191,
+    627,
+    166,
+    177
    ],
-   "w": 135,
-   "h": 226,
+   "w": 166,
+   "h": 177,
    "slot": "arm_far_upper",
    "bone": "arm_far_upper",
    "z": 2,
-   "tx": 468,
-   "ty": 607.5,
-   "rot": -11.5,
-   "scale": 0.845,
-   "score": 0.203,
+   "tx": 476,
+   "ty": 595.5,
+   "rot": -2.5,
+   "scale": 0.895,
+   "score": 0.208,
    "flags": [
     "일치 낮음(가려진 파츠이거나 잘못 배정)"
    ]
@@ -304,7 +304,7 @@
    "h": 96,
    "slot": "arm_far_lower",
    "bone": "arm_far_lower",
-   "z": 3,
+   "z": 1.5,
    "tx": 613.8,
    "ty": 472.6,
    "rot": 22.5,

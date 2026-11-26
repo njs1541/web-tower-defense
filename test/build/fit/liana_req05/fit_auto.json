@@ -1,0 +1,428 @@
+{
+ "format": "td-fit/1",
+ "name": "liana_req05",
+ "type": "full",
+ "source": "test/incoming/char_liana",
+ "c00": "test/incoming/char_liana/c00_complete.png",
+ "skeleton": "test/rig/skeleton_human.json",
+ "generatedAt": "2026-11-26T07:03:13.502Z",
+ "parts": [
+  {
+   "id": "s1_1",
+   "src": "test/build/fit/liana_req05/src/s1_1.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    48,
+    84,
+    239,
+    318
+   ],
+   "w": 239,
+   "h": 318,
+   "slot": "head_base",
+   "bone": "head",
+   "z": 8.5,
+   "tx": 524,
+   "ty": 391,
+   "rot": 3.5,
+   "scale": 0.98,
+   "score": 0.35,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s1_2",
+   "src": "test/build/fit/liana_req05/src/s1_2.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    365,
+    106,
+    295,
+    278
+   ],
+   "w": 295,
+   "h": 278,
+   "slot": "hair_front",
+   "bone": "head",
+   "z": 12,
+   "tx": 509,
+   "ty": 340,
+   "rot": 0,
+   "scale": 1.16,
+   "score": 0.863,
+   "flags": []
+  },
+  {
+   "id": "s1_3",
+   "src": "test/build/fit/liana_req05/src/s1_3.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    711,
+    108,
+    277,
+    273
+   ],
+   "w": 277,
+   "h": 273,
+   "slot": "hair_back",
+   "bone": "head",
+   "z": 1,
+   "tx": 511,
+   "ty": 258,
+   "rot": -24.5,
+   "scale": 0.725,
+   "score": 0.554,
+   "flags": []
+  },
+  {
+   "id": "s1_4",
+   "src": "test/build/fit/liana_req05/src/s1_4.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    61,
+    624,
+    233,
+    262
+   ],
+   "w": 233,
+   "h": 262,
+   "slot": "face_neutral",
+   "bone": "head",
+   "z": 11,
+   "face": "neutral",
+   "tx": 520.1,
+   "ty": 352,
+   "rot": 0,
+   "scale": 1.055,
+   "score": 0.436,
+   "flags": [
+    "표정 종류 확인"
+   ]
+  },
+  {
+   "id": "s1_5",
+   "src": "test/build/fit/liana_req05/src/s1_5.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    398,
+    624,
+    233,
+    262
+   ],
+   "w": 233,
+   "h": 262,
+   "slot": "face_blink",
+   "bone": "head",
+   "z": 11,
+   "face": "blink",
+   "tx": 519.1,
+   "ty": 352,
+   "rot": -0.5,
+   "scale": 1.055,
+   "score": 0.806,
+   "flags": [
+    "기본 표정 패치에 맞춤",
+    "표정 종류 확인"
+   ]
+  },
+  {
+   "id": "s1_6",
+   "src": "test/build/fit/liana_req05/src/s1_6.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    736,
+    624,
+    233,
+    262
+   ],
+   "w": 233,
+   "h": 262,
+   "slot": "face_attack",
+   "bone": "head",
+   "z": 11,
+   "face": "attack",
+   "tx": 520.1,
+   "ty": 352,
+   "rot": -0.5,
+   "scale": 1.055,
+   "score": 0.776,
+   "flags": [
+    "기본 표정 패치에 맞춤",
+    "표정 종류 확인"
+   ]
+  },
+  {
+   "id": "s2_1",
+   "src": "test/build/fit/liana_req05/src/s2_1.png",
+   "sheet": "sheet2_body.png",
+   "sheetBox": [
+    186,
+    145,
+    188,
+    203
+   ],
+   "w": 188,
+   "h": 203,
+   "slot": "torso",
+   "bone": "torso",
+   "z": 9,
+   "tx": 515.5,
+   "ty": 565,
+   "rot": 0,
+   "scale": 0.865,
+   "score": 0.666,
+   "flags": []
+  },
+  {
+   "id": "s2_2",
+   "src": "test/build/fit/liana_req05/src/s2_2.png",
+   "sheet": "sheet2_body.png",
+   "sheetBox": [
+    631,
+    169,
+    218,
+    182
+   ],
+   "w": 218,
+   "h": 182,
+   "slot": "pelvis",
+   "bone": "pelvis",
+   "z": 8,
+   "tx": 521,
+   "ty": 677,
+   "rot": 0,
+   "scale": 0.875,
+   "score": 0.678,
+   "flags": []
+  },
+  {
+   "id": "s2_3",
+   "src": "test/build/fit/liana_req05/src/s2_3.png",
+   "sheet": "sheet2_body.png",
+   "sheetBox": [
+    404,
+    615,
+    216,
+    209
+   ],
+   "w": 216,
+   "h": 209,
+   "slot": "skirt_back",
+   "bone": "pelvis",
+   "z": 5,
+   "tx": 425,
+   "ty": 633.8,
+   "rot": -9,
+   "scale": 0.74,
+   "score": 0.181,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s3_1",
+   "src": "test/build/fit/liana_req05/src/s3_1.png",
+   "sheet": "sheet3_arms.png",
+   "sheetBox": [
+    211,
+    143,
+    137,
+    181
+   ],
+   "w": 137,
+   "h": 181,
+   "slot": "arm_near_upper",
+   "bone": "arm_near_upper",
+   "z": 14,
+   "tx": 434.5,
+   "ty": 570.5,
+   "rot": 0,
+   "scale": 0.725,
+   "score": 0.435,
+   "flags": []
+  },
+  {
+   "id": "s3_2",
+   "src": "test/build/fit/liana_req05/src/s3_2.png",
+   "sheet": "sheet3_arms.png",
+   "sheetBox": [
+    707,
+    173,
+    100,
+    129
+   ],
+   "w": 100,
+   "h": 129,
+   "slot": "arm_near_lower",
+   "bone": "arm_near_lower",
+   "z": 13.5,
+   "tx": 525.3,
+   "ty": 474.8,
+   "rot": -24.5,
+   "scale": 1.025,
+   "score": 0.429,
+   "flags": []
+  },
+  {
+   "id": "s3_3",
+   "src": "test/build/fit/liana_req05/src/s3_3.png",
+   "sheet": "sheet3_arms.png",
+   "sheetBox": [
+    191,
+    627,
+    166,
+    177
+   ],
+   "w": 166,
+   "h": 177,
+   "slot": "arm_far_upper",
+   "bone": "arm_far_upper",
+   "z": 2,
+   "tx": 476,
+   "ty": 595.5,
+   "rot": -2.5,
+   "scale": 0.895,
+   "score": 0.208,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s3_4",
+   "src": "test/build/fit/liana_req05/src/s3_4.png",
+   "sheet": "sheet3_arms.png",
+   "sheetBox": [
+    658,
+    692,
+    165,
+    96
+   ],
+   "w": 165,
+   "h": 96,
+   "slot": "arm_far_lower",
+   "bone": "arm_far_lower",
+   "z": 1.5,
+   "tx": 613.8,
+   "ty": 472.6,
+   "rot": 22.5,
+   "scale": 1.275,
+   "score": 0.267,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s4_1",
+   "src": "test/build/fit/liana_req05/src/s4_1.png",
+   "sheet": "sheet4_legs_weapons.png",
+   "sheetBox": [
+    229,
+    139,
+    102,
+    225
+   ],
+   "w": 102,
+   "h": 225,
+   "slot": "leg_near",
+   "bone": "leg_near",
+   "z": 7,
+   "tx": 472,
+   "ty": 769,
+   "rot": 0,
+   "scale": 1,
+   "score": 0.561,
+   "flags": []
+  },
+  {
+   "id": "s4_2",
+   "src": "test/build/fit/liana_req05/src/s4_2.png",
+   "sheet": "sheet4_legs_weapons.png",
+   "sheetBox": [
+    693,
+    142,
+    95,
+    210
+   ],
+   "w": 95,
+   "h": 210,
+   "slot": "leg_far",
+   "bone": "leg_far",
+   "z": 6,
+   "tx": 574,
+   "ty": 767,
+   "rot": 0,
+   "scale": 0.995,
+   "score": 0.535,
+   "flags": []
+  },
+  {
+   "id": "s4_3",
+   "src": "test/build/fit/liana_req05/src/s4_3.png",
+   "sheet": "sheet4_legs_weapons.png",
+   "sheetBox": [
+    631,
+    591,
+    218,
+    288
+   ],
+   "w": 218,
+   "h": 288,
+   "slot": "weapon_sub",
+   "bone": "arm_far_lower",
+   "z": 4,
+   "tx": 730.4,
+   "ty": 616.7,
+   "rot": 0,
+   "scale": 0.99,
+   "score": 0.38,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s4_4",
+   "src": "test/build/fit/liana_req05/src/s4_4.png",
+   "sheet": "sheet4_legs_weapons.png",
+   "sheetBox": [
+    146,
+    598,
+    268,
+    274
+   ],
+   "w": 268,
+   "h": 274,
+   "slot": "weapon_main",
+   "bone": "hand_near",
+   "z": 13,
+   "tx": 320.5,
+   "ty": 755.5,
+   "rot": 7.5,
+   "scale": 0.925,
+   "score": 0.59,
+   "flags": []
+  },
+  {
+   "id": "s4_5",
+   "src": "test/build/fit/liana_req05/src/s4_5.png",
+   "sheet": "sheet4_legs_weapons.png",
+   "sheetBox": [
+    492,
+    910,
+    60,
+    70
+   ],
+   "w": 60,
+   "h": 70,
+   "slot": "hand_cap",
+   "bone": "hand_near",
+   "z": 13.7,
+   "tx": 417.5,
+   "ty": 639.5,
+   "rot": 5,
+   "scale": 0.825,
+   "score": 0.448,
+   "flags": []
+  }
+ ]
+}
