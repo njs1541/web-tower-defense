@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T05:41:52.644Z",
+ "seconds": 3.8,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 2132796358,
+ "prompt": "isolated single 2D game sprite part, small centered chibi back hair layer with wide green margin, long wavy pastel sky blue anime hair flaring outward to bottom left and bottom right, smooth round top silhouette behind head, clean dark outline, cel shading, solid bright green background, chroma key green background, simple background, no face, no head, no hat, no shadow",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, pixel art, pixelated, black hole, face, eyes, mouth, nose, ears, head, hat, beret, body, neck, clothes, octopus, ghost, gradient background, drop shadow, multiple views, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

@@ -1,0 +1,6 @@
+# NovelAI 네거티브 틀 (nai_generate.mjs --negative-file test/nai/negative.txt)
+# 프로젝트 규칙의 필수 네거티브(CLAUDE.md "이미지 프롬프트 필수 항목")다. 지우지 않고 필요한 항목만 아래에 추가한다.
+cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot
+extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs
+poorly drawn hands, extra fingers, deformed fingers
+child, kid, underage, loli, male, boy, man

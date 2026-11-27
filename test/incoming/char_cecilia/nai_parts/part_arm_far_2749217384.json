@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T05:40:52.545Z",
+ "seconds": 3.1,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 2749217384,
+ "prompt": "isolated single 2D game sprite part, single detached anime arm and gloved hand only, left arm hanging naturally down-right, pastel sky blue sleeve with wide white cuff trimmed with gold line and button, relaxed open brown leather gloved hand with gentle fingers, empty hand, adult female chibi character limb, anime illustration, bold crisp dark outline, clean cel shading, solid bright green background, chroma key green background, simple background, centered with generous green margin, no shadow",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, wand, staff, weapon, head, torso, body, capelet, legs, bag, satchel, gradient background, drop shadow, multiple views, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

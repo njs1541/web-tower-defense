@@ -16,6 +16,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { ROOT, decodePNG, ensureServer, launchEdge, saveDataUrl } from './lib.mjs';
 import { encodePNG } from '../../scratch/pixelfx/tools/lib/png.mjs';
+import { checkSeams } from './seam_check.mjs';
 
 const require = createRequire(import.meta.url);
 const Fit = require('../proto/fit_core.js');
@@ -48,6 +49,29 @@ for (const p of fit.parts) {
     const S = Fit.SLOTS[p.slot] || {};
     layers.push({ id: p.slot, kind: S.face ? 'face' : 'part', bone: p.bone || S.bone, z: p.z ?? S.z, x: x0 - PAD, y: y0 - PAD, w, h, crop, from: p.id });
 }
+
+// 대기형(R04 A-48, v0.55.68): 팔을 한 덩어리(어깨 뼈)로 그리므로 팔꿈치·손목 뼈에는 그림이 없다. 그런 뼈에 붙은 파츠(주무기,
+// 보조무기)가 그대로 있으면 팔꿈치 회전만큼 팔 그림과 어긋난다(대기 모션 최대 20.8px). 그림이 있는 가장 가까운 조상 뼈로 옮긴다.
+// 전체형은 손목 회전(공격)이 의도된 움직임이라 건드리지 않는다.
+if ((fit.type || 'full') === 'idle') {
+    const skel = JSON.parse(fs.readFileSync(path.join(ROOT, fit.skeleton), 'utf8'));
+    const parentOf = Object.fromEntries(skel.bones.map(b => [b.id, b.parent]));
+    // 몸 그림이 있는 뼈: 표정과 들고 있는 물건(무기, 추가 파츠)은 빼고 센다. 무기 자신의 뼈를 세면 옮길 곳이 없다고 잘못 판정한다
+    const carried = id => /^(weapon_|extra_)/.test(id);
+    const drawn = new Set(layers.filter(l => l.kind !== 'face' && !carried(l.id)).map(l => l.bone));
+    for (const l of layers) {
+        if (!carried(l.id)) continue;
+        let b = l.bone;
+        while (b && !drawn.has(b) && parentOf[b]) b = parentOf[b];
+        if (b && b !== l.bone && drawn.has(b)) { warnings.push(`${l.id}: 대기형이라 뼈를 ${l.bone} → ${b}로 옮겼다(그림 없는 관절, A-48)`); l.bone = b; }
+    }
+}
+
+// 이음새 검사(R04 A-38, v0.55.70): 같은 재질 경계의 진한 선, 둥근 끝 중심과 관절 축 거리. 결과는 checks.json
+const skelAll = JSON.parse(fs.readFileSync(path.join(ROOT, fit.skeleton), 'utf8'));
+const pivotOf = b => (fit.pivots && fit.pivots[b]) || (skelAll.bones.find(x => x.id === b) || {}).pivot || [512, 512];
+const seams = checkSeams(layers, pivotOf);
+for (const r of seams) for (const w of r.warnings) warnings.push('[이음새] ' + w);
 
 // 아틀라스(높이순 선반 배치, 간격 2px)
 const MAXW = 2048, GAP = 2;
@@ -86,5 +110,6 @@ const rig = {
     layers: layers.sort((a, b) => a.z - b.z).map(({ crop, from, ...l }) => l),
 };
 fs.writeFileSync(path.join(OUT, 'rig.json'), JSON.stringify(rig, null, 1));
+fs.writeFileSync(path.join(OUT, 'checks.json'), JSON.stringify({ checkedAt: new Date().toISOString(), seams, warnings }, null, 1));
 console.log(`레이어 ${layers.length}개, 아틀라스 ${AW}x${AH} PNG ${(pngBuf.length / 1024).toFixed(0)}KB / WebP ${(webpBytes / 1024).toFixed(0)}KB → ${path.relative(ROOT, OUT)}`);
 for (const w of warnings) console.log('[경고] ' + w);

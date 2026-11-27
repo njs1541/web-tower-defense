@@ -1,0 +1,7 @@
+{
+  "_설명": "NovelAI MCP 서버(독립판 novelai-mcp)가 이 프로젝트 안에 저장할 때 적용하는 규칙. CLAUDE.md '이미지 프롬프트 필수 항목'과 같다.",
+  "defaultNegativeFile": "test/nai/negative.txt",
+  "negativeRequired": ["child", "kid", "underage", "loli", "male", "boy", "man"],
+  "forbiddenPositive": ["child", "children", "kid", "kids", "toddler", "underage", "minor", "little girl", "young girl", "elementary"],
+  "promptRecommended": ["full body", "adult female", "exactly two arms", "exactly two legs"]
+}

@@ -1,0 +1,30 @@
+{
+ "checkedAt": "2026-11-27T08:32:35.641Z",
+ "seams": [
+  {
+   "pair": "head_base~torso",
+   "joint": "head",
+   "upper": "torso",
+   "warnings": [],
+   "seam": {
+    "edgePx": 21,
+    "darkPct": 0,
+    "materialDist": 65.5,
+    "upperColor": [
+     214,
+     223,
+     224
+    ],
+    "lowerColor": [
+     251,
+     230,
+     214
+    ],
+    "bothSkin": false
+   }
+  }
+ ],
+ "warnings": [
+  "weapon_main: 대기형이라 뼈를 hand_near → arm_near_upper로 옮겼다(그림 없는 관절, A-48)"
+ ]
+}

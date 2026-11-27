@@ -1,0 +1,184 @@
+{
+ "checkedAt": "2026-11-26T09:08:23.469Z",
+ "seams": [
+  {
+   "pair": "arm_near_lower~arm_near_upper",
+   "joint": "arm_near_lower",
+   "upper": "arm_near_upper",
+   "warnings": [],
+   "seam": {
+    "edgePx": 13,
+    "darkPct": 100,
+    "materialDist": 82.2,
+    "upperColor": [
+     217,
+     206,
+     183
+    ],
+    "lowerColor": [
+     245,
+     188,
+     155
+    ],
+    "bothSkin": false
+   },
+   "dome": {
+    "points": 55,
+    "center": [
+     423.1,
+     594.8
+    ],
+    "radius": 25.5,
+    "pivot": [
+     425,
+     592
+    ],
+    "distPx": 3.4
+   }
+  },
+  {
+   "pair": "arm_far_lower~arm_far_upper",
+   "joint": "arm_far_lower",
+   "upper": "arm_far_upper",
+   "warnings": [],
+   "seam": {
+    "edgePx": 19,
+    "darkPct": 100,
+    "materialDist": 82.5,
+    "upperColor": [
+     221,
+     208,
+     181
+    ],
+    "lowerColor": [
+     242,
+     180,
+     146
+    ],
+    "bothSkin": false
+   },
+   "dome": {
+    "points": 25,
+    "center": [
+     607.5,
+     620.1
+    ],
+    "radius": 22.2,
+    "pivot": [
+     608,
+     615
+    ],
+    "distPx": 5.1
+   }
+  },
+  {
+   "pair": "hand_cap~arm_near_lower",
+   "joint": "hand_near",
+   "upper": "hand_cap",
+   "warnings": [],
+   "seam": {
+    "edgePx": 0,
+    "darkPct": 0,
+    "materialDist": 18.3,
+    "upperColor": [
+     245,
+     181,
+     142
+    ],
+    "lowerColor": [
+     243,
+     185,
+     152
+    ],
+    "bothSkin": true
+   },
+   "dome": {
+    "points": 12,
+    "note": "가려진 둥근 끝이 거의 없어 재지 않음"
+   }
+  },
+  {
+   "pair": "pelvis~torso",
+   "joint": "torso",
+   "upper": "torso",
+   "warnings": [],
+   "seam": {
+    "edgePx": 51,
+    "darkPct": 100,
+    "materialDist": 56.5,
+    "upperColor": [
+     149,
+     157,
+     166
+    ],
+    "lowerColor": [
+     188,
+     178,
+     171
+    ],
+    "bothSkin": false
+   }
+  },
+  {
+   "pair": "head_base~torso",
+   "joint": "head",
+   "upper": "torso",
+   "warnings": [],
+   "seam": {
+    "edgePx": 25,
+    "darkPct": 100,
+    "materialDist": 75.1,
+    "upperColor": [
+     202,
+     188,
+     170
+    ],
+    "lowerColor": [
+     248,
+     194,
+     161
+    ],
+    "bothSkin": false
+   }
+  },
+  {
+   "pair": "leg_near~pelvis",
+   "joint": "leg_near",
+   "upper": "pelvis",
+   "warnings": [],
+   "seam": {
+    "edgePx": 0,
+    "darkPct": 0,
+    "materialDist": null,
+    "upperColor": [
+     213,
+     200,
+     179
+    ],
+    "lowerColor": null,
+    "bothSkin": false
+   }
+  },
+  {
+   "pair": "leg_far~pelvis",
+   "joint": "leg_far",
+   "upper": "pelvis",
+   "warnings": [],
+   "seam": {
+    "edgePx": 0,
+    "darkPct": 0,
+    "materialDist": null,
+    "upperColor": [
+     224,
+     214,
+     195
+    ],
+    "lowerColor": null,
+    "bothSkin": false
+   }
+  }
+ ],
+ "warnings": [
+  "arm_far_upper: 회전 33.8도(15도 초과). 미리 굽기 재샘플링으로 선이 흐려질 수 있다. 원래 자세에 가깝게 다시 그리기를 권장"
+ ]
+}

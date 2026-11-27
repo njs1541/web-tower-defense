@@ -1,0 +1,374 @@
+{
+ "format": "td-fit/1",
+ "name": "cecilia",
+ "type": "idle",
+ "source": "test/incoming/char_cecilia",
+ "c00": "test/incoming/char_cecilia/c00_complete.png",
+ "skeleton": "test/rig/skeleton_human.json",
+ "generatedAt": "2026-11-27T08:29:31.054Z",
+ "parts": [
+  {
+   "id": "s1_1",
+   "src": "test/build/fit/cecilia/src/s1_1.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    291,
+    61,
+    301,
+    354
+   ],
+   "w": 301,
+   "h": 354,
+   "slot": "hair_front",
+   "bone": "head",
+   "z": 12,
+   "raw": {
+    "sheet": "sheet1_head.png",
+    "box": [
+     291,
+     61,
+     301,
+     354
+    ],
+    "hash": "d8553e3f11cee0742a169a08af50d110fd254dca"
+   },
+   "tx": 533,
+   "ty": 355,
+   "rot": 0,
+   "scale": 1,
+   "score": 1,
+   "flags": []
+  },
+  {
+   "id": "s1_2",
+   "src": "test/build/fit/cecilia/src/s1_2.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    626,
+    101,
+    385,
+    253
+   ],
+   "w": 385,
+   "h": 253,
+   "slot": "hair_back",
+   "bone": "head",
+   "z": 1,
+   "raw": {
+    "sheet": "sheet1_head.png",
+    "box": [
+     626,
+     101,
+     385,
+     253
+    ],
+    "hash": "88ae2c21fdcf330ee78f61f90abd1dfbd96f8792"
+   },
+   "tx": 534,
+   "ty": 443,
+   "rot": 0.5,
+   "scale": 1,
+   "score": 0.387,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s1_3",
+   "src": "test/build/fit/cecilia/src/s1_3.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    46,
+    131,
+    192,
+    235
+   ],
+   "w": 192,
+   "h": 235,
+   "slot": "head_base",
+   "bone": "head",
+   "z": 8.5,
+   "raw": {
+    "sheet": "sheet1_head.png",
+    "box": [
+     46,
+     131,
+     192,
+     235
+    ],
+    "hash": "8daca30a9c900812200befed9956efc690ab0d25"
+   },
+   "tx": 499,
+   "ty": 408,
+   "rot": 1,
+   "scale": 0.875,
+   "score": 0.471,
+   "flags": []
+  },
+  {
+   "id": "s1_4",
+   "src": "test/build/fit/cecilia/src/s1_4.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    231,
+    601,
+    147,
+    125
+   ],
+   "w": 147,
+   "h": 125,
+   "slot": "face_neutral",
+   "bone": "head",
+   "z": 11,
+   "face": "neutral",
+   "raw": {
+    "sheet": "sheet1_head.png",
+    "box": [
+     231,
+     601,
+     147,
+     125
+    ],
+    "hash": "1b54fd9792a849c70fdc2741f2db3548b87ad289"
+   },
+   "tx": 487.1,
+   "ty": 390,
+   "rot": 0,
+   "scale": 1,
+   "score": 0.978,
+   "flags": [
+    "표정 종류 확인"
+   ]
+  },
+  {
+   "id": "s1_5",
+   "src": "test/build/fit/cecilia/src/s1_5.png",
+   "sheet": "sheet1_head.png",
+   "sheetBox": [
+    601,
+    601,
+    147,
+    125
+   ],
+   "w": 147,
+   "h": 125,
+   "slot": "face_blink",
+   "bone": "head",
+   "z": 11,
+   "face": "blink",
+   "raw": {
+    "sheet": "sheet1_head.png",
+    "box": [
+     601,
+     601,
+     147,
+     125
+    ],
+    "hash": "98c998e758d80b1141e7e1981a5bb88dca1025d9"
+   },
+   "tx": 491.1,
+   "ty": 369,
+   "rot": 1,
+   "scale": 0.725,
+   "score": 0.671,
+   "flags": [
+    "기본 표정 패치에 맞춤",
+    "표정 종류 확인"
+   ]
+  },
+  {
+   "id": "s2_1",
+   "src": "test/build/fit/cecilia/src/s2_1.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    361,
+    81,
+    223,
+    301
+   ],
+   "w": 223,
+   "h": 301,
+   "slot": "lower",
+   "bone": "pelvis",
+   "z": 7,
+   "raw": {
+    "sheet": "sheet2_body_arms.png",
+    "box": [
+     361,
+     81,
+     223,
+     301
+    ],
+    "hash": "a6174dd75aa41a0530e93191b67f5e2e90064ab0"
+   },
+   "tx": 494,
+   "ty": 731,
+   "rot": 0,
+   "scale": 1,
+   "score": 0.944,
+   "flags": []
+  },
+  {
+   "id": "s2_2",
+   "src": "test/build/fit/cecilia/src/s2_2.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    56,
+    131,
+    215,
+    199
+   ],
+   "w": 215,
+   "h": 199,
+   "slot": "torso",
+   "bone": "torso",
+   "z": 9,
+   "raw": {
+    "sheet": "sheet2_body_arms.png",
+    "box": [
+     56,
+     131,
+     215,
+     199
+    ],
+    "hash": "4c018982afd10ffd2ae4c63b33b0395582be8b6e"
+   },
+   "tx": 498.5,
+   "ty": 552,
+   "rot": 0,
+   "scale": 1,
+   "score": 0.858,
+   "flags": []
+  },
+  {
+   "id": "s2_3",
+   "src": "test/build/fit/cecilia/src/s2_3.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    701,
+    176,
+    208,
+    106
+   ],
+   "w": 208,
+   "h": 106,
+   "slot": "skirt_back",
+   "bone": "pelvis",
+   "z": 5,
+   "raw": {
+    "sheet": "sheet2_body_arms.png",
+    "box": [
+     701,
+     176,
+     208,
+     106
+    ],
+    "hash": "129de155eb99dc132d88e5f493f337537f6995aa"
+   },
+   "tx": 456,
+   "ty": 585.8,
+   "rot": 0,
+   "scale": 1.115,
+   "score": 0.129,
+   "flags": [
+    "일치 낮음(가려진 파츠이거나 잘못 배정)"
+   ]
+  },
+  {
+   "id": "s2_4",
+   "src": "test/build/fit/cecilia/src/s2_4.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    621,
+    581,
+    95,
+    185
+   ],
+   "w": 95,
+   "h": 185,
+   "slot": "arm_far",
+   "bone": "arm_far_upper",
+   "z": 2,
+   "raw": {
+    "sheet": "sheet2_body_arms.png",
+    "box": [
+     621,
+     581,
+     95,
+     185
+    ],
+    "hash": "ecab14f6812ee17ff129c18ae8f177e23c35fcf3"
+   },
+   "tx": 612,
+   "ty": 585,
+   "rot": -1,
+   "scale": 1.025,
+   "score": 0.639,
+   "flags": []
+  },
+  {
+   "id": "s2_5",
+   "src": "test/build/fit/cecilia/src/s2_5.png",
+   "sheet": "sheet2_body_arms.png",
+   "sheetBox": [
+    241,
+    601,
+    91,
+    172
+   ],
+   "w": 91,
+   "h": 172,
+   "slot": "arm_near",
+   "bone": "arm_near_upper",
+   "z": 14,
+   "raw": {
+    "sheet": "sheet2_body_arms.png",
+    "box": [
+     241,
+     601,
+     91,
+     172
+    ],
+    "hash": "8910b4b8e733880bb3e2058c989010a1b1f45b54"
+   },
+   "tx": 396,
+   "ty": 580,
+   "rot": 0,
+   "scale": 1,
+   "score": 0.565,
+   "flags": []
+  },
+  {
+   "id": "s3_1",
+   "src": "test/build/fit/cecilia/src/s3_1.png",
+   "sheet": "sheet3_weapons.png",
+   "sheetBox": [
+    411,
+    396,
+    202,
+    231
+   ],
+   "w": 202,
+   "h": 231,
+   "slot": "weapon_main",
+   "bone": "hand_near",
+   "z": 13,
+   "raw": {
+    "sheet": "sheet3_weapons.png",
+    "box": [
+     411,
+     396,
+     202,
+     231
+    ],
+    "hash": "d75c2016d406902c86b3ae29b1d731e91ebd6db3"
+   },
+   "tx": 291.5,
+   "ty": 738.5,
+   "rot": 0,
+   "scale": 1,
+   "score": 0.949,
+   "flags": []
+  }
+ ]
+}

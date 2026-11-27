@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T05:39:14.229Z",
+ "seconds": 2.5,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 262490660,
+ "prompt": "isolated single 2D game sprite part, back layer of skirt hem only, empty hollow inner back view of pale sky blue flared winter skirt with gold trim and white ruffle underskirt lining at bottom, no legs, no torso, no head, no person, adult female costume part, three-quarter view facing right, anime illustration, bold crisp dark outline, clean cel shading, solid bright green background, chroma key green background, simple background, centered with generous green margin, no shadow, no sparkles",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, head, face, hair, torso, legs, feet, boots, arms, hands, person, human, gradient background, drop shadow, multiple views, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

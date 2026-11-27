@@ -1,0 +1,18 @@
+{
+ "tool": "nai_generate.mjs",
+ "createdAt": "2026-11-27T04:11:41.101Z",
+ "seconds": 3.4,
+ "model": "nai-diffusion-4-5-full",
+ "width": 1024,
+ "height": 1024,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 591894308,
+ "prompt": "full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing pose, anatomically correct, exactly two arms, exactly two legs, adult female",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

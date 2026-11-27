@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T05:39:03.685Z",
+ "seconds": 4.3,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 434210966,
+ "prompt": "isolated single 2D game sprite part, lower body and legs layer only from waist down, chibi super deformed proportions, pale sky blue flared winter coat skirt with white center placket and gold trim, white ruffle underskirt, white tights, straight separated legs standing with both feet flat on same level, brown leather winter ankle boots with white fur cuff and small snowflake badge, waist-down only without head or torso or arms, adult female character outfit, three-quarter view facing right, anime illustration, bold crisp dark outline, clean cel shading, solid bright green background, chroma key green background, simple background, centered with generous green margin, no shadow, no sparkles",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, head, face, hair, upper body, capelet, arms, hands, bag, satchel, strap, weapon, staff, gradient background, drop shadow, ground shadow, multiple views, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

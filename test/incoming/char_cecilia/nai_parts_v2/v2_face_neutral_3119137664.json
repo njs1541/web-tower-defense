@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T07:31:42.834Z",
+ "seconds": 4.5,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5.5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 3119137664,
+ "prompt": "isolated single 2D game sprite part, round chibi face expression patch only, smooth rounded pale cream peach skin silhouette without ears and without neck and without hair, large expressive sparkling sky blue anime eyes with white highlights, thin curved eyebrows, tiny nose dot, gentle warm smile, soft rosy blush cheeks, three-quarter view facing right, adult female chibi character, modern mobile RPG chibi character art, anime illustration, bold crisp dark outline, clean cel shading, solid bright pure green background (#00FF00), chroma key green background, simple background, small centered sprite with wide empty green space on all four sides, no shadow, no sparkles",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, pixel art, pixelated, sprite, retro, 8-bit, lowres, touching border, cropped edges, gradient background, drop shadow, multiple views, character sheet, grid, text, watermark, hair, bangs, hat, beret, ears, neck, shoulders, clothes, body, closed eyes, rectangle border, square patch",
+ "anlasBefore": 9972,
+ "anlasAfter": 9972
+}

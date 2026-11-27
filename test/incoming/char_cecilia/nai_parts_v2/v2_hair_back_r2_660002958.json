@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T07:36:57.110Z",
+ "seconds": 4.5,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 6,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 660002958,
+ "prompt": "anime hair wig asset on bright green screen, single back hair layer only, long wavy pastel sky blue hair curtain spreading into thick wavy curls at bottom left and bottom right, visible hair strands and clean cel shading highlights, smooth rounded top crown, bold crisp dark outline, adult female anime hair style, solid bright pure green background (#00FF00), simple background, no face, no eyes, centered with wide empty green margin on all four sides",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, eyes, mouth, nose, face features, shoes, boots, skirt, hat, beret, bow, empty green image, blank image, gradient background, drop shadow, text, watermark",
+ "anlasBefore": 9972,
+ "anlasAfter": 9972
+}

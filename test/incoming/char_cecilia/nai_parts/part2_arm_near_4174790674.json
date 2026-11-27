@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T05:42:41.657Z",
+ "seconds": 4.3,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 4174790674,
+ "prompt": "isolated single 2D game sprite part, small slender chibi full arm centered with wide empty green margin on all sides, complete right arm from rounded shoulder end through full pastel sky blue long sleeve, wide white cuff with gold line, small brown leather gloved hand curled gently to hold a thin wand handle, empty hand without wand, diagonal pose down-left, bold crisp dark outline, clean cel shading, solid bright green background, chroma key green background, simple background, no shadow",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, close-up hand, giant hand, severed hand, bare skin arm, foreshortened, wand, staff, weapon, stick, head, torso, capelet, legs, gradient background, drop shadow, multiple views, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

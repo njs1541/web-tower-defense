@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T05:40:00.967Z",
+ "seconds": 3,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 31181037,
+ "prompt": "isolated single 2D game sprite part, front hair and beret hat layer only, fluffy knitted pastel sky blue beret with crisp white snowflake brooch on right side, wavy pastel light blue bangs parted at center and side locks framing an empty green face gap, no eyes, no mouth, no nose, no face skin, hollow green space inside hair, three-quarter view facing right, adult female character wig, anime illustration, bold crisp dark outline, clean cel shading, solid bright green background, chroma key green background, simple background, centered with generous green margin, no shadow, no sparkles",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, eyes, eyebrows, nose, mouth, face, skin, neck, body, clothes, long back hair, gradient background, drop shadow, multiple views, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

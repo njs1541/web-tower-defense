@@ -11,7 +11,9 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { ROOT, decodePNG, isBackground, CHROMA_RULE, components, componentGap } from './lib.mjs';
+import { createRequire } from 'node:module';
+import { ROOT, decodePNG, isBackground, bgTestFor, CHROMA_RULE, components, componentGap } from './lib.mjs';
+const Fit = createRequire(import.meta.url)('../proto/fit_core.js');
 
 const [kind, dirArg, typeArg = 'full'] = process.argv.slice(2);
 if (!['body', 'char', 'body-v1', 'char-v1'].includes(kind) || !dirArg) {
@@ -40,7 +42,8 @@ const add = (file, item, ok, detail, level = ok ? '통과' : '실패') => result
 
 function mask(img) {
     const m = new Uint8Array(img.w * img.h), p = img.rgba;
-    for (let i = 0; i < img.w * img.h; i++) m[i] = isBackground(p[i * 4], p[i * 4 + 1], p[i * 4 + 2], p[i * 4 + 3]) ? 0 : 1;
+    const bg = bgTestFor(img); // 그림의 배경색만 배경으로(v0.55.72, A-46)
+    for (let i = 0; i < img.w * img.h; i++) m[i] = bg(p[i * 4], p[i * 4 + 1], p[i * 4 + 2], p[i * 4 + 3]) ? 0 : 1;
     return m;
 }
 function dilate(m, w, h, r) {
@@ -81,7 +84,7 @@ for (const name of expected) {
     add(name, '색 형식', true, img.hasAlpha ? 'RGBA' : 'RGB(알파 없음)', '정보');
 
     // 배경: 가장자리 4px이 모두 배경이어야 하고, 크로마키 배경색은 고르게 단색이어야 한다
-    const p = img.rgba; let edgeFg = 0, bgN = 0, sum = [0, 0, 0], sq = [0, 0, 0], greenish = 0;
+    const p = img.rgba; let edgeFg = 0, bgN = 0, sum = [0, 0, 0], sq = [0, 0, 0], greenish = 0, pinkish = 0;
     const m = mask(img);
     for (let y = 0; y < img.h; y++) for (let x = 0; x < img.w; x++) {
         const i = y * img.w + x;
@@ -90,6 +93,7 @@ for (const name of expected) {
         if (m[i] && x > 0 && y > 0 && x < img.w - 1 && y < img.h - 1 && (!m[i - 1] || !m[i + 1] || !m[i - img.w] || !m[i + img.w])) {
             const r = p[i * 4], g = p[i * 4 + 1], b = p[i * 4 + 2];
             if (g > r + 25 && g > b + 25) greenish++;
+            if (r > g + 25 && b > g + 25) pinkish++; // 마젠타 배경용(v0.55.72, A-46)
         }
     }
     add(name, '가장자리 비움', edgeFg === 0, edgeFg ? `가장자리 4px에 내용 ${edgeFg}px (잘림 의심)` : '정상');
@@ -98,7 +102,10 @@ for (const name of expected) {
         const mean = sum.map(v => Math.round(v / bgN));
         add(name, '배경 단색', std <= 12, `평균 rgb(${mean.join(',')}), 편차 ${std.toFixed(1)}${std > 12 ? ' (그라데이션이나 그림자 의심)' : ''}`);
     }
-    add(name, '외곽 녹색 번짐', greenish < 300, `외곽 픽셀 중 녹색 기운 ${greenish}개 (빌드 전처리로 보정 가능)`, greenish < 300 ? '통과' : '경고');
+    // 배경이 마젠타면 마젠타 번짐을 센다. 녹색 기운은 그 캐릭터의 녹색 의상이라 번짐이 아니다(v0.55.72, A-46)
+    const isMagentaBg = bgN && sum[0] / bgN > 200 && sum[1] / bgN < 80;
+    const fr = isMagentaBg ? pinkish : greenish, frName = isMagentaBg ? '외곽 마젠타 번짐' : '외곽 녹색 번짐';
+    add(name, frName, fr < 300, `외곽 픽셀 중 ${isMagentaBg ? '마젠타' : '녹색'} 기운 ${fr}개 (빌드 전처리로 보정 가능)`, fr < 300 ? '통과' : '경고');
 }
 
 // b00 수치 (4절)
@@ -157,7 +164,41 @@ if (!V1 && !IS_BODY) {
             if (g < minGap) { minGap = g; pair = [i, j]; }
         }
         if (parts.length > 1) add(name, '파츠 사이 간격', minGap >= PART_GAP, `가장 가까운 두 파츠 ${minGap >= 200 ? '200px 이상' : Math.round(minGap) + 'px'} (최소 ${PART_GAP}px)`);
+        comparePrev(name, img, parts);
     }
+}
+
+/**
+ * 이전 판과 비교(v0.55.70, R04 A-38·A-42): 같은 이름의 백업 시트(<시트>_v<번호>.png) 중 가장 큰 번호와 파츠별로 비교해
+ * "그대로 / 바뀜 / 새 파츠"를 보고한다. 납품 보고의 "그대로 둔 파츠" 주장을 자동으로 대조하는 용도다.
+ * 같은 상자이고 상자 안 픽셀이 모두 같으면(채널 차이 합 6 이하) 그대로로 본다. 이름은 시트 배치 순서 규칙(2.2절)으로 붙인다.
+ */
+function comparePrev(name, img, parts) {
+    const backs = fs.readdirSync(dir).map(x => x.match(new RegExp('^' + name + '_v(\\d+)\\.png$', 'i'))).filter(Boolean).sort((a, b) => b[1] - a[1]);
+    if (!backs.length) return;
+    const prev = decodePNG(path.join(dir, backs[0][0]));
+    if (prev.w !== img.w || prev.h !== img.h) { add(name, '이전 판과 비교', true, `${backs[0][0]}과 크기가 달라 비교하지 않음`, '경고'); return; }
+    const pp = components(mask(prev), prev.w, prev.h).comps.filter(c => c.area >= PART_MIN_AREA);
+    const box = c => ({ x: c.x0, y: c.y0, w: c.x1 - c.x0 + 1, h: c.y1 - c.y0 + 1 });
+    const sheetNo = +name.match(/^sheet(\d+)_/)[1];
+    const names = Fit.slotsByOrder(typeArg === 'idle' ? 'idle' : 'full', sheetNo, parts.map(box));
+    const order = Fit.readingOrder(parts.map(box)), rank = {}; order.forEach((pi, k) => { rank[pi] = k + 1; });
+    const px = (im, i) => [im.rgba[i * 4], im.rgba[i * 4 + 1], im.rgba[i * 4 + 2]];
+    const same = [], changed = [], added = [];
+    parts.forEach((c, i) => {
+        const label = `${rank[i]}번${names ? '(' + (Fit.SLOTS[names[i]] || {}).label + ')' : ''}`;
+        const q = pp.find(p => p.x0 === c.x0 && p.y0 === c.y0 && p.x1 === c.x1 && p.y1 === c.y1);
+        if (!q) { (pp.some(p => p.x0 < c.x1 && c.x0 < p.x1 && p.y0 < c.y1 && c.y0 < p.y1) ? changed : added).push(label); return; }
+        let diff = 0;
+        for (let y = c.y0; y <= c.y1 && !diff; y++) for (let x = c.x0; x <= c.x1; x++) {
+            const i = y * img.w + x, a = px(img, i), b = px(prev, i);
+            if (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]) > 6) { diff = 1; break; }
+        }
+        (diff ? changed : same).push(label);
+    });
+    for (const arr of [same, changed, added]) arr.sort((x, y) => parseInt(x) - parseInt(y));
+    const gone = pp.filter(q => !parts.some(c => c.x0 < q.x1 && q.x0 < c.x1 && c.y0 < q.y1 && q.y0 < c.y1)).length;
+    add(name, '이전 판과 비교', true, `${backs[0][0]} 기준: 그대로 ${same.length}개${same.length ? ' [' + same.join(', ') + ']' : ''}, 바뀜 ${changed.length}개${changed.length ? ' [' + changed.join(', ') + ']' : ''}, 새 파츠 ${added.length}개${added.length ? ' [' + added.join(', ') + ']' : ''}${gone ? `, 없어진 파츠 ${gone}개` : ''}. 납품 보고의 "그대로 둔 파츠"와 맞는지 본다`, '정보');
 }
 
 // 조립 정합 (사양 v1 전용: 파츠를 제자리에 그렸을 때만 의미가 있다. v2는 자리 맞춤 도구의 남은 차이로 본다)

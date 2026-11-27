@@ -126,12 +126,18 @@
     }
 
     // ---------- 그림 다루기 (RGBA 바이트 배열) ----------
-    /** 배경 판정 마스크(1 = 배경). c00 같은 크로마키 원본용 */
+    /**
+     * 배경 판정 마스크(1 = 배경). c00 같은 크로마키 원본용.
+     * v0.55.72(R04 A-46): 테두리 다수결로 배경색을 정해 그 색만 배경으로 본다. 마젠타 배경 캐릭터의 녹색 의상이 배경으로 지워지지 않게 한다.
+     */
     function bgMask(rgba, w, h) {
+        let gr = 0, mg = 0;
+        for (let x = 0; x < w; x++) for (const y of [0, h - 1]) { const i = (y * w + x) * 4; if (rgba[i + 1] > 150 && rgba[i] < 120 && rgba[i + 2] < 120) gr++; else if (rgba[i] > 200 && rgba[i + 2] > 200 && rgba[i + 1] < 80) mg++; }
+        const useG = !(mg > gr), useM = !(gr > mg); // 한쪽이 많으면 그쪽만, 같으면(0 포함) 둘 다
         const m = new Uint8Array(w * h);
         for (let i = 0; i < w * h; i++) {
             const r = rgba[i * 4], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2], a = rgba[i * 4 + 3];
-            m[i] = (a < 20 || (g > 150 && r < 120 && b < 120) || (r > 200 && b > 200 && g < 80)) ? 1 : 0;
+            m[i] = (a < 20 || (useG && g > 150 && r < 120 && b < 120) || (useM && r > 200 && b > 200 && g < 80)) ? 1 : 0;
         }
         return m;
     }

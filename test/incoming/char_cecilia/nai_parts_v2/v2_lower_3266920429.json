@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T07:33:27.298Z",
+ "seconds": 3.9,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5.5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 3266920429,
+ "prompt": "isolated single 2D game sprite part, compact 2.5-head-tall chibi lower body waist-down only, short flared pale sky blue winter coat skirt with white center front placket and gold trim, white ruffle underskirt, short straight chibi legs in white tights separated at shoulder width, both feet flat on same level, brown leather winter ankle boots with white fur cuff and gold buckle, no torso, no capelet, no head, no arms, three-quarter view facing right, adult female chibi outfit, modern mobile RPG chibi character art, anime illustration, bold crisp dark outline, clean cel shading, solid bright pure green background (#00FF00), chroma key green background, simple background, small centered sprite with generous empty green space above waist and below boots, no shadow, no sparkles",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, pixel art, pixelated, sprite, retro, 8-bit, lowres, touching border, cropped edges, gradient background, drop shadow, multiple views, character sheet, grid, text, watermark, head, face, hair, torso, capelet, collar, bag, strap, arms, hands, wand, staff, tall legs, long legs, cropped waist",
+ "anlasBefore": 9972,
+ "anlasAfter": 9972
+}

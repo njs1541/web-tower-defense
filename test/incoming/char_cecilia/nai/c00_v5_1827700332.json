@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T04:58:12.271Z",
+ "seconds": 5.9,
+ "model": "nai-diffusion-4-5-full",
+ "width": 1024,
+ "height": 1024,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 1827700332,
+ "prompt": "full body shot, entire body visible from head to toe, wide shot, no cut off, feet and shoes fully in frame, standing straight with both feet flat on same level, anatomically correct, exactly two arms, exactly two legs, adult female, 1girl, solo, chibi, super deformed, 2.5 heads tall, large head, compact short body, facing right, three-quarter view, long wavy pastel light blue hair with soft layered wispy bangs covering forehead, large sparkling blue eyes, gentle warm smile, knitted pastel sky blue beret with white snowflake brooch on side, short pastel sky blue shoulder capelet with white trim and gold clasp, pale sky blue winter dress coat with white and gold trim and crisp white snowflake embroidery along lower skirt hem, white ruffle underskirt, brown diagonal crossbody strap with brown leather satchel resting at far right hip, brown gloves, white tights, brown leather winter ankle boots with white fur cuff and gold buckle, arms slightly away from body, right hand holding a short ornate fantasy magic wand with carved gold filigree setting a bright faceted blue ice crystal at the tip pointing down-left away from body, left arm lowered naturally at side with empty hand, legs straight and separated at shoulder width, smooth clean anime illustration, highres, modern mobile RPG chibi character art, bold crisp dark outline, clean cel shading, solid bright green background, chroma key green background, simple background, no shadow, no sparkles, no snowflakes",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, white border, sticker border, white outline, sticker, pixel art, pixelated, sprite, retro, 8-bit, 16-bit, lowres, jagged lines, pom-pom, twig, tree branch, raw stick, icicle, hanging icicle, floating crystals, detached pieces, long staff, polearm, staff behind body, scythe, axe, walking, lifting foot, crossed legs, overlapping legs, overlapping feet, bare forehead, parted forehead, realistic proportions, tall body, long legs, holding strap, hand on chest, staff crossing shoulder, glow, sparkles, snowflakes, particle effects, drop shadow, ground shadow, gradient background, scenic background, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

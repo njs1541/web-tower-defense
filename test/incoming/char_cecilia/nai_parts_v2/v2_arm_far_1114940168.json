@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T07:35:27.800Z",
+ "seconds": 4.6,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5.5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 1114940168,
+ "prompt": "isolated single 2D game sprite part, full single chibi left arm hanging diagonally down-right from rounded shoulder top through pale sky blue sleeve and wide white cuff with gold stripe and button to a relaxed open brown leather gloved hand with gentle fingers, empty hand, complete upper arm and shoulder end intact, modern mobile RPG chibi character art, anime illustration, bold crisp dark outline, clean cel shading, solid bright pure green background (#00FF00), chroma key green background, simple background, small compact sprite centered with wide empty green border on all four sides, no shadow, no sparkles",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, pixel art, pixelated, sprite, retro, 8-bit, lowres, touching border, cropped edges, gradient background, drop shadow, multiple views, character sheet, grid, text, watermark, wand, staff, weapon, close-up hand, giant hand, severed hand, bare skin arm, foreshortened, torso, capelet, bag, satchel, legs",
+ "anlasBefore": 9972,
+ "anlasAfter": 9972
+}

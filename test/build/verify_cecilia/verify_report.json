@@ -1,0 +1,156 @@
+{
+ "generatedAt": "2026-11-27T08:32:38.414Z",
+ "restVsC00": {
+  "tolerancePx": 5,
+  "pixelsA": 181614,
+  "pixelsB": 183298,
+  "aOutsideBpct": 0.12,
+  "bOutsideApct": 0.21,
+  "note": "A = DOM 조립(정지 자세), B = c00 완성본"
+ },
+ "jointGap": {
+  "idle": {
+   "adaptive": {
+    "keys": 151,
+    "frames": 152,
+    "maxPx": 0,
+    "meanPx": 0.001,
+    "worst": {
+     "bone": "head",
+     "timeMs": 1414
+    }
+   },
+   "dense": {
+    "keys": 151,
+    "frames": 152,
+    "maxPx": 0,
+    "meanPx": 0.001,
+    "worst": {
+     "bone": "head",
+     "timeMs": 1414
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "frames": 7,
+    "maxPx": 0.53,
+    "meanPx": 0.202,
+    "worst": {
+     "bone": "head",
+     "timeMs": 1267
+    }
+   }
+  },
+  "walk": {
+   "adaptive": {
+    "keys": 29,
+    "frames": 47,
+    "maxPx": 0.03,
+    "meanPx": 0.007,
+    "worst": {
+     "bone": "head",
+     "timeMs": 248
+    }
+   },
+   "dense": {
+    "keys": 29,
+    "frames": 30,
+    "maxPx": 0.05,
+    "meanPx": 0.012,
+    "worst": {
+     "bone": "head",
+     "timeMs": 949
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "frames": 7,
+    "maxPx": 0.53,
+    "meanPx": 0.191,
+    "worst": {
+     "bone": "head",
+     "timeMs": 727
+    }
+   }
+  },
+  "attack": {
+   "adaptive": {
+    "keys": 23,
+    "frames": 81,
+    "maxPx": 0.05,
+    "meanPx": 0.003,
+    "worst": {
+     "bone": "head",
+     "timeMs": 313
+    }
+   },
+   "dense": {
+    "keys": 23,
+    "frames": 24,
+    "maxPx": 0.42,
+    "meanPx": 0.029,
+    "worst": {
+     "bone": "head",
+     "timeMs": 319
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "frames": 7,
+    "maxPx": 1.8,
+    "meanPx": 0.269,
+    "worst": {
+     "bone": "head",
+     "timeMs": 319
+    }
+   }
+  },
+  "hit": {
+   "adaptive": {
+    "keys": 17,
+    "frames": 27,
+    "maxPx": 0.03,
+    "meanPx": 0.017,
+    "worst": {
+     "bone": "head",
+     "timeMs": 13
+    }
+   },
+   "dense": {
+    "keys": 17,
+    "frames": 18,
+    "maxPx": 0.41,
+    "meanPx": 0.062,
+    "worst": {
+     "bone": "head",
+     "timeMs": 17
+    }
+   },
+   "sparse": {
+    "keys": 6,
+    "frames": 7,
+    "maxPx": 3.28,
+    "meanPx": 0.455,
+    "worst": {
+     "bone": "head",
+     "timeMs": 45
+    }
+   }
+  }
+ },
+ "attachGap": {
+  "idle": {
+   "weapon_main~arm_near": 0
+  },
+  "walk": {
+   "weapon_main~arm_near": 0
+  },
+  "attack": {
+   "weapon_main~arm_near": 0
+  },
+  "hit": {
+   "weapon_main~arm_near": 0
+  }
+ },
+ "pageErrors": []
+}

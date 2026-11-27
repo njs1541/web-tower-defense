@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-26T07:17:25.308Z",
+ "generatedAt": "2026-11-26T08:55:28.995Z",
  "restVsC00": {
   "tolerancePx": 5,
   "pixelsA": 205211,
@@ -7,6 +7,16 @@
   "aOutsideBpct": 1.37,
   "bOutsideApct": 4.94,
   "note": "A = DOM 조립(정지 자세), B = c00 완성본"
+ },
+ "restVsRef": {
+  "ref": "test/build/fit/liana/rest_ref.png",
+  "tolerancePx": 5,
+  "pixelsA": 205211,
+  "pixelsB": 205211,
+  "aOutsideBpct": 0,
+  "bOutsideApct": 0,
+  "colorDiffPct": 0,
+  "note": "A = DOM 조립(정지 자세), B = 승인된 기준 그림. 바뀐 파츠만큼 달라진다"
  },
  "jointGap": {
   "idle": {
@@ -136,6 +146,24 @@
      "timeMs": 47
     }
    }
+  }
+ },
+ "attachGap": {
+  "idle": {
+   "weapon_main~hand_cap": 0,
+   "weapon_sub~arm_far_lower": 0
+  },
+  "walk": {
+   "weapon_main~hand_cap": 0,
+   "weapon_sub~arm_far_lower": 0
+  },
+  "attack": {
+   "weapon_main~hand_cap": 0,
+   "weapon_sub~arm_far_lower": 0
+  },
+  "hit": {
+   "weapon_main~hand_cap": 0,
+   "weapon_sub~arm_far_lower": 0
   }
  },
  "pageErrors": []

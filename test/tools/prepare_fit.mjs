@@ -10,8 +10,17 @@
  *
  * 사용법 (프로젝트 루트):
  *   node test/tools/prepare_fit.mjs <납품 폴더> [--type full|idle] [--skeleton test/rig/skeleton_human.json] [--name 캐릭터] [--merge 15]
+ *   node test/tools/prepare_fit.mjs <납품 폴더> --update [--name 캐릭터]
+ *
+ * --update (v0.55.69, R04 A-33): 수정 납품용. 출력 폴더를 지우지 않고, 사람이 맞춘 fit.json을 그대로 두고 바뀐 파츠만 바꾼다.
+ *   - 파츠마다 잘라 낸 원본의 지문(raw.hash)을 fit.json에 남긴다. 지문이 같으면 손대지 않는다(후처리한 src도 그대로).
+ *   - 지문이 없는 옛 fit.json은 같은 시트·같은 상자면 같은 파츠로 보고 지문만 처음 기록한다.
+ *   - 바뀐 파츠: 새 그림을 src/<id>_<지문 8자>.png로 저장하고, 회전·크기는 이전 값, 위치는 시트 상자 가운데가 움직인 만큼만 옮긴다.
+ *     이전 src가 후처리본(뒤집기 등)이었으면 그 처리는 없어지므로 경고한다. 사람이 fit_tool.html에서 확인한다.
+ *   - 새 슬롯은 자동 맞춤, 납품에서 빠진 슬롯은 그대로 두고 경고한다. fit.json은 fit.prev.json으로 백업한 뒤 덮어쓴다.
  */
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { ROOT, decodePNG, components, componentGap } from './lib.mjs';
@@ -26,7 +35,8 @@ const dir = path.resolve(args[0] || '');
 if (!args[0] || !fs.existsSync(path.join(dir, 'c00_complete.png'))) { console.log('사용법: node test/tools/prepare_fit.mjs <c00_complete.png와 sheet*.png가 있는 폴더> [--skeleton 파일] [--name 이름] [--merge px]'); process.exit(2); }
 const skelFile = path.resolve(opt('skeleton', path.join(ROOT, 'test', 'rig', 'skeleton_human.json')));
 const name = opt('name', path.basename(dir));
-const MERGE = +opt('merge', 15), CRUMB = 40, TYPE = opt('type', 'full');
+const MERGE = +opt('merge', 15), CRUMB = 40, UPDATE = args.includes('--update');
+let TYPE = opt('type', 'full');
 const OUT = path.join(ROOT, 'test', 'build', 'fit', name);
 const skel = JSON.parse(fs.readFileSync(skelFile, 'utf8'));
 const rel = p => path.relative(ROOT, p).replace(/\\/g, '/');
@@ -36,8 +46,13 @@ const c00 = decodePNG(path.join(dir, 'c00_complete.png'));
 const ref = { w: c00.w, h: c00.h, rgba: c00.rgba, bg: Fit.bgMask(c00.rgba, c00.w, c00.h) };
 const pyr = Fit.pyramid(ref);
 
-fs.rmSync(OUT, { recursive: true, force: true });
+const FIT_FILE = path.join(OUT, 'fit.json');
+if (UPDATE) {
+    if (!fs.existsSync(FIT_FILE)) { console.log(`--update: ${rel(FIT_FILE)}이 없다. 처음 납품은 --update 없이 돌린다`); process.exit(2); }
+    TYPE = JSON.parse(fs.readFileSync(FIT_FILE, 'utf8')).type || TYPE;
+} else fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(path.join(OUT, 'src'), { recursive: true });
+const hashOf = rgba => crypto.createHash('sha1').update(rgba).digest('hex');
 
 // 1) 시트 분리
 const sheets = fs.readdirSync(dir).filter(f => /^sheet(\d+)_.*\.png$/i.test(f) && !/_(v\d+|old)\.png$/i.test(f)).sort();
@@ -78,11 +93,13 @@ for (const sf of sheets) {
             if (own) crop.set(keyed.subarray(si * 4, si * 4 + 4), (y * w + x) * 4);
         }
         const id = `s${sheetNo}_${++k}`, file = path.join(OUT, 'src', id + '.png');
-        fs.writeFileSync(file, encodePNG(w, h, crop));
-        parts.push({ id, sheet: sf, sheetNo, src: rel(file), sheetBox: [x0, y0, w, h], pieces: g.length, img: { w, h, rgba: crop } });
+        if (!UPDATE) fs.writeFileSync(file, encodePNG(w, h, crop)); // 갱신 모드는 바뀐 파츠만 따로 저장한다
+        parts.push({ id, sheet: sf, sheetNo, src: rel(file), sheetBox: [x0, y0, w, h], pieces: g.length, img: { w, h, rgba: crop }, hash: hashOf(crop) });
     }
     console.log(`${sf}: 덩어리 ${comps.length}개 → 파츠 ${k}개 (묶음 ${MERGE}px, 버린 부스러기 ${dropped}개)`);
 }
+
+if (UPDATE) { runUpdate(); process.exit(0); }
 
 // 2) 슬롯 고르기: 시트 안 읽는 순서(사양 v2 2.2절). 개수가 안 맞는 시트만 점수로 추정
 const t0 = Date.now();
@@ -155,7 +172,7 @@ for (const p of parts) {
     if (p.pieces > 1) flags.push(`조각 ${p.pieces}개를 묶음`);
     if (slot && !p.byOrder) flags.push('이름을 점수로 추정');
     fit.parts.push({ id: p.id, src: p.src, sheet: p.sheet, sheetBox: p.sheetBox, w: p.img.w, h: p.img.h, slot, bone: S ? S.bone : null, z: S ? S.z : 0,
-        face: S && S.face ? S.face : undefined, tx: +r.tx.toFixed(1), ty: +r.ty.toFixed(1), rot: r.rot, scale: r.scale, score: r.score, flags });
+        face: S && S.face ? S.face : undefined, raw: { sheet: p.sheet, box: p.sheetBox, hash: p.hash }, tx: +r.tx.toFixed(1), ty: +r.ty.toFixed(1), rot: r.rot, scale: r.scale, score: r.score, flags });
 }
 fs.writeFileSync(path.join(OUT, 'fit_auto.json'), JSON.stringify(fit, null, 1));
 console.log(`자동 맞춤 ${parts.length}개, ${((Date.now() - t0) / 1000).toFixed(1)}초 → ${rel(path.join(OUT, 'fit_auto.json'))}`);
@@ -197,4 +214,85 @@ if (fs.existsSync(truthFile)) {
     console.log(rows.join('\n'));
     fs.writeFileSync(path.join(OUT, 'fit_truth.json'), JSON.stringify(truthFit, null, 1));
     console.log(`정답 비교: ${ok}/${fit.parts.length}개가 슬롯 일치 + 위치 6px·회전 2도·크기 0.03 이내 (표정 3종끼리 바뀐 것은 일치로 셈)`);
+}
+
+// ---------- 수정 납품 갱신 (--update, R04 A-33) ----------
+function runUpdate() {
+    const t0 = Date.now(), fit = JSON.parse(fs.readFileSync(FIT_FILE, 'utf8'));
+    const bySlot = {}; fit.parts.forEach(o => { if (o.slot) bySlot[o.slot] = o; });
+    const sameBox = (a, b) => a && b && a.every((v, i) => v === b[i]);
+    // 맞춤 기준(R04 A-34): 승인된 정지 자세 그림(rest_ref.png)이 있으면 그것, 없으면 c00
+    let uref = ref, upyr = pyr, refName = 'c00';
+    if (fit.restRef && fs.existsSync(path.join(ROOT, fit.restRef.src))) {
+        const im = decodePNG(path.join(ROOT, fit.restRef.src)), bg = new Uint8Array(im.w * im.h);
+        for (let i = 0; i < bg.length; i++) bg[i] = im.rgba[i * 4 + 3] < 128 ? 1 : 0;
+        uref = { w: im.w, h: im.h, rgba: im.rgba, bg }; upyr = Fit.pyramid(uref); refName = 'rest_ref';
+    }
+    // 새 파츠의 배율: 같은 뼈나 부모 뼈에 붙은 기존 몸 파츠의 배율을 물려받는다(Gemini 보완). 손은 아래팔 배율
+    const parentOf = Object.fromEntries(skel.bones.map(b => [b.id, b.parent]));
+    const inheritScale = bone => {
+        for (let b = bone; b; b = parentOf[b]) {
+            const q = fit.parts.find(o => o.bone === b && o.slot && !/^(weapon_|extra_|face_)/.test(o.slot));
+            if (q) return { scale: q.scale, from: q.slot };
+        }
+        return null;
+    };
+    // 슬롯 이름: 처음 납품과 같은 순서 규칙. 개수가 안 맞으면 같은 시트에서 상자 가운데가 가장 가까운 이전 파츠의 슬롯을 쓴다
+    const named = {};
+    for (const sheetNo of [...new Set(parts.map(p => p.sheetNo))]) {
+        const ps = parts.filter(p => p.sheetNo === sheetNo);
+        const names = Fit.slotsByOrder(TYPE, sheetNo, ps.map(p => ({ x: p.sheetBox[0], y: p.sheetBox[1], w: p.sheetBox[2], h: p.sheetBox[3] })));
+        ps.forEach((p, i) => {
+            if (names) { named[p.id] = names[i]; return; }
+            const c = b => [b[0] + b[2] / 2, b[1] + b[3] / 2], pc = c(p.sheetBox);
+            let best = null, bd = 1e9;
+            for (const o of fit.parts) { if (o.sheet !== p.sheet || !o.slot) continue; const oc = c((o.raw && o.raw.box) || o.sheetBox), d = Math.hypot(oc[0] - pc[0], oc[1] - pc[1]); if (d < bd) { bd = d; best = o.slot; } }
+            named[p.id] = best;
+        });
+    }
+    const rows = [], seen = new Set(), stamp = new Date().toISOString().slice(0, 10);
+    let same = 0, baseline = 0, changed = 0, added = 0;
+    for (const p of parts) {
+        const slot = named[p.id], o = slot && bySlot[slot];
+        if (slot) seen.add(slot);
+        const raw = { sheet: p.sheet, box: p.sheetBox, hash: p.hash };
+        if (o && o.raw && o.raw.hash === p.hash) { same++; continue; }
+        if (o && !o.raw && o.sheet === p.sheet && sameBox(o.sheetBox, p.sheetBox)) { o.raw = raw; baseline++; continue; }
+        const file = path.join(OUT, 'src', `${p.id}_${p.hash.slice(0, 8)}.png`);
+        fs.writeFileSync(file, encodePNG(p.img.w, p.img.h, p.img.rgba));
+        if (o) {
+            // 회전·크기는 이전 값. 위치는 시트 상자 가운데가 움직인 만큼(이전 회전·크기를 적용해) 옮긴다
+            const ob = (o.raw && o.raw.box) || o.sheetBox, r = (o.rot || 0) * Math.PI / 180, sc = o.scale || 1;
+            const dx = (p.sheetBox[0] + p.sheetBox[2] / 2) - (ob[0] + ob[2] / 2), dy = (p.sheetBox[1] + p.sheetBox[3] / 2) - (ob[1] + ob[3] / 2);
+            const derived = !new RegExp('/' + o.id + '(_[0-9a-f]{8})?\\.png$').test(o.src);
+            const flags = (o.flags || []).filter(x => !x.startsWith('갱신'));
+            flags.push(`갱신(${stamp}): 다시 그린 파츠. 이전 위치에서 시작했으니 확인`);
+            if (derived) flags.push(`갱신(${stamp}): 이전 src가 후처리본(${path.basename(o.src)})이었다. 같은 처리가 필요하면 다시 한다`);
+            const start = { tx: o.tx + sc * (Math.cos(r) * dx - Math.sin(r) * dy), ty: o.ty + sc * (Math.sin(r) * dx + Math.cos(r) * dy), rot: o.rot || 0, scale: sc };
+            // 기준 그림에 대고 좁게 다듬는다(위치 ±24px, 회전 ±4도, 크기 ±6%). 일치가 분명히 나아질 때만 받아들인다(다시 그려 모양이 달라졌으면 시작값 유지)
+            const pts = Fit.partPoints(p.img, 2), s0 = Fit.score(uref, pts, start.tx, start.ty, start.rot, start.scale);
+            const fr = Fit.autoFit(uref, p.img, [start.tx, start.ty], { win: 24, pyr: upyr, rots: [start.rot - 4, start.rot - 2, start.rot, start.rot + 2, start.rot + 4], scales: [sc * 0.94, sc * 0.97, sc, sc * 1.03, sc * 1.06] });
+            const take = fr.score >= 0.5 && fr.score > s0 + 0.05;
+            const fin = take ? fr : start;
+            flags.push(take ? `갱신(${stamp}): ${refName}에 맞춰 다듬음(일치 ${s0.toFixed(2)} → ${fr.score.toFixed(2)})` : `갱신(${stamp}): 다듬기 효과 없음(일치 ${s0.toFixed(2)}), 시트 위치만 반영`);
+            Object.assign(o, { src: rel(file), sheet: p.sheet, sheetBox: p.sheetBox, w: p.img.w, h: p.img.h, raw, flags,
+                tx: +fin.tx.toFixed(1), ty: +fin.ty.toFixed(1), rot: +(+fin.rot).toFixed(2), scale: +(+fin.scale).toFixed(3) });
+            changed++; rows.push(`바뀜   ${slot.padEnd(16)} ${path.basename(file)}${take ? ' 다듬음' : ''}${derived ? '  (이전 후처리본 대체)' : ''}`);
+        } else {
+            const S = slot ? Fit.SLOTS[slot] : null;
+            const inh = S ? inheritScale(S.bone) : null, k = inh ? inh.scale : 1;
+            const r = S ? Fit.autoFit(uref, p.img, Fit.priorCenter(skel, slot), { win: S.win, pyr: upyr, ...(inh ? { scales: [k * 0.94, k, k * 1.06] } : {}) }) : { tx: 512, ty: 512, rot: 0, scale: 1, score: 0 };
+            fit.parts.push({ id: p.id, src: rel(file), sheet: p.sheet, sheetBox: p.sheetBox, w: p.img.w, h: p.img.h, slot, bone: S ? S.bone : null, z: S ? S.z : 0,
+                face: S && S.face ? S.face : undefined, raw, tx: +r.tx.toFixed(1), ty: +r.ty.toFixed(1), rot: r.rot, scale: r.scale, score: r.score,
+                flags: [`갱신(${stamp}): 새 파츠, ${refName} 기준 자동 맞춤${inh ? `(배율은 ${inh.from}에서 물려받음)` : ''}${slot ? '' : '(슬롯 없음)'}. 확인`] });
+            added++; rows.push(`새 파츠 ${String(slot).padEnd(16)} ${path.basename(file)}`);
+        }
+    }
+    for (const o of fit.parts) if (o.slot && !seen.has(o.slot)) rows.push(`빠짐   ${o.slot.padEnd(16)} 이번 납품에 없어 그대로 둔다`);
+    fs.copyFileSync(FIT_FILE, path.join(OUT, 'fit.prev.json'));
+    fit.updatedAt = new Date().toISOString();
+    fs.writeFileSync(FIT_FILE, JSON.stringify(fit, null, 1));
+    console.log(rows.join('\n'));
+    console.log(`갱신: 그대로 ${same}개, 지문 처음 기록 ${baseline}개, 바뀜 ${changed}개, 새 파츠 ${added}개 (${((Date.now() - t0) / 1000).toFixed(1)}초) → ${rel(FIT_FILE)} (이전 파일 fit.prev.json)`);
+    if (changed || added) console.log('다음: fit_tool.html에서 "갱신" 표시 파츠를 확인한 뒤 export_rig_v2.mjs');
 }

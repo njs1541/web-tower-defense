@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T05:39:49.984Z",
+ "seconds": 4.7,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 3910249011,
+ "prompt": "isolated single 2D game sprite part, blank bald chibi head base with ears and short neck only, completely featureless smooth pale peach skin face with no eyes, no eyebrows, no nose, no mouth, no hair, bald round head silhouette, three-quarter view facing right, adult female chibi base, anime illustration, bold crisp dark outline, clean cel shading, solid bright green background, chroma key green background, simple background, centered with generous green margin, no shadow",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, eyes, eyebrows, nose, mouth, hair, bangs, hat, shoulders, clothes, torso, mannequin joints, doll joints, gradient background, drop shadow, multiple views, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

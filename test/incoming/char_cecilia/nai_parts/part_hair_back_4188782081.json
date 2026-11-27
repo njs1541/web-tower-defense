@@ -1,0 +1,18 @@
+{
+ "tool": "novelai-mcp 1.0.0",
+ "createdAt": "2026-11-27T05:38:49.355Z",
+ "seconds": 4.8,
+ "model": "nai-diffusion-4-5-full",
+ "width": 512,
+ "height": 512,
+ "steps": 28,
+ "scale": 5,
+ "sampler": "k_euler_ancestral",
+ "noise": "karras",
+ "cfgRescale": 0,
+ "seed": 4188782081,
+ "prompt": "isolated single 2D game sprite part, back hair layer only, long wavy pastel light blue hair locks flaring outward on both left and right sides, hollow open gap at upper center, no face, no head, no hat, no body, no clothes, adult female character hair style, three-quarter view facing right, anime illustration, bold crisp dark outline, clean cel shading, solid bright green background, chroma key green background, simple background, plenty of empty green margin around, no shadow, no sparkles",
+ "negative": "cropped, out of frame, cut off head, cut off feet, cut off legs, close-up, portrait, bust shot, upper body only, medium shot, extra arms, extra legs, extra limbs, third arm, mutated hands, missing limbs, fused limbs, malformed limbs, cloned limbs, poorly drawn hands, extra fingers, deformed fingers, child, kid, underage, loli, male, boy, man, face, eyes, mouth, nose, ears, head, hat, beret, body, neck, clothes, gradient background, drop shadow, multiple views, text, watermark",
+ "anlasBefore": 10000,
+ "anlasAfter": 10000
+}

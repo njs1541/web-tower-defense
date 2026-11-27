@@ -58,6 +58,27 @@ export const CHROMA_RULE = {
     magenta: 'R > 200 그리고 B > 200 그리고 G < 80',
     transparent: 'A < 20',
 };
+/**
+ * 그림의 배경 종류(v0.55.72, R04 A-46): 테두리 픽셀 다수결로 'green' | 'magenta' | 'alpha'(투명) | 'none'(정할 수 없음).
+ * 마젠타 배경 캐릭터는 녹색 의상이 있어서 마젠타를 쓰는 것이므로, 녹색을 배경으로 보면 그 의상이 지워진다.
+ */
+export function bgKeyOf(rgba, w, h) {
+    let g = 0, m = 0, t = 0, n = 0;
+    const look = i => { n++; const r = rgba[i * 4], gg = rgba[i * 4 + 1], b = rgba[i * 4 + 2], a = rgba[i * 4 + 3]; if (a < 20) t++; else if (gg > 150 && r < 120 && b < 120) g++; else if (r > 200 && b > 200 && gg < 80) m++; };
+    for (let x = 0; x < w; x++) { look(x); look((h - 1) * w + x); }
+    for (let y = 1; y < h - 1; y++) { look(y * w); look(y * w + w - 1); }
+    const best = Math.max(g, m, t);
+    if (best < n * 0.5) return 'none';
+    return best === t ? 'alpha' : best === g ? 'green' : 'magenta';
+}
+/** 배경 판정 함수. key가 green이면 녹색만, magenta면 마젠타만 배경으로 본다(투명은 항상 배경). none이면 예전처럼 둘 다 */
+export function makeBgTest(key) {
+    return (r, g, b, a) => a < 20 || (key !== 'magenta' && g > 150 && r < 120 && b < 120) || (key !== 'green' && r > 200 && b > 200 && g < 80);
+}
+/** 그림(decodePNG 결과)에 맞는 배경 판정 함수 */
+export const bgTestFor = img => makeBgTest(bgKeyOf(img.rgba, img.w, img.h));
+
+/** 배경 판정(배경 종류를 모를 때). 녹색과 마젠타를 모두 배경으로 본다. 그림이 있으면 bgTestFor(img)를 쓴다 */
 export function isBackground(r, g, b, a) {
     if (a < 20) return true;
     if (g > 150 && r < 120 && b < 120) return true;
